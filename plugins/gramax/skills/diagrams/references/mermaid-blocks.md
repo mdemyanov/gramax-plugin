@@ -59,4 +59,4 @@ sequenceDiagram
 
 ## Примеры из реальных каталогов
 
-Для production-эталонов смотри `naumen-ecosystem/business-requirements/` (см. spec writer-skill).
+Для дополнительных примеров смотри реальные Gramax-каталоги с mermaid-блоками.

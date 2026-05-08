@@ -42,7 +42,7 @@ properties:
 
 Применяется к двум уровням: к корневому ключу `style:` (цвет заголовка каталога) и к property-level `style:` (цвет бейджа property). Список валидных значений общий.
 
-Подтверждённые в production-эталоне `naumen-ecosystem/business-requirements/.doc-root.yaml`:
+Подтверждённые в production Gramax-каталогах:
 
 `gray`, `green`, `light-green`, `blue`, `light-blue`, `blue-green`, `purple`, `light-purple`, `orange`, `dark-orange`, `light-pink`
 

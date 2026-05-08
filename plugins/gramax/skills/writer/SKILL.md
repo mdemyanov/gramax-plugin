@@ -313,4 +313,4 @@ uv run ${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py <path> --fix --yes   
 
 ## Production эталоны
 
-Канонический референс структуры — `/Users/mdemyanov/Devel/naumen-ecosystem/business-requirements/`. Production-каталог бизнес-документации SMRM (200+ JTBD/BRQ/процессов): object-нотация frontmatter, `style:` + `icon:` на каждом property, `<view>`-дашборды в `_index.md`. При сомнениях о формате — сверяйся с этим эталоном.
+Канонический референс структуры — реальный Gramax-каталог с production-данными: object-нотация frontmatter, `style:` + `icon:` на каждом property, `<view>`-дашборды в `_index.md`. При сомнениях о формате — опирайся на примеры в `references/doc-root-schema.md` и `references/structure.md`.
