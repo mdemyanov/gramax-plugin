@@ -1,0 +1,18 @@
+{
+  "name": "gramax-marketplace",
+  "owner": {
+    "name": "mdemyanov",
+    "email": "qutask@gmail.com"
+  },
+  "metadata": {
+    "description": "Claude Code marketplace для Gramax-документации: writer, comments, diagrams, review-agent. С опциональным claude-mermaid (vendored).",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "gramax",
+      "source": "./plugins/gramax",
+      "description": "Документация Gramax: writer, comments-read, comments-write, diagrams (drawio/mermaid), review-agent."
+    }
+  ]
+}
