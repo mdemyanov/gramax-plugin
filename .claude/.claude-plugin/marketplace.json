@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "gramax-internal",
+  "description": "Внутренний CTO-инструментарий gramax-marketplace: PM/BA/SA/Dev/QA/Researcher/Tech-writer. Не для публичного distribution.",
+  "owner": {
+    "name": "mdemyanov",
+    "email": "qutask@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "project",
+      "description": "Универсальные агенты (PM/BA/SA/Dev/QA/Researcher/Tech-writer) и slash-команды для разработки плагинов в gramax-marketplace.",
+      "source": "./plugins/project",
+      "category": "development"
+    }
+  ]
+}

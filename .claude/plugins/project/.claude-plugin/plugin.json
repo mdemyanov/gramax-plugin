@@ -1,0 +1,9 @@
+{
+  "name": "project",
+  "version": "0.1.0",
+  "description": "Локальные агенты PM/BA/SA/Dev/QA/Researcher/Tech-writer для разработки плагинов в gramax-marketplace.",
+  "author": {
+    "name": "mdemyanov",
+    "email": "qutask@gmail.com"
+  }
+}
