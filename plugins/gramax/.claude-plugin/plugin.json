@@ -1,13 +1,13 @@
 {
   "name": "gramax",
-  "version": "1.1.0",
-  "description": "Документация Gramax: writer (создание/редактирование), comments-read (чтение комментариев), comments-write (добавление/ответы на комментарии).",
+  "version": "1.2.0",
+  "description": "Gramax: writer, comments-read, comments-write, diagrams (drawio/mermaid), review-agent.",
   "author": {
     "name": "mdemyanov",
     "email": "qutask@gmail.com"
   },
-  "homepage": "https://github.com/mdemyanov/ai-assistants",
-  "repository": "https://github.com/mdemyanov/ai-assistants",
+  "homepage": "https://github.com/mdemyanov/gramax-plugin",
+  "repository": "https://github.com/mdemyanov/gramax-plugin",
   "license": "MIT",
-  "keywords": ["gramax", "documentation", "markdown", "comments", "drawio"]
+  "keywords": ["gramax", "documentation", "markdown", "comments", "drawio", "mermaid", "review"]
 }

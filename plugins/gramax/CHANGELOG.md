@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.2.0 — 2026-05-08
+
+Migration to dedicated marketplace repo `mdemyanov/gramax-plugin`. Plugin теперь поставляется как часть Claude Code marketplace, а не из монорепо `mdemyanov/ai-assistants`.
+
+### Added
+- `skills/diagrams/` — новый skill для drawio/mermaid в Gramax-каталогах. Бриджит существующий `scripts/drawio_convert.py` через `${CLAUDE_PLUGIN_ROOT}`. References: `drawio-workflow.md`, `mermaid-blocks.md`.
+- `agents/review-agent.md` — агент-координатор для ревью комментариев. Workflow: inventory → triage → report → optional apply (gated на подтверждение). Использует comments-read/comments-write через Skill tool.
+
+### Changed
+- `homepage` / `repository` обновлены на `https://github.com/mdemyanov/gramax-plugin`.
+- `keywords` дополнены `mermaid`, `review`.
+- `description` отражает новый scope (4 skills + agent).
+
+### Migration notes
+- Плагин больше не доступен по адресу `ai-assistants/plugins/gramax`. Установка: `/plugin marketplace add mdemyanov/gramax-plugin`.
+- Скрипты по тем же путях внутри плагина — пользовательские ссылки `${CLAUDE_PLUGIN_ROOT}/scripts/...` работают без изменений.
+- Источник в `mdemyanov/ai-assistants` заменён на git submodule на этот репо (отдельный коммит в ai-assistants).
+
 ## 1.1.0 — 2026-05-06
 
 Schema alignment с production-эталоном `<gramax-catalog>/`. Закрывает 8 из 9 находок из `example-project/docs/gramax-skills-update.md` (см. ADR-028 проекта example-project).

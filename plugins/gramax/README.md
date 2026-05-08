@@ -5,8 +5,8 @@ Claude Code plugin для работы с документацией в форм
 ## Установка
 
 ```
-/plugin marketplace add mdemyanov/ai-assistants
-/plugin install gramax@ai-assistants
+/plugin marketplace add mdemyanov/gramax-plugin
+/plugin install gramax@gramax-marketplace
 ```
 
 ## Skills
@@ -14,10 +14,15 @@ Claude Code plugin для работы с документацией в форм
 - `/gramax:writer` — создание и редактирование Gramax-документов
 - `/gramax:comments-read <path>` — показать комментарии документа
 - `/gramax:comments-write <path>` — добавить/ответить/редактировать/удалить комментарий
+- `/gramax:diagrams` — правила создания и встраивания .drawio / mermaid диаграмм
+
+## Agents
+
+- `review-agent` — координирует ревью комментариев в каталоге (запуск через Task tool)
 
 ## Scripts
 
-Скрипты в `scripts/` доступны через `${CLAUDE_PLUGIN_ROOT}/scripts/...` или напрямую `uv run`:
+Скрипты в `scripts/` доступны через `${CLAUDE_PLUGIN_ROOT}/scripts/...`:
 
 - `drawio_convert.py` — конвертация `.drawio` → SVG с embedded drawio-данными
 - `slugify.py` — транслит кириллицы в latin-slug для имён файлов
@@ -28,4 +33,4 @@ Claude Code plugin для работы с документацией в форм
 
 ## Версия
 
-1.0.0 — см. [CHANGELOG.md](./CHANGELOG.md)
+1.2.0 — см. [CHANGELOG.md](./CHANGELOG.md)
