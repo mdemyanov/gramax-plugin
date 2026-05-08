@@ -1,0 +1,16 @@
+code: bad-test
+title: Bad test catalog
+description: Fixture с нарушениями
+language: ru
+syntax: XML
+
+properties:
+  - name: Тип контента
+    type: Enum
+    style: green
+    icon: file-text
+    values:
+      - ADR
+      - Требование
+
+filterProperties: [Тип контента]
