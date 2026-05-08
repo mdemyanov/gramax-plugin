@@ -311,6 +311,6 @@ uv run ${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py <path> --fix --yes   
 - `references/staging.md` — pre-publish checklist
 - `references/doc-root-schema.md` — полный справочник `.doc-root.yaml`
 
-## Production эталоны
+## Production-паттерны
 
-Канонический референс структуры — `<gramax-catalog>/`. Production-каталог бизнес-документации large Gramax catalog: object-нотация frontmatter, `style:` + `icon:` на каждом property, `<view>`-дашборды в `_index.md`. При сомнениях о формате — сверяйся с этим эталоном.
+Рекомендуемая структура каталога: object-нотация frontmatter (`properties: [- name/value: [...]]`), `style:` + `icon:` на каждом property, `<view>`-дашборды в `_index.md`. Подробности: `references/doc-root-schema.md` и `references/structure.md`.

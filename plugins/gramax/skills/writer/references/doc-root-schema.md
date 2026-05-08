@@ -42,11 +42,11 @@ properties:
 
 Применяется к двум уровням: к корневому ключу `style:` (цвет заголовка каталога) и к property-level `style:` (цвет бейджа property). Список валидных значений общий.
 
-Подтверждённые в production-эталоне `<gramax-catalog>/.doc-root.yaml`:
+Подтверждённые валидные значения:
 
 `gray`, `green`, `light-green`, `blue`, `light-blue`, `blue-green`, `purple`, `light-purple`, `orange`, `dark-orange`, `light-pink`
 
-**Семантика по аналогии с эталоном:**
+**Рекомендуемая семантика:**
 
 - **categorical** (что это) — `green`, `light-blue`, `purple`
 - **lifecycle** (где в цикле) — `light-green`, `dark-orange`
@@ -55,15 +55,15 @@ properties:
 
 ## Иконки
 
-Любая иконка из набора Lucide (`https://lucide.dev/icons`). Часто используемые из эталона:
+Любая иконка из набора Lucide (`https://lucide.dev/icons`). Часто используемые:
 
 `hash`, `layers`, `package`, `box`, `folder`, `user`, `users`, `zap`, `briefcase`, `link`, `repeat`, `play`, `target`, `circle-check`, `alert-triangle`, `git-branch`, `file-text`, `check-circle`, `user-check`
 
 ## Полный пример
 
 ```yaml
-title: example-project
-description: Knowledge base for example-project
+title: My Knowledge Base
+description: Documentation catalog
 language: ru
 syntax: XML
 style: blue
@@ -97,8 +97,8 @@ editors:
 
 ### `required:` на property
 
-Не используется в production-эталонах. Все 16 properties в `<gramax-catalog>/.doc-root.yaml` без `required:`. Gramax не делает с ним ничего полезного — пропускать.
+Не используется на практике. Gramax не делает с ним ничего полезного — пропускать.
 
 ### `type: select` с `values: [{name: X}]`
 
-Встречается в `example-mcp` как эксперимент. **Не приживается в production-каталогах.** Использовать `type: Enum` со строковым массивом `values:`.
+Экспериментальный синтаксис, не рекомендуется. Использовать `type: Enum` со строковым массивом `values:`.
