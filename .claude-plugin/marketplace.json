@@ -13,6 +13,11 @@
       "name": "gramax",
       "source": "./plugins/gramax",
       "description": "Документация Gramax: writer, comments-read, comments-write, diagrams (drawio/mermaid), review-agent."
+    },
+    {
+      "name": "claude-mermaid",
+      "source": "./plugins/claude-mermaid",
+      "description": "Mermaid live-preview MCP plugin (vendored from veelenga/claude-mermaid, MIT)."
     }
   ]
 }

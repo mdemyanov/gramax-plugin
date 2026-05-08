@@ -1,0 +1,3 @@
+[submodule "plugins/claude-mermaid"]
+	path = plugins/claude-mermaid
+	url = https://github.com/veelenga/claude-mermaid.git
