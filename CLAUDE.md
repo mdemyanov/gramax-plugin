@@ -19,10 +19,9 @@
 
 ## Контекст проекта
 
-Публичный Claude Code marketplace (`mdemyanov/gramax-plugin`), включает два плагина:
+Публичный Claude Code marketplace (`mdemyanov/gramax-plugin`), один плагин:
 
-- **`plugins/gramax/`** — наш плагин: writer, comments-read, comments-write, diagrams, review-agent. Версионируется отдельно (см. `plugins/gramax/CHANGELOG.md`).
-- **`plugins/claude-mermaid/`** — vendored MIT-плагин (git submodule на upstream `veelenga/claude-mermaid`). НЕ редактировать.
+- **`plugins/gramax/`** — writer, comments-read, comments-write, mermaid, drawio, review-agent. Версионируется отдельно (см. `plugins/gramax/CHANGELOG.md`). Drawio — заглушка-делегатор к внешнему плагину `Agents365-ai/drawio-skill`.
 
 Marketplace объявлен в корневом `.claude-plugin/marketplace.json` под именем `gramax-marketplace` (для публичного distribution).
 
@@ -31,7 +30,6 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 - Markdown skills и agent prompts (большая часть плагина).
 - Bash скрипты (плагинная инфраструктура, smoke-тесты).
 - JSON (manifests, settings).
-- В составе `claude-mermaid` есть JS/MCP — но это submodule, мы его не трогаем.
 
 ## Команды сборки и проверки
 
@@ -76,7 +74,6 @@ Marketplace'ы и enabled плагины — в `.claude/settings.json`.
 
 - НЕ публиковать секреты (`.env`, токены, API-ключи, credentials).
 - НЕ менять `.claude-plugin/marketplace.json` (корневой, публичный) без ADR. Это договор с пользователями.
-- НЕ редактировать `plugins/claude-mermaid/` — это git submodule на upstream `veelenga/claude-mermaid` (MIT). Все изменения — через PR upstream.
 - НЕ принимать `/dev`-задачи без артефакта SA (для нетривиальных фич — обязателен ADR).
 - НЕ ломать обратную совместимость skill-имён в `plugins/gramax/skills/` без bump major-версии в `plugins/gramax/CHANGELOG.md` + анонс в основном CHANGELOG.
 - Tests/линтеры (если в проекте есть) — зелёные перед commit.

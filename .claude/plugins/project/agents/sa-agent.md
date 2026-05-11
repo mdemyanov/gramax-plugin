@@ -29,7 +29,7 @@ model: sonnet
    - **Agent** — отдельный субагент с собственной ролью, активируется по триггерам в `description` или явно через PM.
 2. **Границы плагина.** Один плагин — одна тематическая зона (например, `gramax` — gramax-spec работа). Если фича не ложится — обсуждать новый плагин в marketplace.
 3. **Submodule vs vendor.**
-   - **Submodule** — third-party код, который мы не модифицируем и хотим следить за upstream (см. `plugins/claude-mermaid/`). Лицензия совместима. ADR обязателен.
+   - **Submodule** — third-party код, который мы не модифицируем и хотим следить за upstream. Лицензия совместима. ADR обязателен.
    - **Vendor (copy)** — small snippet, нужно патчить под нас, либо upstream неактивен. ADR с фиксацией upstream-commit.
 4. **Разделы `marketplace.json` / `plugin.json`.**
    - `marketplace.json` (корень `.claude-plugin/`) — публичный реестр плагинов. Изменения = ADR + bump версии.
@@ -139,7 +139,7 @@ model: sonnet
 - НЕ пиши test stubs или test design — это QA-author.
 - НЕ выбирай тестовый фреймворк за QA-author — указывай только уровень (smoke/integration/manifest-validation), реализацию (bash / bats / node) подберёт QA-author.
 - ВСЕГДА проверь совместимость с существующими ADR и `marketplace.json`.
-- НЕ редактируй `plugins/claude-mermaid/` — это vendored MIT submodule, изменения идут через upstream.
+- НЕ редактируй vendored submodule'ы — изменения идут через PR в upstream.
 - **ADR supersede-процедура:** когда новый ADR частично/полностью supersedes существующий — **НЕ меняй** frontmatter / статус / тело старого ADR. Пиши «superseded в части X» только в новом ADR (раздел «Consequences» + «Связанные артефакты»). Смена статуса старого ADR — отдельная задача PM с явным sign-off.
 - При breaking change в публичном `marketplace.json` — обязательный ADR + bump major-версии + явное подтверждение пользователя через PM.
 

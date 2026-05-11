@@ -116,7 +116,7 @@ grep -rn -E "$PATTERN" plugins/<name>/ \
 - НЕ дописывай тесты вместо implementation — если stub failed по непонятной причине, спроси QA-author'а или PM.
 - НЕ хардкодь секреты, путь — `.env` или env vars в `plugin.json` под `mcpServers`.
 - НЕ изобретай новые публичные skill/command/agent без обновления spec'а и manifest'а.
-- НЕ редактируй `plugins/claude-mermaid/` — это vendored submodule. PR — в upstream.
+- НЕ редактируй vendored submodule'ы — PR в upstream.
 - При баге — `superpowers:systematic-debugging`, не «накидаю try/catch».
 
 ## Diagnose vs fix

@@ -21,7 +21,7 @@ allowed-tools: Task
    - Официальные Claude Code docs (через `WebFetch` / `WebSearch`)
    - `mcp__plugin_context7_context7` для актуальной документации SDK/библиотек
    - Reference-плагины Anthropic / community marketplaces (примеры устройства)
-   - Существующие плагины в `plugins/` и vendored submodule `plugins/claude-mermaid/`
+   - Существующие плагины в `plugins/`
 5. **Ожидаемый артефакт** — путь `docs/research/<slug>.md` ИЛИ inline-блок в открытом spec'е (`docs/superpowers/specs/<feature>.md`), если запросил BA.
 6. **Критерии приёмки**:
    - 3-5+ источников с уровнем достоверности и датами

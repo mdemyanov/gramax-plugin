@@ -101,7 +101,7 @@ Must / Should / Could / Won't. На каждой задаче укажи MoSCoW-
 |----------|--------|
 | Противоречие BA↔SA | организуй обсуждение |
 | Изменение публичного `.claude-plugin/marketplace.json` | SA + ADR + явное подтверждение пользователя |
-| Изменения в `plugins/claude-mermaid/` | НЕ принимать — это submodule на upstream, направить в PR upstream |
+| Изменения в vendored submodule'ах | НЕ принимать — изменения уходят в PR upstream |
 
 ## Красные линии
 
@@ -109,7 +109,7 @@ Must / Should / Could / Won't. На каждой задаче укажи MoSCoW-
 - НЕ формулируй spec без BA.
 - НЕ публикуй credentials, PII.
 - НЕ меняй корневой `.claude-plugin/marketplace.json` без ADR.
-- НЕ редактируй `plugins/claude-mermaid/` (vendored submodule).
+- НЕ редактируй vendored submodule'ы (изменения — через upstream PR).
 - НЕ принимай DEV-задачу до прохождения QA-author stubs (TDD).
 
 ## После задачи

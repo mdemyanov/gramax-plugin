@@ -1,5 +1,50 @@
 # Changelog
 
+## 3.0.0 — 2026-05-11
+
+Breaking change. Устранена путаница в роутинге диаграмм: добавлен явный skill `gramax:drawio` как заглушка-делегатор на внешний плагин, а vendored submodule `claude-mermaid` удалён — он создавал конфликт триггеров с `gramax:mermaid`.
+
+### Added
+- `skills/drawio/` — новый skill `gramax:drawio`. Точка входа для явных drawio-запросов («нарисуй drawio», «drawio-схема», «.drawio-файл»). Не генерирует диаграммы самостоятельно — делегирует на внешний `Agents365-ai/drawio-skill` и информирует о двухшаговом Gramax-workflow: drawio-skill создаёт `.drawio` + `.svg` → writer-skill помогает вставить тег `[drawio:...]`.
+- `plugin.json` — skill `drawio` объявлен в секции `skills`.
+
+### Removed
+- `plugins/claude-mermaid/` — vendored MIT submodule удалён (конфликт триггеров с `gramax:mermaid`; директива пользователя 2026-05-11). MCP-инструменты `mermaid_preview` и `mermaid_save` из этого submodule более недоступны — это breaking change для пользователей, опиравшихся на MCP-preview.
+- `.gitmodules` — запись `[submodule "plugins/claude-mermaid"]` удалена вместе с submodule.
+
+### Changed
+- `skills/mermaid/SKILL.md` — description уточнён по ADR-0009: убрано упоминание `Agents365-ai/mermaid-skill` как конфликтующего (разграничение теперь через `gramax:drawio`); добавлены явные generic-триггеры («визуализируй процесс/архитектуру» без движка); добавлен cross-ref `gramax:drawio`; добавлена секция «Fallback при ambiguous-request» — при запросе без явного engine-keyword задаётся уточняющий вопрос (mermaid inline vs drawio через внешний плагин).
+- `.claude-plugin/marketplace.json` — удалена запись `claude-mermaid`; descriptions обновлены; version `3.0.0`.
+- `plugins/gramax/.claude-plugin/plugin.json` — version `3.0.0`; description обновлён.
+- Корневой `README.md` — раздел Skills обновлён: добавлен `gramax:drawio`, убраны упоминания `claude-mermaid`.
+- `AGENTS.md`, `CLAUDE.md` — sunset-паттерн: удалены orphan-ссылки на `claude-mermaid` submodule.
+
+### Migration notes
+
+Для пользователей, переходящих с v2.x:
+
+1. Обнови плагин: `/plugin update gramax` (или переустанови: `/plugin marketplace add mdemyanov/gramax-plugin && /plugin install gramax@gramax-marketplace`).
+2. Проверь `~/.claude/settings.json` на наличие записи в `mcpServers` с ключом `mermaid` или `claude-mermaid`. Если запись есть — удали вручную: MCP-сервер более не входит в marketplace. Если Claude Code сообщает «MCP server not found» для mermaid — это следствие удаления submodule; `gramax:mermaid` работает без MCP.
+3. Для drawio-диаграмм установи внешний плагин:
+   ```
+   /plugin marketplace add Agents365-ai/365-skills
+   /plugin install drawio
+   ```
+   А также **draw.io desktop** (macOS: `brew install --cask drawio`; Linux: `.deb`/`.rpm` с [releases](https://github.com/jgraph/drawio-desktop/releases), не snap) и **Python 3** (нужен внешнему плагину).
+4. MCP-preview (`mermaid_preview`, `mermaid_save`) из `claude-mermaid` более не поддерживается. Для inline mermaid — используй `gramax:mermaid` как прежде, он работает без изменений.
+5. При неявном запросе («нарисуй диаграмму» без указания движка) `gramax:mermaid` задаст уточняющий вопрос. Для детерминированного выбора — указывай движок явно в запросе. Подробнее — в `plugins/gramax/skills/mermaid/SKILL.md` (секция «Fallback при ambiguous-request»).
+
+### ADR
+- ADR-0009 (новый) — обоснование удаления `claude-mermaid`, добавления `gramax:drawio`, keyword-стратегия description, процедура `git submodule deinit`. Документ: `docs/adr/0009-drawio-stub-and-claude-mermaid-removal.md`.
+- ADR-0008 остаётся Active — ADR-0009 дополняет его, не отменяет.
+
+### Backward compatibility
+
+- Имя skill'а `gramax:mermaid` не изменилось — явные запросы с «mermaid» в тексте работают без изменений.
+- Inline-генерация mermaid DSL работает идентично v2.0.0.
+- Skills `writer`, `comments-read`, `comments-write` и agent `review-agent` не затронуты.
+- **Known limitation:** при неявном запросе («нарисуй диаграмму» без движка) Claude может активировать `gramax:drawio` вместо `gramax:mermaid`. Полный детерминизм — только при явном engine-keyword в запросе (см. ADR-0009, Решение 6).
+
 ## 2.0.0 — 2026-05-11
 
 Breaking change. Внутренние diagram-skills удалены; drawio делегирован внешнему плагину.
