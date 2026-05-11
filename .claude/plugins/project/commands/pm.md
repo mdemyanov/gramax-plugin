@@ -72,6 +72,6 @@ cd .worktrees/feat-<slug>
 
 ## Красные линии
 
-- НЕ редактируй `plugins/claude-mermaid/` — это vendored MIT submodule, изменения уходят в upstream PR.
+- НЕ редактируй vendored submodule'ы — изменения уходят в upstream PR.
 - НЕ меняй корневой `.claude-plugin/marketplace.json` без ADR от SA.
 - НЕ принимай DEV-задачу до QA-author stubs (TDD).

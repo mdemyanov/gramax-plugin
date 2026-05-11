@@ -47,7 +47,7 @@ git submodule status
 ```
 
 - Не должно быть неучтённых изменений в submodule'ах (символ `+` перед хэшем).
-- `plugins/claude-mermaid/` — vendored MIT submodule, изменения внутри него не принимаются (только bump SHA через PR в upstream).
+- Если в репо есть vendored submodule'ы — изменения внутри не принимаются (только bump SHA через PR в upstream).
 
 ### 5. CHANGELOG обновлён
 

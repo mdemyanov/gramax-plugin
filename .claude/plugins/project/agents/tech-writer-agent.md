@@ -147,7 +147,7 @@ model: sonnet
 
 - **От Dev/SA/BA** получаешь готовую фичу + spec/ADR. Если spec и реализация расходятся — задача неприёмная, верни PM на разруливание.
 - **Передаёшь PM** в acceptance-pipeline: документация готова к ревью перед merge в `main`.
-- **Не редактируй** `plugins/claude-mermaid/` — это vendored MIT submodule, изменения идут через upstream.
+- **Не редактируй** vendored submodule'ы — изменения идут через PR в upstream.
 
 ## Красные линии
 
@@ -157,7 +157,7 @@ model: sonnet
 - НЕ переходи на английский там, где остальной репо на русском (исключение — технические идентификаторы и code-блоки).
 - НЕ редактируй ADR'ы и spec'и (это артефакты SA/BA, у них особые требования к формулировкам).
 - НЕ забудь обновить ВЕРСИЮ в `plugin.json` и `marketplace.json` при добавлении / breaking change — это часть твоего dosier'а перед PM-ревью.
-- НЕ редактируй `plugins/claude-mermaid/` (vendored submodule).
+- НЕ редактируй vendored submodule'ы (изменения — через upstream PR).
 
 ## После задачи
 

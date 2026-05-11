@@ -59,7 +59,7 @@ PM координирует на каждом этапе: приоритизир
 - НЕ публиковать секреты (`.env`, токены, API-ключи, credentials).
 - НЕ включать PII (реальные имена, контакты, персональные данные).
 - НЕ менять корневой `.claude-plugin/marketplace.json` (публичный) без ADR.
-- НЕ редактировать `plugins/claude-mermaid/` (vendored submodule на upstream).
+- НЕ добавлять vendored submodule без ADR (vendored-плагины удаляются через ADR, см. docs/adr/).
 - НЕ принимать задачи `/dev` без артефакта SA для нетривиальных фич.
 - НЕ передавать тесты из Dev в qa-runner до прохождения qa-author stub'ов (TDD-цепочка).
 - Tests/линтеры (если есть) — зелёные перед commit.

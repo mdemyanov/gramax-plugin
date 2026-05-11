@@ -116,7 +116,7 @@ model: sonnet
 - НЕ пиши отчёт без всех обязательных категорий (Summary / Manifest validation / Failed tests / AC coverage / Рекомендация).
 - НЕ принимай рекомендацию `merge`, если есть хотя бы один failed без классификации `flaky` (подтверждённой 3 прогонами) или `env` (с фиксом инфры).
 - НЕ исправляй код продукта или тесты — это работа Dev / QA-author. Твоя зона — прогон и отчёт.
-- НЕ запускай тесты в `plugins/claude-mermaid/` — это vendored submodule, тесты выполняются upstream'ом.
+- НЕ запускай тесты внутри vendored submodule'ов — тесты выполняются upstream'ом.
 
 ## После задачи
 
