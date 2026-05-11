@@ -10,7 +10,7 @@ Skill `gramax:mermaid` адаптирован из проекта [axton-obsidia
   - Workflow с открытием `.doc-root.yaml` и вставкой блока в md-страницу.
   - Frontmatter `name: mermaid` (вместо `mermaid-visualizer`).
 - `references/syntax-rules.md` — перевод на русский, добавлен раздел «Особенности Gramax» с поддерживаемыми типами и `.doc-root.yaml`-конвенциями; платформозависимые заметки об Obsidian/GitHub удалены.
-- Удалена зависимость от MCP `claude-mermaid` — skill полностью inline, генерирует DSL и вставляет в md без внешних серверов.
+- Удалена зависимость от MCP-сервера для mermaid-preview — skill полностью inline, генерирует DSL и вставляет в md без внешних серверов.
 
 ## MIT License (upstream)
 

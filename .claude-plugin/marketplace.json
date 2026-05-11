@@ -5,19 +5,14 @@
     "email": "qutask@gmail.com"
   },
   "metadata": {
-    "description": "Claude Code marketplace для Gramax-документации: writer, comments, mermaid, review-agent. Drawio — через внешний плагин Agents365-ai/drawio-skill.",
-    "version": "2.0.0"
+    "description": "Claude Code marketplace для Gramax-документации: writer, comments, mermaid, drawio, review-agent. Drawio skill делегирует внешнему плагину Agents365-ai/drawio-skill.",
+    "version": "3.0.0"
   },
   "plugins": [
     {
       "name": "gramax",
       "source": "./plugins/gramax",
-      "description": "Документация Gramax: writer, comments-read, comments-write, mermaid, review-agent. Drawio делегирован внешнему плагину Agents365-ai/drawio-skill."
-    },
-    {
-      "name": "claude-mermaid",
-      "source": "./plugins/claude-mermaid",
-      "description": "Mermaid live-preview MCP plugin (vendored from veelenga/claude-mermaid, MIT)."
+      "description": "Документация Gramax: writer, comments-read, comments-write, mermaid, drawio, review-agent. Drawio делегирует внешнему плагину Agents365-ai/drawio-skill."
     }
   ]
 }
