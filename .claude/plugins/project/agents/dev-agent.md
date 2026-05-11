@@ -80,6 +80,22 @@ BA-acceptance: gate по AC из spec
 3. **TDD-итерации.** Один stub → один цикл red/green/refactor → один commit. Запуск: `bash tests/<plugin>/<feature>_test.sh` или `bash tests/<plugin>/run.sh`.
 4. **Smoke в живом окружении.** После зелёных юнит-тестов: убедись, что плагин стартует. Минимум — `jq . plugins/<name>/.claude-plugin/plugin.json` (валидный JSON), `bash scripts/check.sh --fast` (если есть).
 
+## Sunset / удаление публичного артефакта
+
+Если задача — **удалить** skill / command / agent / script / manifest-поле, после `rm` и до запуска тестов **обязательно** выполни wide-sweep grep:
+
+```bash
+PATTERN="<removed_name_1>|<removed_script.sh>"
+grep -rn -E "$PATTERN" plugins/<name>/ \
+  --include="*.md" --include="*.sh" --include="*.json"
+```
+
+Каждое попадание — остаточная ссылка, которую надо починить (переписать раздел, удалить упоминание, заменить ссылку на новый workflow). Не считай задачу выполненной, пока этот grep не пуст по живым файлам плагина.
+
+Если QA-author прописал отдельный AC «no orphan references» (см. `qa-author-agent.md` → секция «Sunset-паттерн») — это твой главный red→green ориентир.
+
+**Why:** в PR #4 (2026-05-11) удаление `diagram-on-demand` + `diagrams` оставило 19 остаточных ссылок в writer-skill, которые ловил AC-016 в TDD-фазе. Без этого Dev мог бы закоммитить «зелёный» smoke с битыми путями в живых skill-файлах. См. `docs/lessons-learned.md` запись «2026-05-11 — sunset diagram-on-demand + diagrams».
+
 ## Целевые каталоги
 
 - `plugins/<name>/skills/<feature>/` — SKILL.md и вспомогательные файлы

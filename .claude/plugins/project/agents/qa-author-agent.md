@@ -39,6 +39,22 @@ model: sonnet
 
 Уровень выбирается по AC и контракту от SA.
 
+## Sunset-паттерн (обязательный AC)
+
+Когда spec описывает удаление (sunset) публичного skill, command, agent, script или manifest-поля — **обязательно добавь в test-pack AC «no orphan references»**:
+
+```bash
+# AC-N: ни один оставшийся файл плагина не ссылается на удалённые артефакты
+PATTERN="<removed_name_1>|<removed_name_2>|<removed_script.sh>"
+! grep -rn -E "$PATTERN" plugins/<name>/ --include="*.md" --include="*.sh" --include="*.json"
+```
+
+Охват — всё, что остаётся после удаления: `skills/`, `agents/`, `commands/`, `scripts/`, `.claude-plugin/`, `README.md`, `CHANGELOG.md`. Допустимы ссылки только в исторических локациях (`docs/adr/`, `docs/lessons-learned.md`, прошлые `docs/qa-reports/`).
+
+**Why:** в PR #4 (2026-05-11, удаление `diagram-on-demand` + `diagrams`) аналогичный AC-016 поймал 19 остаточных ссылок в `writer-skill` и удаляемых `references/`. Без него Dev мог бы закоммитить «успех» с битыми путями. См. `docs/lessons-learned.md` запись «2026-05-11 — sunset diagram-on-demand + diagrams».
+
+**Не пропускай этот AC** даже если BA не прописал его явно — sunset публичного артефакта без orphan-проверки считается неполным acceptance design'ом, верни BA на дополнение spec'а.
+
 ## 5-шаговый процесс
 
 1. **Прочитай spec.** Открой `docs/superpowers/specs/<file>.md`. Извлеки AC, FR, NFR. Если AC размыты или отсутствуют — верни задачу BA, не выдумывай.
