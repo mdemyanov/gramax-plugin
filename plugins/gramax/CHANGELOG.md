@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.3.0 — 2026-05-08
+
+### Added
+- `skills/diagram-on-demand/` — новый skill для явной генерации mermaid/drawio по описанию с сохранением в Gramax-каталог. Принимает параметры `engine`, `description`, `target_page`; определяет синтаксис каталога через `.doc-root.yaml` (XML или Markdown) и вставляет ссылку автоматически.
+- `scripts/find_doc_root.sh` — поиск `.doc-root.yaml` вверх по дереву от указанного файла.
+- `scripts/validate_diagram_type.sh` — проверка типа mermaid-диаграммы на вхождение в поддерживаемый список; при неподдерживаемом типе выводит `[WARN]` и завершается с exit 0 (без создания файлов).
+- `scripts/save_diagram.sh` — сохранение mxfile XML в `.drawio`, запуск `drawio_convert.py` для получения `.svg`; поддерживает флаг `--force` для перезаписи существующих файлов.
+- `scripts/insert_diagram_ref.sh` — вставка ссылки на диаграмму в md-файл с учётом синтаксиса каталога (XML: `<mermaid>...</mermaid>` / `<Image src="..." />`; Markdown: fenced ```mermaid или `![]()`).
+- Опциональная поддержка `lgazo/drawio-mcp-server` для SVG-конвертации drawio — подключается через `mcpServers` в локальном `settings.json`, не обязателен.
+
+### Сохранено без изменений
+- Skill `diagrams` — не затронут; `diagram-on-demand` является дополнением, а не заменой.
+
 ## 1.2.0 — 2026-05-08
 
 Migration to dedicated marketplace repo `mdemyanov/gramax-plugin`. Plugin теперь поставляется как часть Claude Code marketplace, а не из монорепо `mdemyanov/ai-assistants`.

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit — вызывает scripts/check.sh --fast.
+# Активируется через bash scripts/install-hooks.sh.
+# Bypass: git commit --no-verify.
+
+set -euo pipefail
+
+if [ -x scripts/check.sh ]; then
+  bash scripts/check.sh --fast
+else
+  echo "WARN: scripts/check.sh не найден или не исполняем — пропускаю pre-commit gate"
+fi

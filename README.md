@@ -37,6 +37,7 @@ git submodule update --init --recursive
 - `/gramax:comments-read <path>` — показать комментарии
 - `/gramax:comments-write <path>` — добавить / ответить / редактировать / удалить
 - `/gramax:diagrams` — правила drawio / mermaid в Gramax
+- `/gramax:diagram-on-demand` — явная генерация mermaid/drawio по описанию с сохранением в Gramax-каталог
 
 ## Agents (плагин gramax)
 
