@@ -1,6 +1,6 @@
 # ADR-0007: Функциональность, перенесённая в Phase 2
 
-**Status:** Accepted
+**Status:** Superseded by ADR-0008
 **Date:** 2026-05-08
 **Plugin:** gramax
 

@@ -1,5 +1,44 @@
 # Changelog
 
+## 2.0.0 — 2026-05-11
+
+Breaking change. Внутренние diagram-skills удалены; drawio делегирован внешнему плагину.
+
+### Removed
+- `skills/diagram-on-demand/` — удалён. Замена: внешний плагин `Agents365-ai/drawio-skill` для drawio; встроенный `mermaid` для mermaid.
+- `skills/diagrams/` — удалён. Гайд по drawio/mermaid переезжает в `skills/writer/references/drawio.md` (новый workflow) и `skills/mermaid/SKILL.md`.
+- Четыре bash-скрипта из `scripts/` (обслуживали только удалённые skills) — удалены. Полный список в теге `v1.4.0`.
+- Python-скрипт конвертации drawio→SVG из `scripts/` — удалён. При необходимости: возьми версию из тега `v1.4.0`.
+
+### Changed
+- `skills/writer/SKILL.md` и `skills/writer/references/drawio.md` — переработаны: drawio-генерация делегирована внешнему плагину; описан двухшаговый workflow и Gramax-теги (`[drawio:...]` для Markdown, `<Image>` для XML).
+- `skills/writer/references/staging.md` — обновлён чек-лист: шаг конвертации drawio переработан (без внутреннего python-скрипта).
+- `skills/mermaid/SKILL.md` description уточнено: только Mermaid DSL; drawio → внешний плагин.
+- `.claude-plugin/marketplace.json` и `plugins/gramax/.claude-plugin/plugin.json` — версия `2.0.0`, descriptions обновлены без `diagrams`/`diagram-on-demand`.
+
+### Migration notes
+
+При переходе с `diagram-on-demand`, `diagrams` или внутренних drawio-скриптов плагина:
+
+1. Обнови плагин: `/plugin update gramax`.
+2. Установи внешний drawio-плагин:
+   ```
+   /plugin marketplace add Agents365-ai/365-skills
+   /plugin install drawio
+   ```
+3. Поставь **draw.io desktop** (macOS: `brew install --cask drawio`; Windows/Linux: [github.com/jgraph/drawio-desktop/releases](https://github.com/jgraph/drawio-desktop/releases) — не используй snap на Linux).
+4. Поставь **Python 3** (требуется `repair_png.py` внутри внешнего плагина).
+5. Существующие `.drawio`/`.svg` файлы в Gramax-каталогах продолжают рендериться — меняется только workflow создания новых.
+6. Внешний плагин `drawio-skill` не вставляет ссылку в md автоматически — после генерации вставь тег вручную (writer-skill подскажет формат): `[drawio:./file.svg:alt:WxHpx]` для Markdown-syntax, `<Image src="./file.svg" />` для XML-syntax.
+
+**Не устанавливай** `Agents365-ai/mermaid-skill` параллельно с `gramax:mermaid` — конфликт триггеров.
+
+### ADR
+- ADR-0008 (новый) — обоснование breaking change.
+- ADR-0001, 0004, 0005, 0007 → статус `Superseded by ADR-0008`.
+- ADR-0002, 0003 → статус `Historical (Informational)`.
+- ADR-0006 остаётся Active (semver-policy применён здесь).
+
 ## 1.4.0 — 2026-05-08
 
 ### Added
@@ -14,10 +53,7 @@
 
 ### Added
 - `skills/diagram-on-demand/` — новый skill для явной генерации mermaid/drawio по описанию с сохранением в Gramax-каталог. Принимает параметры `engine`, `description`, `target_page`; определяет синтаксис каталога через `.doc-root.yaml` (XML или Markdown) и вставляет ссылку автоматически.
-- `scripts/find_doc_root.sh` — поиск `.doc-root.yaml` вверх по дереву от указанного файла.
-- `scripts/validate_diagram_type.sh` — проверка типа mermaid-диаграммы на вхождение в поддерживаемый список; при неподдерживаемом типе выводит `[WARN]` и завершается с exit 0 (без создания файлов).
-- `scripts/save_diagram.sh` — сохранение mxfile XML в `.drawio`, запуск `drawio_convert.py` для получения `.svg`; поддерживает флаг `--force` для перезаписи существующих файлов.
-- `scripts/insert_diagram_ref.sh` — вставка ссылки на диаграмму в md-файл с учётом синтаксиса каталога (XML: `<mermaid>...</mermaid>` / `<Image src="..." />`; Markdown: fenced ```mermaid или `![]()`).
+- Четыре вспомогательных bash-скрипта в `scripts/` для поддержки diagram-on-demand: поиск `.doc-root.yaml`, валидация типа диаграммы, сохранение mxfile/SVG, вставка ссылки в md (удалены в 2.0.0).
 - Опциональная поддержка `lgazo/drawio-mcp-server` для SVG-конвертации drawio — подключается через `mcpServers` в локальном `settings.json`, не обязателен.
 
 ### Сохранено без изменений
@@ -28,7 +64,7 @@
 Migration to dedicated marketplace repo `mdemyanov/gramax-plugin`. Plugin теперь поставляется как часть Claude Code marketplace, а не из монорепо `mdemyanov/ai-assistants`.
 
 ### Added
-- `skills/diagrams/` — новый skill для drawio/mermaid в Gramax-каталогах. Бриджит существующий `scripts/drawio_convert.py` через `${CLAUDE_PLUGIN_ROOT}`. References: `drawio-workflow.md`, `mermaid-blocks.md`.
+- `skills/diagrams/` — новый skill для drawio/mermaid в Gramax-каталогах. Использует внутренний python-скрипт конвертации drawio→SVG (удалён в 2.0.0). References: `drawio-workflow.md`, `mermaid-blocks.md`.
 - `agents/review-agent.md` — агент-координатор для ревью комментариев. Workflow: inventory → triage → report → optional apply (gated на подтверждение). Использует comments-read/comments-write через Skill tool.
 
 ### Changed
@@ -38,7 +74,7 @@ Migration to dedicated marketplace repo `mdemyanov/gramax-plugin`. Plugin теп
 
 ### Migration notes
 - Плагин больше не доступен по адресу `ai-assistants/plugins/gramax`. Установка: `/plugin marketplace add mdemyanov/gramax-plugin`.
-- Скрипты по тем же путях внутри плагина — пользовательские ссылки `${CLAUDE_PLUGIN_ROOT}/scripts/...` работают без изменений.
+- Скрипты по тем же путям внутри плагина — пользовательские ссылки `${CLAUDE_PLUGIN_ROOT}/scripts/...` работают без изменений.
 - Источник в `mdemyanov/ai-assistants` заменён на git submodule на этот репо (отдельный коммит в ai-assistants).
 
 ## 1.1.0 — 2026-05-06
@@ -82,7 +118,7 @@ Schema alignment с проверенным production-паттерном Gramax-
 - `comments-write` — операционный workflow add/reply/edit/delete
 
 ### Scripts
-- `drawio_convert.py` — конвертация `.drawio` → SVG с правильной обработкой кириллицы
+- `scripts/drawio/` — конвертация `.drawio` → SVG с правильной обработкой кириллицы (удалён в 2.0.0)
 - `slugify.py` — транслит кириллицы → latin-slug
 - `validate_structure.py` — валидация каталога Gramax (с `--fix --yes`)
 - `parse_comments.py` — парсинг комментариев (JSON/report, фильтры)

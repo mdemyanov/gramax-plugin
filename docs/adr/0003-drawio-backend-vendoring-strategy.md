@@ -1,6 +1,6 @@
 # ADR-0003: Vendoring strategy для drawio MCP-бэкенда
 
-**Status:** Accepted
+**Status:** Historical (Informational)
 **Date:** 2026-05-08
 **Plugin:** gramax
 

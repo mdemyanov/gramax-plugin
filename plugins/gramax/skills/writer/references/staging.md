@@ -22,15 +22,12 @@ uv run ${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py <path> --fix --yes # 
 
 ## 2. Конвертировать `.drawio` → `.svg`
 
-Все диаграммы должны быть в формате SVG с embedded drawio-данными:
+Все диаграммы должны быть в формате SVG с embedded drawio-данными. Drawio-файлы конвертируются через внешний плагин `Agents365-ai/drawio-skill` (см. `references/drawio.md`). Локального скрипта в плагине больше нет.
 
-```bash
-uv run ${CLAUDE_PLUGIN_ROOT}/scripts/drawio_convert.py file.drawio file.svg
-```
-
-Если был подкаталог `diagrams/` с сырыми `.drawio` — удалить после конвертации.
-
-Детали → `drawio.md`.
+Чек-лист:
+- `.drawio` + `.svg` рядом со страницей (или только `.svg` если черновик `.drawio` не нужен)
+- Сырой `.drawio` без парного `.svg` **не публиковать** — Gramax покажет его как вложение, а не встроенную диаграмму
+- Если был подкаталог `diagrams/` с сырыми `.drawio` — удалить после конвертации
 
 ## 3. Проверить отсутствие `_index.md` в корне каталога
 

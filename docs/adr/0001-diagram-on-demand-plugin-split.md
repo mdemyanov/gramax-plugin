@@ -1,6 +1,6 @@
 # ADR-0001: Размещение навыков diagram-on-demand внутри плагина gramax (без split)
 
-**Status:** Accepted
+**Status:** Superseded by ADR-0008
 **Date:** 2026-05-08
 **Plugin:** gramax / marketplace
 

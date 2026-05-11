@@ -36,9 +36,9 @@ git submodule update --init --recursive
 - `/gramax:writer` — создание и редактирование Gramax-документов
 - `/gramax:comments-read <path>` — показать комментарии
 - `/gramax:comments-write <path>` — добавить / ответить / редактировать / удалить
-- `/gramax:diagrams` — правила drawio / mermaid в Gramax
-- `/gramax:diagram-on-demand` — явная генерация mermaid/drawio по описанию с сохранением в Gramax-каталог
 - `/gramax:mermaid` — генерация mermaid-диаграмм inline (без MCP, адаптировано из axtonliu/axton-obsidian-visual-skills, MIT)
+
+Для drawio-диаграмм — внешний плагин `Agents365-ai/drawio-skill` (см. [plugins/gramax/README.md](./plugins/gramax/README.md)).
 
 ## Agents (плагин gramax)
 
