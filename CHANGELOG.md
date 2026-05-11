@@ -1,5 +1,10 @@
 # Marketplace Changelog
 
+## 1.2.0 — 2026-05-08
+
+### Changed
+- `gramax` обновлён до v1.4.0: добавлен skill `mermaid` — генерация mermaid-диаграмм по описанию inline (без MCP). Адаптирован из upstream `axtonliu/axton-obsidian-visual-skills` (MIT).
+
 ## 1.1.0 — 2026-05-08
 
 ### Changed

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.0 — 2026-05-08
+
+### Added
+- `skills/mermaid/` — новый skill для генерации mermaid-диаграмм по текстовому описанию без внешних зависимостей. Адаптирован из upstream [axtonliu/axton-obsidian-visual-skills](https://github.com/axtonliu/axton-obsidian-visual-skills) (MIT). Учитывает синтаксис Gramax-каталога (XML или Markdown через `.doc-root.yaml`), 8 поддерживаемых типов, защита от типовых ошибок парсера (list-syntax conflict, subgraph naming, node references). Не использует MCP-серверы — генерация и вставка DSL inline.
+- `skills/mermaid/references/syntax-rules.md` — расширенный справочник синтаксиса, troubleshooting и advanced паттернов.
+- `skills/mermaid/LICENSE.upstream.md` — MIT-attribution upstream-источника со списком изменений.
+
+### Сохранено без изменений
+- Skill `diagram-on-demand` и `diagrams` — не затронуты; `mermaid` дополняет их inline-вариантом без зависимостей.
+
 ## 1.3.0 — 2026-05-08
 
 ### Added

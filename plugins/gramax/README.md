@@ -16,6 +16,7 @@ Claude Code plugin для работы с документацией в форм
 - `/gramax:comments-write <path>` — добавить/ответить/редактировать/удалить комментарий
 - `/gramax:diagrams` — правила создания и встраивания .drawio / mermaid диаграмм
 - `/gramax:diagram-on-demand` — явная генерация mermaid/drawio по описанию с сохранением в Gramax-каталог
+- `/gramax:mermaid` — генерация mermaid-диаграмм по описанию inline, без MCP и внешних зависимостей
 
 ### Skill `diagram-on-demand`
 
@@ -65,6 +66,27 @@ Claude Code plugin для работы с документацией в форм
 
 После подключения MCP-сервер используется автоматически, если доступен. Если недоступен — skill выводит `[ERROR]` с командой ручной конвертации и завершается с exit code 1.
 
+### Skill `mermaid`
+
+Генерирует mermaid DSL по словесному описанию и (опционально) вставляет блок в md-страницу Gramax-каталога. Полностью inline — без MCP-серверов, без скриптов, без preview.
+
+Триггеры: «нарисуй mermaid», «сгенерируй mermaid-диаграмму», «визуализируй процесс/архитектуру/цикл», «сделай flowchart/sequence/gantt/class/state/ER/pie/mindmap».
+
+Что делает:
+
+1. Анализирует запрос — выделяет сущности, отношения, последовательность.
+2. Выбирает тип диаграммы (8 поддерживаемых: `flowchart`, `sequenceDiagram`, `gantt`, `classDiagram`, `stateDiagram-v2`, `erDiagram`, `pie`, `mindmap`).
+3. Применяет 5 критических правил синтаксиса (list-conflict, subgraph naming, node-references, спецсимволы, стрелки) — защита от типовых parser-ошибок.
+4. Если указан `target_page` — открывает ближайший `.doc-root.yaml`, читает `syntax: XML|Markdown`, вставляет блок в правильном формате.
+
+Не использует MCP `claude-mermaid` — skill полностью текстовый. Подходит когда нужен только корректный DSL, а preview/save в SVG необязательны.
+
+Адаптировано из [axtonliu/axton-obsidian-visual-skills](https://github.com/axtonliu/axton-obsidian-visual-skills) (MIT) — см. `skills/mermaid/LICENSE.upstream.md`.
+
+Когда брать `mermaid` vs `diagram-on-demand`:
+- `mermaid` — inline DSL в md, без файлов, без MCP. Быстро.
+- `diagram-on-demand` — full pipeline с сохранением `.svg`/`.drawio` рядом со страницей и ref в md. Тяжелее.
+
 ## Agents
 
 - `review-agent` — координирует ревью комментариев в каталоге (запуск через Task tool)
@@ -86,4 +108,4 @@ Claude Code plugin для работы с документацией в форм
 
 ## Версия
 
-1.3.0 — см. [CHANGELOG.md](./CHANGELOG.md)
+1.4.0 — см. [CHANGELOG.md](./CHANGELOG.md)
