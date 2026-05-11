@@ -1,5 +1,10 @@
 # Marketplace Changelog
 
+## 1.1.0 — 2026-05-08
+
+### Changed
+- `gramax` обновлён до v1.3.0: добавлен skill `diagram-on-demand` — явная генерация mermaid/drawio по описанию с сохранением в Gramax-каталог.
+
 ## 1.0.0 — 2026-05-08
 
 Первый релиз публичного marketplace репо `mdemyanov/gramax-plugin`.

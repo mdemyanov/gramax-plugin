@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Claude Code marketplace для Gramax-документации: writer, comments, diagrams, review-agent. С опциональным claude-mermaid (vendored).",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "plugins": [
     {
       "name": "gramax",
       "source": "./plugins/gramax",
-      "description": "Документация Gramax: writer, comments-read, comments-write, diagrams (drawio/mermaid), review-agent."
+      "description": "Документация Gramax: writer, comments-read, comments-write, diagrams (drawio/mermaid), diagram-on-demand, review-agent."
     },
     {
       "name": "claude-mermaid",

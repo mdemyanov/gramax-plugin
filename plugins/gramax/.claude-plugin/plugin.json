@@ -1,7 +1,7 @@
 {
   "name": "gramax",
-  "version": "1.2.0",
-  "description": "Gramax: writer, comments-read, comments-write, diagrams (drawio/mermaid), review-agent.",
+  "version": "1.3.0",
+  "description": "Gramax: writer, comments-read, comments-write, diagrams (drawio/mermaid), diagram-on-demand, review-agent.",
   "author": {
     "name": "mdemyanov",
     "email": "qutask@gmail.com"
