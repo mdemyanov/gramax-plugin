@@ -1,6 +1,6 @@
 # ADR-0005: Контракт API save flow (drawio_convert.py, slugify.py, .doc-root.yaml)
 
-**Status:** Accepted
+**Status:** Superseded by ADR-0008
 **Date:** 2026-05-08
 **Plugin:** gramax
 

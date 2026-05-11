@@ -1,6 +1,6 @@
 # ADR-0004: Механизм выбора движка (router и engine selection)
 
-**Status:** Accepted
+**Status:** Superseded by ADR-0008
 **Date:** 2026-05-08
 **Plugin:** gramax
 

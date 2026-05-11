@@ -1,6 +1,6 @@
 # ADR-0002: Выбор drawio MCP-бэкенда и роль LLM в генерации XML
 
-**Status:** Accepted
+**Status:** Historical (Informational)
 **Date:** 2026-05-08
 **Plugin:** gramax
 

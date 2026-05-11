@@ -10,13 +10,14 @@
 
 | ADR | Название | Статус | Дата | Плагин |
 |-----|----------|--------|------|--------|
-| [0001](0001-diagram-on-demand-plugin-split.md) | Размещение навыков diagram-on-demand внутри плагина gramax (без split) | Accepted | 2026-05-08 | gramax / marketplace |
-| [0002](0002-drawio-mcp-backend-selection.md) | Выбор drawio MCP-бэкенда и роль LLM в генерации XML | Accepted | 2026-05-08 | gramax |
-| [0003](0003-drawio-backend-vendoring-strategy.md) | Vendoring strategy для drawio MCP-бэкенда | Accepted | 2026-05-08 | gramax |
-| [0004](0004-router-and-engine-selection.md) | Механизм выбора движка (router и engine selection) | Accepted | 2026-05-08 | gramax |
-| [0005](0005-save-flow-script-api-contract.md) | Контракт API save flow (drawio_convert.py, slugify.py, .doc-root.yaml) | Accepted | 2026-05-08 | gramax |
-| [0006](0006-marketplace-json-semver-strategy.md) | Стратегия версионирования marketplace.json при добавлении diagram-on-demand | Accepted | 2026-05-08 | marketplace |
-| [0007](0007-out-of-scope-phase2.md) | Функциональность, перенесённая в Phase 2 | Accepted | 2026-05-08 | gramax |
+| [0001](0001-diagram-on-demand-plugin-split.md) | Размещение навыков diagram-on-demand внутри плагина gramax (без split) | Accepted → Superseded by ADR-0008 | 2026-05-08 | gramax / marketplace |
+| [0002](0002-drawio-mcp-backend-selection.md) | Выбор drawio MCP-бэкенда и роль LLM в генерации XML | Accepted → Historical | 2026-05-08 | gramax |
+| [0003](0003-drawio-backend-vendoring-strategy.md) | Vendoring strategy для drawio MCP-бэкенда | Accepted → Historical | 2026-05-08 | gramax |
+| [0004](0004-router-and-engine-selection.md) | Механизм выбора движка (router и engine selection) | Accepted → Superseded by ADR-0008 | 2026-05-08 | gramax |
+| [0005](0005-save-flow-script-api-contract.md) | Контракт API save flow (drawio_convert.py, slugify.py, .doc-root.yaml) | Accepted → Superseded by ADR-0008 | 2026-05-08 | gramax |
+| [0006](0006-marketplace-json-semver-strategy.md) | Стратегия версионирования marketplace.json при добавлении diagram-on-demand | Accepted (Active) | 2026-05-08 | marketplace |
+| [0007](0007-out-of-scope-phase2.md) | Функциональность, перенесённая в Phase 2 | Accepted → Superseded by ADR-0008 | 2026-05-08 | gramax |
+| [0008](0008-drop-internal-drawio-skills.md) | Удаление внутренних drawio-skills и делегирование внешнему плагину | Accepted | 2026-05-11 | gramax / marketplace |
 
 ## Связи между ADR
 

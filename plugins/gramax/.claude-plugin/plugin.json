@@ -1,7 +1,7 @@
 {
   "name": "gramax",
-  "version": "1.4.0",
-  "description": "Gramax: writer, comments-read, comments-write, diagrams, diagram-on-demand, mermaid, review-agent.",
+  "version": "2.0.0",
+  "description": "Gramax: writer, comments-read, comments-write, mermaid, review-agent. Drawio — через внешний плагин Agents365-ai/drawio-skill.",
   "author": {
     "name": "mdemyanov",
     "email": "qutask@gmail.com"
@@ -9,5 +9,5 @@
   "homepage": "https://github.com/mdemyanov/gramax-plugin",
   "repository": "https://github.com/mdemyanov/gramax-plugin",
   "license": "MIT",
-  "keywords": ["gramax", "documentation", "markdown", "comments", "drawio", "mermaid", "review"]
+  "keywords": ["gramax", "documentation", "markdown", "comments", "mermaid", "review"]
 }

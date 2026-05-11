@@ -1,6 +1,6 @@
 ---
 name: mermaid
-description: Создание профессиональных mermaid-диаграмм для документации Gramax по текстовому описанию. Используй когда пользователь просит «нарисуй mermaid», «сгенерируй mermaid-диаграмму», «визуализируй процесс/архитектуру/цикл», «сделай flowchart/sequence/gantt/class/state/ER/pie/mindmap». Учитывает синтаксис .doc-root.yaml (XML или Markdown), 8 поддерживаемых типов Gramax, защита от типовых ошибок парсера. Без внешних зависимостей и MCP.
+description: "Только для диаграмм в синтаксисе Mermaid DSL. Создание профессиональных mermaid-диаграмм для документации Gramax по текстовому описанию. Используй когда пользователь просит «нарисуй mermaid», «сгенерируй mermaid-диаграмму», «визуализируй процесс/архитектуру/цикл», «сделай flowchart/sequence/gantt/class/state/ER/pie/mindmap». Учитывает синтаксис .doc-root.yaml (XML или Markdown), 8 поддерживаемых типов Gramax, защита от типовых ошибок парсера. Без внешних зависимостей и MCP. Для drawio — используй внешний плагин drawio из marketplace Agents365-ai/365-skills, не этот skill."
 ---
 
 # Mermaid для Gramax
@@ -15,7 +15,7 @@ Skill переводит текстовое описание в корректн
 - Нужно flowchart / sequence / gantt / class / state / ER / pie / mindmap.
 - Вставить mermaid-диаграмму в md-файл Gramax-каталога.
 
-**Не для:** конвертации drawio (см. `diagram-on-demand`), preview диаграмм в браузере, рендера в SVG/PNG.
+**Не для:** drawio-диаграмм (для drawio используй внешний плагин **drawio** из marketplace **Agents365-ai/365-skills**), preview диаграмм в браузере, рендера в SVG/PNG.
 
 ## Quick start
 
@@ -208,7 +208,7 @@ flowchart TB
 ```
 ````
 
-Mermaid рендерится Gramax-фронтендом при отображении страницы — отдельный файл не нужен. Если требуется сохранение в `.svg`/`.png` рядом со страницей — это сценарий другого skill (`diagram-on-demand`).
+Mermaid рендерится Gramax-фронтендом при отображении страницы — отдельный файл не нужен. Если требуется drawio-диаграмма с сохранением `.svg` рядом со страницей — используй внешний плагин **drawio** из marketplace **Agents365-ai/365-skills**.
 
 ## References
 
