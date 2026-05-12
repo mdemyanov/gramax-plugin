@@ -3,7 +3,7 @@ description: "Исследователь (subagent, Sonnet). Разведка п
 allowed-tools: Task
 ---
 
-Запусти subagent `researcher-agent` через Task tool.
+Запусти subagent `project:researcher-agent` через Task tool (`subagent_type: "project:researcher-agent"`).
 
 **Входы пользователя:** `$ARGUMENTS`
 

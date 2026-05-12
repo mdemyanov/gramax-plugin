@@ -14,16 +14,18 @@ Claude Code plugin для работы с документацией в форм
 - `/gramax:writer` — создание и редактирование Gramax-документов
 - `/gramax:comments-read <path>` — показать комментарии документа
 - `/gramax:comments-write <path>` — добавить/ответить/редактировать/удалить комментарий
-- `/gramax:mermaid` — генерация mermaid-диаграмм по описанию inline, без MCP и внешних зависимостей
+- `/gramax:mermaid` — генерация mermaid-диаграмм: создаёт `.mermaid`-файл рядом со статьёй и вставляет тег-ссылку в md
 - `/gramax:drawio` — drawio-диаграммы через внешний плагин `Agents365-ai/drawio-skill` (двухшаговый workflow)
 
 ### Skill `mermaid`
 
-Генерирует mermaid DSL по словесному описанию и (опционально) вставляет блок в md-страницу Gramax-каталога. Полностью inline — без MCP-серверов, без скриптов, без preview.
+Генерирует mermaid DSL по словесному описанию, записывает его в отдельный `.mermaid`-файл рядом со статьёй и вставляет тег-ссылку `<mermaid path="…"/>` в md-документ. Без MCP-серверов и внешних зависимостей.
 
 Триггеры: «нарисуй mermaid», «сгенерируй mermaid-диаграмму», «визуализируй процесс/архитектуру/цикл», «сделай flowchart/sequence/gantt/class/state/ER/pie/mindmap».
 
-При запросе без явного движка («нарисуй диаграмму») задаёт уточняющий вопрос: mermaid (inline, без файла) или drawio (через внешний плагин, создаёт `.svg`).
+При запросе без явного движка («нарисуй диаграмму») задаёт уточняющий вопрос: mermaid (`.mermaid`-файл + тег-ссылка) или drawio (через внешний плагин, создаёт `.svg`).
+
+**Пример результата:** для статьи `docs/auth/overview.md` с темой «процесс авторизации» skill создаёт `docs/auth/overview-auth-flow.mermaid` и вставляет в md тег `<mermaid path="./overview-auth-flow.mermaid" width="800px" height="450px"/>`.
 
 Поддерживаемые типы: `flowchart`, `sequenceDiagram`, `gantt`, `classDiagram`, `stateDiagram-v2`, `erDiagram`, `pie`, `mindmap`.
 
@@ -66,4 +68,4 @@ Claude Code plugin для работы с документацией в форм
 
 ## Версия
 
-3.0.0 — см. [CHANGELOG.md](./CHANGELOG.md)
+4.0.0 — см. [CHANGELOG.md](./CHANGELOG.md)

@@ -3,7 +3,7 @@ description: "Системный аналитик (subagent, Sonnet). Архит
 allowed-tools: Task
 ---
 
-Запусти subagent `sa-agent` через Task tool.
+Запусти subagent `project:sa-agent` через Task tool (`subagent_type: "project:sa-agent"`).
 
 **Входы пользователя:** `$ARGUMENTS`
 

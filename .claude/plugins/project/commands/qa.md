@@ -11,7 +11,7 @@ allowed-tools: Task
 
 Распарсь `$ARGUMENTS`:
 
-1. **`--mode=author`** — диспетч `qa-author-agent` через Task tool.
+1. **`--mode=author`** — диспетч `project:qa-author-agent` через Task tool (`subagent_type: "project:qa-author-agent"`).
    - Цель: создать AC-driven test design + failing test stubs ДО Dev'а
    - Входы: spec `docs/superpowers/specs/<feature>.md` (с AC); опц. ADR в `docs/adr/`
    - Артефакты:
@@ -19,7 +19,7 @@ allowed-tools: Task
      - failing stubs `tests/<plugin>/<feature>_test.sh` (bash-harness)
    - Критерии: stubs запускаются и падают (red); AC покрытие 100%; `bash tests/<plugin>/run.sh` показывает падения только для нового файла
 
-2. **`--mode=runner`** — диспетч `qa-runner-agent` через Task tool.
+2. **`--mode=runner`** — диспетч `project:qa-runner-agent` через Task tool (`subagent_type: "project:qa-runner-agent"`).
    - Цель: прогнать full test suite + регрессии после Dev'а; сформировать отчёт
    - Входы: реализация в `plugins/<name>/`, тесты `tests/<plugin>/`, spec с AC
    - Запуск: `bash tests/<plugin>/run.sh` (или индивидуальные `bash tests/<plugin>/<feature>_test.sh`)
@@ -46,8 +46,8 @@ allowed-tools: Task
 
 ## Примеры
 
-- `/qa --mode=author plugin-status` → запускает qa-author-agent с задачей «написать AC-driven test design + failing stubs для plugin-status»
-- `/qa --mode=runner gramax` → запускает qa-runner-agent с задачей «прогнать full suite для plugin gramax, написать отчёт»
+- `/qa --mode=author plugin-status` → запускает `project:qa-author-agent` с задачей «написать AC-driven test design + failing stubs для plugin-status»
+- `/qa --mode=runner gramax` → запускает `project:qa-runner-agent` с задачей «прогнать full suite для plugin gramax, написать отчёт»
 
 ## Handoff
 

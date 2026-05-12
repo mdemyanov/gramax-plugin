@@ -3,7 +3,7 @@ description: "Tech Writer (subagent, Sonnet). Пишет/правит README, CH
 allowed-tools: Task
 ---
 
-Запусти subagent `tech-writer-agent` через Task tool.
+Запусти subagent `project:tech-writer-agent` через Task tool (`subagent_type: "project:tech-writer-agent"`).
 
 **Входы пользователя:** `$ARGUMENTS`
 

@@ -18,6 +18,16 @@
 
 **Применимо:** любой будущий sunset публичного skill или скриптов в `plugins/gramax/`.
 
+## 2026-05-12 — mermaid skill v4.0.0: переход на file-based workflow
+
+**Что изменилось:** skill теперь создаёт `.mermaid`-файл через Write tool и вставляет тег-ссылку `<mermaid path="..."/>` вместо inline DSL.
+
+**Почему:** формат Gramax всегда требовал file-based подход (задокументирован в blocks.md), но skill учил устаревшему inline-методу. Расхождение обнаружено при планировании PM.
+
+**Что сработало:** обнаружение расхождения ground-truth (blocks.md) vs SKILL.md до начала работы Dev — позволило сформировать корректный spec сразу.
+
+**ADR:** docs/adr/0010-mermaid-file-based-workflow.md
+
 ## 2026-05-08 — TDD-stubs могут быть частично зелёными от старта
 
 **Контекст:** QA-author создал 12 stubs; 9 упали (требуют новых артефактов), 3 прошли сразу (тестируют уже существующие `drawio_convert.py`/`slugify.py`).
