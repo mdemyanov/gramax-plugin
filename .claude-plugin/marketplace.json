@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Claude Code marketplace для Gramax-документации: writer, comments, mermaid, drawio, review-agent. Drawio skill делегирует внешнему плагину Agents365-ai/drawio-skill.",
-    "version": "3.0.0"
+    "version": "4.1.0"
   },
   "plugins": [
     {
       "name": "gramax",
       "source": "./plugins/gramax",
-      "description": "Документация Gramax: writer, comments-read, comments-write, mermaid, drawio, review-agent. Drawio делегирует внешнему плагину Agents365-ai/drawio-skill."
+      "description": "Документация Gramax: writer, comments-read, comments-write, mermaid, drawio, review-agent. Mermaid skill — file-based workflow: создаёт .mermaid-файл рядом со статьёй. Drawio делегирует внешнему плагину Agents365-ai/drawio-skill."
     }
   ]
 }

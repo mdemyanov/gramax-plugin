@@ -3,7 +3,7 @@ description: "Бизнес-аналитик (subagent, Sonnet). Spec на skill/
 allowed-tools: Task
 ---
 
-Запусти subagent `ba-agent` через Task tool.
+Запусти subagent `project:ba-agent` через Task tool (`subagent_type: "project:ba-agent"`).
 
 **Входы пользователя:** `$ARGUMENTS`
 
@@ -45,7 +45,7 @@ BA работает в двух режимах:
 
 Цель: проверить, что реализация (skill/command/agent + тесты в `tests/<plugin>/`) реально покрывает каждое Acceptance Criteria из spec'а. Вынести вердикт **pass** или **block**.
 
-Передай subagent'у `ba-agent`:
+Передай subagent'у `project:ba-agent`:
 
 1. **Цель**: «BA --mode=acceptance: проверить AC ↔ реализация для фичи <feature>»
 2. **Входные файлы**:

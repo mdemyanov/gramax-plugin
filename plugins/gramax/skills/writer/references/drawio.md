@@ -36,32 +36,23 @@ Drawio-диаграммы делегированы внешнему плагин
 
 После получения файла вставь тег в нужное место страницы (см. раздел «Gramax-теги» ниже). Writer-skill подскажет правильный формат, если указать путь к файлу и синтаксис каталога.
 
-## Gramax-теги для drawio
+## Gramax-тег для drawio
 
-Тег зависит от поля `syntax:` в ближайшем `.doc-root.yaml` (обход вверх от target_page).
+Тег единый — не зависит от синтаксиса каталога (Markdown или XML).
 
-### Markdown syntax (default или `syntax: Markdown`)
-
-```markdown
-[drawio:./diagram.svg:Подпись:971px:311px]
+```xml
+<drawio path="./diagram.svg" width="971px" height="311px"/>
 ```
 
 Параметры:
-1. Относительный путь к SVG-файлу
-2. Подпись (может быть пустой: `::`)
-3. Ширина (`NNNpx`)
-4. Высота (`NNNpx`)
+- `path` — относительный путь к SVG-файлу
+- `width` — ширина (`NNNpx`)
+- `height` — высота (`NNNpx`)
 
 Примеры:
-```markdown
-[drawio:./architecture.svg:Общая схема процесса:971px:311px]
-[drawio:./overview.svg::211px:101px]
-```
-
-### XML syntax (`.doc-root.yaml` → `syntax: XML`)
-
 ```xml
-<Image src="./diagram.svg" />
+<drawio path="./architecture.svg" width="971px" height="311px"/>
+<drawio path="./overview.svg" width="211px" height="101px"/>
 ```
 
 ## Правила размещения
@@ -78,4 +69,4 @@ Drawio-диаграммы делегированы внешнему плагин
 | Linux: конвертация падает с ошибкой display | Нет Xvfb | `xvfb-run drawio --export ...` |
 | Linux snap: ошибка записи файла | AppArmor блокирует snap | Установить `.deb`/`.rpm` вместо snap |
 | Windows: Python не найден | Python 3 не в PATH | Добавить Python в PATH или использовать `py -3` |
-| `[drawio:./file.svg:…]` не рендерится | Нет размеров или неверный формат | Проверить `WIDTHpx:HEIGHTpx` в конце тега |
+| `<drawio path="..."/>` не рендерится | Нет атрибутов width/height или неверный формат | Проверить наличие `width="NNNpx" height="NNNpx"` |

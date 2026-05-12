@@ -223,15 +223,13 @@
 
 ## Draw.io
 
-```markdown
-[drawio:./filename.svg:Описание:WIDTHpx:HEIGHTpx]
+```xml
+<drawio path="./filename.svg" width="WIDTHpx" height="HEIGHTpx"/>
 ```
 
-Параметры:
-1. Относительный путь к SVG-файлу (`./filename.svg`)
-2. Описание (может быть пустым: `::`)
-3. Ширина (`NNNpx`)
-4. Высота (`NNNpx`)
+Файл `.svg` хранится рядом со статьёй, создаётся через `gramax:drawio`.
+
+Устаревший формат (до v4.1.0): `[drawio:./filename.svg:Описание:WIDTHpx:HEIGHTpx]` — в новых документах не использовать.
 
 Устаревший формат (в старых каталогах): `[START Name.drawio](<./START Name.drawio>)` — **не использовать для новых документов**. Конвертация и детали → `drawio.md`.
 

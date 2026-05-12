@@ -17,7 +17,7 @@ model: sonnet
 |----------|-------|
 | Многошаговый дизайн фичи | `superpowers:brainstorming` → `superpowers:writing-plans` |
 | Перед claim'ом «дизайн готов» | `superpowers:verification-before-completion` |
-| Нужна ссылка на актуальную доку Claude Code / MCP | через `/research` (researcher-agent) |
+| Нужна ссылка на актуальную доку Claude Code / MCP | через `/research` (`project:researcher-agent`) |
 
 ## Базовые архитектурные решения для marketplace-плагина
 

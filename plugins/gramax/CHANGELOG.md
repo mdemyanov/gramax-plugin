@@ -1,5 +1,63 @@
 # Changelog
 
+## 4.1.0 — 2026-05-12
+
+### Changed
+- **drawio**: формат тега в md изменён на `<drawio path="..." width="..." height="..."/>`
+  (единый синтаксис вместо `[drawio:...]` для Markdown и `<Image.../>` для XML)
+
+### Migration notes (с v4.0.0)
+Старый тег: `[drawio:./file.svg:Описание:800px:600px]`
+Новый тег: `<drawio path="./file.svg" width="800px" height="600px"/>`
+
+## 4.0.0 — 2026-05-12
+
+Breaking change. Mermaid skill переведён с inline-workflow на file-based: DSL теперь хранится в отдельном `.mermaid`-файле рядом со статьёй, а в md вставляется тег-ссылка `<mermaid path="…"/>`. Соответствует реальному формату Gramax, задокументированному в `blocks.md`.
+
+### Breaking change
+
+- `gramax:mermaid` больше не вставляет DSL inline в md-файл (`<mermaid>…</mermaid>` или ` ```mermaid … ``` `). Inline-подход несовместим с Gramax-рендером.
+- Skill теперь создаёт два артефакта: `.mermaid`-файл (DSL) и тег-ссылку в md.
+- Пользователи, строившие workflow на inline-вставке, должны адаптироваться к новому workflow (см. Migration notes ниже).
+
+### Added
+
+- **File-based workflow:** skill создаёт `.mermaid`-файл в той же директории, что и `target_page`, через Write tool. DSL содержит только чистый Mermaid (без обёрток).
+- **Naming convention:** `<page-slug>-<diagram-slug>.mermaid`. Специальный кейс `_index.md` → `page-slug` берётся из родительской директории.
+- **Коллизия имён:** при повторном вызове с уже существующим `.mermaid`-файлом skill читает первые 5 строк, информирует пользователя и предлагает три опции: перезаписать / выбрать другое имя / отменить. Без явного «перезаписать» — файл не трогается (NFR-001: идемпотентность).
+- **Backward-compat предупреждение:** при обнаружении inline-блока `<mermaid>…</mermaid>` или fenced block ` ```mermaid … ``` ` в `target_page` — skill выводит предупреждение «устаревший формат» и предлагает миграцию. Не мигрирует молча.
+- **Кириллица в slug:** при кириллической теме диаграммы skill предлагает семантический перевод на английский (не механическую транслитерацию).
+
+### Changed
+
+- `skills/mermaid/SKILL.md` — полная переработка: file-based workflow, naming convention, backward-compat, обновлённый fallback-диалог (mermaid-опция: «файл `.mermaid` рядом со статьёй, тег-ссылка в md»), расширенный checklist (добавлен пункт «файл не содержит Gramax-разметки»).
+- `skills/mermaid/references/syntax-rules.md` — секция «Особенности Gramax» обновлена: file-based формат тега `<mermaid path="…"/>` вместо описания inline-блоков как основного формата.
+- `.claude-plugin/plugin.json` — version `4.0.0`.
+- `.claude-plugin/marketplace.json` — metadata.version `4.0.0`; descriptions обновлены.
+
+### Default width/height
+
+Из ground-truth `blocks.md`: `width="800px" height="450px"`. Пользователь может переопределить явно в запросе; если указан один параметр — второй берётся из default.
+
+### Migration notes (с v3.x)
+
+1. Обнови плагин: `/plugin update gramax` (или переустанови).
+2. Все новые диаграммы создаются через file-based workflow автоматически.
+3. Существующие inline-блоки в md-файлах **не затрагиваются автоматически**: при следующем обращении к статье skill предложит миграцию (извлечь DSL в `.mermaid`-файл и заменить блок на тег-ссылку).
+4. При работе с git: после создания диаграммы через skill в commit входят два файла — `.mermaid` и изменённый md-файл со вставленным тегом.
+5. Если Gramax-рендер не отображает диаграмму — проверь, что тег в md имеет форму `<mermaid path="./имя.mermaid" width="800px" height="450px"/>` (самозакрывающийся, путь относительный).
+
+### ADR
+
+- ADR-0010 (новый) — обоснование file-based workflow, naming convention, major bump 4.0.0, backward-compat scope, валидация DSL через checklist. Документ: `docs/adr/0010-mermaid-file-based-workflow.md`.
+- Частично supersedes ADR-0009 в части поведения mermaid skill (inline → file-based).
+
+### Backward compatibility
+
+- Имя skill'а `gramax:mermaid` не изменилось — явные триггеры работают.
+- Skills `writer`, `comments-read`, `comments-write`, `drawio` и agent `review-agent` не затронуты.
+- **Known limitation:** `gramax:mermaid-migrate` (пакетная миграция inline-блоков) не входит в scope v4.0.0. Планируется как Phase 2 при наличии реального запроса.
+
 ## 3.0.0 — 2026-05-11
 
 Breaking change. Устранена путаница в роутинге диаграмм: добавлен явный skill `gramax:drawio` как заглушка-делегатор на внешний плагин, а vendored submodule `claude-mermaid` удалён — он создавал конфликт триггеров с `gramax:mermaid`.

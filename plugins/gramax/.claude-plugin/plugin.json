@@ -1,7 +1,7 @@
 {
   "name": "gramax",
-  "version": "3.0.0",
-  "description": "Gramax: writer, comments-read, comments-write, mermaid, drawio, review-agent. Drawio делегирует внешнему плагину Agents365-ai/drawio-skill через двухшаговый workflow.",
+  "version": "4.1.0",
+  "description": "Gramax: writer, comments-read, comments-write, mermaid, drawio, review-agent. Mermaid — file-based workflow: .mermaid-файл рядом со статьёй + тег-ссылка в md. Drawio делегирует Agents365-ai/drawio-skill.",
   "author": {
     "name": "mdemyanov",
     "email": "qutask@gmail.com"
