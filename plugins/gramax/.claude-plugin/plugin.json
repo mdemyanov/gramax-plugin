@@ -9,12 +9,5 @@
   "homepage": "https://github.com/mdemyanov/gramax-plugin",
   "repository": "https://github.com/mdemyanov/gramax-plugin",
   "license": "MIT",
-  "keywords": ["gramax", "documentation", "markdown", "comments", "mermaid", "drawio", "review"],
-  "skills": [
-    {"name": "writer"},
-    {"name": "comments-read"},
-    {"name": "comments-write"},
-    {"name": "mermaid"},
-    {"name": "drawio"}
-  ]
+  "keywords": ["gramax", "documentation", "markdown", "comments", "mermaid", "drawio", "review"]
 }
