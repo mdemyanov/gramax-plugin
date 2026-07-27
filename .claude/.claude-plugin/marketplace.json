@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "gramax-internal",
+  "name": "gramax-plugin-internal-local",
   "description": "Внутренний CTO-инструментарий gramax-marketplace: PM/BA/SA/Dev/QA/Researcher/Tech-writer. Не для публичного distribution.",
   "owner": {
     "name": "mdemyanov",

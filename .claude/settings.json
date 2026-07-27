@@ -1,6 +1,6 @@
 {
   "extraKnownMarketplaces": {
-    "gramax-internal": {
+    "gramax-plugin-internal-local": {
       "source": {
         "source": "directory",
         "path": ".claude"
@@ -8,6 +8,6 @@
     }
   },
   "enabledPlugins": {
-    "project@gramax-internal": true
+    "project@gramax-plugin-internal-local": true
   }
 }
