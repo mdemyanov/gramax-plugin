@@ -1,0 +1,13 @@
+# tests/gramax/orphan-references/sunset-registry.txt
+# Реестр артефактов, удалённых из плагина. Один extended-regex на строку.
+# Строки, начинающиеся с #, и пустые — игнорируются.
+#
+# Правило (CLAUDE.md → Красные линии): удаляя skill или script, добавь сюда его имя.
+# Гейт tests/gramax/orphan-references/run.sh не даст остаточной ссылке дожить до коммита.
+#
+# 2026-05-11, ADR-0008 — удаление внутренних drawio-скиллов:
+drawio_convert
+find_doc_root
+save_diagram
+insert_diagram_ref
+validate_diagram_type
