@@ -1,13 +1,1 @@
-{
-  "extraKnownMarketplaces": {
-    "gramax-plugin-internal-local": {
-      "source": {
-        "source": "directory",
-        "path": ".claude"
-      }
-    }
-  },
-  "enabledPlugins": {
-    "project@gramax-plugin-internal-local": true
-  }
-}
+{}
