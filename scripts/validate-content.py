@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -250,7 +251,10 @@ def check_bloat(content_dir: Path, threshold: int = 40) -> list[Issue]:
 # kind: "path" — резолв относительно source.parent; "snippet_id" — резолв в
 # <content_dir>/.gramax/snippets/<raw_target>.md (спец-случай, §2 шаг7).
 _LINK_PATTERNS: list[tuple[str, re.Pattern]] = [
-    ("path", re.compile(r'!?\[[^\]]*\]\(([^)]+)\)')),          # #1/#2: markdown link/image
+    # #1/#2: markdown link/image. Классы отрицают \n намеренно: без этого на
+    # несбалансированной скобке (markdown-таблица, пример кода) матч убегает через
+    # несколько строк и подставляет мусор в сообщение об ошибке.
+    ("path", re.compile(r'!?\[[^\]\n]*\]\(([^)\n]+)\)')),      # #1/#2: markdown link/image
     ("path", re.compile(r'<mermaid\s+[^>]*?path="([^"]+)"')),   # #3
     ("path", re.compile(r'<image\s+[^>]*?src="([^"]+)"')),      # #4
     ("path", re.compile(r'<openapi\s+[^>]*?src="([^"]+)"')),    # #5
@@ -261,6 +265,45 @@ _LINK_PATTERNS: list[tuple[str, re.Pattern]] = [
 # Внешние цели (http/https/mailto/tel/protocol-relative //) — не сканируются, сети нет
 # (ADR-014 Д1/Д5, спека §1).
 _EXTERNAL_RE = re.compile(r'^(?:[a-z][a-z0-9+.\-]*:|//)', re.IGNORECASE)
+
+# Забор код-блока: до 3 пробелов отступа, затем >= 3 бэктиков или тильд, затем info-строка.
+_FENCE_RE = re.compile(r'^ {0,3}(`{3,}|~{3,})(.*)$')
+# Inline-код: пробег из N бэктиков, содержимое, закрывающий пробег той же длины. Намеренно
+# в пределах одной строки: непарный бэктик в прозе иначе съел бы всё до следующего бэктика
+# где-то ниже по файлу и замаскировал бы настоящие ссылки между ними.
+_INLINE_CODE_RE = re.compile(r'(`+)([^\n]+?)\1')
+
+
+def _mask_code(text: str) -> str:
+    """Заменяет код (fenced-блоки и inline) пробелами, сохраняя длину строк и их число.
+
+    Статья, документирующая синтаксис Gramax-тега, содержит примеры вида
+    `<mermaid path="./file.mermaid"/>` как иллюстрации, а не как ссылки. Без этой маски
+    C9 требует существования файла из примера (ложный error), а C10 засчитывает пример
+    markdown-ссылки входящей ссылкой и «отбеливает» настоящую статью-сироту.
+
+    Маскирование заменой, не вырезанием: смещения в тексте сохраняются, поэтому соседний
+    с блоком настоящий линк находится там же, где и до маски.
+    """
+    out: list[str] = []
+    fence_char: str | None = None
+    fence_len = 0
+    for line in text.split("\n"):
+        m = _FENCE_RE.match(line)
+        if fence_char is None:
+            if m:
+                fence_char, fence_len = m.group(1)[0], len(m.group(1))
+                out.append(" " * len(line))
+            else:
+                out.append(line)
+            continue
+        # Внутри блока: закрывает только забор того же символа, не короче открывающего и
+        # без info-строки. Вложенный забор короче внешнего остаётся содержимым.
+        if m and m.group(1)[0] == fence_char and len(m.group(1)) >= fence_len \
+                and not m.group(2).strip():
+            fence_char, fence_len = None, 0
+        out.append(" " * len(line))
+    return _INLINE_CODE_RE.sub(lambda m: " " * len(m.group(0)), "\n".join(out))
 
 
 @dataclass
@@ -277,12 +320,15 @@ def _collect_references(content_dir: Path) -> list[Reference]:
     Guard Д2: файлы с has_placeholder() == True пропускаются целиком — их исходящие
     ссылки не проверяются вовсе (ни error, ни warning). Файл остаётся видимым в C1-C8 и
     как ЦЕЛЬ входящих ссылок (C10) — guard касается только его СОБСТВЕННЫХ исходящих.
+
+    Код в тексте маскируется до применения паттернов (_mask_code): пример синтаксиса —
+    не ссылка ни для C9, ни для C10.
     """
     refs: list[Reference] = []
     for md_path in sorted(content_dir.rglob("*.md")):
         if has_placeholder(md_path):
             continue
-        text = md_path.read_text(encoding="utf-8")
+        text = _mask_code(md_path.read_text(encoding="utf-8"))
         for kind, pattern in _LINK_PATTERNS:
             for m in pattern.finditer(text):
                 raw_target = m.group(1)
@@ -483,6 +529,26 @@ def check_size_budget(content_dir: Path, doc_root: dict) -> list[Issue]:
     return issues
 
 
+GATES_FILENAME = ".nauta-gates.yaml"
+
+
+def _load_gates(content_dir: Path) -> tuple[dict, list[Issue]]:
+    """ADR-031: конфигурация гейтов шаблона из корня проекта.
+
+    Корень — родитель `content_dir`. Отсутствие файла и его нечитаемость
+    различаются явно, как в блоке чтения `.doc-root.yaml` (ADR-007 Д5):
+    нет файла -> ({}, []) — конфигурации нет, потребители законно тривиальны;
+    малформенный -> ({}, [error]) — «не смог прочитать» != «нарушений нет».
+    """
+    path = content_dir.parent / GATES_FILENAME
+    if not path.is_file():
+        return {}, []
+    try:
+        return parse_yaml_file(path) or {}, []
+    except MalformedYamlError as e:
+        return {}, [issue_from_yaml_error(e)]
+
+
 def check_type_content_declared(content_dir: Path) -> list[Issue]:
     """C12 (ADR-018 Д6, TPL-68): каждая не-_index.md статья обязана нести непустое свойство
     "Тип контента". Ловит класс, невидимый C3-C6: parse_frontmatter -> None для файла без
@@ -502,6 +568,208 @@ def check_type_content_declared(content_dir: Path) -> list[Issue]:
                 'статья не объявляет непустое свойство "Тип контента" '
                 '(properties: - name: Тип контента / value: [...]) -- TPL-68, ADR-018 Д6'))
     return issues
+
+
+# ===== C13/C14: гейт объёма кода (.py/.groovy) и корневого промт-слоя (ADR-032, PT-EPIC-27) ====
+
+GIT_OK, GIT_NO_BINARY, GIT_NO_REPO = "ok", "no-binary", "no-repo"
+
+
+class _GitUnavailable(Exception):
+    """git отсутствует в PATH -- поднимается `_git_ls_files`, перехватывается
+    `check_code_size_budget` и превращается в громкий Issue(error) (ADR-007 Д1: "не
+    смог проверить" != "0 нарушений"), не в тихий []."""
+
+
+def _git_probe(repo_root: Path) -> str:
+    """ADR-032-spec §3.1, симметрично `check-status-drift.py::_git_probe`. Три исхода:
+    GIT_OK -- рабочее дерево git; GIT_NO_REPO -- команда завершилась ошибкой (не рабочее
+    дерево, напр. SNAP_DIR publish-public.sh, `git archive | tar -x`, без `.git`);
+    GIT_NO_BINARY -- сам `git` не найден в PATH."""
+    try:
+        subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "--is-inside-work-tree"],
+            check=True, capture_output=True,
+        )
+    except FileNotFoundError:
+        return GIT_NO_BINARY
+    except subprocess.CalledProcessError:
+        return GIT_NO_REPO
+    return GIT_OK
+
+
+def _git_ls_files(repo_root: Path, patterns: list[str]) -> list[str] | None:
+    """`git ls-files`, не `Path.rglob` (Д3 ADR-032 -- та же tracked-популяция, что
+    измеряла RES-030; `.gitignore`-исключения наследуются даром). None -- GIT_NO_REPO,
+    легитимный тихий skip (тот же посадочный принцип, что `_load_gates` на отсутствующем
+    `.nauta-gates.yaml`, ADR-031 Д3). GIT_NO_BINARY поднимается как исключение --
+    вызывающая сторона решает, во что его превратить (не «0 нарушений»)."""
+    probe = _git_probe(repo_root)
+    if probe == GIT_NO_REPO:
+        return None
+    if probe == GIT_NO_BINARY:
+        raise _GitUnavailable()
+    r = subprocess.run(
+        ["git", "-C", str(repo_root), "ls-files", "--"] + patterns,
+        capture_output=True, text=True, check=True,
+    )
+    return [ln for ln in r.stdout.splitlines() if ln]
+
+
+# RES-030 §B буквально, с исправлением (ADR-032 §7): FR-002 BA-048 транскрипционно
+# потеряла пятую альтернативу Groovy `^public class ` при переносе из RES-030 -- её
+# потеря сливает соседние сегменты в один длиннее (риск в сторону БЛОКА, не тихого
+# прохода), не наоборот.
+PY_DECL_RE = re.compile(r'^(?:class |def |async def )')
+GROOVY_DECL_RE = re.compile(r'^(?:class |abstract class |final class |public class |def )')
+
+
+def _longest_declaration_or_file(body: str, decl_re: re.Pattern) -> int:
+    """FR-002 BA-048: анкеры -- строки без отступа, начинающиеся с шаблона декларации.
+    Длина самого длинного сегмента между соседними анкерами (и от последнего анкера до
+    EOF). Ноль анкеров (script-style, 42% Groovy-корпуса RES-030) -- декларация := длина
+    файла целиком: "класс и файл -- один и тот же объект" (FR-002, AC-003)."""
+    lines = body.splitlines()
+    anchors = [i for i, ln in enumerate(lines) if decl_re.match(ln)]
+    if not anchors:
+        return len(lines)
+    anchors.append(len(lines))
+    return max(b - a for a, b in zip(anchors, anchors[1:]))
+
+
+# FR-004 BA-048, буквально -- `tests`/`test`-сегмент пути ИЛИ имя матчит один из 4
+# суффиксных паттернов (`*Spec.*` -- Spock-конвенция Groovy).
+_TEST_NAME_RE = (
+    re.compile(r'^test_'),         # test_*
+    re.compile(r'_test\.[^.]+$'),  # *_test.ext
+    re.compile(r'Test\.[^.]+$'),   # *Test.ext
+    re.compile(r'Spec\.[^.]+$'),   # *Spec.ext (Spock, Groovy)
+)
+
+
+def _is_test_file(rel_posix: str) -> bool:
+    parts = rel_posix.split("/")
+    if any(seg in ("tests", "test") for seg in parts[:-1]):
+        return True
+    name = parts[-1]
+    return any(p.search(name) for p in _TEST_NAME_RE)
+
+
+def check_code_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
+    """C13 (ADR-032): пара "строки файла + длиннейшая top-level декларация" для
+    `.py`/`.groovy`, тот же контракт BR-004, что уже несёт C11 для content/. Перечисление
+    файлов -- `git ls-files` (Д3), не `Path.rglob`. Отсутствие `codeSizeBudgets` в
+    конфигурации -- легитимный тихий skip (симметрично C11)."""
+    entries = {
+        (b["extension"], b["kind"]): b
+        for b in (gates.get("codeSizeBudgets") or [])
+        if isinstance(b, dict) and b.get("extension") and b.get("kind")
+           and b.get("thresholdLines") is not None
+    }
+    if not entries:
+        return []
+    extensions = sorted({ext for ext, _ in entries})
+    try:
+        files = _git_ls_files(repo_root, [f"*{e}" for e in extensions])
+    except _GitUnavailable:
+        return [Issue("error", str(repo_root),
+            "git недоступен в PATH -- код-гейт (C13) не проверен, это НЕ \"0 нарушений\" "
+            "(ADR-007 Д1)")]
+    if files is None:  # GIT_NO_REPO -- напр. SNAP_DIR publish-public.sh (git archive, без .git)
+        return []
+    grandfathered = {
+        g["path"]: g["ceiling"] for g in (gates.get("sizeBudgetGrandfathered") or [])
+        if isinstance(g, dict) and "path" in g and "ceiling" in g
+    }
+    issues = []
+    for rel in files:
+        ext = "." + rel.rsplit(".", 1)[-1] if "." in rel else ""
+        kind = "test" if _is_test_file(rel) else "prod"
+        budget = entries.get((ext, kind))
+        if budget is None:
+            continue  # расширение/kind без записи -- не гейтится (FR-006, напр. .sh)
+        path = repo_root / rel
+        try:
+            raw = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue  # нечитаемый файл -- тихий skip, не выдумываем сигнал (Д4 ADR-032)
+        lines = raw.count("\n")
+        threshold = budget["thresholdLines"]
+        if lines <= threshold:
+            continue  # BR-003/BR-004: количественный признак не сработал
+        decl_re = PY_DECL_RE if ext == ".py" else GROOVY_DECL_RE
+        decl_len = _longest_declaration_or_file(raw, decl_re)
+        decl_threshold = budget["qualityThreshold"]
+        if decl_len < decl_threshold:
+            continue  # тихий проход -- контейнер (BR-003, пример: validate-profile.py)
+        ceiling = grandfathered.get(rel)
+        severity = budget.get("severity", "block")
+        level = "error" if severity == "block" else "warning"
+        if ceiling is not None:
+            if lines <= ceiling:
+                issues.append(Issue("warning", str(path),
+                    f"грандфазер: {lines} строк <= замороженного потолка {ceiling} "
+                    f"({rel}, ADR-032 Д7, ADR-018 Д5) -- не блокирует"))
+            else:
+                issues.append(Issue("error", str(path),
+                    f"грандфазер-потолок превышен: {lines} строк > {ceiling} ({rel}). "
+                    f"Разбей декларацию, верни рост, или подними ceiling явной правкой "
+                    f"sizeBudgetGrandfathered в этом же коммите (ADR-032 Д7, ADR-018 Д5)."))
+            continue
+        issues.append(Issue(level, str(path),
+            f"{rel}: {lines} строк ({kind}) > T={threshold}, самая длинная top-level "
+            f"декларация -- {decl_len} строк >= T_S={decl_threshold}. Разбей декларацию на "
+            f"части, либо заведи sizeBudgetGrandfathered-запись (path: \"{rel}\") тем же "
+            f"коммитом (ADR-032, ADR-018 Д5)."))
+    return issues
+
+
+PROMPT_LAYER_GRANDFATHER_KEY = "CLAUDE.md+AGENTS.md"
+PROMPT_LAYER_FILES = ("CLAUDE.md", "AGENTS.md")
+
+
+def check_prompt_layer_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
+    """C14 (ADR-032): корневой промт-слой -- СУММА строк `CLAUDE.md`+`AGENTS.md`, один
+    количественный признак без пары (FR-008 -- контекстное окно тратится на длину
+    независимо от структуры, второй признак здесь нечего страховать). Отсутствующий файл
+    пары даёт 0 к сумме (FR-007), не ошибку. Не читает git вовсе (Д8 ADR-032) -- ловит
+    рост промт-слоя и на снапшоте `publish-public.sh` без `.git`."""
+    budget = gates.get("promptLayerSizeBudget")
+    if not isinstance(budget, dict) or budget.get("thresholdLines") is None:
+        return []
+    counts = {}
+    for name in PROMPT_LAYER_FILES:
+        p = repo_root / name
+        try:
+            counts[name] = p.read_text(encoding="utf-8").count("\n") if p.is_file() else 0
+        except (OSError, UnicodeDecodeError):
+            counts[name] = 0  # нечитаемый -- 0 к сумме, симметрично отсутствующему (FR-007)
+    total = sum(counts.values())
+    threshold = budget["thresholdLines"]
+    if total <= threshold:
+        return []
+    grandfathered = {
+        g["path"]: g["ceiling"] for g in (gates.get("sizeBudgetGrandfathered") or [])
+        if isinstance(g, dict) and "path" in g and "ceiling" in g
+    }
+    ceiling = grandfathered.get(PROMPT_LAYER_GRANDFATHER_KEY)
+    severity = budget.get("severity", "block")
+    level = "error" if severity == "block" else "warning"
+    detail = "+".join(f"{n}={c}" for n, c in counts.items())
+    if ceiling is not None:
+        if total <= ceiling:
+            return [Issue("warning", PROMPT_LAYER_GRANDFATHER_KEY,
+                f"грандфазер: сумма {total} ({detail}) <= замороженного потолка {ceiling} "
+                f"(ADR-032 Д7) -- не блокирует")]
+        return [Issue("error", PROMPT_LAYER_GRANDFATHER_KEY,
+            f"грандфазер-потолок превышен: сумма {total} ({detail}) > {ceiling}. Сократи "
+            f"объём одного из файлов, верни рост, или подними ceiling явной правкой "
+            f"sizeBudgetGrandfathered (path: \"{PROMPT_LAYER_GRANDFATHER_KEY}\") тем же "
+            f"коммитом (ADR-032 Д7).")]
+    return [Issue(level, PROMPT_LAYER_GRANDFATHER_KEY,
+        f"сумма строк {detail} = {total} > T={threshold} (корневой промт-слой, FR-008). "
+        f"Сократи объём одного из файлов, либо заведи sizeBudgetGrandfathered-запись "
+        f"(path: \"{PROMPT_LAYER_GRANDFATHER_KEY}\") тем же коммитом (ADR-032).")]
 
 
 def main(argv: list[str]) -> int:
@@ -536,7 +804,16 @@ def main(argv: list[str]) -> int:
         issues.extend(check_property_names(content_dir, doc_root))
         issues.extend(check_property_values(content_dir, doc_root))
         issues.extend(check_filter_coverage(content_dir, doc_root))
-        issues.extend(check_size_budget(content_dir, doc_root))       # C11, новое (ADR-018)
+    # C11 (ADR-018) переехал на собственный носитель (ADR-031): .doc-root.yaml
+    # принадлежит Gramax и конфигурацию шаблона больше не несёт.
+    gates, gates_issues = _load_gates(content_dir)
+    issues.extend(gates_issues)
+    issues.extend(check_size_budget(content_dir, gates))
+    # repo_root -- уже установленная конвенция _load_gates (ADR-031 Д1), C13/C14
+    # переиспользуют тот же якорь, не вводят второй способ найти корень (ADR-032 §5).
+    repo_root = content_dir.parent
+    issues.extend(check_code_size_budget(repo_root, gates))          # C13, новое (ADR-032)
+    issues.extend(check_prompt_layer_size_budget(repo_root, gates))  # C14, новое (ADR-032)
     issues.extend(check_placeholders(content_dir))
     issues.extend(check_doc_root_placeholders(content_dir))
     issues.extend(check_type_content_declared(content_dir))          # C12, новое (ADR-018 Д6)
