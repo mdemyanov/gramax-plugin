@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-file-based/ac-005-default-width-height-values.sh
 # Spec: docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md
-# ADR:  docs/adr/0010-mermaid-file-based-workflow.md (Решение 5)
+# ADR:  content/00-project/adr/0010-mermaid-file-based-workflow.md (Решение 5)
 # AC coverage:
 #   AC-005 → тег в md использует дефолты width="800px" height="450px",
 #             если пользователь не задал явно

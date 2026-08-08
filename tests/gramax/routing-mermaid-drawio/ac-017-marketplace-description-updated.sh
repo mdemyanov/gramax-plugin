@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-017-marketplace-description-updated.sh
 # Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
-# ADR: docs/adr/0009-drawio-stub-and-claude-mermaid-removal.md (пункт 6 списка изменений)
+# ADR: content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md (пункт 6 списка изменений)
 # AC coverage:
 #   Sunset pattern: metadata.description в marketplace.json НЕ упоминает claude-mermaid
 #                   (должно быть заменено на актуальное описание с drawio skill)

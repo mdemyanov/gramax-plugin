@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # AC-005: drawio LLM-XML → drawio_convert.py → .svg с embedded content= атрибутом
 # Spec: docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md (AC-004, FR-002, FR-009)
-# ADR: docs/adr/0005-save-flow-script-api-contract.md (раздел 4-5: атомарная запись и drawio_convert.py)
+# ADR: content/00-project/adr/0005-save-flow-script-api-contract.md (раздел 4-5: атомарная запись и drawio_convert.py)
 # Status: FAILING (TDD stub — Dev должен сделать зелёным)
 #
 # Coverage:

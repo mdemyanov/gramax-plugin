@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # AC-012: невалидный mxfile XML → drawio_convert.py exit != 0, файл не создан
 # Spec: docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md (AC-012, FR-009)
-# ADR: docs/adr/0005-save-flow-script-api-contract.md (раздел 4: ошибка конвертации)
+# ADR: content/00-project/adr/0005-save-flow-script-api-contract.md (раздел 4: ошибка конвертации)
 # Status: FAILING (TDD stub — Dev должен сделать зелёным)
 #
 # Coverage:

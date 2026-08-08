@@ -2,7 +2,7 @@
 # tests/gramax/mermaid-file-based/run.sh
 # Aggregator: запускает все ac-*.sh тесты, выводит PASS/FAIL по каждому.
 # Spec: docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md
-# ADR:  docs/adr/0010-mermaid-file-based-workflow.md
+# ADR:  content/00-project/adr/0010-mermaid-file-based-workflow.md
 #
 # Usage (из корня репозитория):
 #   bash tests/gramax/mermaid-file-based/run.sh

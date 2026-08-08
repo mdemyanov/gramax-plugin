@@ -49,7 +49,7 @@ Breaking change. Mermaid skill переведён с inline-workflow на file-b
 
 ### ADR
 
-- ADR-0010 (новый) — обоснование file-based workflow, naming convention, major bump 4.0.0, backward-compat scope, валидация DSL через checklist. Документ: `docs/adr/0010-mermaid-file-based-workflow.md`.
+- ADR-0010 (новый) — обоснование file-based workflow, naming convention, major bump 4.0.0, backward-compat scope, валидация DSL через checklist. Документ: `content/00-project/adr/0010-mermaid-file-based-workflow.md`.
 - Частично supersedes ADR-0009 в части поведения mermaid skill (inline → file-based).
 
 ### Backward compatibility
@@ -93,7 +93,7 @@ Breaking change. Устранена путаница в роутинге диа�
 5. При неявном запросе («нарисуй диаграмму» без указания движка) `gramax:mermaid` задаст уточняющий вопрос. Для детерминированного выбора — указывай движок явно в запросе. Подробнее — в `plugins/gramax/skills/mermaid/SKILL.md` (секция «Fallback при ambiguous-request»).
 
 ### ADR
-- ADR-0009 (новый) — обоснование удаления `claude-mermaid`, добавления `gramax:drawio`, keyword-стратегия description, процедура `git submodule deinit`. Документ: `docs/adr/0009-drawio-stub-and-claude-mermaid-removal.md`.
+- ADR-0009 (новый) — обоснование удаления `claude-mermaid`, добавления `gramax:drawio`, keyword-стратегия description, процедура `git submodule deinit`. Документ: `content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md`.
 - ADR-0008 остаётся Active — ADR-0009 дополняет его, не отменяет.
 
 ### Backward compatibility

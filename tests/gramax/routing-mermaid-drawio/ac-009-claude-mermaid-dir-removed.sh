@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-009-claude-mermaid-dir-removed.sh
 # Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
-# ADR: docs/adr/0009-drawio-stub-and-claude-mermaid-removal.md (Решение 2)
+# ADR: content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md (Решение 2)
 # AC coverage:
 #   AC-010/FR-008 → plugins/claude-mermaid/ не существует физически (или пуст)
 #

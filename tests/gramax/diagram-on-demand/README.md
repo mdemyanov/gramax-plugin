@@ -105,5 +105,5 @@ tests/gramax/diagram-on-demand/
 ## Связанные документы
 
 - Spec: `docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md`
-- ADR-0001: `docs/adr/0001-diagram-on-demand-plugin-split.md`
-- ADR-0005: `docs/adr/0005-save-flow-script-api-contract.md`
+- ADR-0001: `content/00-project/adr/0001-diagram-on-demand-plugin-split.md`
+- ADR-0005: `content/00-project/adr/0005-save-flow-script-api-contract.md`

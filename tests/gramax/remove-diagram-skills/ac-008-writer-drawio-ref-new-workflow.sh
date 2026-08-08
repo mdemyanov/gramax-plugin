@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-008-writer-drawio-ref-new-workflow.sh
 # Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
-# ADR: docs/adr/0008-drop-internal-drawio-skills.md Решение 4
+# ADR: content/00-project/adr/0008-drop-internal-drawio-skills.md Решение 4
 # AC coverage:
 #   AC-008 → writer/references/drawio.md содержит обязательные секции нового workflow
 #            (Prerequisites, draw.io desktop, Python 3, Agents365-ai install commands,

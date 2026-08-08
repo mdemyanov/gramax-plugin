@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-file-based/ac-008-no-silent-overwrite.sh
 # Spec: docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md
-# ADR:  docs/adr/0010-mermaid-file-based-workflow.md (NFR-001, FR-004, Решение 2 — Обработка коллизии)
+# ADR:  content/00-project/adr/0010-mermaid-file-based-workflow.md (NFR-001, FR-004, Решение 2 — Обработка коллизии)
 # AC coverage:
 #   AC-008 → идемпотентность: если .mermaid-файл уже существует, skill не перезаписывает
 #             без явного подтверждения; содержимое файла остаётся неизменным

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-012-marketplace-json-updated.sh
 # Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
-# ADR: docs/adr/0008-drop-internal-drawio-skills.md Решение 7
+# ADR: content/00-project/adr/0008-drop-internal-drawio-skills.md Решение 7
 # AC coverage:
 #   AC-012 → .claude-plugin/marketplace.json:
 #             metadata.version = "2.0.0"

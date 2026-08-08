@@ -9,7 +9,7 @@ to version 3.0.0 (breaking change).
 ## Spec and ADR
 
 - Spec: `docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md` (AC-001..AC-015)
-- ADR: `docs/adr/0009-drawio-stub-and-claude-mermaid-removal.md`
+- ADR: `content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md`
 
 ## AC to test mapping
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # AC-006: нет .doc-root.yaml → fallback Markdown-синтаксис + [WARN] в stdout
 # Spec: docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md (AC-006, FR-006)
-# ADR: docs/adr/0005-save-flow-script-api-contract.md (раздел 1: fallback при exit 1)
+# ADR: content/00-project/adr/0005-save-flow-script-api-contract.md (раздел 1: fallback при exit 1)
 # Status: FAILING (TDD stub — Dev должен сделать зелёным)
 #
 # Coverage:

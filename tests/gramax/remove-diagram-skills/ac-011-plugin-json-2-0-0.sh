@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-011-plugin-json-2-0-0.sh
 # Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
-# ADR: docs/adr/0008-drop-internal-drawio-skills.md Решение 1
+# ADR: content/00-project/adr/0008-drop-internal-drawio-skills.md Решение 1
 # AC coverage:
 #   AC-011 → plugins/gramax/.claude-plugin/plugin.json содержит "version": "2.0.0"
 #             description не содержит diagram-on-demand, /gramax:diagrams как skills

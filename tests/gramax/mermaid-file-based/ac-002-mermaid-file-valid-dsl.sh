@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-file-based/ac-002-mermaid-file-valid-dsl.sh
 # Spec: docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md
-# ADR:  docs/adr/0010-mermaid-file-based-workflow.md
+# ADR:  content/00-project/adr/0010-mermaid-file-based-workflow.md
 # AC coverage:
 #   AC-002 → первая строка .mermaid-файла — один из 8 поддерживаемых типов Gramax
 #

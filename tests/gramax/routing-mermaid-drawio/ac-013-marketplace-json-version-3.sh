@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-013-marketplace-json-version-3.sh
 # Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
-# ADR: docs/adr/0009-drawio-stub-and-claude-mermaid-removal.md (Решение 3)
+# ADR: content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md (Решение 3)
 # AC coverage:
 #   AC-012 (marketplace side) / FR-010 → .claude-plugin/marketplace.json — metadata.version == "3.0.0"
 #   (Both plugin.json and marketplace.json must be bumped synchronously — ADR-0006)
