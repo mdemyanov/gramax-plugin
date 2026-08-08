@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-014-mermaid-description-updated.sh
-# Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
+# Spec: content/30-requirements/2026-05-11-remove-diagram-skills.md
 # ADR: content/00-project/adr/0008-drop-internal-drawio-skills.md Решение 5
 # AC coverage:
 #   AC-014 → plugins/gramax/skills/mermaid/SKILL.md description в frontmatter:

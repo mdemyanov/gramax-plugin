@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-012-plugin-json-version-3.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # ADR: content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md (Решение 3)
 # AC coverage:
 #   AC-012/FR-009 → plugins/gramax/.claude-plugin/plugin.json — .version == "3.0.0"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-file-based/ac-010-no-list-syntax-in-dsl.sh
-# Spec: docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md
+# Spec: content/30-requirements/2026-05-12-mermaid-file-based-design.md
 # ADR:  content/00-project/adr/0010-mermaid-file-based-workflow.md (Решение 4)
 # AC coverage:
 #   AC-010 → DSL в .mermaid-файле не содержит паттерн "число. пробел" (list-syntax conflict)

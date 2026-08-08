@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-002-skill-diagrams-removed.sh
-# Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
+# Spec: content/30-requirements/2026-05-11-remove-diagram-skills.md
 # AC coverage:
 #   AC-002 → каталог plugins/gramax/skills/diagrams/ не существует
 #

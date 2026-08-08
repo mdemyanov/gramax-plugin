@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-003-drawio-description-install-hint.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # AC coverage:
 #   AC-004/FR-004 → description или body skill'а упоминает «Agents365-ai/drawio-skill» или
 #                   «Agents365-ai/365-skills» как инструкцию по установке внешнего плагина

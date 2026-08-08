@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-010-readme-no-removed-skills.sh
-# Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
+# Spec: content/30-requirements/2026-05-11-remove-diagram-skills.md
 # AC coverage:
 #   AC-010 → plugins/gramax/README.md не упоминает diagram-on-demand и /gramax:diagrams
 #             как доступные skills пользователю

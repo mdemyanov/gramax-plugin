@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-016-no-orphan-references.sh
-# Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
+# Spec: content/30-requirements/2026-05-11-remove-diagram-skills.md
 # ADR: content/00-project/adr/0008-drop-internal-drawio-skills.md (Контракт с QA-author: edge cases)
 # AC coverage:
 #   AC-016 → ни один оставшийся файл плагина не ссылается на удалённые скрипты:

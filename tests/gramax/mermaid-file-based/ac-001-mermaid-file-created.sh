@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-file-based/ac-001-mermaid-file-created.sh
-# Spec: docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md
+# Spec: content/30-requirements/2026-05-12-mermaid-file-based-design.md
 # ADR:  content/00-project/adr/0010-mermaid-file-based-workflow.md
 # AC coverage:
 #   AC-001 → .mermaid-файл создаётся в той же директории, что и target_page

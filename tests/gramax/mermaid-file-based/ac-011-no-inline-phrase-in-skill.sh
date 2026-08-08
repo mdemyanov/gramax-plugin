@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-file-based/ac-011-no-inline-phrase-in-skill.sh
-# Spec: docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md
+# Spec: content/30-requirements/2026-05-12-mermaid-file-based-design.md
 # ADR:  content/00-project/adr/0010-mermaid-file-based-workflow.md (Бриф для Dev, п.1 — fallback-диалог)
 # AC coverage:
 #   AC-011 → fallback-диалог в SKILL.md не содержит фразу «inline DSL, без файла»

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/run-all.sh
 # Aggregator: runs all ac-*.sh tests, prints summary, returns non-zero if any failed.
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # ADR: content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md
 #
 # Usage (from repo root or worktree root):

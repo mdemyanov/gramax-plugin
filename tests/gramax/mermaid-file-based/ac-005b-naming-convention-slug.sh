@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-file-based/ac-005b-naming-convention-slug.sh
-# Spec: docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md
+# Spec: content/30-requirements/2026-05-12-mermaid-file-based-design.md
 # ADR:  content/00-project/adr/0010-mermaid-file-based-workflow.md (Решение 2)
 # AC coverage:
 #   AC-005 (naming convention) → имя .mermaid-файла соответствует конвенции:

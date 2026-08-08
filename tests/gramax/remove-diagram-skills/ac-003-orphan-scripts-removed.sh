@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-003-orphan-scripts-removed.sh
-# Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
+# Spec: content/30-requirements/2026-05-11-remove-diagram-skills.md
 # AC coverage:
 #   AC-003 → четыре скрипта-сироты отсутствуют в plugins/gramax/scripts/
 #            find_doc_root.sh, save_diagram.sh, insert_diagram_ref.sh, validate_diagram_type.sh

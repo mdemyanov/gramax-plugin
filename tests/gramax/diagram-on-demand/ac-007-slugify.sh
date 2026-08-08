@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # AC-007: кириллица в имени файла → slugify.py возвращает ASCII-only slug
-# Spec: docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md (AC-007, FR-008)
+# Spec: content/30-requirements/2026-05-08-diagram-on-demand-design.md (AC-007, FR-008)
 # ADR: content/00-project/adr/0005-save-flow-script-api-contract.md (раздел 2: slugify.py контракт)
 # Status: FAILING (TDD stub — Dev должен сделать зелёным)
 #

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # AC-011: существующий файл → [WARN] в stdout, перезапись не выполняется без --force
-# Spec: docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md (AC-010, FR-007)
+# Spec: content/30-requirements/2026-05-08-diagram-on-demand-design.md (AC-010, FR-007)
 # ADR: content/00-project/adr/0005-save-flow-script-api-contract.md (раздел 3: проверка существующего файла)
 # Status: FAILING (TDD stub — Dev должен сделать зелёным)
 #

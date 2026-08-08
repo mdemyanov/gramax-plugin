@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # AC-008: gitGraph/journey/requirementDiagram/C4Context → [WARN] с подсказкой, файлы не создаются
-# Spec: docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md (AC-003, FR-005)
+# Spec: content/30-requirements/2026-05-08-diagram-on-demand-design.md (AC-003, FR-005)
 # ADR: n/a (логика skill-промпта)
 # Status: FAILING (TDD stub — Dev должен сделать зелёным)
 #

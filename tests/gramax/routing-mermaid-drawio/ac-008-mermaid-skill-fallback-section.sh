@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-008-mermaid-skill-fallback-section.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # ADR: content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md (Решение 1, Решение 6)
 # AC coverage:
 #   AC-008/FR-006 → body mermaid/SKILL.md содержит секцию про уточняющий вопрос

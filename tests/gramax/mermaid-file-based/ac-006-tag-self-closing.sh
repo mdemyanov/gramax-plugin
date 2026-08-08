@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-file-based/ac-006-tag-self-closing.sh
-# Spec: docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md
+# Spec: content/30-requirements/2026-05-12-mermaid-file-based-design.md
 # ADR:  content/00-project/adr/0010-mermaid-file-based-workflow.md
 # AC coverage:
 #   AC-006 → тег в md является самозакрывающимся (без содержимого между тегами)

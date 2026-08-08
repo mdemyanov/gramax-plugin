@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-004-drawio-skill-workflow-section.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # AC coverage:
 #   AC-005/FR-005 → body содержит секцию про двухшаговый workflow:
 #                   drawio-skill создаёт .svg → writer-skill вставляет тег

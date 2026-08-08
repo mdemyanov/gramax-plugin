@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-011-marketplace-no-claude-mermaid.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # AC coverage:
 #   AC-011/FR-010 → .claude-plugin/marketplace.json — массив «plugins» не содержит
 #                   элемент с name == "claude-mermaid"
