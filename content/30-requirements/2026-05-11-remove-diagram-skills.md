@@ -3,6 +3,13 @@ title: Удаление diagram-on-demand и diagrams, переход на вн�
 status: draft
 date: 2026-05-11
 plugin: gramax
+properties:
+  - name: Тип контента
+    value: [Требование]
+  - name: Статус
+    value: [Done]
+  - name: Плагин
+    value: [gramax]
 ---
 
 # Удаление diagram-on-demand и diagrams, переход на внешний drawio-skill

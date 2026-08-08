@@ -3,6 +3,13 @@ title: Diagram on Demand
 status: draft
 date: 2026-05-08
 plugin: diagram-mermaid / diagram-drawio
+properties:
+  - name: Тип контента
+    value: [Требование]
+  - name: Статус
+    value: [Superseded]
+  - name: Плагин
+    value: [gramax]
 ---
 
 # Diagram on Demand

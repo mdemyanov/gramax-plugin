@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [Research]
+  - name: Статус
+    value: [Done]
+  - name: Плагин
+    value: [gramax]
+---
+
 # RES-001: Agents365-ai/drawio-skill
 
 Дата: 2026-05-11

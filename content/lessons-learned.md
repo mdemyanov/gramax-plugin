@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [Урок]
+  - name: Статус
+    value: [Active]
+  - name: Плагин
+    value: [gramax, marketplace]
+---
+
 # Lessons Learned — gramax marketplace
 
 > Append-only журнал. Каждая запись — короткий урок из реальной работы (фича, bug, surprise). Формат: `## YYYY-MM-DD — <тема>`, далее 3-5 строк: контекст / что узнали / как теперь делаем.

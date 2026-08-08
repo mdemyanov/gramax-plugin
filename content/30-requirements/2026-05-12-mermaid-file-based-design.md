@@ -3,6 +3,13 @@ feature: mermaid-file-based
 plugin: gramax
 status: draft
 created: 2026-05-12
+properties:
+  - name: Тип контента
+    value: [Требование]
+  - name: Статус
+    value: [Done]
+  - name: Плагин
+    value: [gramax]
 ---
 
 # Mermaid skill — file-based workflow
