@@ -4,7 +4,7 @@
 # доставлен через /nauta:sync-scripts, обновляется тем же каналом.
 #
 # Modes:
-#   --fast   : whitespace + JSON validity + validate-content.py (для pre-commit hook)
+#   --fast   : whitespace + JSON validity + validate-content.py (uv обязателен; для pre-commit hook)
 #   --full   : --fast + shellcheck (если установлен) + проверка submodule status
 #
 # Exit codes:
@@ -56,7 +56,8 @@ if [ -d content ]; then
       echo "OK: content validated"
     fi
   else
-    echo "WARN: uv not installed — skipping content validation"
+    echo "FAIL: uv not installed — content/ validation not performed (install: https://docs.astral.sh/uv/)"
+    FAILED=1
   fi
 else
   echo "OK: no content/ directory"
