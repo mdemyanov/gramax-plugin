@@ -16,8 +16,10 @@
 | `/nauta:tech-writer` | Tech-writer | subagent (Sonnet) | README, CHANGELOG, marketplace descriptions |
 | `/nauta:devsecops` | DevSecOps (opt-in) | subagent (Sonnet) | Secrets sweep перед публичным релизом |
 
-Роли приходят из плагина `nauta` (user-scope, `nauta@nauta`). Собственных агентов
-репозиторий не держит. Полная матрица и контракт вызова — в **AGENTS.md**.
+Роли приходят из плагина `nauta` — marketplace закреплён в `~/.claude/settings.json`
+(`ref: v0.3.1`), а включение локальное: через `.claude/settings.local.json`, который
+не входит в репозиторий. Собственных агентов репозиторий не держит. Полная матрица
+и контракт вызова — в **AGENTS.md**.
 
 ## Контекст проекта
 
@@ -54,7 +56,7 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 
 ## Поток работы
 
-Канонический порядок новой фичи: **Researcher (опц.) → BA (spec) → SA (ADR при нетривиальной фиче) → Dev (TDD) → QA → Tech-writer (docs)**. PM координирует, `/pm-review` валидирует перед merge.
+Канонический порядок новой фичи: **Researcher (опц.) → BA (spec) → SA (ADR при нетривиальной фиче) → Dev (TDD) → QA → Tech-writer (docs)**. PM координирует, `/nauta:pm-review` валидирует перед merge.
 
 Ветвление: `main` — единственная ветка, в которую вливаются PR. Feature-ветки опциональны, через worktree (`superpowers:using-git-worktrees`).
 
@@ -74,7 +76,7 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 
 - НЕ публиковать секреты (`.env`, токены, API-ключи, credentials).
 - НЕ менять `.claude-plugin/marketplace.json` (корневой, публичный) без ADR. Это договор с пользователями.
-- НЕ принимать `/dev`-задачи без артефакта SA (для нетривиальных фич — обязателен ADR).
+- НЕ принимать `/nauta:dev`-задачи без артефакта SA (для нетривиальных фич — обязателен ADR).
 - НЕ ломать обратную совместимость skill-имён в `plugins/gramax/skills/` без bump major-версии в `plugins/gramax/CHANGELOG.md` + анонс в основном CHANGELOG.
 - Tests/линтеры (если в проекте есть) — зелёные перед commit.
 - НЕ коммитить с `--no-verify` без явного разрешения.

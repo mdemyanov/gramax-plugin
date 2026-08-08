@@ -55,17 +55,17 @@ nauta только три вообще упоминают `CLAUDE.md`, и то �
 
 Researcher (опц.) → BA → SA (для нетривиальных фич) → QA-author (failing stubs) → Dev (TDD) → QA-runner → BA-acceptance gate → Tech-writer (docs).
 
-PM координирует на каждом этапе: приоритизирует, разрешает блокеры, запускает `/pm-review` перед merge.
+PM координирует на каждом этапе: приоритизирует, разрешает блокеры, запускает `/nauta:pm-review` перед merge.
 
 ## Branch strategy
 
-`main` — единственная trunk-ветка. Feature-ветки опциональны (через worktree из `superpowers:using-git-worktrees`); merge через PR с прошедшим `/pm-review`.
+`main` — единственная trunk-ветка. Feature-ветки опциональны (через worktree из `superpowers:using-git-worktrees`); merge через PR с прошедшим `/nauta:pm-review`.
 
 ## Self-improvement
 
-- `docs/lessons-learned.md` — append-only журнал.
+- `content/lessons-learned.md` — append-only журнал.
 - Субагенты сохраняют находки в auto-memory (типы: `reference`, `project`, `feedback`).
-- `/pm-review` читает lessons + memory и предлагает обновления `CLAUDE.md` / промтов агентов.
+- `/nauta:pm-review` читает lessons + memory и предлагает обновления `CLAUDE.md` / промтов агентов.
 
 ## Красные линии (универсальные)
 
@@ -73,6 +73,6 @@ PM координирует на каждом этапе: приоритизир
 - НЕ включать PII (реальные имена, контакты, персональные данные).
 - НЕ менять корневой `.claude-plugin/marketplace.json` (публичный) без ADR.
 - НЕ добавлять vendored submodule без ADR (vendored-плагины удаляются через ADR, см. content/00-project/adr/).
-- НЕ принимать задачи `/dev` без артефакта SA для нетривиальных фич.
+- НЕ принимать задачи `/nauta:dev` без артефакта SA для нетривиальных фич.
 - НЕ передавать тесты из Dev в qa-runner до прохождения qa-author stub'ов (TDD-цепочка).
 - Tests/линтеры (если есть) — зелёные перед commit.
