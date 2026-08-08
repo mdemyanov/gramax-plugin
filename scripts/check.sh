@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # scripts/check.sh — light pre-commit/pre-merge gate для gramax-marketplace.
-# Без content/-валидаторов (нет content/), без profile-валидаторов (нет профилей).
+# Без profile-валидаторов (профилей нет). Валидатор content/ — из nauta,
+# доставлен через /nauta:sync-scripts, обновляется тем же каналом.
 #
 # Modes:
-#   --fast   : whitespace + JSON validity (для pre-commit hook)
+#   --fast   : whitespace + JSON validity + validate-content.py (для pre-commit hook)
 #   --full   : --fast + shellcheck (если установлен) + проверка submodule status
 #
 # Exit codes:
@@ -42,6 +43,23 @@ if [ -n "$JSON_FILES" ]; then
   echo "OK: JSON validated"
 else
   echo "OK: no JSON files tracked"
+fi
+
+# --- 2.5. Gramax content/ validation (валидатор nauta, PEP 723) ---
+echo "==> content"
+if [ -d content ]; then
+  if command -v uv > /dev/null 2>&1; then
+    if ! uv run scripts/validate-content.py; then
+      echo "FAIL: content/ validation"
+      FAILED=1
+    else
+      echo "OK: content validated"
+    fi
+  else
+    echo "WARN: uv not installed — skipping content validation"
+  fi
+else
+  echo "OK: no content/ directory"
 fi
 
 # --- 3. (--full only) Shellcheck on tracked .sh files, if installed ---
