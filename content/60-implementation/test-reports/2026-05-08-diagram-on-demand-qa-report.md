@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [Тест-отчёт]
+  - name: Статус
+    value: [Done]
+  - name: Плагин
+    value: [gramax]
+---
+
 # QA Report: diagram-on-demand
 
 **Дата:** 2026-05-08

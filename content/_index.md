@@ -16,4 +16,5 @@ order: 0
 - [Проект](00-project/_index.md) — архитектурные решения
 - [Домен](10-domain/_index.md) — исследования
 - [Требования](30-requirements/_index.md) — спеки фич плагина
+- [Реализация](60-implementation/_index.md) — отчёты прогона и приёмки
 - [Уроки](lessons-learned.md) — журнал находок команды

@@ -1,10 +1,20 @@
+---
+properties:
+  - name: Тип контента
+    value: [Тест-отчёт]
+  - name: Статус
+    value: [Done]
+  - name: Плагин
+    value: [gramax]
+---
+
 # QA Report: remove-diagram-skills
 
 Дата: 2026-05-11
 QA-runner: qa-runner-agent
 Worktree: `feat-remove-diagram-skills`
-Spec: [docs/superpowers/specs/2026-05-11-remove-diagram-skills.md](../superpowers/specs/2026-05-11-remove-diagram-skills.md)
-ADR: [docs/adr/0008-drop-internal-drawio-skills.md](../adr/0008-drop-internal-drawio-skills.md)
+Spec: [content/30-requirements/2026-05-11-remove-diagram-skills.md](../../30-requirements/2026-05-11-remove-diagram-skills.md)
+ADR: [content/00-project/adr/0008-drop-internal-drawio-skills.md](../../00-project/adr/0008-drop-internal-drawio-skills.md)
 
 ## Summary
 

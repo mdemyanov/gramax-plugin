@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [Тест-отчёт]
+  - name: Статус
+    value: [Done]
+  - name: Плагин
+    value: [gramax]
+---
+
 # QA Report — routing-mermaid-drawio-v2 (gramax 3.0.0)
 
 **Date:** 2026-05-11

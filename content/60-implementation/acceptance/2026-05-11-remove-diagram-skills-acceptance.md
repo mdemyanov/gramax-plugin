@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [Приёмка]
+  - name: Статус
+    value: [Done]
+  - name: Плагин
+    value: [gramax]
+---
+
 # Acceptance Report: remove-diagram-skills
 
 Дата: 2026-05-11

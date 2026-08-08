@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [Тест-отчёт]
+  - name: Статус
+    value: [Done]
+  - name: Плагин
+    value: [gramax]
+---
+
 # Test Report — 2026-05-12 — gramax / mermaid-file-based (QA-R-007)
 
 ## Summary

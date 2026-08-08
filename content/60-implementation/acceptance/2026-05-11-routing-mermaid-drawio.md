@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [Приёмка]
+  - name: Статус
+    value: [Done]
+  - name: Плагин
+    value: [gramax]
+---
+
 # Acceptance Report — routing-mermaid-drawio-v2
 
 **Date:** 2026-05-11
