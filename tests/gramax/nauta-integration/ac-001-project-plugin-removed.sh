@@ -20,6 +20,9 @@ assert_file_not_exists ".claude/.claude-plugin/marketplace.json" \
 assert_dir_not_exists "tests/project" \
   "AC-11: tests/project должен быть удалён вместе с плагином"
 
+assert_file_exists ".claude/settings.json" \
+  "FR-1: settings.json должен существовать всегда"
+
 if [ -f ".claude/settings.json" ]; then
   assert_no_grep ".claude/settings.json" "gramax-plugin-internal-local" \
     "AC-1: settings.json не должен упоминать внутренний marketplace"

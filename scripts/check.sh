@@ -5,7 +5,8 @@
 #
 # Modes:
 #   --fast   : whitespace + JSON validity + validate-content.py (uv обязателен; для pre-commit hook)
-#   --full   : --fast + shellcheck (если установлен) + проверка submodule status
+#   --full   : --fast + shellcheck (если установлен) + проверка submodule status +
+#              tests/gramax/orphan-references + tests/gramax/nauta-integration
 #
 # Exit codes:
 #   0 — all checks passed
@@ -32,15 +33,19 @@ fi
 echo "==> json"
 JSON_FILES=$(git ls-files '*.json' 2>/dev/null || true)
 if [ -n "$JSON_FILES" ]; then
+  JSON_FAILED=0
   for f in $JSON_FILES; do
     # Skip submodule contents (claude-mermaid)
     if [[ "$f" == plugins/claude-mermaid/* ]]; then continue; fi
     if ! python3 -m json.tool "$f" > /dev/null 2>&1; then
       echo "FAIL: invalid JSON: $f"
       FAILED=1
+      JSON_FAILED=1
     fi
   done
-  echo "OK: JSON validated"
+  if [ "$JSON_FAILED" -eq 0 ]; then
+    echo "OK: JSON validated"
+  fi
 else
   echo "OK: no JSON files tracked"
 fi
@@ -90,6 +95,24 @@ if [ "$MODE" = "--full" ]; then
     git submodule status
   else
     echo "OK: submodules in sync"
+  fi
+
+  # --- 5. (--full only) orphan-references gate ---
+  echo "==> orphan-references"
+  if bash tests/gramax/orphan-references/run.sh; then
+    echo "OK: orphan-references clean"
+  else
+    echo "FAIL: orphan-references gate"
+    FAILED=1
+  fi
+
+  # --- 6. (--full only) nauta-integration AC suite ---
+  echo "==> nauta-integration"
+  if bash tests/gramax/nauta-integration/run.sh; then
+    echo "OK: nauta-integration AC suite green"
+  else
+    echo "FAIL: nauta-integration AC suite"
+    FAILED=1
   fi
 fi
 

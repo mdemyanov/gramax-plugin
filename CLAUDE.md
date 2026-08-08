@@ -40,9 +40,13 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 ## Команды сборки и проверки
 
 - `bash scripts/check.sh --fast` — pre-commit gate (whitespace, JSON, валидация `content/`).
+- `bash scripts/check.sh --full` — то же плюс shellcheck, submodule status и suite'ы
+  `tests/gramax/orphan-references` + `tests/gramax/nauta-integration` (полный прогон, не для
+  pre-commit — вызывается вручную или в CI).
 - `uv run scripts/validate-content.py` — только валидация Gramax-каталога.
 - `bash scripts/install-hooks.sh` — активировать `.githooks/pre-commit` (опционально).
-- `bash tests/gramax/orphan-references/run.sh` — гейт остаточных ссылок на удалённое.
+- `bash tests/gramax/orphan-references/run.sh` — гейт остаточных ссылок на удалённое (тот же suite,
+  что и в `--full`, но отдельно).
 - Для распространения: `git push` → пользователи получают через
   `/plugin marketplace add mdemyanov/gramax-plugin`.
 
@@ -53,6 +57,9 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
   Мета-артефакты о самом репозитории и процессе (спеки по тулингу, планы исполнения) — в `docs/`.
 - Решения по структуре marketplace, разделению плагинов, изменению manifests — через ADR
   (`content/00-project/adr/`).
+- Новый подраздел `content/` обязан нести `_index.md` и ссылку на него из родительского
+  `_index.md` — иначе `check.sh --fast` красный (C1: отсутствие `_index.md` — error;
+  C10: статья-сирота без входящих ссылок — warning).
 
 ## Поток работы
 
@@ -81,8 +88,8 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 - Tests/линтеры (если в проекте есть) — зелёные перед commit.
 - НЕ коммитить с `--no-verify` без явного разрешения.
 - Удаляя skill или script — добавь его имя в `tests/gramax/orphan-references/sunset-registry.txt`
-  и прогони `grep -rn '<имя>' .` по репозиторию. Остаточные ссылки на удалённое ловятся гейтом,
-  а не глазами на ревью.
+  и прогони `bash scripts/check.sh --full` перед коммитом. Гейт остаточных ссылок на удалённое
+  подключён к `--full`, не к `--fast` — сам по себе на каждый коммит он не срабатывает.
 
 ## Self-improvement
 

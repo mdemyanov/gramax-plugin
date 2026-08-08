@@ -14,6 +14,9 @@ venv/
 .vscode/
 *.swp
 
+# Claude Code local settings (per-machine, not distributed)
+.claude/settings.local.json
+
 # Logs / tmp
 *.log
 tmp/
