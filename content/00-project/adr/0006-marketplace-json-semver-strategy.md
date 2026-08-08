@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [ADR]
+  - name: Статус
+    value: [Accepted]
+  - name: Плагин
+    value: [marketplace]
+---
+
 # ADR-0006: Стратегия версионирования marketplace.json при добавлении diagram-on-demand
 
 **Status:** Accepted

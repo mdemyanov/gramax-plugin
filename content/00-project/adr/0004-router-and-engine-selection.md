@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [ADR]
+  - name: Статус
+    value: [Superseded]
+  - name: Плагин
+    value: [gramax]
+---
+
 # ADR-0004: Механизм выбора движка (router и engine selection)
 
 **Status:** Superseded by ADR-0008

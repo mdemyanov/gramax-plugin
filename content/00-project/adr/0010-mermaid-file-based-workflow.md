@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [ADR]
+  - name: Статус
+    value: [Accepted]
+  - name: Плагин
+    value: [gramax]
+---
+
 # ADR-0010: Mermaid skill — file-based workflow
 
 **Status:** Accepted

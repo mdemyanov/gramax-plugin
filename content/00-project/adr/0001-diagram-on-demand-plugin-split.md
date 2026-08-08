@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [ADR]
+  - name: Статус
+    value: [Superseded]
+  - name: Плагин
+    value: [gramax, marketplace]
+---
+
 # ADR-0001: Размещение навыков diagram-on-demand внутри плагина gramax (без split)
 
 **Status:** Superseded by ADR-0008

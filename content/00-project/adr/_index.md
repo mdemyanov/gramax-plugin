@@ -1,3 +1,8 @@
+---
+title: Архитектурные решения
+order: 1
+---
+
 # Architecture Decision Records
 
 Реестр архитектурных решений проекта `mdemyanov/gramax-plugin`.

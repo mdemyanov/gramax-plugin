@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [ADR]
+  - name: Статус
+    value: [Superseded]
+  - name: Плагин
+    value: [gramax]
+---
+
 # ADR-0007: Функциональность, перенесённая в Phase 2
 
 **Status:** Superseded by ADR-0008

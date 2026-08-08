@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [ADR]
+  - name: Статус
+    value: [Accepted]
+  - name: Плагин
+    value: [gramax, marketplace]
+---
+
 # ADR-0009: Drawio-stub skill и удаление submodule claude-mermaid
 
 **Status:** Accepted

@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [ADR]
+  - name: Статус
+    value: [Historical]
+  - name: Плагин
+    value: [gramax]
+---
+
 # ADR-0002: Выбор drawio MCP-бэкенда и роль LLM в генерации XML
 
 **Status:** Historical (Informational)

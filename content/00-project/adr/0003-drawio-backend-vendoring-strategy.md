@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [ADR]
+  - name: Статус
+    value: [Historical]
+  - name: Плагин
+    value: [gramax]
+---
+
 # ADR-0003: Vendoring strategy для drawio MCP-бэкенда
 
 **Status:** Historical (Informational)

@@ -1,3 +1,13 @@
+---
+properties:
+  - name: Тип контента
+    value: [ADR]
+  - name: Статус
+    value: [Superseded]
+  - name: Плагин
+    value: [gramax]
+---
+
 # ADR-0005: Контракт API save flow (drawio_convert.py, slugify.py, .doc-root.yaml)
 
 **Status:** Superseded by ADR-0008
