@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.1.1
+
+### Fixed
+
+- `skills/writer/SKILL.md` — примеры и шаг 4 двухшагового workflow учили устаревшему тегу `[drawio:...]` / `<Image src=.../>`; заменено на канонический `<drawio path="..." width="..." height="..."/>`, введённый в 4.1.0. Расхождение с `references/drawio.md` и `references/blocks.md`, где формат уже был обновлён, устранено.
+- `README.md` — та же правка тега в описании шага 2 drawio-workflow.
+- `README.md` — добавлен `Warning` о конфликте триггеров с `Agents365-ai/mermaid-skill`, предписанный ADR-0008 «Решение 6» и не попавший в 2.0.0.
+- `scripts/check.sh` — удалены три мёртвых guard'а для submodule `plugins/claude-mermaid/`, удалённого в 3.0.0.
+
 ## 4.1.0 — 2026-05-12
 
 ### Changed

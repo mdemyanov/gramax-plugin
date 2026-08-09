@@ -6,7 +6,8 @@
 # Modes:
 #   --fast   : whitespace + JSON validity + validate-content.py (uv обязателен; для pre-commit hook)
 #   --full   : --fast + shellcheck (если установлен) + проверка submodule status +
-#              tests/gramax/orphan-references + tests/gramax/nauta-integration
+#              tests/gramax/orphan-references + tests/gramax/nauta-integration +
+#              tests/gramax/plugin-contract
 #
 # Exit codes:
 #   0 — all checks passed
@@ -110,6 +111,15 @@ if [ "$MODE" = "--full" ]; then
     echo "OK: nauta-integration AC suite green"
   else
     echo "FAIL: nauta-integration AC suite"
+    FAILED=1
+  fi
+
+  # --- 7. (--full only) plugin-contract: живые инварианты плагина ---
+  echo "==> plugin-contract"
+  if bash tests/gramax/plugin-contract/run.sh; then
+    echo "OK: plugin-contract green"
+  else
+    echo "FAIL: plugin-contract"
     FAILED=1
   fi
 fi
