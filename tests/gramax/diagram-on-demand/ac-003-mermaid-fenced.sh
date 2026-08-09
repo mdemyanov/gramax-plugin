@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # AC-003: mermaid в Markdown-syntax → fenced ```mermaid...``` блок вставляется в md
-# Spec: docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md (AC-002, FR-001, FR-003, FR-004)
-# ADR: docs/adr/0005-save-flow-script-api-contract.md (раздел 6: вставка ссылки)
+# Spec: content/30-requirements/2026-05-08-diagram-on-demand-design.md (AC-002, FR-001, FR-003, FR-004)
+# ADR: content/00-project/adr/0005-save-flow-script-api-contract.md (раздел 6: вставка ссылки)
 # Status: FAILING (TDD stub — Dev должен сделать зелёным)
 #
 # Coverage:

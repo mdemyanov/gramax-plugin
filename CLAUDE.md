@@ -6,16 +6,20 @@
 
 | Команда | Роль | Где исполняется | Артефакты |
 |---------|------|----------------|-----------|
-| `/pm`   | PM (orchestrator) | main (Opus) | Декомпозиция, координация, roadmap |
-| `/pm-review` | PM | main (Opus) | Финальная валидация перед merge в main |
-| `/research` | Researcher | subagent (Sonnet) | Аналитические выжимки (Claude Code docs, plugin patterns, MCP) |
-| `/ba`   | BA  | subagent (Sonnet) | Spec в `docs/superpowers/specs/` |
-| `/sa`   | SA  | subagent (Sonnet) | Архитектурные решения в `docs/adr/` |
-| `/dev`  | Dev | subagent (Sonnet) | Код в `plugins/gramax/` (TDD для shell/JS) |
-| `/qa`   | QA (author/runner) | subagent (Sonnet) | Smoke-тесты плагина, проверка outputs |
-| `/tech-writer` | Tech-writer | subagent (Sonnet) | README, CHANGELOG, marketplace.json descriptions |
+| `/nauta:pm` | PM (orchestrator) | main (Opus) | Декомпозиция, координация |
+| `/nauta:pm-review` | PM | main (Opus) | Финальная валидация перед merge в main |
+| `/nauta:research` | Researcher | subagent (Sonnet) | `content/10-domain/research/` |
+| `/nauta:ba` | BA | subagent (Sonnet) | `content/30-requirements/` |
+| `/nauta:sa` | SA | subagent (Sonnet) | `content/00-project/adr/`, `content/40-architecture/` |
+| `/nauta:dev` | Dev | subagent (Sonnet) | Код в `plugins/gramax/` (TDD) |
+| `/nauta:qa` | QA (author/runner) | subagent (Sonnet) | `content/60-implementation/test-reports/` |
+| `/nauta:tech-writer` | Tech-writer | subagent (Sonnet) | README, CHANGELOG, marketplace descriptions |
+| `/nauta:devsecops` | DevSecOps (opt-in) | subagent (Sonnet) | Secrets sweep перед публичным релизом |
 
-Полная матрица ролей и контракт вызова субагентов — в **AGENTS.md**.
+Роли приходят из плагина `nauta` — marketplace закреплён в `~/.claude/settings.json`
+(`ref: v0.3.1`), а включение локальное: через `.claude/settings.local.json`, который
+не входит в репозиторий. Собственных агентов репозиторий не держит. Полная матрица
+и контракт вызова — в **AGENTS.md**.
 
 ## Контекст проекта
 
@@ -30,31 +34,36 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 - Markdown skills и agent prompts (большая часть плагина).
 - Bash скрипты (плагинная инфраструктура, smoke-тесты).
 - JSON (manifests, settings).
+- Python-скрипты в `scripts/` — не язык этого проекта: доставлены из `nauta` через
+  `/nauta:sync-scripts`, запускаются через `uv run` (PEP 723). Их не пишут и не правят здесь.
 
 ## Команды сборки и проверки
 
-- `bash scripts/check.sh --fast` — pre-commit gate (whitespace, JSON-валидность).
+- `bash scripts/check.sh --fast` — pre-commit gate (whitespace, JSON, валидация `content/`).
+- `bash scripts/check.sh --full` — то же плюс shellcheck, submodule status и suite'ы
+  `tests/gramax/orphan-references` + `tests/gramax/nauta-integration` (полный прогон, не для
+  pre-commit — вызывается вручную или в CI).
+- `uv run scripts/validate-content.py` — только валидация Gramax-каталога.
 - `bash scripts/install-hooks.sh` — активировать `.githooks/pre-commit` (опционально).
-- Для распространения: `git push` → пользователи получают через `/plugin marketplace add mdemyanov/gramax-plugin`.
+- `bash tests/gramax/orphan-references/run.sh` — гейт остаточных ссылок на удалённое (тот же suite,
+  что и в `--full`, но отдельно).
+- Для распространения: `git push` → пользователи получают через
+  `/plugin marketplace add mdemyanov/gramax-plugin`.
 
 ## Архитектурные правила
 
-- Каждый плагин в `plugins/<name>/` имеет свой `.claude-plugin/plugin.json`, `README.md`, `CHANGELOG.md`.
 - Skills и команды плагина — в `plugins/<name>/skills/` и `plugins/<name>/commands/`.
-- Локальный CTO-инструментарий (агенты PM/BA/SA/...) — в `.claude/plugins/project/`, не в `plugins/` (не публикуется).
-- Решения по структуре marketplace, разделению плагинов, изменению manifests — через ADR (`docs/adr/`).
-
-## Подключённые плагины
-
-- **gramax@ai-assistants** или `gramax@gramax-marketplace` — `gramax:writer`, `gramax:comments-read`, `gramax:comments-write`, `gramax:diagrams` (наш собственный плагин, тестируем здесь же).
-- **superpowers@claude-plugins-official** — `brainstorming`, `writing-plans`, `executing-plans`, `subagent-driven-development`, `test-driven-development`, `systematic-debugging`, `verification-before-completion`.
-- **project@gramax-internal** — локальный CTO-плагин с агентами PM/BA/SA/Dev/QA/Researcher/Tech-writer (приватный, не для distribution).
-
-Marketplace'ы и enabled плагины — в `.claude/settings.json`.
+- Артефакты продукта (ADR, требования, research, отчёты) — в `content/` по таксономии Gramax.
+  Мета-артефакты о самом репозитории и процессе (спеки по тулингу, планы исполнения) — в `docs/`.
+- Решения по структуре marketplace, разделению плагинов, изменению manifests — через ADR
+  (`content/00-project/adr/`).
+- Новый подраздел `content/` обязан нести `_index.md` и ссылку на него из родительского
+  `_index.md` — иначе `check.sh --fast` красный (C1: отсутствие `_index.md` — error;
+  C10: статья-сирота без входящих ссылок — warning).
 
 ## Поток работы
 
-Канонический порядок новой фичи: **Researcher (опц.) → BA (spec) → SA (ADR при нетривиальной фиче) → Dev (TDD) → QA → Tech-writer (docs)**. PM координирует, `/pm-review` валидирует перед merge.
+Канонический порядок новой фичи: **Researcher (опц.) → BA (spec) → SA (ADR при нетривиальной фиче) → Dev (TDD) → QA → Tech-writer (docs)**. PM координирует, `/nauta:pm-review` валидирует перед merge.
 
 Ветвление: `main` — единственная ветка, в которую вливаются PR. Feature-ветки опциональны, через worktree (`superpowers:using-git-worktrees`).
 
@@ -74,13 +83,16 @@ Marketplace'ы и enabled плагины — в `.claude/settings.json`.
 
 - НЕ публиковать секреты (`.env`, токены, API-ключи, credentials).
 - НЕ менять `.claude-plugin/marketplace.json` (корневой, публичный) без ADR. Это договор с пользователями.
-- НЕ принимать `/dev`-задачи без артефакта SA (для нетривиальных фич — обязателен ADR).
+- НЕ принимать `/nauta:dev`-задачи без артефакта SA (для нетривиальных фич — обязателен ADR).
 - НЕ ломать обратную совместимость skill-имён в `plugins/gramax/skills/` без bump major-версии в `plugins/gramax/CHANGELOG.md` + анонс в основном CHANGELOG.
 - Tests/линтеры (если в проекте есть) — зелёные перед commit.
 - НЕ коммитить с `--no-verify` без явного разрешения.
+- Удаляя skill или script — добавь его имя в `tests/gramax/orphan-references/sunset-registry.txt`
+  и прогони `bash scripts/check.sh --full` перед коммитом. Гейт остаточных ссылок на удалённое
+  подключён к `--full`, не к `--fast` — сам по себе на каждый коммит он не срабатывает.
 
 ## Self-improvement
 
-- `docs/lessons-learned.md` — append-only журнал.
+- `content/lessons-learned.md` — append-only журнал.
 - Субагенты сохраняют находки в auto-memory (типы: `reference`, `project`, `feedback`).
-- `/pm-review` читает lessons + memory и предлагает обновления `CLAUDE.md` / промптов агентов.
+- `/nauta:pm-review` читает lessons + memory и предлагает обновления `CLAUDE.md` / промптов.

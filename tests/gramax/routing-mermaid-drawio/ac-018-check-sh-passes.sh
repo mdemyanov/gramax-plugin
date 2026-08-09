@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-018-check-sh-passes.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # AC coverage:
 #   AC-014/NFR-004 → bash scripts/check.sh --fast завершается с exit code 0
 #                    (финальный gate: whitespace, JSON-валидность, pre-commit checks)

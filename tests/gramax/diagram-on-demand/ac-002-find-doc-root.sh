@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # AC-002: find_doc_root.sh находит .doc-root.yaml вверх по дереву каталогов
-# Spec: docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md (FR-003, FR-006, AC-006)
-# ADR: docs/adr/0005-save-flow-script-api-contract.md (раздел 1: find_doc_root.sh)
+# Spec: content/30-requirements/2026-05-08-diagram-on-demand-design.md (FR-003, FR-006, AC-006)
+# ADR: content/00-project/adr/0005-save-flow-script-api-contract.md (раздел 1: find_doc_root.sh)
 # Status: FAILING (TDD stub — Dev должен сделать зелёным)
 #
 # Coverage:

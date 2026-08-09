@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-002-drawio-description-explicit-triggers.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # AC coverage:
 #   AC-003/FR-002 → description упоминает «drawio» (explicit trigger), НЕ упоминает «mermaid»
 #                   в строке description (anti-trigger: не должен срабатывать на mermaid-запросы)

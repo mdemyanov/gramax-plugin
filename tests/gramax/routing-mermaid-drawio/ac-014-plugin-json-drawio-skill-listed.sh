@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-014-plugin-json-drawio-skill-listed.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # AC coverage:
 #   AC-002/FR-001 → plugins/gramax/.claude-plugin/plugin.json содержит skill drawio в секции skills
 #                   (Dev must add a skills array/dict declaring the drawio skill)

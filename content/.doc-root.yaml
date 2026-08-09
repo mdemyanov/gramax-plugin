@@ -1,0 +1,16 @@
+code: GRAMAX-PLUGIN
+title: Gramax Marketplace
+description: Документация плагина gramax для Claude Code
+editors:
+  - qutask@gmail.com
+properties:
+  - name: Тип контента
+    type: Enum
+    values: [ADR, Требование, Research, Тест-отчёт, Приёмка, Урок, Архитектура]
+  - name: Статус
+    type: Enum
+    values: [Draft, Active, Accepted, Superseded, Historical, Done]
+  - name: Плагин
+    type: Enum
+    values: [gramax, marketplace]
+filterProperties: [Тип контента, Статус, Плагин]

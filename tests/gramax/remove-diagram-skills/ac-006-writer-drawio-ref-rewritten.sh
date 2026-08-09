@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-006-writer-drawio-ref-rewritten.sh
-# Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
+# Spec: content/30-requirements/2026-05-11-remove-diagram-skills.md
 # AC coverage:
 #   AC-006 → plugins/gramax/skills/writer/references/drawio.md не содержит drawio_convert.py
 #

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # AC-001: SKILL.md создан для diagram-on-demand, frontmatter валидный
-# Spec: docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md
-# ADR: docs/adr/0001-diagram-on-demand-plugin-split.md (один skill в plugins/gramax/skills/)
+# Spec: content/30-requirements/2026-05-08-diagram-on-demand-design.md
+# ADR: content/00-project/adr/0001-diagram-on-demand-plugin-split.md (один skill в plugins/gramax/skills/)
 # Status: FAILING (TDD stub — Dev должен сделать зелёным)
 #
 # Coverage:

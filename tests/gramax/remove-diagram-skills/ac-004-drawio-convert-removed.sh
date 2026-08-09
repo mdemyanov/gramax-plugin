@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-004-drawio-convert-removed.sh
-# Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
+# Spec: content/30-requirements/2026-05-11-remove-diagram-skills.md
 # AC coverage:
 #   AC-004 → plugins/gramax/scripts/drawio_convert.py отсутствует
 #

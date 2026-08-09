@@ -1,0 +1,17 @@
+# .nauta-scripts-basis.yaml — пишет /nauta:sync-scripts (tools-ai/nauta). Не
+# редактируйте руками значения; секцию `skip:` — можно (ADR-030-spec §5/§6).
+nauta_version: "0.3.1"
+nauta_ref_sha: "unknown"
+synced_at: "2026-08-08T10:16:51Z"
+files:
+  scripts/_apply_profile.py: "sha256:f8704a7b32b853b392dc6a0412ee63bb6ba18bbafbf2920590d898e9d72d631c"
+  scripts/_apply_yaml_patch.py: "sha256:4ee8d9ed86225a19e5bb0cb8b6aa152382612b9e4a9611040227a317d10f450c"
+  scripts/_drift_check.py: "sha256:0fc262e41eee9d0acb16a8c2ee4161ef691be5777109963ad3e342725d46922a"
+  scripts/_init_helpers.py: "sha256:c2bbae6bee49de1d027e6263e01a1700237fad802d99a390ab57dead13990473"
+  scripts/_resolve_agents.py: "sha256:ed6ac2a782c5cceff1fee0477f91c56134efbe29ea98e9750f959f80c65a60c3"
+  scripts/_validate_common.py: "sha256:b10d63096fe1834dde8d58b858250fde41ffe0cbb5fb56b17e362a2d2d78dbae"
+  scripts/apply-overlay.sh: "sha256:8ba636a7b0185d161789f743127a8b656f158f5b9ad72cb48e1a56cf93b8d5cf"
+  scripts/check-status-drift.py: "sha256:95e4bed5db546156da2a4cae216973d38800a4abfbc0b18e6689639bc9a5427e"
+  scripts/validate-content.py: "sha256:499ada3a16fc762e6e9fdea0feb9bc415c08336b20efd9f1bbe79e13dbd16311"
+  scripts/validate-profile.py: "sha256:c578f31c4ce3c720ef8f11628cd63bcecb9132a50e15b74ffc8c08ca0d22b5e2"
+skip:

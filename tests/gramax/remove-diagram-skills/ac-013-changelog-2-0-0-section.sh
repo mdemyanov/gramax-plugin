@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-013-changelog-2-0-0-section.sh
-# Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
+# Spec: content/30-requirements/2026-05-11-remove-diagram-skills.md
 # AC coverage:
 #   AC-013 → plugins/gramax/CHANGELOG.md содержит секцию ## 2.0.0
 #             с подразделами Removed (или эквивалент) и ### Migration

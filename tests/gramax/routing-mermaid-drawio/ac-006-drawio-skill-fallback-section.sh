@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-006-drawio-skill-fallback-section.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # AC coverage:
 #   AC-006/FR-006 → body содержит cross-reference на gramax:mermaid для mermaid-запросов
 #                   (fallback / «не для» секция; также покрывает ambiguous-request алгоритм ADR-0009)

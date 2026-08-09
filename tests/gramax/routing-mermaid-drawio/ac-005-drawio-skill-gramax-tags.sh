@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-005-drawio-skill-gramax-tags.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # AC coverage:
 #   AC-005/FR-005 → body упоминает оба Gramax-формата вставки:
 #                   [drawio:...] (Markdown) и <Image src (XML)

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/remove-diagram-skills/ac-009-readme-prerequisites-block.sh
-# Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
-# ADR: docs/adr/0008-drop-internal-drawio-skills.md Решения 4, 6
+# Spec: content/30-requirements/2026-05-11-remove-diagram-skills.md
+# ADR: content/00-project/adr/0008-drop-internal-drawio-skills.md Решения 4, 6
 # AC coverage:
 #   AC-009 → plugins/gramax/README.md содержит prerequisites-блок внешнего drawio-плагина:
 #             draw.io desktop, /plugin marketplace add Agents365-ai/365-skills,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-file-based/ac-012-manifest-version-4.sh
-# Spec: docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md
-# ADR:  docs/adr/0010-mermaid-file-based-workflow.md (Решение 1 — major bump 4.0.0)
+# Spec: content/30-requirements/2026-05-12-mermaid-file-based-design.md
+# ADR:  content/00-project/adr/0010-mermaid-file-based-workflow.md (Решение 1 — major bump 4.0.0)
 # AC coverage:
 #   (дополнительный AC из ADR) → plugin.json и marketplace.json содержат версию 4.0.0
 #

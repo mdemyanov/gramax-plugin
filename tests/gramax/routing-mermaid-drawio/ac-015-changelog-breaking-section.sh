@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-015-changelog-breaking-section.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # AC coverage:
 #   AC-013/FR-011 → plugins/gramax/CHANGELOG.md содержит секцию ## 3.0.0
 #                   с подсекциями ### Removed, ### Added, ### Changed, ### Migration

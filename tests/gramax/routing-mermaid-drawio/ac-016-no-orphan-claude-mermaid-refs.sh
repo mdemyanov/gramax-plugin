@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-016-no-orphan-claude-mermaid-refs.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
-# ADR: docs/adr/0009-drawio-stub-and-claude-mermaid-removal.md (Решение 2 пункт 8, RISK-002)
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
+# ADR: content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md (Решение 2 пункт 8, RISK-002)
 # AC coverage:
 #   Sunset pattern (не в spec, но обязателен при удалении публичного компонента):
 #   ни один оставшийся файл плагина НЕ ссылается на «claude-mermaid»,
-#   за исключением исторических локаций: docs/adr/, docs/superpowers/
+#   за исключением исторических локаций: content/00-project/adr/, docs/superpowers/
 #
 # Допустимые упоминания: ADR-0009, spec 2026-05-11, прошлые CHANGELOG-секции (до 3.0.0).
 # Недопустимые: plugins/gramax/skills/, plugins/gramax/.claude-plugin/,
@@ -52,7 +52,7 @@ done
 if [ "$TOTAL_MATCHES" -gt 0 ]; then
   echo "" >&2
   echo "  AC-016 total: $TOTAL_MATCHES orphan reference(s) to removed 'claude-mermaid'" >&2
-  echo "  Allowed locations (not checked here): docs/adr/, docs/superpowers/" >&2
+  echo "  Allowed locations (not checked here): content/00-project/adr/, docs/superpowers/" >&2
   FAIL=$((FAIL + 1))
 fi
 

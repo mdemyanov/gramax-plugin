@@ -1,6 +1,6 @@
 # tests/gramax/remove-diagram-skills
 
-Smoke-тесты для фичи «удаление diagram-on-demand + diagrams skills, переход на внешний drawio» (spec: `docs/superpowers/specs/2026-05-11-remove-diagram-skills.md`, ADR-0008).
+Smoke-тесты для фичи «удаление diagram-on-demand + diagrams skills, переход на внешний drawio» (spec: `content/30-requirements/2026-05-11-remove-diagram-skills.md`, ADR-0008).
 
 ## Запуск
 

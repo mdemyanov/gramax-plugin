@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/routing-mermaid-drawio/ac-007-mermaid-description-drawio-xref.sh
-# Spec: docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md
+# Spec: content/30-requirements/2026-05-11-routing-mermaid-drawio.md
 # AC coverage:
 #   AC-008/FR-007 → description в mermaid/SKILL.md упоминает «gramax:drawio» как cross-ref,
 #                   НЕ упоминает «Agents365-ai» как конфликтующий инструмент
