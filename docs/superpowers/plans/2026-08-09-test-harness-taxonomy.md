@@ -129,7 +129,9 @@ rc=0
 for s in remove-diagram-skills routing-mermaid-drawio mermaid-file-based; do
   while IFS= read -r f; do
     rel="${f#tests/gramax/archive/$s/}"
-    if ! git show "$BASE:tests/gramax/$s/$rel" 2>/dev/null | diff -q - "$f" > /dev/null; then
+    # Скобки вокруг BASE обязательны: Bash-инструмент исполняет команды через zsh,
+    # где "$VAR:tests/…" съедает ':t' как history-модификатор (tail) даже в кавычках.
+    if ! git show "${BASE}:tests/gramax/$s/$rel" 2>/dev/null | diff -q - "$f" > /dev/null; then
       echo "DIFF: $f"; rc=1
     fi
   done < <(find "tests/gramax/archive/$s" -type f)
