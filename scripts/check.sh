@@ -35,8 +35,6 @@ JSON_FILES=$(git ls-files '*.json' 2>/dev/null || true)
 if [ -n "$JSON_FILES" ]; then
   JSON_FAILED=0
   for f in $JSON_FILES; do
-    # Skip submodule contents (claude-mermaid)
-    if [[ "$f" == plugins/claude-mermaid/* ]]; then continue; fi
     if ! python3 -m json.tool "$f" > /dev/null 2>&1; then
       echo "FAIL: invalid JSON: $f"
       FAILED=1
@@ -72,7 +70,7 @@ fi
 if [ "$MODE" = "--full" ]; then
   echo "==> shellcheck"
   if command -v shellcheck > /dev/null 2>&1; then
-    SH_FILES=$(git ls-files '*.sh' 2>/dev/null | grep -v '^plugins/claude-mermaid/' || true)
+    SH_FILES=$(git ls-files '*.sh' 2>/dev/null || true)
     if [ -n "$SH_FILES" ]; then
       # shellcheck disable=SC2086
       if ! shellcheck $SH_FILES; then

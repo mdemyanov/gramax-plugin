@@ -11,3 +11,14 @@ find_doc_root
 save_diagram
 insert_diagram_ref
 validate_diagram_type
+#
+# 2026-05-11, ADR-0009 — удаление vendored submodule claude-mermaid:
+plugins/claude-mermaid([^a-zA-Z0-9-]|$)
+#
+# 2026-05-11, ADR-0008 — удаление skill'ов diagrams и diagram-on-demand.
+# Паттерн опознаёт артефакт по пути или способу вызова, не по слову (ADR-0011 Решение 3):
+# голое `diagrams` ловит прозу о действующем workflow (writer/references/staging.md,
+# drawio.md) и вымышленный пример gramax:diagrams-export в AGENTS.md; голое
+# `diagram-on-demand` ловит имена переехавших документов в ассертах nauta-integration.
+skills/diagrams([^a-zA-Z0-9-]|$)|gramax:diagrams([^a-zA-Z0-9-]|$)
+skills/diagram-on-demand([^a-zA-Z0-9-]|$)|gramax:diagram-on-demand([^a-zA-Z0-9-]|$)
