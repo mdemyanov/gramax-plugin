@@ -168,7 +168,7 @@ Drawio-workflow для пользователя после изменений:
 
 ## Бриф для SA
 
-**Spec:** `docs/superpowers/specs/2026-05-11-remove-diagram-skills.md`
+**Spec:** `content/30-requirements/2026-05-11-remove-diagram-skills.md`
 
 **Спроектировать:**
 - Подтвердить semver (2.0.0 vs 1.5.0) и задокументировать в ADR-0008.
@@ -187,7 +187,7 @@ Drawio-workflow для пользователя после изменений:
 
 ## Бриф для QA-author
 
-**Spec:** `docs/superpowers/specs/2026-05-11-remove-diagram-skills.md`
+**Spec:** `content/30-requirements/2026-05-11-remove-diagram-skills.md`
 
 **Покрыть тестами:** каждое из AC-001—AC-016 должно быть реализовано как отдельный failing stub в `tests/gramax/remove-diagram-skills/` до начала Dev.
 

@@ -16,7 +16,7 @@ properties:
 
 ## Context
 
-Spec `docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md` описывает фичу **mermaid-file-based v4.0.0**:
+Spec `content/30-requirements/2026-05-12-mermaid-file-based-design.md` описывает фичу **mermaid-file-based v4.0.0**:
 
 Текущий `gramax:mermaid` (v3.0.0) вставляет DSL **inline** в md-файл — либо как `<mermaid>…</mermaid>` (XML-syntax), либо как ` ```mermaid … ``` ` (Markdown-syntax). Это противоречит реальному формату Gramax, задокументированному в `plugins/gramax/skills/writer/references/blocks.md` (строки 178–180):
 
@@ -231,8 +231,8 @@ width="800px" height="450px"
 
 ## Бриф для Dev
 
-**Spec:** `docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md`
-**ADR:** `docs/adr/0010-mermaid-file-based-workflow.md`
+**Spec:** `content/30-requirements/2026-05-12-mermaid-file-based-design.md`
+**ADR:** `content/00-project/adr/0010-mermaid-file-based-workflow.md`
 
 **Реализовать:**
 
@@ -311,9 +311,9 @@ width="800px" height="450px"
 
 ## Связанные артефакты
 
-- spec: `docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md`
+- spec: `content/30-requirements/2026-05-12-mermaid-file-based-design.md`
 - ground-truth: `plugins/gramax/skills/writer/references/blocks.md` (строки 178–180)
-- применяет semver-policy: `docs/adr/0006-marketplace-json-semver-strategy.md`
-- supersedes в части поведения mermaid-skill (inline → file-based): `docs/adr/0009-drawio-stub-and-claude-mermaid-removal.md` (Решение 1, описание inline-workflow в fallback-секции)
-- предшествующий контекст: `docs/adr/0008-drop-internal-drawio-skills.md`
+- применяет semver-policy: `content/00-project/adr/0006-marketplace-json-semver-strategy.md`
+- supersedes в части поведения mermaid-skill (inline → file-based): `content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md` (Решение 1, описание inline-workflow в fallback-секции)
+- предшествующий контекст: `content/00-project/adr/0008-drop-internal-drawio-skills.md`
 - затрагивает: `plugins/gramax/skills/mermaid/SKILL.md`, `plugins/gramax/skills/mermaid/references/syntax-rules.md`, `plugins/gramax/.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `plugins/gramax/CHANGELOG.md`

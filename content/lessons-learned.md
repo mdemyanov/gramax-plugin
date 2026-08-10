@@ -36,7 +36,7 @@ properties:
 
 **Что сработало:** обнаружение расхождения ground-truth (blocks.md) vs SKILL.md до начала работы Dev — позволило сформировать корректный spec сразу.
 
-**ADR:** docs/adr/0010-mermaid-file-based-workflow.md
+**ADR:** content/00-project/adr/0010-mermaid-file-based-workflow.md
 
 ## 2026-05-08 — TDD-stubs могут быть частично зелёными от старта
 

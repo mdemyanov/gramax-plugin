@@ -7,7 +7,7 @@
 #   --fast   : whitespace + JSON validity + validate-content.py (uv обязателен; для pre-commit hook)
 #   --full   : --fast + shellcheck (если установлен) + проверка submodule status +
 #              tests/gramax/orphan-references + tests/gramax/nauta-integration +
-#              tests/gramax/plugin-contract
+#              tests/gramax/plugin-contract + tests/gramax/doc-paths
 #
 # Exit codes:
 #   0 — all checks passed
@@ -120,6 +120,15 @@ if [ "$MODE" = "--full" ]; then
     echo "OK: plugin-contract green"
   else
     echo "FAIL: plugin-contract"
+    FAILED=1
+  fi
+
+  # --- 8. (--full only) doc-paths: нет нерабочих docs/-указателей в content/ ---
+  echo "==> doc-paths"
+  if bash tests/gramax/doc-paths/run.sh; then
+    echo "OK: doc-paths clean"
+  else
+    echo "FAIL: doc-paths gate"
     FAILED=1
   fi
 fi

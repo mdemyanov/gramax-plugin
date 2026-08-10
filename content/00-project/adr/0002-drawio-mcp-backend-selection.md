@@ -87,6 +87,6 @@ Spec FR-011 явно предусматривает fallback: «если MCP dra
 
 ## Связанные артефакты
 
-- spec: `docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md` (open question #2, #4, FR-009, FR-011, AC-004, AC-009, AC-012)
+- spec: `content/30-requirements/2026-05-08-diagram-on-demand-design.md` (open question #2, #4, FR-009, FR-011, AC-004, AC-009, AC-012)
 - затрагивает: `plugins/gramax/.claude-plugin/plugin.json` (секция `mcpServers`)
 - см. также: ADR-0003 (vendoring strategy), ADR-0005 (save flow)

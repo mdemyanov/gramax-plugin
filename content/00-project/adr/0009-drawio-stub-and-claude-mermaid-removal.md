@@ -16,7 +16,7 @@ properties:
 
 ## Context
 
-Spec `docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md` описывает фичу **routing-mermaid-drawio v3.0.0**:
+Spec `content/30-requirements/2026-05-11-routing-mermaid-drawio.md` описывает фичу **routing-mermaid-drawio v3.0.0**:
 
 - Добавить явный skill `gramax:drawio` (заглушка-делегатор) с точными description-формулировками и уточняющим вопросом при неоднозначном запросе.
 - Удалить vendored submodule `plugins/claude-mermaid/` — он создаёт конфликт триггеров с `gramax:mermaid`.
@@ -357,8 +357,8 @@ XML: <Image src="./file.svg" alt="..." />
 
 ## Бриф для Dev
 
-**Spec:** `docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md`
-**ADR:** `docs/adr/0009-drawio-stub-and-claude-mermaid-removal.md`
+**Spec:** `content/30-requirements/2026-05-11-routing-mermaid-drawio.md`
+**ADR:** `content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md`
 
 **Реализовать в порядке:**
 
@@ -377,8 +377,8 @@ XML: <Image src="./file.svg" alt="..." />
 
 ## Связанные артефакты
 
-- spec: `docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md`
-- дополняет: `docs/adr/0008-drop-internal-drawio-skills.md` (не supersedes)
-- reconciles (в части OQ-001): `docs/adr/0004-router-and-engine-selection.md` (Superseded by ADR-0008)
-- применяет semver-policy: `docs/adr/0006-marketplace-json-semver-strategy.md`
+- spec: `content/30-requirements/2026-05-11-routing-mermaid-drawio.md`
+- дополняет: `content/00-project/adr/0008-drop-internal-drawio-skills.md` (не supersedes)
+- reconciles (в части OQ-001): `content/00-project/adr/0004-router-and-engine-selection.md` (Superseded by ADR-0008)
+- применяет semver-policy: `content/00-project/adr/0006-marketplace-json-semver-strategy.md`
 - затрагивает: `plugins/gramax/skills/drawio/` (new), `plugins/gramax/skills/mermaid/SKILL.md`, `plugins/gramax/.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `plugins/gramax/CHANGELOG.md`, `plugins/claude-mermaid/` (removed), `.gitmodules`

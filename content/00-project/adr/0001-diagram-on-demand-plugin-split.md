@@ -16,7 +16,7 @@ properties:
 
 ## Context
 
-Spec `docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md` вводит два движка генерации диаграмм: mermaid и drawio. Open question #1 из spec: нужен ли split на два отдельных плагина (`diagram-mermaid` + `diagram-drawio`) или оба движка живут внутри одного плагина.
+Spec `content/30-requirements/2026-05-08-diagram-on-demand-design.md` вводит два движка генерации диаграмм: mermaid и drawio. Open question #1 из spec: нужен ли split на два отдельных плагина (`diagram-mermaid` + `diagram-drawio`) или оба движка живут внутри одного плагина.
 
 Текущее состояние репозитория:
 - `plugins/gramax/` — основной плагин с skills writer, comments-read, comments-write, diagrams.
@@ -80,6 +80,6 @@ Spec `docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md` вводи�
 
 ## Связанные артефакты
 
-- spec: `docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md` (open question #1)
+- spec: `content/30-requirements/2026-05-08-diagram-on-demand-design.md` (open question #1)
 - затрагивает: `plugins/gramax/.claude-plugin/plugin.json`, `plugins/gramax/skills/diagram-on-demand/SKILL.md`
 - см. также: ADR-0004 (router и engine selection), ADR-0006 (marketplace.json semver)

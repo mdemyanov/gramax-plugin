@@ -145,7 +145,7 @@ Skill читает существующий файл, сообщает поль�
 
 ## Бриф для SA
 
-**Spec:** `docs/superpowers/specs/2026-05-12-mermaid-file-based-design.md`
+**Spec:** `content/30-requirements/2026-05-12-mermaid-file-based-design.md`
 
 **Спроектировать:**
 
