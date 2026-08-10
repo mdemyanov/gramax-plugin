@@ -19,7 +19,14 @@
 # после второго, свободный текст причины и в разбор не идёт (а если второго « — » нет —
 # ожидаемый путь это весь остаток строки, причины попросту нет).
 
-DOC_PATHS_PATTERN='docs/(adr|qa-reports|acceptance|research|lessons-learned|superpowers/specs)'
+# Каталоги-прокси (docs/adr, docs/qa-reports, docs/acceptance, docs/research,
+# docs/lessons-learned.md) переехали целиком — префикс безопасен. `docs/superpowers/specs/`
+# — нет: там остаются два легитимных, никуда не переезжавших спека
+# (2026-05-08-apply-project-template-design.md, 2026-08-07-nauta-integration-design.md,
+# FR-029). Префиксный паттерн ловил бы рабочие ссылки на них как нерабочие указатели —
+# поэтому здесь, как и в соседнем tests/gramax/nauta-integration/ac-007, только точные
+# имена четырёх переехавших спек, не префикс каталога.
+DOC_PATHS_PATTERN='docs/(adr|qa-reports|acceptance|research|lessons-learned)|docs/superpowers/specs/(2026-05-08-diagram-on-demand-design|2026-05-11-remove-diagram-skills|2026-05-11-routing-mermaid-drawio|2026-05-12-mermaid-file-based-design)\.md'
 
 # scan_doc_paths <content-root> <allowlist-path>
 scan_doc_paths() {
