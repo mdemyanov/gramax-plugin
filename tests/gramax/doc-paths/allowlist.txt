@@ -1,0 +1,36 @@
+# tests/gramax/doc-paths/allowlist.txt
+# Упоминания docs/-путей в content/, которые остаются дословно.
+#
+# Две формы:
+#   file.md:N — причина    точечная: конкретная строка есть историческая запись
+#   file.md — причина      whole-file: весь документ посвящён самой миграции путей
+#
+# Критерий (ADR-0011 Решение 4): роль предложения, не каталог. Указатель, по которому
+# читателя приглашают перейти, — чиним. Запись о том, что было выполнено или решено на
+# тот момент, — сохраняем: замена пути переписала бы историческую запись.
+
+# --- Решение ADR, зафиксировавшее исключения на дату принятия ---
+content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md:270 — список каталогов, исключённых из правки на момент решения; замена превратила бы решение в утверждение о сегодняшней раскладке
+
+# --- Запись приёмки: где orphan-hits были допущены в тот прогон ---
+content/60-implementation/acceptance/2026-05-11-remove-diagram-skills-acceptance.md:52 — вердикт AC-016, перечень допущенных локаций на момент приёмки
+content/60-implementation/acceptance/2026-05-11-remove-diagram-skills-acceptance.md:92 — рекомендация PM в той формулировке, в какой была вынесена
+
+# --- Отчёт QA: перечень найденного при скане с классификацией ---
+content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md:60 — свидетельство прогона: найденная локация и её классификация
+content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md:61 — то же
+content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md:62 — то же; плюс glob-паттерн, а не путь к файлу
+content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md:63 — то же
+content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md:64 — то же
+
+# --- Отчёт QA: процитированная выполненная команда и таблица hits ---
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:72 — команда была выполнена именно так; правка сделала бы отчёт ложным описанием собственного метода
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:83 — строка таблицы найденных hits с вердиктом
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:84 — то же
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:85 — то же
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:86 — то же
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:87 — то же
+
+# --- Whole-file: документы, предмет которых — сама миграция путей ---
+content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md — требование этой работы: карта переездов и диспозиция обязаны называть старые пути
+content/00-project/adr/0011-test-harness-taxonomy.md — ADR этой работы: обоснование политики требует цитировать старые пути
