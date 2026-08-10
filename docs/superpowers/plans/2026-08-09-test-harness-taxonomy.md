@@ -10,9 +10,9 @@
 
 ## Источники
 
-- Требование: `content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md` (FR-001…FR-033, AC-001…AC-034)
+- Требование: `content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md` (FR-001…FR-034, AC-001…AC-035 — FR-034/AC-035 добавлены 2026-08-10 по итогам финального ревью, см. задачу 9)
 - ADR: `content/00-project/adr/0011-test-harness-taxonomy.md` (Решения 1-6)
-- Диспозиция путей: `/private/tmp/claude-501/-Users-mdemyanov-Devel-gramax/ad244b1c-1b2d-4012-81df-db70ba81da8d/scratchpad/doc-paths-disposition.md`
+- Диспозиция путей: `docs/doc-paths-disposition.md`
 
 ## Global Constraints
 
@@ -95,9 +95,9 @@
 - [ ] **Step 1: Зафиксировать базовую ревизию для последующей сверки**
 
 ```bash
-cd /Users/mdemyanov/Devel/gramax
-git rev-parse HEAD > /private/tmp/claude-501/-Users-mdemyanov-Devel-gramax/ad244b1c-1b2d-4012-81df-db70ba81da8d/scratchpad/BASE_REV
-cat /private/tmp/claude-501/-Users-mdemyanov-Devel-gramax/ad244b1c-1b2d-4012-81df-db70ba81da8d/scratchpad/BASE_REV
+cd <repo-root>
+git rev-parse HEAD > <scratchpad>/BASE_REV
+cat <scratchpad>/BASE_REV
 ```
 
 Эта ревизия — аргумент `BASE_REV` для проверки побайтового совпадения архива (AC-003).
@@ -124,7 +124,7 @@ ls tests/gramax/
 - [ ] **Step 4: Проверить, что переезд не изменил содержимое**
 
 ```bash
-BASE=$(cat /private/tmp/claude-501/-Users-mdemyanov-Devel-gramax/ad244b1c-1b2d-4012-81df-db70ba81da8d/scratchpad/BASE_REV)
+BASE=$(cat <scratchpad>/BASE_REV)
 rc=0
 for s in remove-diagram-skills routing-mermaid-drawio mermaid-file-based; do
   while IFS= read -r f; do
@@ -730,7 +730,6 @@ bash tests/gramax/plugin-contract/run.sh; echo "exit=$?"
 - `skills/writer/SKILL.md` — примеры и шаг 4 двухшагового workflow учили устаревшему тегу `[drawio:...]` / `<Image src=.../>`; заменено на канонический `<drawio path="..." width="..." height="..."/>`, введённый в 4.1.0. Расхождение с `references/drawio.md` и `references/blocks.md`, где формат уже был обновлён, устранено.
 - `README.md` — та же правка тега в описании шага 2 drawio-workflow.
 - `README.md` — добавлен `Warning` о конфликте триггеров с `Agents365-ai/mermaid-skill`, предписанный ADR-0008 «Решение 6» и не попавший в 2.0.0.
-- `scripts/check.sh` — удалены три мёртвых guard'а для submodule `plugins/claude-mermaid/`, удалённого в 3.0.0.
 ```
 
 - [ ] **Step 7: Синхронный bump обоих манифестов**
@@ -1278,7 +1277,7 @@ EOF
 - [ ] **Step 1: Массовая замена в 16 файлах, где только указатели**
 
 ```bash
-cd /Users/mdemyanov/Devel/gramax
+cd <repo-root>
 FILES=(
   content/00-project/adr/0001-diagram-on-demand-plugin-split.md
   content/00-project/adr/0002-drawio-mcp-backend-selection.md
@@ -1561,5 +1560,10 @@ bash tests/gramax/archive/mermaid-file-based/verify.sh   # ожидается us
 **Расхождение с нумерацией AC спеки.** AC-003 требует сверки архива с `BASE_REV` — план фиксирует его в задаче 1 шаг 1 и использует в шаге 4 той же задачи, а не отложенной проверкой: после последующих коммитов определить «коммит непосредственно перед переездом» сложнее, чем записать его заранее.
 
 **Известное отклонение.** Спека (FR-021) относит удаление мёртвых guard'ов `check.sh` к продуктовым фиксам 4.1.1, план выполняет его в задаче 2 — ограничение порядка из FR-013 требует, чтобы очистка предшествовала расширению реестра. Запись в CHANGELOG остаётся в задаче 4, как и предписано. Изменение сделано осознанно и здесь зафиксировано.
+
+По итогам ревью задачи 4 (коммит `fefb9c5`) FR-021 сужен: удаление мёртвых guard'ов — фикс
+`scripts/check.sh`, а не поставки плагина, поэтому в CHANGELOG плагина о нём записи нет
+(коммит `bdcc5ec` вычистил четвёртый буллет из `plugins/gramax/CHANGELOG.md`). Step 6 выше
+приведён в соответствие: CHANGELOG 4.1.1 несёт только три буллета про drawio-тег и WARNING.
 
 **Типы и имена.** Функция `scan_doc_paths <root> <allowlist>` объявлена в задаче 6 шаг 2 и вызывается под тем же именем и с той же сигнатурой в шагах 3 и 5. Переменная `DOC_PATHS_PATTERN` объявлена там же и используется внутри функции. `BASE_REV` пишется в файл в задаче 1 шаг 1 и читается в шаге 4.
