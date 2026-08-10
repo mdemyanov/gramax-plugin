@@ -189,7 +189,7 @@ SA решает: является ли `gramax:drawio` полноценным SK
 
 ## Бриф для SA
 
-**Spec:** `docs/superpowers/specs/2026-05-11-routing-mermaid-drawio.md`
+**Spec:** `content/30-requirements/2026-05-11-routing-mermaid-drawio.md`
 
 **Спроектировать (ADR-0009):**
 - Ответить на OQ-001—OQ-007 (критичны OQ-001, OQ-005, OQ-006).

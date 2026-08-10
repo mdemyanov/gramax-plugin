@@ -22,12 +22,17 @@ PATTERN_SPECS='docs/superpowers/specs/(2026-05-08-diagram-on-demand-design|2026-
 
 # scripts/ вне области: доставленные sync-scripts валидаторы — чужие файлы под управлением
 # .nauta-scripts-basis.yaml (validate-content.py несёт "docs/adr/" в собственном комментарии),
-# править их нельзя. tests/gramax/nauta-integration/ исключён: этот suite обязан называть
-# старые пути в ассертах их отсутствия.
+# править их нельзя. Из tests/ исключены целиком suite'ы, чей предмет — сами устаревшие
+# docs/-пути: они обязаны называть эти пути дословно (в ассертах их отсутствия, в README,
+# в обучающих фикстурах), и находка там — не регрессия, а инструмент этого suite'а. Сейчас
+# это tests/gramax/nauta-integration/ (собственные ассерты про docs/-пути) и
+# tests/gramax/doc-paths/ (README и fixtures/stale-allowlist/ учат гейт распознавать
+# устаревшие пути). Новый такой suite добавляется в исключение по тому же принципу — по
+# факту, что его предмет есть устаревшие пути, а не по факту, что он мешает прогону.
 HITS_DIRS="$(grep -rnE "$PATTERN_DIRS" \
   --include='*.md' --include='*.sh' --include='*.json' \
   plugins tests CLAUDE.md AGENTS.md README.md 2>/dev/null \
-  | grep -v '^tests/gramax/nauta-integration/' || true)"
+  | grep -vE '^tests/gramax/(nauta-integration|doc-paths)/' || true)"
 
 if [ -n "$HITS_DIRS" ]; then
   echo "  FAIL: AC-14: остались ссылки на переехавшие каталоги (docs/adr|qa-reports|acceptance|research):" >&2
@@ -38,7 +43,7 @@ fi
 HITS_SPECS="$(grep -rnE "$PATTERN_SPECS" \
   --include='*.md' --include='*.sh' --include='*.json' \
   plugins tests CLAUDE.md AGENTS.md README.md 2>/dev/null \
-  | grep -v '^tests/gramax/nauta-integration/' || true)"
+  | grep -vE '^tests/gramax/(nauta-integration|doc-paths)/' || true)"
 
 if [ -n "$HITS_SPECS" ]; then
   echo "  FAIL: AC-14: остались ссылки на переехавшие спеки (docs/superpowers/specs/<файл>.md, задача 6):" >&2

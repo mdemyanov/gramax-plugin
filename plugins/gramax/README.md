@@ -36,7 +36,7 @@ Claude Code plugin для работы с документацией в форм
 Точка входа для явных drawio-запросов («нарисуй drawio», «drawio-схема», «.drawio-файл»). Не генерирует диаграммы самостоятельно — делегирует на внешний `Agents365-ai/drawio-skill` и описывает двухшаговый Gramax-workflow:
 
 - Шаг 1: drawio-skill создаёт `.drawio` + `.svg` в рабочей директории.
-- Шаг 2: вставь тег в md-страницу (writer-skill подскажет формат): `[drawio:./diagram.svg:Описание:800px:600px]`.
+- Шаг 2: вставь тег в md-страницу (writer-skill подскажет формат): `<drawio path="./diagram.svg" width="800px" height="600px"/>`.
 
 **Установка внешнего плагина:**
 
@@ -44,6 +44,11 @@ Claude Code plugin для работы с документацией в форм
 /plugin marketplace add Agents365-ai/365-skills
 /plugin install drawio
 ```
+
+> **Warning:** Не устанавливайте `Agents365-ai/mermaid-skill` из 365-skills одновременно
+> с `gramax:mermaid`. Оба skill'а описывают одинаковые триггеры (flowchart, sequence,
+> gantt и др.) — Claude может выбрать не тот, поведение становится недетерминированным.
+> Для drawio устанавливайте только `drawio` из 365-skills (не `mermaid`).
 
 **Дополнительные зависимости** (требуются внешнему плагину):
 

@@ -72,6 +72,6 @@ Bump `marketplace.json` не является breaking change. ADR требуе�
 
 ## Связанные артефакты
 
-- spec: `docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md`
+- spec: `content/30-requirements/2026-05-08-diagram-on-demand-design.md`
 - предшествует: ADR-0001 (нет новых entry)
 - затрагивает: `.claude-plugin/marketplace.json`, `plugins/gramax/.claude-plugin/plugin.json`, `plugins/gramax/CHANGELOG.md`

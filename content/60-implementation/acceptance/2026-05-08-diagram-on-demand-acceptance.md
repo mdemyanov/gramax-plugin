@@ -11,8 +11,8 @@ properties:
 # Acceptance: diagram-on-demand
 
 **Дата:** 2026-05-08
-**Spec:** docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md
-**QA Report:** docs/qa-reports/2026-05-08-diagram-on-demand-qa-report.md
+**Spec:** content/30-requirements/2026-05-08-diagram-on-demand-design.md
+**QA Report:** content/60-implementation/test-reports/2026-05-08-diagram-on-demand-qa-report.md
 **Reviewer:** BA (acceptance mode)
 
 ---

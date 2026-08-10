@@ -6,7 +6,8 @@
 # Modes:
 #   --fast   : whitespace + JSON validity + validate-content.py (uv обязателен; для pre-commit hook)
 #   --full   : --fast + shellcheck (если установлен) + проверка submodule status +
-#              tests/gramax/orphan-references + tests/gramax/nauta-integration
+#              tests/gramax/orphan-references + tests/gramax/nauta-integration +
+#              tests/gramax/plugin-contract + tests/gramax/doc-paths
 #
 # Exit codes:
 #   0 — all checks passed
@@ -35,8 +36,6 @@ JSON_FILES=$(git ls-files '*.json' 2>/dev/null || true)
 if [ -n "$JSON_FILES" ]; then
   JSON_FAILED=0
   for f in $JSON_FILES; do
-    # Skip submodule contents (claude-mermaid)
-    if [[ "$f" == plugins/claude-mermaid/* ]]; then continue; fi
     if ! python3 -m json.tool "$f" > /dev/null 2>&1; then
       echo "FAIL: invalid JSON: $f"
       FAILED=1
@@ -72,10 +71,26 @@ fi
 if [ "$MODE" = "--full" ]; then
   echo "==> shellcheck"
   if command -v shellcheck > /dev/null 2>&1; then
-    SH_FILES=$(git ls-files '*.sh' 2>/dev/null | grep -v '^plugins/claude-mermaid/' || true)
+    # tests/gramax/archive/ — замороженные свидетельства приёмки прошлых релизов
+    # (BR-001, ADR-0011 Решение 1): их не редактируют, поэтому замечания shellcheck
+    # там не чинимы и не значимы — исключаем каталог из проверки, а не подавляем
+    # находки. grep -v не должен молча выесть весь список: если после фильтрации
+    # не осталось файлов, живых .sh в репозитории не найдено — это отдельный факт,
+    # с ним разбираются отдельно от "архив исключён штатно".
+    ALL_SH_FILES=$(git ls-files '*.sh' 2>/dev/null || true)
+    if [ -n "$ALL_SH_FILES" ]; then
+      SH_FILES=$(printf '%s\n' "$ALL_SH_FILES" | grep -v '^tests/gramax/archive/' || true)
+    else
+      SH_FILES=""
+    fi
     if [ -n "$SH_FILES" ]; then
+      # -x -P SCRIPTDIR: не подавление, а починка вызова. Без них shellcheck ищет
+      # `source`-цели относительно текущего каталога (тут — repo root), а не
+      # каталога проверяемого скрипта, и почти каждый `source "$SCRIPT_DIR/lib/…"`
+      # даёт ложный SC1091 "Not following". С флагами shellcheck идёт по source
+      # и резолвит путь от файла скрипта — так, как это реально исполняется.
       # shellcheck disable=SC2086
-      if ! shellcheck $SH_FILES; then
+      if ! shellcheck -x -P SCRIPTDIR $SH_FILES; then
         echo "FAIL: shellcheck issues"
         FAILED=1
       else
@@ -112,6 +127,24 @@ if [ "$MODE" = "--full" ]; then
     echo "OK: nauta-integration AC suite green"
   else
     echo "FAIL: nauta-integration AC suite"
+    FAILED=1
+  fi
+
+  # --- 7. (--full only) plugin-contract: живые инварианты плагина ---
+  echo "==> plugin-contract"
+  if bash tests/gramax/plugin-contract/run.sh; then
+    echo "OK: plugin-contract green"
+  else
+    echo "FAIL: plugin-contract"
+    FAILED=1
+  fi
+
+  # --- 8. (--full only) doc-paths: нет нерабочих docs/-указателей в content/ ---
+  echo "==> doc-paths"
+  if bash tests/gramax/doc-paths/run.sh; then
+    echo "OK: doc-paths clean"
+  else
+    echo "FAIL: doc-paths gate"
     FAILED=1
   fi
 fi

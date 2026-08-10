@@ -234,7 +234,7 @@ Inserted into docs/auth/login-flow.md:
 
 ## Бриф для SA
 
-**Spec:** `docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md`
+**Spec:** `content/30-requirements/2026-05-08-diagram-on-demand-design.md`
 
 **Спроектировать:**
 - Структуру плагина(ов): один `diagram-on-demand` skill в `gramax` или два независимых плагина (`diagram-mermaid`, `diagram-drawio`).

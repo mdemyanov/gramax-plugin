@@ -97,6 +97,6 @@ plugins/gramax/skills/diagram-on-demand/
 
 ## Связанные артефакты
 
-- spec: `docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md` (open question #1, #3, #6; FR-010, AC-001, AC-008, AC-011)
+- spec: `content/30-requirements/2026-05-08-diagram-on-demand-design.md` (open question #1, #3, #6; FR-010, AC-001, AC-008, AC-011)
 - предшествует: ADR-0001 (один плагин без split)
 - затрагивает: `plugins/gramax/skills/diagram-on-demand/SKILL.md`

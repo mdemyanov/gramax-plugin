@@ -1,0 +1,42 @@
+# tests/gramax/doc-paths/allowlist.txt
+# Упоминания docs/-путей в content/, которые остаются дословно.
+#
+# Две формы:
+#   file.md:N — docs/expected/path.md — причина    точечная: конкретная строка есть
+#     историческая запись. Второе поле — ИМЕННО тот docs/-путь, что стоит на строке N
+#     сейчас; freshness сверяет его дословно, а не факт присутствия какого-то docs/-пути
+#     вообще (иначе переписанная строка молча прикрыла бы новый нерабочий указатель,
+#     случайно попавший на тот же номер — находка ревью).
+#   file.md — причина                              whole-file: весь документ посвящён
+#     самой миграции путей, пинить нечего — пункт держится дисциплиной (ADR-0011 Решение
+#     4, Trade-offs), не построчной проверкой.
+#
+# Критерий (ADR-0011 Решение 4): роль предложения, не каталог. Указатель, по которому
+# читателя приглашают перейти, — чиним. Запись о том, что было выполнено или решено на
+# тот момент, — сохраняем: замена пути переписала бы историческую запись.
+
+# --- Решение ADR, зафиксировавшее исключения на дату принятия ---
+content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md:270 — docs/adr/ — список каталогов, исключённых из правки на момент решения; замена превратила бы решение в утверждение о сегодняшней раскладке
+
+# --- Запись приёмки: где orphan-hits были допущены в тот прогон ---
+content/60-implementation/acceptance/2026-05-11-remove-diagram-skills-acceptance.md:52 — docs/research — вердикт AC-016, перечень допущенных локаций на момент приёмки
+content/60-implementation/acceptance/2026-05-11-remove-diagram-skills-acceptance.md:92 — docs/lessons-learned.md — рекомендация PM в той формулировке, в какой была вынесена
+
+# --- Отчёт QA: перечень найденного при скане с классификацией ---
+content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md:60 — docs/acceptance/2026-05-08-diagram-on-demand-acceptance.md — свидетельство прогона: найденная локация и её классификация
+content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md:61 — docs/qa-reports/2026-05-08-diagram-on-demand-qa-report.md — то же
+content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md:62 — docs/adr/0001-0007*.md — то же; плюс glob-паттерн, а не путь к файлу
+content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md:63 — docs/research/ — то же
+content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md:64 — docs/superpowers/specs/ — то же
+
+# --- Отчёт QA: процитированная выполненная команда и таблица hits ---
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:72 — docs/adr — команда была выполнена именно так; правка сделала бы отчёт ложным описанием собственного метода
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:83 — docs/lessons-learned.md — строка таблицы найденных hits с вердиктом
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:84 — docs/qa-reports/2026-05-11-remove-diagram-skills-qa-report.md — то же
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:85 — docs/qa-reports/2026-05-08-diagram-on-demand-qa-report.md — то же
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:86 — docs/acceptance/2026-05-11-remove-diagram-skills-acceptance.md — то же
+content/60-implementation/test-reports/2026-05-11-routing-mermaid-drawio.md:87 — docs/acceptance/2026-05-08-diagram-on-demand-acceptance.md — то же
+
+# --- Whole-file: документы, предмет которых — сама миграция путей ---
+content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md — требование этой работы: карта переездов и диспозиция обязаны называть старые пути
+content/00-project/adr/0011-test-harness-taxonomy.md — ADR этой работы: обоснование политики требует цитировать старые пути

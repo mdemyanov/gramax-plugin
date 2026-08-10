@@ -12,9 +12,9 @@ properties:
 
 Дата: 2026-05-11
 BA: ba-agent (mode=acceptance)
-Spec: docs/superpowers/specs/2026-05-11-remove-diagram-skills.md
-ADR: docs/adr/0008-drop-internal-drawio-skills.md
-QA: docs/qa-reports/2026-05-11-remove-diagram-skills-qa-report.md
+Spec: content/30-requirements/2026-05-11-remove-diagram-skills.md
+ADR: content/00-project/adr/0008-drop-internal-drawio-skills.md
+QA: content/60-implementation/test-reports/2026-05-11-remove-diagram-skills-qa-report.md
 
 ## Verdict
 

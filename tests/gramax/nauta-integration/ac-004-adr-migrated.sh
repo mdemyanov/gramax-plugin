@@ -21,7 +21,7 @@ assert_file_exists "$ADR_DIR/_index.md" "C1: раздел ADR должен им�
 assert_file_exists "content/00-project/_index.md" "C1: 00-project должен иметь _index.md"
 
 for n in 0001 0002 0003 0004 0005 0006 0007 0008 0009 0010; do
-  f=$(ls "$ADR_DIR"/${n}-*.md 2>/dev/null | head -1)
+  f=$(find "$ADR_DIR" -maxdepth 1 -name "${n}-*.md" 2>/dev/null | head -1)
   if [ -z "$f" ]; then
     echo "  FAIL: AC-3: ADR-$n не найден в $ADR_DIR" >&2
     FAIL=$((FAIL + 1))
@@ -35,7 +35,7 @@ done
 check_status() {
   local n="$1" expected="$2"
   local f
-  f=$(ls "$ADR_DIR"/${n}-*.md 2>/dev/null | head -1)
+  f=$(find "$ADR_DIR" -maxdepth 1 -name "${n}-*.md" 2>/dev/null | head -1)
   [ -z "$f" ] && return
   if ! grep -qF "value: [$expected]" "$f"; then
     echo "  FAIL: AC-8: ADR-$n должен иметь статус $expected" >&2

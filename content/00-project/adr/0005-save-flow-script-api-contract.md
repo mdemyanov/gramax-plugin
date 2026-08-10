@@ -192,6 +192,6 @@ Dev обязан проверить сигнатуру `mermaid_save` в PoC (cl
 
 ## Связанные артефакты
 
-- spec: `docs/superpowers/specs/2026-05-08-diagram-on-demand-design.md` (open question #5, #6; FR-003, FR-004, FR-006, FR-007, FR-008, FR-009, FR-010, FR-011, NFR-003, NFR-004, NFR-005; AC-001, AC-002, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010)
+- spec: `content/30-requirements/2026-05-08-diagram-on-demand-design.md` (open question #5, #6; FR-003, FR-004, FR-006, FR-007, FR-008, FR-009, FR-010, FR-011, NFR-003, NFR-004, NFR-005; AC-001, AC-002, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010)
 - затрагивает: `plugins/gramax/scripts/find_doc_root.sh` (новый), `plugins/gramax/skills/diagram-on-demand/SKILL.md`
 - переиспользует: `plugins/gramax/scripts/drawio_convert.py`, `plugins/gramax/scripts/slugify.py`

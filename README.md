@@ -24,6 +24,10 @@ cd gramax-plugin
 /plugin marketplace add /absolute/path/to/gramax-plugin
 ```
 
+## Разработка этого репозитория
+
+Работа над плагином ведётся ролями из marketplace `nauta` (`/nauta:ba`, `/nauta:sa`, `/nauta:dev`, …) — собственных агентов репозиторий не держит. Установка на чистой машине, пререквизиты (`uv`, git-хуки) и проверка — в [docs/onboarding-nauta.md](docs/onboarding-nauta.md).
+
 ## Skills (плагин gramax)
 
 - `/gramax:writer` — создание и редактирование Gramax-документов

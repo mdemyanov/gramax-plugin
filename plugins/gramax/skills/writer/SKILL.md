@@ -226,13 +226,13 @@ XML (с кадрированием/аннотациями — НЕ редакт�
 
 Синтаксис вставки:
 ```markdown
-[drawio:./filename.svg:Описание:WIDTHpx:HEIGHTpx]
+<drawio path="./filename.svg" width="WIDTHpx" height="HEIGHTpx"/>
 ```
 
 Примеры:
 ```markdown
-[drawio:./architecture.svg:Общая схема процесса:971px:311px]
-[drawio:./overview.svg::211px:101px]
+<drawio path="./architecture.svg" width="971px" height="311px"/>
+<drawio path="./overview.svg" width="211px" height="101px"/>
 ```
 
 **Drawio через внешний плагин** (двухшаговый workflow):
@@ -240,7 +240,7 @@ XML (с кадрированием/аннотациями — НЕ редакт�
 1. Установи prerequisites и внешний плагин `Agents365-ai/drawio-skill` (см. `references/drawio.md`).
 2. Вызови внешний skill — Claude автоматически подберёт его по триггеру (drawio, схема, диаграмма).
 3. Drawio-skill создаёт файл в CWD или по явно указанному пользователем пути — пользователь сам выбирает расположение.
-4. Вставь тег в md вручную: `[drawio:./file.svg:alt:WxHpx]` для Markdown-syntax или `<Image src="./file.svg" />` для XML-syntax (`.doc-root.yaml syntax`).
+4. Вставь тег в md вручную: `<drawio path="./file.svg" width="800px" height="600px"/>` — единый синтаксис для Markdown и XML (с v4.1.0; `.doc-root.yaml syntax` на формат тега больше не влияет).
 
 Полные детали, prerequisites и troubleshooting → `references/drawio.md`.
 

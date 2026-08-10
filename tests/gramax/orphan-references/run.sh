@@ -7,7 +7,7 @@
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
-cd "$ROOT"
+cd "$ROOT" || exit 1
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -24,10 +24,10 @@ fi
 # они исключены ниже, а не здесь, чтобы список областей оставался читаемым.
 SEARCH_PATHS=(plugins scripts tests CLAUDE.md AGENTS.md README.md)
 
-# Исторические suite исключены осознанно: remove-diagram-skills проверяет ровно эти имена
-# как предмет своих AC, diagram-on-demand покрывает удалённую по ADR-0008 фичу и содержит
-# все пять паттернов в 11 файлах. Без этих двух исключений гейт красный с первого прогона.
-EXCLUDE_RE='(^|/)CHANGELOG\.md$|^content/00-project/adr/|^content/60-implementation/|^docs/|^tests/gramax/orphan-references/|^tests/gramax/remove-diagram-skills/|^tests/gramax/diagram-on-demand/'
+# Архив исключён по принципу, а не по списку имён: tests/gramax/archive/ — замороженные
+# свидетельства приёмки прошлых релизов, они обязаны называть удалённые артефакты как
+# предмет своих ассертов (ADR-0011, Решение 1). CHANGELOG, ADR и отчёты — то же основание.
+EXCLUDE_RE='(^|/)CHANGELOG\.md$|^content/00-project/adr/|^content/60-implementation/|^docs/|^tests/gramax/orphan-references/|^tests/gramax/archive/'
 
 TOTAL=0
 while IFS= read -r pattern; do
@@ -55,5 +55,5 @@ if [ "$TOTAL" -gt 0 ]; then
   exit 1
 fi
 
-printf "${GREEN}PASS${NC}: остаточных ссылок на удалённые артефакты нет.\n"
+printf "%bPASS%b: остаточных ссылок на удалённые артефакты нет.\n" "$GREEN" "$NC"
 exit 0
