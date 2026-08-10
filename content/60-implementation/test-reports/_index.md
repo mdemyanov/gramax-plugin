@@ -11,3 +11,4 @@ order: 1
 - [Удаление diagram-скиллов](2026-05-11-remove-diagram-skills-qa-report.md)
 - [Роутинг mermaid и drawio](2026-05-11-routing-mermaid-drawio.md)
 - [Mermaid file-based](2026-05-12-mermaid-file-based-qa-report.md)
+- [Наведение порядка в test harness и doc-paths](2026-08-10-test-harness-taxonomy-qa-report.md)
