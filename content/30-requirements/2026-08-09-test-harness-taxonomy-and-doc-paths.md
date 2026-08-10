@@ -222,7 +222,7 @@ properties:
   `git show "$BASE_REV:tests/gramax/$s/$f" | diff -q - "tests/gramax/archive/$s/$f" && echo PASS`
   где `BASE_REV` — коммит непосредственно перед переездом (первый родитель коммита с `git mv`). Способ определения `BASE_REV` и обвязка цикла по файлам suite — на усмотрение QA-author; здесь фиксируется инвариант побайтового совпадения, не конкретный скрипт.
 - [ ] **AC-004:** `diagram-on-demand/` удалён: `test ! -d tests/gramax/diagram-on-demand && echo PASS`
-- [ ] **AC-005:** архив не упоминается в `check.sh`: `grep -c 'tests/gramax/archive' scripts/check.sh | grep -q '^0$' && echo PASS`
+- [ ] **AC-005 (переформулирован 2026-08-10 по итогам финального ревью, см. FR-034):** архив не *вызывается* из `check.sh` — инвариант FR-005/NFR-004 про исполнение, не про упоминание. Задача 9 добавила в `check.sh` исключение `tests/gramax/archive/` из shellcheck-скана (комментарий + `grep -v`) — это упоминание, не вызов, и инвариант не нарушает. Проверка: `! grep -qE 'bash +tests/gramax/archive' scripts/check.sh && echo PASS`
 - [ ] **AC-006:** `verify.sh` существует и требует параметр: `test -f tests/gramax/archive/mermaid-file-based/verify.sh && bash tests/gramax/archive/mermaid-file-based/verify.sh 2>&1 | grep -qi 'output-dir' && echo PASS`
 
 ### plugin-contract
@@ -237,7 +237,7 @@ properties:
 - [ ] **AC-014 (CHANGELOG-секция для текущей версии):** `V=$(python3 -c "import json; print(json.load(open('plugins/gramax/.claude-plugin/plugin.json'))['version'])"); grep -q "## $V" plugins/gramax/CHANGELOG.md && echo PASS`
 - [ ] **AC-015 (ретировка):** ретировка означает, что `plugin-contract` не содержит ассерта на поле `skills` (а не что поля нет в манифесте — манифест мы не трогаем): `test -d tests/gramax/plugin-contract && ! grep -rlE "get\('skills'\)|\['skills'\]" tests/gramax/plugin-contract/ 2>/dev/null | grep -q . && echo PASS`
 - [ ] **AC-016 (sunset-registry расширен, без ложных срабатываний):** реестр содержит нужные паттерны, и гейт зелёный целиком — зелёный результат исключает ложные срабатывания на `staging.md:30` и `drawio.md:60` (иначе `run.sh` вернул бы ненулевой код именно на них): `grep -qi 'claude-mermaid' tests/gramax/orphan-references/sunset-registry.txt && grep -qi 'diagram-on-demand' tests/gramax/orphan-references/sunset-registry.txt && bash tests/gramax/orphan-references/run.sh && echo PASS`
-- [ ] **AC-017 (EXCLUDE_RE схлопнут):** `grep -c 'remove-diagram-skills\|tests/gramax/diagram-on-demand' tests/gramax/orphan-references/run.sh | grep -q '^0$' && grep -q 'tests/gramax/archive' tests/gramax/orphan-references/run.sh && echo PASS`
+- [ ] **AC-017 (EXCLUDE_RE схлопнут, переформулирован 2026-08-10 по итогам финального ревью):** проверяется сам паттерн `EXCLUDE_RE`, а не файл целиком — комментарий в строке 4 (`# Обобщение ac-016 из remove-diagram-skills.`) легитимно упоминает старое имя suite и не должен ловиться проверкой: `EXCLUDE_RE` выражает принцип (`^tests/gramax/archive/`), а не список конкретных имён: `! grep 'EXCLUDE_RE=' tests/gramax/orphan-references/run.sh | grep -qE 'remove-diagram-skills|tests/gramax/diagram-on-demand' && grep 'EXCLUDE_RE=' tests/gramax/orphan-references/run.sh | grep -q 'tests/gramax/archive' && echo PASS`
 - [ ] **AC-018 (подключение к `--full`):** `grep -q 'plugin-contract' scripts/check.sh && grep -q 'doc-paths' scripts/check.sh && echo PASS`
 
 ### Продуктовые фиксы v4.1.1
