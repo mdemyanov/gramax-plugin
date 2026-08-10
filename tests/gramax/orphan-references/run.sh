@@ -7,7 +7,7 @@
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
-cd "$ROOT"
+cd "$ROOT" || exit 1
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -55,5 +55,5 @@ if [ "$TOTAL" -gt 0 ]; then
   exit 1
 fi
 
-printf "${GREEN}PASS${NC}: остаточных ссылок на удалённые артефакты нет.\n"
+printf "%bPASS%b: остаточных ссылок на удалённые артефакты нет.\n" "$GREEN" "$NC"
 exit 0

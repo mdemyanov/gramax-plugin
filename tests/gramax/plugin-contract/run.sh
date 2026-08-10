@@ -4,7 +4,7 @@
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+cd "$SCRIPT_DIR" || exit 1
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -35,7 +35,7 @@ for t in "${tests[@]}"; do
   fi
 done
 
-printf "\n${YELLOW}━━━ Summary ━━━${NC}\n"
+printf "\n%b━━━ Summary ━━━%b\n" "$YELLOW" "$NC"
 printf "${GREEN}Passed:${NC} %d\n" "$pass"
 printf "${RED}Failed:${NC} %d\n" "$fail"
 

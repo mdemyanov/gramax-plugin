@@ -71,10 +71,26 @@ fi
 if [ "$MODE" = "--full" ]; then
   echo "==> shellcheck"
   if command -v shellcheck > /dev/null 2>&1; then
-    SH_FILES=$(git ls-files '*.sh' 2>/dev/null || true)
+    # tests/gramax/archive/ — замороженные свидетельства приёмки прошлых релизов
+    # (BR-001, ADR-0011 Решение 1): их не редактируют, поэтому замечания shellcheck
+    # там не чинимы и не значимы — исключаем каталог из проверки, а не подавляем
+    # находки. grep -v не должен молча выесть весь список: если после фильтрации
+    # не осталось файлов, живых .sh в репозитории не найдено — это отдельный факт,
+    # с ним разбираются отдельно от "архив исключён штатно".
+    ALL_SH_FILES=$(git ls-files '*.sh' 2>/dev/null || true)
+    if [ -n "$ALL_SH_FILES" ]; then
+      SH_FILES=$(printf '%s\n' "$ALL_SH_FILES" | grep -v '^tests/gramax/archive/' || true)
+    else
+      SH_FILES=""
+    fi
     if [ -n "$SH_FILES" ]; then
+      # -x -P SCRIPTDIR: не подавление, а починка вызова. Без них shellcheck ищет
+      # `source`-цели относительно текущего каталога (тут — repo root), а не
+      # каталога проверяемого скрипта, и почти каждый `source "$SCRIPT_DIR/lib/…"`
+      # даёт ложный SC1091 "Not following". С флагами shellcheck идёт по source
+      # и резолвит путь от файла скрипта — так, как это реально исполняется.
       # shellcheck disable=SC2086
-      if ! shellcheck $SH_FILES; then
+      if ! shellcheck -x -P SCRIPTDIR $SH_FILES; then
         echo "FAIL: shellcheck issues"
         FAILED=1
       else
