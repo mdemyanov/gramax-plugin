@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "nauta@nauta": true,
+    "superpowers@claude-plugins-official": true
+  }
+}
