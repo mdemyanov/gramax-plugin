@@ -74,11 +74,14 @@ else
 fi
 
 # AC-005b: конвенция имени — <page-slug>-<diagram-slug>.mermaid
-find "$OUT" -name '*.mermaid' -print0 2>/dev/null | while IFS= read -r -d '' f; do
+# Через process substitution (< <(...)), а не pipe (find | while): pipe запускал бы while
+# в подоболочке, и note()'вский FAIL=$((FAIL+1)) внутри неё терялся бы при возврате в основной
+# shell — скрипт печатал бы FAIL в stderr, но всё равно выходил бы нулём.
+while IFS= read -r -d '' f; do
   base="$(basename "$f" .mermaid)"
   echo "$base" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)+$' \
-    || printf "${RED}FAIL${NC}: AC-005b: имя '%s' не соответствует конвенции <page-slug>-<diagram-slug>\n" "$base" >&2
-done
+    || note "AC-005b: имя '$base' не соответствует конвенции <page-slug>-<diagram-slug>"
+done < <(find "$OUT" -name '*.mermaid' -print0 2>/dev/null)
 
 if [ "$FAIL" -gt 0 ]; then
   printf "\n${RED}FAILED${NC}: %d проверок не прошли.\n" "$FAIL" >&2
