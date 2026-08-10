@@ -1682,11 +1682,16 @@ Run: `cp ~/.claude/settings.json ~/.claude/settings.json.bak-nauta-pin`
 
 Отредактировать `~/.claude/settings.json`, привести запись к виду:
 
+> Хост в `url` ниже замаскирован 2026-08-10: репозиторий публичный, и публиковать в нём
+> адрес внутренней инфраструктуры компании не нужно. Это редактура ради нераскрытия хоста,
+> а не правка исторического решения — сам шаг и его результат (закрепление `ref`) не
+> менялись.
+
 ```json
     "nauta": {
       "source": {
         "source": "git",
-        "url": "https://doc-hub.gitlab.yandexcloud.net/tools-ai/nauta.git",
+        "url": "https://<внутренний-хост>/tools-ai/nauta.git",
         "ref": "v0.2.1"
       }
     }
