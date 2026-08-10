@@ -160,7 +160,8 @@ properties:
   | `docs/research/` | `content/10-domain/research/` |
   | `docs/lessons-learned.md` | `content/lessons-learned.md` |
 
-  Построчный список всех 41 файла/строки — в приложенной диспозиции (`doc-paths-disposition.md`, раздел «POINTER — чиним»), не дублируется здесь построчно.
+  Построчный список всех 41 файла/строки — в приложенной диспозиции
+  (`docs/doc-paths-disposition.md`, раздел «POINTER — чиним»), не дублируется здесь построчно.
 
 - **FR-026:** 14 упоминаний с ролью RECORD (диспозиция, раздел «RECORD — сохраняем дословно») остаются без изменений. Allowlist `tests/gramax/doc-paths/allowlist.txt` поддерживает две формы записи:
   - `file:line — причина` — точечная защита одной из 14 исторических записей диспозиции;
