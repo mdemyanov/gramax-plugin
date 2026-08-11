@@ -1,7 +1,7 @@
 {
   "name": "gramax",
-  "version": "4.1.1",
-  "description": "Gramax: writer, comments-read, comments-write, mermaid, drawio, review-agent. Mermaid — file-based workflow: .mermaid-файл рядом со статьёй + тег-ссылка в md. Drawio делегирует Agents365-ai/drawio-skill.",
+  "version": "4.2.0",
+  "description": "Gramax: writer, comments-read, comments-write, mermaid, drawio, review-agent. Плюс валидатор Gramax-каталога с машиночитаемым контрактом тегов и правил (gramax-tags.json, gramax-catalog-rules.json) и офлайн-мигратор устаревшего inline-mermaid. Mermaid — file-based workflow: .mermaid-файл рядом со статьёй + тег-ссылка в md. Drawio делегирует Agents365-ai/drawio-skill.",
   "author": {
     "name": "mdemyanov",
     "email": "qutask@gmail.com"

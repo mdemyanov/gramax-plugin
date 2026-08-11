@@ -1,4 +1,6 @@
 ---
+title: Принятие file-based mermaid потребителями и пакетная миграция
+order: 13
 properties:
   - name: Тип контента
     value: [ADR]

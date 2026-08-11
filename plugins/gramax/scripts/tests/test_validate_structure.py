@@ -30,6 +30,46 @@ class GoodCatalogTests(unittest.TestCase):
         self.assertEqual(result.stdout.strip(), "", "Good catalog should produce no messages")
 
 
+class RootIndexTests(unittest.TestCase):
+    """AC-009 (content/30-requirements/2026-08-11-validation-contract.md); проверяемое
+    требование зафиксировано в content/00-project/adr/0015-root-index-inert.md, Решение 5.
+
+    `fixtures/good/` не несёт корневой `_index.md` и уже проходит чисто
+    (`GoodCatalogTests.test_good_catalog_passes`) — негативный контроль «отсутствие»
+    уже покрыт, отдельная фикстура для него не заводится (ADR-0015, Решение 5).
+
+    Природа: живой контракт — КРАСНЫЙ на момент создания. `check_no_index_in_root`
+    (`validate_structure.py:78-80`) всё ещё вызывается из `validate()` и сегодня
+    флагует `_index.md` в корне как error — удаление этой проверки закрывает DEV-001
+    (ADR-0012 Решение 1 / ADR-0015 Решение 1). Тест проверяет только код возврата и
+    отсутствие issue — не рендер: у Python-валидатора нет доступа к движку Gramax,
+    сам факт «контент не отображается» вне его периметра (ADR-0015, Решение 5).
+    """
+
+    def test_root_index_present_passes(self):
+        result = run_validator(FIXTURES / "root-index")
+        self.assertEqual(result.returncode, 0, f"stdout: {result.stdout}")
+        self.assertEqual(result.stdout.strip(), "")
+
+
+class TagMaskingRegressionTests(unittest.TestCase):
+    """Регрессия на дефект `check_tags`, найденный догфудингом (ADR-0012 Решение 5): тег,
+    упомянутый в прозе как inline-код (`` `<note>` ``), не парная разметка — не должен
+    давать ложный `unpaired`. `check_tags` раньше вырезал только ``` fenced-блоки
+    собственной ad-hoc регуляркой, не inline-код; почин — переиспользовать `_mask_code`
+    (уже используется `check_placeholders`/`check_broken_links`/`check_orphans`).
+
+    Фикстура держит и ложный кандидат (inline-упоминание `<note>`/`<tabs>` без реальной
+    разметки), и настоящую сбалансированную пару `<note>...</note>` — вторая часть
+    гарантирует, что маскирование не выключило детектирование реальных непарных тегов.
+    """
+
+    def test_inline_tag_mention_does_not_trigger_unpaired(self):
+        result = run_validator(FIXTURES / "inline-tag-mention")
+        self.assertEqual(result.returncode, 0, f"stdout: {result.stdout}\nstderr: {result.stderr}")
+        self.assertNotIn("unpaired", result.stdout)
+
+
 class BadCatalogTests(unittest.TestCase):
     def setUp(self):
         self.result = run_validator(FIXTURES / "bad")

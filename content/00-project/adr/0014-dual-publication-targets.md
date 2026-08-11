@@ -1,4 +1,6 @@
 ---
+title: Два независимых таргета публикации — публичный GitHub и внутренний GitLab-каталог
+order: 14
 properties:
   - name: Тип контента
     value: [ADR]

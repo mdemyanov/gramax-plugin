@@ -1,0 +1,16 @@
+code: good-test
+title: Good test catalog
+description: Valid fixture
+language: ru
+syntax: XML
+
+properties:
+  - name: Тип контента
+    type: Enum
+    style: green
+    icon: file-text
+    values:
+      - Требование
+      - ADR
+
+filterProperties: [Тип контента]

@@ -1,4 +1,6 @@
 ---
+title: "RES-002: Где потребителям не хватило инструкций плагина"
+order: 3
 properties:
   - name: Тип контента
     value: [Research]

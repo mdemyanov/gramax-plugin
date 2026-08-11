@@ -1,5 +1,120 @@
 # Changelog
 
+## 4.2.0 — 2026-08-12
+
+Валидатор каталога и mermaid-workflow получают машиночитаемый контракт вместо документации
+прозой (ADR-0012), резолвится противоречие про `_index.md` в корне каталога (ADR-0015), а
+принятие file-based mermaid у потребителей получает границу юрисдикции и инструмент пакетной
+миграции (ADR-0013). Дополнительно задокументированы шесть повторяющихся потребительских
+практик: cross-каталожные ссылки, статус ADR, XML-блоки как структура, дрейф локальных
+скилл-дублей (`content/40-architecture/2026-08-11-writer-rules-disposition.md`). Semver —
+Minor (ADR-0006): все изменения аддитивны, единственное ослабление существующей
+error-проверки не может покрасить каталог, который раньше проходил валидацию.
+
+Contract: `gramax-tags.json` v1, `gramax-catalog-rules.json` v1 (новые) — единственный
+источник правды о поддерживаемых Gramax-тегах и правилах каталога; `validate_structure.py`
+читает оба файла вместо собственных захардкоженных списков `PAIRED_TAGS`/`SELF_CLOSING`/
+`GARBAGE_FILES` (ADR-0012 Решение 3). Семантика `indexPolicy.root` уточнена: `optional`
+означает не «титульная страница», а «разрешён, но не отображается Gramax» (ADR-0015 Решение
+4; подробности — раздел «Changed» ниже).
+
+### Added
+
+- **`gramax-tags.json`** (new) — единый список поддерживаемых Gramax-тегов: парных (`note`,
+  `tabs`, `tab`, `html`, `comment`, `color`, `highlight`) и самозакрывающихся (`view`,
+  `snippet`, `openapi`, `mermaid`, `video`, `icon`, `image`, `drawio`), плюс `legacy[]` —
+  история устаревших форматов (старый drawio-тег `[drawio:...]`, устаревший inline-mermaid) с
+  версией, в которой синтаксис перестал поддерживаться.
+- **`gramax-catalog-rules.json`** (new) — единый список правил каталога: обязательные поля
+  `.doc-root.yaml` и frontmatter, политика `_index.md` (`root: optional`, `subfolder:
+  required`), служебные файлы, наименование и колокация non-md контента (`.mermaid`).
+- **Три новые проверки `validate_structure.py`:** плейсхолдер шаблона `{{ИМЯ}}`, доехавший до
+  наполненного каталога (error); статья-сирота без входящих markdown-ссылок внутри каталога
+  (warning, error под `--strict`); битая markdown-ссылка на несуществующий файл (error).
+  Ни одна из трёх не резолвит cross-каталожные ссылки между разными `.doc-root.yaml`-
+  каталогами — такая ссылка не считается ни сиротой, ни битой ссылкой.
+- **README:** новый раздел `## Валидация каталога` — среди первых заголовков `##`, со ссылками
+  на оба JSON-контракта и на pre-commit-шаблон. `validate_structure.py --help` теперь тоже
+  указывает, где искать документацию.
+- **`scripts/pre-commit.sh`** (new) — готовый к копированию шаблон git pre-commit хука: вызывает
+  `validate_structure.py` через `${CLAUDE_PLUGIN_ROOT}` на каталоге потребителя.
+- **`scripts/migrate_mermaid.py`** (new) — офлайн-сканер и пакетный мигратор устаревшего
+  inline-mermaid (`<mermaid>…</mermaid>`, fenced ` ```mermaid `) в file-based формат. По
+  умолчанию — только отчёт (файл:строка + сводка `To-migrate`/`Out-of-jurisdiction`/
+  `Already-compliant`), без изменения файлов; мутация — только под `--fix --yes`. Работает
+  внутри границы юрисдикции — поддерева, чей ближайший предок несёт `.doc-root.yaml`; вне
+  границы (инженерные документы репозитория) инлайн-mermaid не считается нарушением.
+- `skills/mermaid/references/jurisdiction-and-validation.md` (new) — граница юрисдикции
+  file-based mermaid с примерами, предикат «валидный `.mermaid`-файл» для собственного
+  валидатора потребителя, пример расширения allowlist на `.mermaid`.
+- `skills/writer/references/authoritative-source.md` (new) — как отличить легитимный локальный
+  скилл-дубль потребителя (свои конвенции конкретного каталога) от нелегитимного
+  (переизлагающего общее Gramax-правило поверх `writer` и объявляющего себя приоритетным при
+  расхождении).
+- `skills/writer/references/doc-root-schema.md` — рабочий пример cross-каталожной ссылки через
+  `code`; явная позиция «вложенные `.doc-root.yaml` и overlay-расширение `properties` — вне
+  периметра плагина, поведение не гарантируется»; проекция статуса ADR между телом статьи
+  (источник истины) и frontmatter (обновляется тем же изменением).
+- `skills/writer/references/structure.md` — раздел «XML-блоки, засчитываемые как структура»:
+  `<note>`, `<tabs>`, `<view>`, `<snippet>`, `<mermaid>`, `<drawio>`, `<image>`, `<openapi>`.
+
+### Changed
+
+- **`_index.md` в корне каталога (рядом с `.doc-root.yaml`) больше не считается ошибкой
+  валидатора** — проверка `check_no_index_in_root` удалена. Одновременно документация
+  (`skills/writer/SKILL.md`, `references/structure.md`, `references/staging.md`,
+  `references/doc-root-schema.md`) прямо формулирует: Gramax исключает корневой `_index.md` из
+  чтения категории — файл разрешён, но не отображается ни как титульная страница, ни как
+  раздел; навигация корня строится целиком из `.doc-root.yaml`. Это ослабление существующей
+  error-проверки: каталог, ранее падавший на ней, теперь проходит, а у каталогов, которые уже
+  проходили, поведение не меняется.
+- `skills/writer/SKILL.md` — три точечные вставки: ловушка обратных кавычек рядом с правилом
+  cross-каталожных ссылок (код-спан `` `[X](Y)` `` — не markdown-ссылка, чужой regex-валидатор
+  может дать ложное срабатывание); guardrail утечки абсолютных путей (двойной риск —
+  идентификация контрибьютора и битая ссылка); декларация `writer` как единственного
+  authoritative-источника Gramax-соглашений плагина со ссылкой на новый
+  `references/authoritative-source.md`.
+- Self-closing tag листинги в документации writer-skill дополнены `<drawio/>`.
+
+### Fixed
+
+- `check_tags` (`validate_structure.py`) — ложное срабатывание `unpaired <tag>` на статьях,
+  упоминающих Gramax-тег как inline-код в прозе (например, `` `<note>` `` в тексте, не сама
+  разметка). Затрагивает любого потребителя, документирующего Gramax-теги прозой, не только
+  этот репозиторий.
+
+### Migration notes (с v4.1.x)
+
+1. Замени собственную regex-таблицу Gramax-тегов чтением контракта — синхронизация с новым
+   релизом плагина перестаёт требовать ручной правки на твоей стороне:
+   ```bash
+   jq -r '.pairedTags, .selfClosingTags' "${CLAUDE_PLUGIN_ROOT}/gramax-tags.json"
+   ```
+2. Если у тебя нет pre-commit-гейта для Gramax-каталога — скопируй готовый шаблон вместо того,
+   чтобы писать свой валидатор с нуля:
+   ```bash
+   cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-commit.sh" .githooks/pre-commit
+   chmod +x .githooks/pre-commit
+   git config core.hooksPath .githooks
+   ```
+3. Мигрируй устаревший inline-mermaid в своём каталоге — сначала отчёт, затем правка:
+   ```bash
+   uv run "${CLAUDE_PLUGIN_ROOT}/scripts/migrate_mermaid.py" content
+   uv run "${CLAUDE_PLUGIN_ROOT}/scripts/migrate_mermaid.py" content --fix --yes
+   ```
+4. Если твой собственный content-валидатор ограничивает проверяемые файлы суффиксом `.md` —
+   расширь allowlist на `.mermaid`, иначе file-based диаграммы для него невидимы. Одного
+   расширения allowlist недостаточно для проверки содержимого — предикат «валидный
+   `.mermaid`-файл» см. `skills/mermaid/references/jurisdiction-and-validation.md`:
+   ```python
+   ALLOWED_SUFFIXES = {".md", ".mermaid"}
+   ```
+5. `_index.md` в корне каталога больше не ошибка валидатора плагина — и одновременно Gramax
+   его не отображает: содержимое не попадает ни в титульную страницу, ни в список статей
+   корня. Если в корневом `_index.md` лежит дашборд или контент, рассчитанный на читателя, —
+   он остаётся видимым только в git-репозитории, не в интерфейсе Gramax; при необходимости
+   перенеси такой контент в `_index.md` подраздела верхнего уровня, где Gramax его отображает.
+
 ## 4.1.1 — 2026-08-10
 
 ### Fixed

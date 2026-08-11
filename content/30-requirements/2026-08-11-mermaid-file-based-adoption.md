@@ -1,13 +1,14 @@
 ---
 title: Принятие file-based mermaid потребителями — граница юрисдикции, обнаружение и миграция устаревшего формата
-status: draft
+order: 6
+status: done
 date: 2026-08-11
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [gramax]
 ---

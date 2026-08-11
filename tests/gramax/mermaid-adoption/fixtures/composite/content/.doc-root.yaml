@@ -1,0 +1,16 @@
+code: mermaid-adoption-fixture
+title: "Фикстура — принятие file-based mermaid"
+description: >-
+  Композитная фикстура для AC-002/AC-003/AC-005…AC-008/AC-010
+  (content/30-requirements/2026-08-11-mermaid-file-based-adoption.md). Два легаси-вхождения
+  (fenced + paired), один уже корректный тег, один файл вне юрисдикции (../outside/).
+language: ru
+syntax: XML
+
+properties:
+  - name: Тип контента
+    type: Enum
+    values:
+      - Требование
+
+filterProperties: [Тип контента]

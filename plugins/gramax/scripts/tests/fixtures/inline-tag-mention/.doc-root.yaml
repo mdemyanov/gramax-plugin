@@ -1,0 +1,16 @@
+code: inline-tag-mention-test
+title: Inline tag mention test catalog
+description: Regression fixture — тег упомянут в прозе как inline-код, не как разметка
+language: ru
+syntax: XML
+
+properties:
+  - name: Тип контента
+    type: Enum
+    style: green
+    icon: file-text
+    values:
+      - Требование
+      - ADR
+
+filterProperties: [Тип контента]

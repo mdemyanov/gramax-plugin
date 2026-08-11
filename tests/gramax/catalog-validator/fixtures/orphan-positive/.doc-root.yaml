@@ -1,0 +1,13 @@
+code: orphan-positive-test
+title: Orphan positive fixture
+description: Фикстура для AC-013/FR-046 — статья без входящих ссылок внутри каталога.
+language: ru
+syntax: XML
+
+properties:
+  - name: Тип контента
+    type: Enum
+    values:
+      - Требование
+
+filterProperties: [Тип контента]

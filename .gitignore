@@ -17,6 +17,10 @@ venv/
 # Claude Code local settings (per-machine, not distributed)
 .claude/settings.local.json
 
+# Рабочие каталоги инструментов и изолированных worktree — локальные, не распространяются
+.claire/
+.worktrees/
+
 # Logs / tmp
 *.log
 tmp/

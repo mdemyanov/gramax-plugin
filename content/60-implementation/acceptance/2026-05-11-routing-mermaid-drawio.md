@@ -1,4 +1,6 @@
 ---
+title: "Acceptance Report — routing-mermaid-drawio-v2"
+order: 3
 properties:
   - name: Тип контента
     value: [Приёмка]

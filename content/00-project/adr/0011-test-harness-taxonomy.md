@@ -1,4 +1,6 @@
 ---
+title: Таксономия test harness tests/gramax и гейт doc-paths
+order: 11
 properties:
   - name: Тип контента
     value: [ADR]

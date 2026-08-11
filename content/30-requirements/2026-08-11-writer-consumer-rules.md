@@ -1,13 +1,14 @@
 ---
 title: Правила, изобретённые потребителями поверх writer — триаж на включение в плагин
-status: draft
+order: 8
+status: done
 date: 2026-08-11
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [gramax]
 ---
@@ -286,8 +287,14 @@ G13) показало шесть повторяющихся тем, по кот�
   `grep -rliE '/Users/|абсолютн(ый|ые) путь' plugins/gramax/skills/writer/ | grep -q . && echo PASS`
 - [ ] **AC-010 (FR-074, `writer` объявляет себя authoritative источником):**
   `grep -riE 'authoritative|единственн.{0,20}источник' plugins/gramax/skills/writer/SKILL.md && echo PASS`
-- [ ] **AC-011 (FR-076, разрешающий документ ссылается на это требование):**
-  `grep -rl '2026-08-11-writer-consumer-rules' content/00-project/adr/*.md 2>/dev/null | grep -q . && echo PASS`
+- [ ] **AC-011 (FR-076, разрешающий документ ссылается на это требование):** разрешающий
+  документ существует, ссылается на это требование по имени файла и несёт триаж всех шести тем
+  A–F. Расположение — `content/00-project/adr/` либо `content/40-architecture/`: FR-076 называет
+  ADR ожидаемой, но не единственной формой, а фактическим разрешающим документом принят
+  `content/40-architecture/2026-08-11-writer-rules-disposition.md` (Accepted), который сам
+  обосновывает, почему он диспозиция, а не ADR: enforcement и машиночитаемый контракт закреплены
+  параллельным ADR-0012, здесь — только триаж. Проверка идёт по наличию ссылки и полноте триажа,
+  не по каталогу размещения (уточнение PM, 2026-08-11).
 - [ ] **AC-012 (NFR-002, regression — существующий синтаксис drawio не тронут):**
   `grep -qE '<drawio path="\[^"\]\*" width="\[^"\]\*" height="\[^"\]\*"/>' plugins/gramax/skills/writer/references/drawio.md && echo PASS`
 - [ ] **AC-013 (композитный):** `bash scripts/check.sh --fast && echo PASS`

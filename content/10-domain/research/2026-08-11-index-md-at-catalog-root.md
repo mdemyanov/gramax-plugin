@@ -1,4 +1,6 @@
 ---
+title: "`_index.md` в корне Gramax-каталога: что запрещает скилл, что требует валидатор, что делает движок"
+order: 2
 properties:
   - name: Тип контента
     value: [Research]

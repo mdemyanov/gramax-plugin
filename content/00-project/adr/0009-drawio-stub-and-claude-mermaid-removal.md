@@ -1,4 +1,6 @@
 ---
+title: Drawio-stub skill и удаление submodule claude-mermaid
+order: 9
 properties:
   - name: Тип контента
     value: [ADR]

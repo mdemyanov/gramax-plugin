@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "pairedTags": ["note", "tabs", "tab", "html", "comment", "color", "highlight"],
+  "selfClosingTags": ["view", "snippet", "openapi", "mermaid", "video", "icon", "image", "drawio"],
+  "legacy": [
+    {
+      "tag": "drawio",
+      "deprecatedSyntax": "[drawio:<path>:<alt>:<width>px:<height>px]",
+      "canonicalSyntax": "<drawio path=\"<path>\" width=\"<width>px\" height=\"<height>px\"/>",
+      "removedInVersion": "4.1.0"
+    },
+    {
+      "tag": "mermaid",
+      "deprecatedSyntax": "<mermaid>...</mermaid>",
+      "canonicalSyntax": "<mermaid path=\"<path>\" width=\"<width>px\" height=\"<height>px\"/>",
+      "removedInVersion": "4.0.0"
+    },
+    {
+      "tag": "mermaid",
+      "deprecatedSyntax": "```mermaid\n...\n```",
+      "canonicalSyntax": "<mermaid path=\"<path>\" width=\"<width>px\" height=\"<height>px\"/>",
+      "removedInVersion": "4.0.0"
+    }
+  ]
+}

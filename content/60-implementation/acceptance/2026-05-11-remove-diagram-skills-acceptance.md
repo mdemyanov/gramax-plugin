@@ -1,4 +1,6 @@
 ---
+title: "Acceptance Report: remove-diagram-skills"
+order: 2
 properties:
   - name: Тип контента
     value: [Приёмка]

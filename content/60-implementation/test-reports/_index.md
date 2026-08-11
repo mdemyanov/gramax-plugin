@@ -12,3 +12,4 @@ order: 1
 - [Роутинг mermaid и drawio](2026-05-11-routing-mermaid-drawio.md)
 - [Mermaid file-based](2026-05-12-mermaid-file-based-qa-report.md)
 - [Наведение порядка в test harness и doc-paths](2026-08-10-test-harness-taxonomy-qa-report.md)
+- [Волна 4.2.0 — контракт валидации, mermaid-adoption, writer-consumer-rules](2026-08-12-wave-4.2.0-qa-report.md)

@@ -1,4 +1,6 @@
 ---
+title: Mermaid skill — file-based workflow
+order: 10
 properties:
   - name: Тип контента
     value: [ADR]

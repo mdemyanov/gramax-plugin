@@ -1,13 +1,14 @@
 ---
 title: Валидация Gramax-каталога как публичный контракт плагина
-status: draft
+order: 7
+status: done
 date: 2026-08-11
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [gramax, marketplace]
 ---

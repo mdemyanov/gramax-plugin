@@ -1,4 +1,6 @@
 ---
+title: "QA Report — наведение порядка в test harness gramax и doc-paths (gramax 4.1.1)"
+order: 5
 properties:
   - name: Тип контента
     value: [Тест-отчёт]

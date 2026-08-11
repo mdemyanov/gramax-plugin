@@ -1,0 +1,17 @@
+code: orphan-boundary-b
+title: Orphan boundary fixture — catalog B
+description: >-
+  Сосед catalog-a/ — отдельный .doc-root.yaml-каталог. Существует, чтобы cross-каталожная
+  ссылка из catalog-a/hub.md указывала на реальный файл, а не на битую ссылку (иначе
+  AC-014 непреднамеренно пересекался бы с AC-015). Этот каталог не сканируется ac-004 —
+  валидатор запускается только на catalog-a/.
+language: ru
+syntax: XML
+
+properties:
+  - name: Тип контента
+    type: Enum
+    values:
+      - Требование
+
+filterProperties: [Тип контента]

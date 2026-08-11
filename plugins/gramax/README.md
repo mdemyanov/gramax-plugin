@@ -57,6 +57,30 @@ Claude Code plugin для работы с документацией в форм
 
 Детали Gramax-тегов для вставки — в справочнике writer-skill (файл `references/drawio.md`).
 
+## Валидация каталога
+
+Плагин поставляет `scripts/validate_structure.py` — офлайн pre-publish валидатор
+Gramax-каталога (обязательность `_index.md` в подпапках, парность тегов, frontmatter,
+плейсхолдеры `{{ИМЯ}}`, статьи-сироты, битые markdown-ссылки). Правила и список
+поддерживаемых Gramax-тегов — не в прозе, а в двух машиночитаемых JSON-контрактах рядом со
+скриптом: [`gramax-tags.json`](./gramax-tags.json) и
+[`gramax-catalog-rules.json`](./gramax-catalog-rules.json) — единственный источник правды,
+который сам валидатор читает при каждом запуске (ADR-0012). Для подключения к pre-commit/CI
+своего репозитория скопируйте готовый шаблон
+[`scripts/pre-commit.sh`](./scripts/pre-commit.sh).
+
+```bash
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py" content
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py" --help
+```
+
+Отдельно — `scripts/migrate_mermaid.py`: офлайн-сканер и пакетный мигратор устаревшего inline-mermaid (`<mermaid>…</mermaid>`, fenced ` ```mermaid `) в file-based формат внутри границы юрисдикции (`.doc-root.yaml`). По умолчанию — только отчёт (файл:строка + сводка из трёх счётчиков — `To-migrate`/`Out-of-jurisdiction`/`Already-compliant`), без единой мутации; мутация — только под `--fix --yes` (сводка тогда печатает `Migrated` вместо `To-migrate`). **Режим отчёта завершается ненулевым кодом, если найдены вхождения для миграции** — удобно как сигнал для CI, но учтите это заранее при вставке вызова в свой пайплайн, не выясняйте по красной сборке. Граница юрисдикции и предикат валидного `.mermaid`-файла для собственного валидатора потребителя — [`skills/mermaid/references/jurisdiction-and-validation.md`](./skills/mermaid/references/jurisdiction-and-validation.md).
+
+```bash
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/migrate_mermaid.py" content
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/migrate_mermaid.py" content --fix --yes
+```
+
 ## Agents
 
 - `review-agent` — координирует ревью комментариев в каталоге (запуск через Task tool)

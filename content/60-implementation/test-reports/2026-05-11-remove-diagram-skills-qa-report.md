@@ -1,4 +1,6 @@
 ---
+title: "QA Report: remove-diagram-skills"
+order: 2
 properties:
   - name: Тип контента
     value: [Тест-отчёт]

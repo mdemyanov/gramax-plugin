@@ -1,5 +1,6 @@
 ---
 title: Diagram on Demand
+order: 1
 status: draft
 date: 2026-05-08
 plugin: diagram-mermaid / diagram-drawio

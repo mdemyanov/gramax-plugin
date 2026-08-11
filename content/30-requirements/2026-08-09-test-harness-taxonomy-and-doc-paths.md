@@ -1,5 +1,6 @@
 ---
 title: Наведение порядка в test harness gramax и вычистка устаревших docs-путей
+order: 5
 status: done
 date: 2026-08-09
 plugin: gramax
