@@ -26,6 +26,8 @@ order: 1
 | [0009](0009-drawio-stub-and-claude-mermaid-removal.md) | Drawio-stub skill и удаление submodule claude-mermaid | Accepted | 2026-05-11 | gramax / marketplace |
 | [0010](0010-mermaid-file-based-workflow.md) | Mermaid skill — file-based workflow | Accepted | 2026-05-12 | gramax |
 | [0011](0011-test-harness-taxonomy.md) | Таксономия test harness tests/gramax и гейт doc-paths | Accepted | 2026-08-09 | gramax / marketplace |
+| [0012](0012-catalog-validation-contract.md) | Контракт валидации Gramax-каталога как публичной поверхности плагина | Accepted | 2026-08-11 | gramax / marketplace |
+| [0013](0013-mermaid-adoption-and-migration.md) | Принятие file-based mermaid потребителями и пакетная миграция | Accepted | 2026-08-11 | gramax |
 
 ## Связи между ADR
 

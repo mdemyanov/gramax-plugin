@@ -12,3 +12,6 @@ order: 3
 - [Роутинг mermaid и drawio](2026-05-11-routing-mermaid-drawio.md)
 - [Mermaid — file-based workflow](2026-05-12-mermaid-file-based-design.md)
 - [Наведение порядка в test harness gramax и вычистка устаревших docs-путей](2026-08-09-test-harness-taxonomy-and-doc-paths.md)
+- [Валидация каталога как публичный контракт плагина](2026-08-11-validation-contract.md) — FR-035…FR-049
+- [Принятие file-based mermaid потребителями](2026-08-11-mermaid-file-based-adoption.md) — FR-050…FR-064
+- [Правила писателя, изобретённые потребителями](2026-08-11-writer-consumer-rules.md) — FR-065…FR-076
