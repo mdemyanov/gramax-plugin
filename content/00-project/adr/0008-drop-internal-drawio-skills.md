@@ -1,4 +1,6 @@
 ---
+title: Удаление внутренних drawio-skills и делегирование внешнему плагину
+order: 8
 properties:
   - name: Тип контента
     value: [ADR]

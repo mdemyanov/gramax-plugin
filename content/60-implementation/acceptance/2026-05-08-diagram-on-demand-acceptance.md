@@ -1,4 +1,6 @@
 ---
+title: "Acceptance: diagram-on-demand"
+order: 1
 properties:
   - name: Тип контента
     value: [Приёмка]

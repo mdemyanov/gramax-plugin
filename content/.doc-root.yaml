@@ -1,6 +1,8 @@
 code: GRAMAX-PLUGIN
 title: Gramax Marketplace
 description: Документация плагина gramax для Claude Code
+language: ru
+syntax: XML
 editors:
   - qutask@gmail.com
 properties:

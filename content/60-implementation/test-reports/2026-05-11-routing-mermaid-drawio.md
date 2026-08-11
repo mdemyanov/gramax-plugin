@@ -1,4 +1,6 @@
 ---
+title: "QA Report — routing-mermaid-drawio-v2 (gramax 3.0.0)"
+order: 3
 properties:
   - name: Тип контента
     value: [Тест-отчёт]

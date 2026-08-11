@@ -1,4 +1,6 @@
 ---
+title: "RES-001: Agents365-ai/drawio-skill"
+order: 0
 properties:
   - name: Тип контента
     value: [Research]

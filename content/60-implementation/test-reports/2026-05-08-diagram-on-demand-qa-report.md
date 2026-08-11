@@ -1,4 +1,6 @@
 ---
+title: "QA Report: diagram-on-demand"
+order: 1
 properties:
   - name: Тип контента
     value: [Тест-отчёт]

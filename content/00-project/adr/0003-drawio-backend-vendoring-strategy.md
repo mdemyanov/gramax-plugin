@@ -1,4 +1,6 @@
 ---
+title: Vendoring strategy для drawio MCP-бэкенда
+order: 3
 properties:
   - name: Тип контента
     value: [ADR]

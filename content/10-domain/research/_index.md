@@ -10,3 +10,4 @@ order: 1
 - [Внешний drawio-skill как замена внутренним скиллам](2026-05-11-drawio-skill-external.md)
 - [Где потребителям не хватило инструкций плагина](2026-08-11-plugin-consumers-gaps.md)
 - [`_index.md` в корне каталога: скилл, валидатор, движок](2026-08-11-index-md-at-catalog-root.md)
+- [`_index.md` в корне каталога: исполняемый probe на движке Gramax](2026-08-11-index-md-root-probe.md)

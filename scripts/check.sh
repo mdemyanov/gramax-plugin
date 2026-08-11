@@ -7,7 +7,9 @@
 #   --fast   : whitespace + JSON validity + validate-content.py (uv обязателен; для pre-commit hook)
 #   --full   : --fast + shellcheck (если установлен) + проверка submodule status +
 #              tests/gramax/orphan-references + tests/gramax/nauta-integration +
-#              tests/gramax/plugin-contract + tests/gramax/doc-paths
+#              tests/gramax/plugin-contract + tests/gramax/doc-paths +
+#              tests/gramax/catalog-validator + tests/gramax/mermaid-adoption +
+#              tests/gramax/writer-consumer-rules
 #
 # Exit codes:
 #   0 — all checks passed
@@ -145,6 +147,33 @@ if [ "$MODE" = "--full" ]; then
     echo "OK: doc-paths clean"
   else
     echo "FAIL: doc-paths gate"
+    FAILED=1
+  fi
+
+  # --- 9. (--full only) catalog-validator: контракт validate_structure.py, догфудинг ---
+  echo "==> catalog-validator"
+  if bash tests/gramax/catalog-validator/run.sh; then
+    echo "OK: catalog-validator green"
+  else
+    echo "FAIL: catalog-validator"
+    FAILED=1
+  fi
+
+  # --- 10. (--full only) mermaid-adoption: юрисдикция + обнаружение/миграция legacy mermaid ---
+  echo "==> mermaid-adoption"
+  if bash tests/gramax/mermaid-adoption/run.sh; then
+    echo "OK: mermaid-adoption green"
+  else
+    echo "FAIL: mermaid-adoption"
+    FAILED=1
+  fi
+
+  # --- 11. (--full only) writer-consumer-rules: триаж правил потребителей поверх writer ---
+  echo "==> writer-consumer-rules"
+  if bash tests/gramax/writer-consumer-rules/run.sh; then
+    echo "OK: writer-consumer-rules green"
+  else
+    echo "FAIL: writer-consumer-rules"
     FAILED=1
   fi
 fi

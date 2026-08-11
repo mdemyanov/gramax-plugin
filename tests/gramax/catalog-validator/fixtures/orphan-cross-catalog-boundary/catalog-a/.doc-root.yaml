@@ -1,0 +1,16 @@
+code: orphan-boundary-a
+title: Orphan boundary fixture — catalog A
+description: >-
+  Фикстура для AC-014/FR-047 (граница) — валидатор запускается только на этом
+  каталоге; catalog-b/ существует рядом только как источник cross-каталожной ссылки
+  и не сканируется этим прогоном.
+language: ru
+syntax: XML
+
+properties:
+  - name: Тип контента
+    type: Enum
+    values:
+      - Требование
+
+filterProperties: [Тип контента]

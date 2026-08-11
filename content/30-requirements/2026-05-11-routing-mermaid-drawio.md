@@ -1,5 +1,6 @@
 ---
 title: Routing mermaid/drawio v3.0.0 — два явных skill'а + уточняющий вопрос
+order: 3
 status: draft
 date: 2026-05-11
 plugin: gramax

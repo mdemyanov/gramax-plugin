@@ -1,5 +1,6 @@
 ---
 title: Удаление diagram-on-demand и diagrams, переход на внешний drawio-skill
+order: 2
 status: draft
 date: 2026-05-11
 plugin: gramax

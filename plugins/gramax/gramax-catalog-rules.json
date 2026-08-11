@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "docRootRequiredFields": ["title", "language", "syntax"],
+  "frontmatterRequiredFields": ["order", "title"],
+  "indexPolicy": {
+    "root": "optional",
+    "subfolder": "required"
+  },
+  "garbageFiles": [".DS_Store", "Thumbs.db", "CLAUDE.md"],
+  "nonMdContentFiles": [
+    {
+      "extension": ".mermaid",
+      "namingConvention": "<page-slug>-<diagram-slug>.mermaid",
+      "colocation": "рядом со страницей-источником (та же директория)",
+      "referencedBy": "<mermaid path=\"…\" width=\"…\" height=\"…\"/>"
+    }
+  ]
+}

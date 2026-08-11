@@ -1,4 +1,6 @@
 ---
+title: Размещение навыков diagram-on-demand внутри плагина gramax (без split)
+order: 1
 properties:
   - name: Тип контента
     value: [ADR]

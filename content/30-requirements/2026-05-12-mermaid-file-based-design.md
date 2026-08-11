@@ -1,4 +1,6 @@
 ---
+title: Mermaid skill — file-based workflow
+order: 4
 feature: mermaid-file-based
 plugin: gramax
 status: draft
