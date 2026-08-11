@@ -28,6 +28,7 @@ order: 1
 | [0011](0011-test-harness-taxonomy.md) | Таксономия test harness tests/gramax и гейт doc-paths | Accepted | 2026-08-09 | gramax / marketplace |
 | [0012](0012-catalog-validation-contract.md) | Контракт валидации Gramax-каталога как публичной поверхности плагина | Accepted | 2026-08-11 | gramax / marketplace |
 | [0013](0013-mermaid-adoption-and-migration.md) | Принятие file-based mermaid потребителями и пакетная миграция | Accepted | 2026-08-11 | gramax |
+| [0014](0014-dual-publication-targets.md) | Два независимых таргета публикации — публичный GitHub и внутренний GitLab-каталог | Accepted | 2026-08-11 | marketplace |
 
 ## Связи между ADR
 
