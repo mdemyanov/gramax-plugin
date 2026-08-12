@@ -13,3 +13,4 @@ order: 1
 - [Mermaid file-based](2026-05-12-mermaid-file-based-qa-report.md)
 - [Наведение порядка в test harness и doc-paths](2026-08-10-test-harness-taxonomy-qa-report.md)
 - [Волна 4.2.0 — контракт валидации, mermaid-adoption, writer-consumer-rules](2026-08-12-wave-4.2.0-qa-report.md)
+- [Ретракция cross-каталожного code:-рецепта (hotfix 4.2.1)](2026-08-13-cross-catalog-retraction-qa-report.md)
