@@ -80,6 +80,11 @@ DEFAULT_EXPECT_COUNT = 103  # снимок реального корпуса н�
 _FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 _INLINE_CODE_RE = re.compile(r"(`+)([^\n]+?)\1")
 
+# Markdown-ссылка — независимая копия по прецеденту `validate_structure.py::_MD_LINK_RE`,
+# нужна ТОЛЬКО для отслеживания границы окна маркеров (см. `_boundary_ends` ниже), не для
+# резолва/orphan-проверки (это территория validate_structure.py, не трогается этим скриптом).
+_MD_LINK_RE = re.compile(r"!?\[[^\]\n]*\]\(([^)\n]+)\)")
+
 
 def _mask_code(text: str) -> str:
     """Байт-в-байт копия `validate_structure.py::_mask_code` — маскирует и fenced-блоки, и
@@ -186,6 +191,29 @@ def _current_bullet_bounds(source: str, paragraph_start: int, paragraph_end: int
     end = pos + nm.start() if nm else paragraph_end
     return last_start, end
 
+
+def _closest_link_end_before(link_ends: list[int], pos: int) -> int:
+    """Наибольший конец markdown-ссылки, не превышающий `pos` (0, если ни одна не подходит).
+
+    Нужно для ИДЕМПОТЕНТНОСТИ окна маркеров направления (`window_start`): без этой поправки
+    повторный прогон ПОСЛЕ `--fix --yes` находит ложные NAV-кандидаты — предыдущий код-спан
+    того же предложения/списка, уже смигрированный в markdown-ссылку на первом прогоне, больше
+    не совпадает с `_INLINE_CODE_RE` (это уже не код-спан), поэтому перестаёт ограничивать
+    окно поиска маркера у СЛЕДУЮЩЕГО код-спана — маркер из-ЗА только что созданной ссылки
+    (например, «прецедент —» перед первой ссылкой инлайн-перечисления) «протекает» на второй,
+    третий и т. д. элементы того же перечисления, которые сами по себе марkера не несут.
+    Отслеживание конца markdown-ссылки как ТАКОЙ ЖЕ границы, какой была граница код-спана,
+    делает повторный прогон детерминированно тем же, что и первый (найдено обнаружено при
+    контроле реальной миграции против RES-005 — см. заметку реализации)."""
+    best = 0
+    for end in link_ends:
+        if end <= pos and end > best:
+            best = end
+        elif end > pos:
+            break
+    return best
+
+
 # FR-077 test 3 — граница scope: гомоним пути из ДРУГОГО репозитория (RES-005 3.4, AC-004).
 # Существование+буквальный резолв внутри root уже механичны — этот маркер снимает ложный NAV на
 # синтаксически совпадающем, но семантически чужом пути. Последняя альтернатива —
@@ -265,6 +293,10 @@ def classify_file(root: Path, md_file: Path, text: str, content_path_re: re.Patt
     marker_source = _mask_code(text)         # и fenced, и inline обнулены — для поиска маркеров
     root_resolved = root.resolve()
     md_resolved = md_file.resolve()
+    # Уже существующие (или ранее в этом же прогоне созданные — не актуально, файл читается
+    # один раз до мутации) markdown-ссылки — граница окна маркеров наравне с код-спанами
+    # (см. `_closest_link_end_before`), для идемпотентности повторного прогона после `--fix`.
+    link_ends = sorted(lm.end() for lm in _MD_LINK_RE.finditer(fenced_masked))
 
     occs: list[Occurrence] = []
     prev_end = 0
@@ -282,7 +314,7 @@ def classify_file(root: Path, md_file: Path, text: str, content_path_re: re.Patt
             continue
 
         paragraph_start, paragraph_end = _paragraph_bounds(text, span_start)
-        window_start = max(paragraph_start, prev_end)
+        window_start = max(paragraph_start, prev_end, _closest_link_end_before(link_ends, span_start))
         window = marker_source[window_start:m.start(1)]
         has_marker = bool(_DIRECTIONALITY_RE.search(window)) or _has_bullet_label_marker(
             marker_source, paragraph_start, m.start(1)
