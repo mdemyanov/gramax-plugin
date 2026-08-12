@@ -14,3 +14,4 @@ order: 2
 - [AT-design: Принятие file-based mermaid потребителями](2026-08-11-mermaid-adoption-at-design.md)
 - [AT-design: Правила, изобретённые потребителями поверх writer](2026-08-11-writer-consumer-rules-at-design.md)
 - [AT-design: Ретракция нерабочего кросс-каталожного code:-рецепта](2026-08-13-cross-catalog-retraction-at-design.md)
+- [AT-design: Резолвер гейта — инференс расширения .md/_index.md (link-form-contract)](2026-08-13-link-form-contract-resolver-at-design.md)
