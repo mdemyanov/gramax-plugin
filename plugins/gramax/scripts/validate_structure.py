@@ -468,6 +468,7 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     check_placeholders(root, issues)
     check_broken_links(root, issues)
     check_orphans(root, issues, strict)
+    check_unsupported_markup(root, issues)
     check_images(root, issues)
     check_diagrams(root, issues)
     return issues
@@ -507,6 +508,74 @@ def check_diagrams(root: Path, issues: list[Issue]):
             ))
 
 
+# Whitelist тегов, которые Gramax НЕ считает unsupported
+_KNOWN_TAGS = {"drawio"}
+
+_UNSUPPORTED_HTML_RE = re.compile(r"<(?!\/)([a-z][a-z0-9]*)(?:\s[^>]*)?>", re.IGNORECASE)
+
+
+def check_unsupported_markup(root: Path, issues: list[Issue]):
+    """Проверяет наличие HTML-тегов и нестандартной разметки в markdown-статьях.
+
+    Gramax не поддерживает произвольный HTML. Исключение: <drawio path="..."/>
+    WARNING-уровень (W034) — некоторые HTML-теги могут быть валидны в markdown.
+    """
+    for md in _collect_md_files(root):
+        text = _mask_code(md.read_text(encoding="utf-8"))
+        seen_tags: set[str] = set()
+        for m in _UNSUPPORTED_HTML_RE.finditer(text):
+            tag = m.group(1).lower()
+            if tag not in _KNOWN_TAGS and tag not in seen_tags:
+                seen_tags.add(tag)
+                issues.append(Issue(
+                    "warning", md,
+                    f'W034: неподдерживаемая разметка: <{m.group(1)}> '
+                    f'(Gramax может не отобразить этот элемент)',
+                ))
+
+
+# Таксономия CatalogErrorGroups (Gramax-совместимо)
+# Не все группы применимы к нам (icons, comments отсутствуют)
+_ERROR_GROUPS = {
+    "content":       {"title": "incorrects-content",      "pattern": r"^(?:ERROR|WARNING)\s+.*\s+(?:missing|invalid|плейсхолдер|placeholder|фронтматтер|frontmatter)"},
+    "links":         {"title": "incorrects-paths",         "pattern": r"битая ссылка|broken link|hash-якорь|W032|W033"},
+    "images":        {"title": "incorrects-paths",         "pattern": r"W030|изображени"},
+    "diagrams":      {"title": "incorrects-paths",         "pattern": r"W031|диаграмм"},
+    "unsupported":   {"title": "incorrects-unsupported",   "pattern": r"W034|неподдержива"},
+}
+
+_UNGROUPED = {"title": "other", "pattern": None}
+
+
+def _classify_issue(issue: Issue) -> str:
+    """Классифицирует Issue в группу CatalogErrorGroups."""
+    text = str(issue)
+    for group, meta in _ERROR_GROUPS.items():
+        if re.search(meta["pattern"], text, re.IGNORECASE):
+            return group
+    return "other"
+
+
+def _print_groups(issues: list[Issue]):
+    """Группированный вывод по CatalogErrorGroups."""
+    if not issues:
+        print("No issues found.")
+        return
+    from collections import defaultdict
+    grouped: dict[str, list[Issue]] = defaultdict(list)
+    for i in issues:
+        grouped[_classify_issue(i)].append(i)
+
+    for group in ["content", "links", "images", "diagrams", "unsupported", "other"]:
+        items = grouped.get(group, [])
+        if not items:
+            continue
+        meta = _ERROR_GROUPS.get(group, _UNGROUPED)
+        print(f"\n[{group}] {meta['title']} ({len(items)}):")
+        for i in items:
+            print(f"  {i}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Валидация структуры каталога Gramax.",
@@ -516,6 +585,8 @@ def main():
     parser.add_argument("--strict", action="store_true", help="Warnings → errors.")
     parser.add_argument("--fix", action="store_true", help="Удалить мусорные файлы (требует --yes).")
     parser.add_argument("--yes", action="store_true", help="Подтверждение для --fix.")
+    parser.add_argument("--groups", action="store_true",
+                        help="Группировать ошибки по таксономии CatalogErrorGroups (Gramax-совместимый вывод).")
     args = parser.parse_args()
 
     if args.fix and not args.yes:
@@ -527,8 +598,11 @@ def main():
     has_errors = any(i.level == "error" for i in issues)
     has_warnings_strict = args.strict and any(i.level == "warning" for i in issues)
 
-    for issue in issues:
-        print(str(issue))
+    if args.groups:
+        _print_groups(issues)
+    else:
+        for issue in issues:
+            print(str(issue))
 
     if has_errors or has_warnings_strict:
         sys.exit(1)
