@@ -19,3 +19,4 @@ order: 0
 - [Архитектура](40-architecture/_index.md) — разрешающие design-документы
 - [Реализация](60-implementation/_index.md) — отчёты прогона и приёмки
 - [Уроки](lessons-learned.md) — журнал находок команды
+- [Render-crash test](zz-render-test/_index.md) — временная секция проверки рендера
