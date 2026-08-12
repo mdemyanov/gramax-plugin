@@ -91,6 +91,6 @@ README плагина добавляет раздел «Drawio MCP (опцион
 
 ## Связанные артефакты
 
-- spec: `content/30-requirements/2026-05-08-diagram-on-demand-design.md` (FR-011, AC-009)
+- spec: [Diagram on Demand](../../30-requirements/2026-05-08-diagram-on-demand-design.md) (FR-011, AC-009)
 - предшествует: ADR-0002 (выбор drawio MCP-бэкенда)
 - затрагивает: `plugins/gramax/.claude-plugin/plugin.json`, `plugins/gramax/README.md`

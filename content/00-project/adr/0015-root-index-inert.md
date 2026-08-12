@@ -300,13 +300,13 @@ grep-детектируемый канал, которым потребител�
 
 ## Связанные артефакты
 
-- амендментирует (без правки тела/статуса/frontmatter): `content/00-project/adr/0012-catalog-validation-contract.md`,
+- амендментирует (без правки тела/статуса/frontmatter): [Контракт валидации Gramax-каталога как публичной поверхности плагина](0012-catalog-validation-contract.md),
   Решение 1
-- закрывающий пробел этого ADR: `content/10-domain/research/2026-08-11-index-md-at-catalog-root.md`
+- закрывающий пробел этого ADR: [`_index.md` в корне Gramax-каталога: что запрещает скилл, что требует валидатор, что делает движок](../../10-domain/research/2026-08-11-index-md-at-catalog-root.md)
   (RES-003, находки 3, 6, 7, 8)
-- требование: `content/30-requirements/2026-08-11-validation-contract.md` (FR-042, FR-043)
-- прецедент амендмента без правки старого ADR: `content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md`
-  (строка 248), `content/00-project/adr/0013-mermaid-adoption-and-migration.md` (Решение 6)
+- требование: [Валидация Gramax-каталога как публичный контракт плагина](../../30-requirements/2026-08-11-validation-contract.md) (FR-042, FR-043)
+- прецедент амендмента без правки старого ADR: [Drawio-stub skill и удаление submodule claude-mermaid](0009-drawio-stub-and-claude-mermaid-removal.md)
+  (строка 248), [Принятие file-based mermaid потребителями и пакетная миграция](0013-mermaid-adoption-and-migration.md) (Решение 6)
 - ограничение, не позволяющее вариант (a) FR-042: `scripts/validate-content.py::check_indexes` (C1),
   `tests/gramax/nauta-integration/ac-003-doc-root-contract.sh:16`
 - вход для DEV-001 (реализация, не эта задача): `plugins/gramax/skills/writer/SKILL.md:60-97`,
@@ -314,4 +314,4 @@ grep-детектируемый канал, которым потребител�
   (new, ADR-0012 Решение 3), `plugins/gramax/CHANGELOG.md` (маркер `Contract:`)
 - вход для QA-001 (тест, не эта задача): `plugins/gramax/scripts/tests/test_validate_structure.py`,
   `plugins/gramax/scripts/tests/fixtures/root-index/` (new)
-- исполняемое подтверждение (RES-004): `content/10-domain/research/2026-08-11-index-md-root-probe.md`
+- исполняемое подтверждение (RES-004): [`_index.md` в корне каталога: исполняемый probe на движке Gramax](../../10-domain/research/2026-08-11-index-md-root-probe.md)

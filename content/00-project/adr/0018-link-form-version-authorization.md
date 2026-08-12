@@ -29,7 +29,7 @@ properties:
 `.claude-plugin/marketplace.json`… без ADR») формально не снята для этой волны.
 
 Прецедент, на который ссылается ADR-0016, при ближайшем рассмотрении содержит именно тот
-недостающий элемент. `content/00-project/adr/0013-mermaid-adoption-and-migration.md` Решение 4
+недостающий элемент. [Принятие file-based mermaid потребителями и пакетная миграция](0013-mermaid-adoption-and-migration.md) Решение 4
 тоже отдаёт точный литерал версии «PM/Dev порядком слияния» — но не голословно: тот же абзац прямо
 указывает, что число уже зарезервировано отдельным документом: «`4.2.0` или `4.3.0`, ADR-0012
 Решение 7 уже резервирует `4.2.0`». Разрешение на саму правку `marketplace.json` для этого числа
@@ -42,7 +42,7 @@ Consequences другого ADR. У ADR-0016 такого эквивалента
 Текущее состояние обоих версионных полей — `"4.2.1"` (последний bump выполнен по
 `content/00-project/adr/0017-cross-catalog-retraction.md` Решение 3, ретракция cross-каталожного
 рецепта `code:`). Разрешение на синхронную правку `marketplace.json` в этом репозитории уже
-применялось четыре раза: `content/00-project/adr/0008-drop-internal-drawio-skills.md` Решение 7,
+применялось четыре раза: [Удаление внутренних drawio-skills и делегирование внешнему плагину](0008-drop-internal-drawio-skills.md) Решение 7,
 `content/00-project/adr/0011-test-harness-taxonomy.md` Решение 6,
 `content/00-project/adr/0012-catalog-validation-contract.md` Решение 7 и
 `content/00-project/adr/0017-cross-catalog-retraction.md` Решение 3. Этот ADR закрывает пробел тем
@@ -97,7 +97,7 @@ ADR-0016 Consequences, только резервирует номер и авт�
 - Версии `plugin.json` и `marketplace.json` остаются синхронными по конвенции, уже применённой в
   четырёх предыдущих bump'ах — не создаётся необъяснённого расхождения.
 - Не потребовалась правка уже принятого и слитого в main ADR-0016 — амендмент оформлен новым
-  документом, тот же паттерн, что `content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md`
+  документом, тот же паттерн, что [Drawio-stub skill и удаление submodule claude-mermaid](0009-drawio-stub-and-claude-mermaid-removal.md)
   (строка 248) закрепил как конвенцию репозитория.
 
 **Negative / trade-offs:**
@@ -134,19 +134,19 @@ ADR-0016 Consequences, только резервирует номер и авт�
 ## Связанные артефакты
 
 - амендментирует (раздел Consequences, без правки тела/статуса/frontmatter):
-  `content/00-project/adr/0016-link-form-contract.md`
-- применяет semver-policy: `content/00-project/adr/0006-marketplace-json-semver-strategy.md`
+  [Контракт формы ссылки на артефакт — резолвер гейта и временный протокол при расхождении с nauta](0016-link-form-contract.md)
+- применяет semver-policy: [Стратегия версионирования marketplace.json при добавлении diagram-on-demand](0006-marketplace-json-semver-strategy.md)
 - прецедент разрешения на правку `marketplace.json` (четырежды применённый паттерн, этот ADR —
-  пятое звено): `content/00-project/adr/0008-drop-internal-drawio-skills.md` Решение 7,
+  пятое звено): [Удаление внутренних drawio-skills и делегирование внешнему плагину](0008-drop-internal-drawio-skills.md) Решение 7,
   `content/00-project/adr/0011-test-harness-taxonomy.md` Решение 6,
   `content/00-project/adr/0012-catalog-validation-contract.md` Решение 7,
   `content/00-project/adr/0017-cross-catalog-retraction.md` Решение 3
 - прецедент формы фиксации амендмента без правки старого ADR:
-  `content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md` (строка 248),
-  `content/00-project/adr/0015-root-index-inert.md` Решение 3,
-  `content/00-project/adr/0017-cross-catalog-retraction.md` Решение 1
+  [Drawio-stub skill и удаление submodule claude-mermaid](0009-drawio-stub-and-claude-mermaid-removal.md) (строка 248),
+  [Корневой _index.md инертен для движка Gramax — амендмент к ADR-0012 Решение 1](0015-root-index-inert.md) Решение 3,
+  [Ретракция рецепта cross-каталожной ссылки через `code` — амендмент к диспозиции, Тема A/FR-065](0017-cross-catalog-retraction.md) Решение 1
 - прецедент отложенного резервирования версии через отдельный явный документ:
-  `content/00-project/adr/0013-mermaid-adoption-and-migration.md` Решение 4
+  [Принятие file-based mermaid потребителями и пакетная миграция](0013-mermaid-adoption-and-migration.md) Решение 4
 - затрагивает (в будущем, задача Tech-writer, не этого ADR):
   `plugins/gramax/.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`,
   `plugins/gramax/CHANGELOG.md`

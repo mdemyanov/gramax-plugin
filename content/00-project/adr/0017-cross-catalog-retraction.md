@@ -56,7 +56,7 @@ FR-065, поручила `writer` показать сквозной рецепт
 новый design-документ в `content/40-architecture/`. Подтверждает предложение требования
 (FR-097/FR-098) без изменений.
 
-**Обоснование:** прямой прецедент — `content/00-project/adr/0015-root-index-inert.md` поверх
+**Обоснование:** прямой прецедент — [Корневой _index.md инертен для движка Gramax — амендмент к ADR-0012 Решение 1](0015-root-index-inert.md) поверх
 `content/00-project/adr/0012-catalog-validation-contract.md` Решение 1: правка Accepted-документа
 стирает след того, что решение принималось на неполных данных и было пересмотрено — сам факт
 пересмотра является частью истории, которую теряет прямая правка (ADR-0009 строка 248,
@@ -347,7 +347,7 @@ Follow-up остаётся низкоприоритетным пунктом г�
 
 ## Бриф для Dev
 
-**Требование:** `content/30-requirements/2026-08-13-cross-catalog-retraction.md`
+**Требование:** [Ретракция кросс-каталожного `code:`-рецепта и миграция потребителей](../../30-requirements/2026-08-13-cross-catalog-retraction.md)
 **ADR:** этот файл (`0017-cross-catalog-retraction.md`)
 **Фаза:** документационная правка; код `plugins/gramax/scripts/**` не трогается.
 
@@ -397,8 +397,8 @@ AC-008 (`marketplace.json` — версия и решение по синхро�
 
 **Архитектурный контекст:**
 - Компоненты: reference-материал `writer` (`doc-root-schema.md`, `SKILL.md`), `CHANGELOG.md`,
-  manifest-файлы (`plugin.json`, `marketplace.json`), реестры (`content/40-architecture/_index.md`,
-  `content/00-project/adr/_index.md` — правит PM, не эта задача).
+  manifest-файлы (`plugin.json`, `marketplace.json`), реестры ([Архитектура](../../40-architecture/_index.md),
+  [Архитектурные решения](_index.md) — правит PM, не эта задача).
 - Интеграции: нет исполняемого пути — весь контракт проверяется статически (grep по тексту,
   `jq` по JSON, `git diff` по диапазону коммитов).
 - Trust boundary: отсутствует — нет кода, исполняемого рантаймом Gramax; единственная
@@ -418,7 +418,7 @@ AC-008 (`marketplace.json` — версия и решение по синхро�
 - AC-006 — независимый сигнал нужен на каждый из пяти под-пунктов FR-100 (а–д), не одна строка
   на всё сразу; текст Решения 3 уже разнесён по отдельным предложениям для этого.
 - Композитный `bash scripts/check.sh --fast` (AC-009) — читать по `$?`, не по наличию `PASS` в
-  отфильтрованном выводе (`content/lessons-learned.md`, «зелёный по грепу — не зелёный»).
+  отфильтрованном выводе ([Lessons Learned — gramax marketplace](../../lessons-learned.md), «зелёный по грепу — не зелёный»).
 
 **Test-pyramid рекомендация:**
 
@@ -432,26 +432,26 @@ AC-008 (`marketplace.json` — версия и решение по синхро�
 
 ## Связанные артефакты
 
-- требование: `content/30-requirements/2026-08-13-cross-catalog-retraction.md`
-- закрывающий пробел: `content/10-domain/research/2026-08-13-cross-catalog-links-probe.md`
+- требование: [Ретракция кросс-каталожного `code:`-рецепта и миграция потребителей](../../30-requirements/2026-08-13-cross-catalog-retraction.md)
+- закрывающий пробел: [Кросс-каталожные markdown-ссылки: резолвит ли их движок Gramax — исполняемый probe](../../10-domain/research/2026-08-13-cross-catalog-links-probe.md)
   (RES-006)
 - амендментирует (без правки тела/статуса/frontmatter):
-  `content/40-architecture/2026-08-11-writer-rules-disposition.md`, Тема A / FR-065
-- предшествующее требование: `content/30-requirements/2026-08-11-writer-consumer-rules.md`
+  [Правила писателя, изобретённые потребителями — диспозиция по шести темам](../../40-architecture/2026-08-11-writer-rules-disposition.md), Тема A / FR-065
+- предшествующее требование: [Правила, изобретённые потребителями поверх writer — триаж на включение в плагин](../../30-requirements/2026-08-11-writer-consumer-rules.md)
   (FR-065/066)
-- применяет semver-policy: `content/00-project/adr/0006-marketplace-json-semver-strategy.md`
+- применяет semver-policy: [Стратегия версионирования marketplace.json при добавлении diagram-on-demand](0006-marketplace-json-semver-strategy.md)
 - прецедент формы фиксации (новый ADR, не правка на месте):
-  `content/00-project/adr/0015-root-index-inert.md`,
-  `content/00-project/adr/0012-catalog-validation-contract.md`
+  [Корневой _index.md инертен для движка Gramax — амендмент к ADR-0012 Решение 1](0015-root-index-inert.md),
+  [Контракт валидации Gramax-каталога как публичной поверхности плагина](0012-catalog-validation-contract.md)
 - прецедент разрешения на правку `marketplace.json`:
-  `content/00-project/adr/0012-catalog-validation-contract.md` Решение 7,
-  `content/00-project/adr/0008-drop-internal-drawio-skills.md`,
-  `content/00-project/adr/0011-test-harness-taxonomy.md`
+  [Контракт валидации Gramax-каталога как публичной поверхности плагина](0012-catalog-validation-contract.md) Решение 7,
+  [Удаление внутренних drawio-skills и делегирование внешнему плагину](0008-drop-internal-drawio-skills.md),
+  [Таксономия test harness tests/gramax и гейт doc-paths](0011-test-harness-taxonomy.md)
 - параллельная, не переопределяемая задача:
-  `content/30-requirements/2026-08-13-link-form-contract.md` (BA-001, будущий ADR-0016) —
+  [Контракт формы ссылки на артефакт в Gramax-каталоге](../../30-requirements/2026-08-13-link-form-contract.md) (BA-001, будущий ADR-0016) —
   контракт формы ссылки внутри каталога; FR-085 того требования (код-спан для cross-каталожных
   ссылок остаётся в силе) — предпосылка, на которой держится Решение 2 этого ADR
 - затрагивает: `plugins/gramax/skills/writer/references/doc-root-schema.md`,
   `plugins/gramax/skills/writer/SKILL.md`, `plugins/gramax/CHANGELOG.md`,
   `plugins/gramax/.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`,
-  `content/40-architecture/_index.md`
+  [Архитектура](../../40-architecture/_index.md)

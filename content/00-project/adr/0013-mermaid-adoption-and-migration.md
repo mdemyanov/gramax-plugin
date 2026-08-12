@@ -18,7 +18,7 @@ properties:
 
 ## Context
 
-Требование `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md` (FR-050…FR-064,
+Требование [Принятие file-based mermaid потребителями — граница юрисдикции, обнаружение и миграция устаревшего формата](../../30-requirements/2026-08-11-mermaid-file-based-adoption.md) (FR-050…FR-064,
 NFR-050…NFR-054). ADR-0010 (Accepted) установил file-based mermaid v4.0.0 —
 `<mermaid path="…" width="…" height="…"/>`, ground-truth `blocks.md:176-182`. Разведка
 `2026-08-11-plugin-consumers-gaps.md` (G4, G5) — решение не долетело до части потребителей.
@@ -207,11 +207,11 @@ standalone-скрипт временно дублирует обход дере�
 
 ## Связанные артефакты
 
-- требование: `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md`
-- research: `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md` (G1, G4, G5)
-- дополняет (не supersedes, не редактируется): `content/00-project/adr/0010-mermaid-file-based-workflow.md`
-- зависимость (форвард, объявлена явно, не блокирующая): `content/00-project/adr/0012-catalog-validation-contract.md` — Решения 2, 3
-- semver: `content/00-project/adr/0006-marketplace-json-semver-strategy.md`
+- требование: [Принятие file-based mermaid потребителями — граница юрисдикции, обнаружение и миграция устаревшего формата](../../30-requirements/2026-08-11-mermaid-file-based-adoption.md)
+- research: [RES-002: Где потребителям не хватило инструкций плагина](../../10-domain/research/2026-08-11-plugin-consumers-gaps.md) (G1, G4, G5)
+- дополняет (не supersedes, не редактируется): [Mermaid skill — file-based workflow](0010-mermaid-file-based-workflow.md)
+- зависимость (форвард, объявлена явно, не блокирующая): [Контракт валидации Gramax-каталога как публичной поверхности плагина](0012-catalog-validation-contract.md) — Решения 2, 3
+- semver: [Стратегия версионирования marketplace.json при добавлении diagram-on-demand](0006-marketplace-json-semver-strategy.md)
 - прецедент «старые ADR не редактируются»: ADR-0009, строка 248
 - затрагивает: `plugins/gramax/skills/mermaid/SKILL.md`,
   `plugins/gramax/skills/mermaid/references/jurisdiction-and-validation.md` (new),

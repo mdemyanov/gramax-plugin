@@ -156,7 +156,7 @@ push-target через `set-url`), рутинный `git push` без парам
 - держит инвариант расположения каталога, теперь двойного назначения:
   `tests/gramax/nauta-integration/ac-003-doc-root-contract.sh`
 - прецедент маскирования внутреннего хоста: `docs/onboarding-nauta.md`
-- контракт каталога, не меняется этим ADR: `content/00-project/adr/0012-catalog-validation-contract.md`,
+- контракт каталога, не меняется этим ADR: [Контракт валидации Gramax-каталога как публичной поверхности плагина](0012-catalog-validation-contract.md),
   `content/.doc-root.yaml`
 - внешняя зависимость (вне этого репозитория): `nau-gramax-manager` —
   `repositories/tools-ai/gramax-plugin.yaml` (new, по образцу `repositories/tools-ai/nsmp-plugin.yaml`),

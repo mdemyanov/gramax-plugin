@@ -18,8 +18,8 @@ properties:
 
 ## Context
 
-Разведка (`content/10-domain/research/2026-08-11-plugin-consumers-gaps.md`, G1, G2, G7, G13) и
-требование `content/30-requirements/2026-08-11-validation-contract.md` (FR-035…FR-049) фиксируют:
+Разведка ([RES-002: Где потребителям не хватило инструкций плагина](../../10-domain/research/2026-08-11-plugin-consumers-gaps.md), G1, G2, G7, G13) и
+требование [Валидация Gramax-каталога как публичный контракт плагина](../../30-requirements/2026-08-11-validation-contract.md) (FR-035…FR-049) фиксируют:
 плагин поставляет `plugins/gramax/scripts/validate_structure.py`, но ~20 потребителей независимо
 переизобрели его как `scripts/validate-content.py` (коды C1–C14) — валидатор упомянут только в
 `skills/writer/SKILL.md:293` и `README.md:69`, никто на него не ссылается (G1). Список
@@ -252,10 +252,10 @@ error/warning-проверки, новый раздел README, новый hook-
 
 ## Связанные артефакты
 
-- требование: `content/30-requirements/2026-08-11-validation-contract.md`
-- разведка: `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md` (G1, G2, G7, G13)
-- применяет semver-policy: `content/00-project/adr/0006-marketplace-json-semver-strategy.md`
-- прецедент suite/ADR-permission: `content/00-project/adr/0011-test-harness-taxonomy.md`
+- требование: [Валидация Gramax-каталога как публичный контракт плагина](../../30-requirements/2026-08-11-validation-contract.md)
+- разведка: [RES-002: Где потребителям не хватило инструкций плагина](../../10-domain/research/2026-08-11-plugin-consumers-gaps.md) (G1, G2, G7, G13)
+- применяет semver-policy: [Стратегия версионирования marketplace.json при добавлении diagram-on-demand](0006-marketplace-json-semver-strategy.md)
+- прецедент suite/ADR-permission: [Таксономия test harness tests/gramax и гейт doc-paths](0011-test-harness-taxonomy.md)
 - затрагивает: `plugins/gramax/scripts/validate_structure.py`, `plugins/gramax/gramax-tags.json`
   (new), `plugins/gramax/gramax-catalog-rules.json` (new), `plugins/gramax/scripts/pre-commit.sh`
   (new), `plugins/gramax/README.md`, `plugins/gramax/skills/writer/SKILL.md`,
