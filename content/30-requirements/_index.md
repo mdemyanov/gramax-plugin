@@ -15,3 +15,5 @@ order: 3
 - [Валидация каталога как публичный контракт плагина](2026-08-11-validation-contract.md) — FR-035…FR-049
 - [Принятие file-based mermaid потребителями](2026-08-11-mermaid-file-based-adoption.md) — FR-050…FR-064
 - [Правила писателя, изобретённые потребителями](2026-08-11-writer-consumer-rules.md) — FR-065…FR-076
+- [Контракт формы ссылки на артефакт в Gramax-каталоге](2026-08-13-link-form-contract.md) — FR-077…FR-092
+- [Ретракция кросс-каталожного `code:`-рецепта и миграция потребителей](2026-08-13-cross-catalog-retraction.md) — FR-093…FR-103

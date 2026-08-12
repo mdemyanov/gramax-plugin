@@ -30,6 +30,8 @@ order: 1
 | [0013](0013-mermaid-adoption-and-migration.md) | Принятие file-based mermaid потребителями и пакетная миграция | Accepted | 2026-08-11 | gramax |
 | [0014](0014-dual-publication-targets.md) | Два независимых таргета публикации — публичный GitHub и внутренний GitLab-каталог | Accepted | 2026-08-11 | marketplace |
 | [0015](0015-root-index-inert.md) | Корневой `_index.md` инертен для движка Gramax — амендмент к ADR-0012 Решение 1 | Accepted | 2026-08-11 | gramax / marketplace |
+| [0016](0016-link-form-contract.md) | Контракт формы ссылки на артефакт — резолвер гейта и временный протокол при расхождении с nauta | Accepted | 2026-08-13 | gramax / marketplace |
+| [0017](0017-cross-catalog-retraction.md) | Ретракция нерабочего рецепта cross-каталожной ссылки через `code` — амендмент к диспозиции Тема A/FR-065 | Accepted | 2026-08-13 | gramax / marketplace |
 
 ## Связи между ADR
 
