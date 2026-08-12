@@ -20,6 +20,8 @@ from pathlib import Path
 
 import yaml
 
+from lib.md_link_parser import parse_md_resources
+
 DOC_URL = "https://github.com/mdemyanov/gramax-plugin"
 EPILOG = (
     "Документация: plugins/gramax/README.md (раздел «Валидация каталога»), "
@@ -435,7 +437,43 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     check_placeholders(root, issues)
     check_broken_links(root, issues)
     check_orphans(root, issues, strict)
+    check_images(root, issues)
+    check_diagrams(root, issues)
     return issues
+
+
+def check_images(root: Path, issues: list[Issue]):
+    """Проверяет существование файлов изображений, на которые ссылаются markdown-статьи.
+
+    ![alt](path) → path должен существовать на диске. WARNING-уровень (W030).
+    """
+    for res in parse_md_resources(root):
+        if res.target_type != "image":
+            continue
+        if not res.in_scope:
+            continue  # cross-каталожная ссылка — не резолвим (FR-047)
+        if not res.resolved_path.exists():
+            issues.append(Issue(
+                "warning", res.source,
+                f'W030: файл изображения не найден: "{res.raw_target}" → {res.resolved_path}',
+            ))
+
+
+def check_diagrams(root: Path, issues: list[Issue]):
+    """Проверяет существование .drawio-файлов, на которые ссылаются статьи.
+
+    <drawio path="..."/> → path должен существовать на диске. WARNING-уровень (W031).
+    """
+    for res in parse_md_resources(root):
+        if res.target_type != "drawio":
+            continue
+        if not res.in_scope:
+            continue
+        if not res.resolved_path.exists():
+            issues.append(Issue(
+                "warning", res.source,
+                f'W031: файл диаграммы не найден: "{res.raw_target}" → {res.resolved_path}',
+            ))
 
 
 def main():
