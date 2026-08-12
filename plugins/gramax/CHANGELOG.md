@@ -1,5 +1,33 @@
 # Changelog
 
+## 4.4.0 — 2026-08-12
+
+Healthcheck-port: в `validate_structure.py` портированы 4 категории ресурсных проверок из
+движка Gramax Healthcheck + таксономия `--groups`. Два новых lib-модуля (`md_link_parser.py`,
+`link_resolver.py`) с 14 unit-тестами. 7 acceptance-тестов (ac-014–ac-020) и 7 тестовых
+фикстур. Все новые проверки — WARNING, не ломают exit code без `--strict`. Semver — Minor
+(ADR-0006): аддитивная фича, существующие коды ошибок и формат вывода без `--groups` сохранены.
+
+### Added
+
+- **W030** — проверка существования файлов изображений `![alt](path)` (`check_images`)
+- **W031** — проверка существования `.drawio`-файлов `<drawio path="..."/>` (`check_diagrams`)
+- **W032** — no-ext резолв ссылок: `[link](target)` → `target.md` → `target/index.md`
+- **W033** — проверка hash-якорей: `[link](article#section)` → существует ли заголовок
+- **W034** — обнаружение неподдерживаемой HTML-разметки в markdown
+- **`--groups`** — группированный вывод ошибок по таксономии CatalogErrorGroups
+- **`lib/md_link_parser.py`** — унифицированный парсинг ссылок/изображений/drawio из markdown (5 unit tests)
+- **`lib/link_resolver.py`** — no-ext + hash-якорь резолв со slugify (9 unit tests)
+- **7 фикстур** в `tests/gramax/catalog-validator/fixtures/gramax-fixtures/`
+- **7 AC-тестов** (ac-014–ac-020), suite расширен до 20 тестов
+
+### Migration notes (с v4.2.1)
+
+Потребителям `validate_structure.py` в CI: новые W030-W034 — WARNING, не ломают exit code.
+При обновлении возможно появление новых предупреждений в логах — это ожидаемо. Для строгого
+режима (exit code ≠ 0 на warnings) используйте `--strict`. Опциональный `--groups` меняет
+формат вывода; без него вывод идентичен предыдущим версиям.
+
 ## 4.3.0 — 2026-08-12
 
 Контракт формы ссылки на артефакт (ADR-0016): резолвер гейта учится инферить расширение цели, а
