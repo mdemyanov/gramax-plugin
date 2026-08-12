@@ -51,6 +51,7 @@ if [ -f "$DOC_ROOT_SCHEMA" ]; then
   fi
 
   # (б) негативная, отдельной командой: точная фраза исходного заголовка — 0 вхождений.
+  # shellcheck disable=SC2016  # backtick — литерал Markdown-заголовка (` code `), не command substitution: интерполяция здесь не нужна и не должна происходить
   if printf '%s' "$FLAT" | grep -qF 'Cross-каталожные ссылки через `code`'; then
     echo "  FAIL: AC-001(б) — заголовок ретируемого раздела всё ещё присутствует (FR-093)" >&2
     FAIL=$((FAIL + 1))

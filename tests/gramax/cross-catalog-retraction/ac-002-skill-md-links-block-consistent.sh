@@ -53,6 +53,7 @@ if [ -f "$SKILL_MD" ]; then
   FLAT="$(tr '\n' ' ' < "$SKILL_MD")"
 
   # (a) негативная
+  # shellcheck disable=SC2016  # backtick — литерал ретируемой фразы SKILL.md (`code:`), не command substitution: интерполяция здесь не нужна и не должна происходить
   if printf '%s' "$FLAT" | grep -qF 'Полный рецепт (реальный `code:`)'; then
     echo "  FAIL: AC-002(a) — ссылка на ретируемый рецепт всё ещё присутствует в блоке ## Ссылки (FR-095)" >&2
     FAIL=$((FAIL + 1))
