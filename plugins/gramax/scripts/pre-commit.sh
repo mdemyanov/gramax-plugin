@@ -30,3 +30,6 @@ fi
 
 echo "pre-commit: валидация Gramax-каталога ($CONTENT_DIR)…"
 uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py" "$CONTENT_DIR"
+# Рендер-линтер (ADR-0019): киллеры рендера блокируют коммит, WARN-стиль подавлен
+# через --errors-only (exit-контракт не меняется: ERROR → 1, WARN → 0).
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_render.py" "$CONTENT_DIR" --errors-only

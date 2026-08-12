@@ -15,3 +15,4 @@ order: 1
 - [Волна 4.2.0 — контракт валидации, mermaid-adoption, writer-consumer-rules](2026-08-12-wave-4.2.0-qa-report.md)
 - [Ретракция cross-каталожного code:-рецепта (hotfix 4.2.1)](2026-08-13-cross-catalog-retraction-qa-report.md)
 - [Контракт формы ссылки на артефакт (link-form-contract, 4.3.0)](2026-08-13-link-form-contract-qa-report.md)
+- [Линтер рендер-киллеров (validate_render.py, 4.4.0)](2026-08-13-render-killer-linter-qa-report.md)

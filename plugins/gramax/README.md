@@ -74,6 +74,25 @@ uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py" content
 uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py" --help
 ```
 
+Второй валидатор — `scripts/validate_render.py`: контент-линтер рендер-киллеров
+(порт `validate-gramax.py`, MIT). Ловит конструкции, роняющие рендерер GES с HTTP 500
+или ломающие вёрстку, на уровне ERROR с номером строки и подсказкой: `<th>`, инлайновый
+`<note>…</note>`, `<note>` внутри `<td>`/`<th>`, `<note>` в `<note>`, несколько `![](…)`
+в строке, несбалансированные парные теги (`note/table/tr/td/th/tabs/tab/color/highlight`).
+Стиль/YAML (`# H1` в теле, frontmatter `title:` без кавычек) — WARN и exit не меняют.
+Код (fenced **+ inline**) исключается из проверок — примеры синтаксиса в прозе не
+считаются разметкой. Реестр киллеров/баланса/allowlist — машиночитаемый контракт
+[`gramax-render-rules.json`](./gramax-render-rules.json) (ADR-0019). Атрибуция источника —
+[`scripts/LICENSE.upstream.md`](./scripts/LICENSE.upstream.md).
+
+```bash
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_render.py" content
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_render.py" --help
+```
+
+Pre-commit-хук этого плагина запускает оба валидатора (структурный + контент-линтер):
+киллер рендера блокирует коммит, WARN-стиль через `--errors-only` не спамит.
+
 Отдельно — `scripts/migrate_mermaid.py`: офлайн-сканер и пакетный мигратор устаревшего inline-mermaid (`<mermaid>…</mermaid>`, fenced ` ```mermaid `) в file-based формат внутри границы юрисдикции (`.doc-root.yaml`). По умолчанию — только отчёт (файл:строка + сводка из трёх счётчиков — `To-migrate`/`Out-of-jurisdiction`/`Already-compliant`), без единой мутации; мутация — только под `--fix --yes` (сводка тогда печатает `Migrated` вместо `To-migrate`). **Режим отчёта завершается ненулевым кодом, если найдены вхождения для миграции** — удобно как сигнал для CI, но учтите это заранее при вставке вызова в свой пайплайн, не выясняйте по красной сборке. Граница юрисдикции и предикат валидного `.mermaid`-файла для собственного валидатора потребителя — [`skills/mermaid/references/jurisdiction-and-validation.md`](./skills/mermaid/references/jurisdiction-and-validation.md).
 
 ```bash
@@ -90,11 +109,12 @@ uv run "${CLAUDE_PLUGIN_ROOT}/scripts/migrate_mermaid.py" content --fix --yes
 Скрипты в `scripts/` доступны через `${CLAUDE_PLUGIN_ROOT}/scripts/...`:
 
 - `slugify.py` — транслит кириллицы в latin-slug для имён файлов
-- `validate_structure.py` — pre-publish валидация каталога Gramax
+- `validate_structure.py` — pre-publish валидация структуры каталога Gramax
+- `validate_render.py` — контент-линтер рендер-киллеров (порт validate-gramax.py, MIT)
 - `parse_comments.py` — парсинг и отчёт по комментариям
 - `gen_comment_id.py` — генерация уникального ID комментария
 - `validate_comments.py` — валидация парности `<comment>` ↔ `.comments.yaml`
 
 ## Версия
 
-4.0.0 — см. [CHANGELOG.md](./CHANGELOG.md)
+4.4.0 — см. [CHANGELOG.md](./CHANGELOG.md)

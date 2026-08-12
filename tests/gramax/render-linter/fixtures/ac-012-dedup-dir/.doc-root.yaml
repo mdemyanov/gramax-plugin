@@ -1,0 +1,5 @@
+code: ac-012-dedup
+title: Dedup fixture
+description: Фикстура для AC-012 — th владеет render-linter, W034 молчит.
+language: ru
+syntax: XML

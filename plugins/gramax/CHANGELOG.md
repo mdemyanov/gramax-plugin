@@ -2,6 +2,14 @@
 
 ## 4.4.0 — 2026-08-12
 
+Render-killer-linter: новый контент-линтер `scripts/validate_render.py` — порт
+`validate-gramax.py` плагина `gramax-skills` (MIT, автор Всеволод Шадрин; атрибуция и список
+изменений — `scripts/LICENSE.upstream.md`). Ловит конструкции, роняющие рендерер GES (HTTP 500)
+или ломающие вёрстку, на уровне ERROR с номером строки и подсказкой. Демаркация с W034
+(ADR-0019): `<th>` владеет рендер-линтер, структурный валидатор не дублирует («одна находка
+на дефект»). Маскирование кода (fenced + inline) вынесено в общий `lib/md_code_mask.py`.
+Semver — Minor (ADR-0006, ADR-0019).
+
 Healthcheck-port: в `validate_structure.py` портированы 4 категории ресурсных проверок из
 движка Gramax Healthcheck + таксономия `--groups`. Два новых lib-модуля (`md_link_parser.py`,
 `link_resolver.py`) с 14 unit-тестами. 7 acceptance-тестов (ac-014–ac-020) и 7 тестовых
@@ -10,7 +18,35 @@ Healthcheck-port: в `validate_structure.py` портированы 4 катег
 
 ### Added
 
-- **W030** — проверка существования файлов изображений `![alt](path)` (`check_images`)
+- **`scripts/validate_render.py`** (new) — линтер рендер-киллеров (FR-104…FR-112): `<th>`,
+  инлайновый `<note>…</note>`, `<note>` в ячейке `<td>`/`<th>`, `<note>` в `<note>`,
+  несколько `![](` в строке, несбалансированные парные теги
+  (`note/table/tr/td/th/tabs/tab/color/highlight`) — ERROR; H1 в теле, frontmatter
+  `title:` без кавычек — WARN
+- **`gramax-render-rules.json`** (new) — контракт киллеров/баланса/allowlist
+  (schemaVersion 1, ADR-0019 Решение 2)
+- **`scripts/lib/md_code_mask.py`** (new) — общий примитив маскирования кода (fenced + inline)
+- **`scripts/LICENSE.upstream.md`** (new) — атрибуция MIT порта (NFR-006)
+- **Демаркация с W034** — `_KNOWN_TAGS` вычисляется из `gramax-render-rules.json`
+  (drawio ∪ killerTags ∪ allowlistedTags); W034 молчит по `<th>`/`<colgroup>`/`<col>`
+- **Дедуп баланса** — `check_tags` балансит только `pairedTags − balanceTags`
+  (`html`, `comment`); unbalanced `note/tabs/tab/color/highlight` репортит рендер-линтер (FR-109)
+- **Suite `tests/gramax/render-linter/`** (new) — 21 AC-тест (ac-001…ac-021), подключён
+  шагом 14 к `check.sh --full`; рендер-линтер также шаг `--fast` на `content/`
+
+Contract: `gramax-render-rules.json` — реестр киллеров рендера и allowlist «не ошибки».
+Новый эмпирический киллер (BR-001) добавляется строкой в `killerTags` + CHANGELOG-запись
+в том же коммите; вынос из allowlist — задокументированным решением, не правкой regex.
+
+### Migration notes (рендер-линтер)
+
+Потребителям pre-commit-хука: шаблон `scripts/pre-commit.sh` теперь вызывает ОБА валидатора
+(`validate_structure.py` + `validate_render.py --errors-only`). Киллер рендера (например `<th>`)
+блокирует коммит; WARN (H1 в теле) exit не меняет. Standalone `validate_structure.py` перестаёт
+репортить unbalanced `note/tabs/tab/color/highlight` (ownership — в рендер-линтере) и W034 по
+`<th>`/`<colgroup>`/`<col>` — см. `scripts/LICENSE.upstream.md` → «Список изменений».
+
+### Migration notes (с v4.2.1)
 - **W031** — проверка существования `.drawio`-файлов `<drawio path="..."/>` (`check_diagrams`)
 - **W032** — no-ext резолв ссылок: `[link](target)` → `target.md` → `target/index.md`
 - **W033** — проверка hash-якорей: `[link](article#section)` → существует ли заголовок

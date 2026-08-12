@@ -4,13 +4,14 @@
 # доставлен через /nauta:sync-scripts, обновляется тем же каналом.
 #
 # Modes:
-#   --fast   : whitespace + JSON validity + validate-content.py (uv обязателен; для pre-commit hook)
+#   --fast   : whitespace + JSON validity + validate-content.py + validate_render.py
+#              (uv обязателен; для pre-commit hook)
 #   --full   : --fast + shellcheck (если установлен) + проверка submodule status +
 #              tests/gramax/orphan-references + tests/gramax/nauta-integration +
 #              tests/gramax/plugin-contract + tests/gramax/doc-paths +
 #              tests/gramax/catalog-validator + tests/gramax/mermaid-adoption +
 #              tests/gramax/writer-consumer-rules + tests/gramax/link-form-resolver +
-#              tests/gramax/link-form-migration
+#              tests/gramax/link-form-migration + tests/gramax/render-linter
 #
 # Exit codes:
 #   0 — all checks passed
@@ -64,6 +65,26 @@ if [ -d content ]; then
     fi
   else
     echo "FAIL: uv not installed — content/ validation not performed (install: https://docs.astral.sh/uv/)"
+    FAILED=1
+  fi
+else
+  echo "OK: no content/ directory"
+fi
+
+# --- 2.6. Gramax content/ render-linter (рендер-киллеры, ADR-0019 Решение 4) ---
+# Киллер рендера (HTTP 500 на GES) блокирует pre-commit: exit 1/2 → FAILED=1.
+# --errors-only: принятый H1-WARN-шум по content/ не спамит pre-commit, exit-контракт тот же.
+echo "==> render"
+if [ -d content ]; then
+  if command -v uv > /dev/null 2>&1; then
+    if ! uv run plugins/gramax/scripts/validate_render.py content --errors-only; then
+      echo "FAIL: render-linter — киллер рендера в content/"
+      FAILED=1
+    else
+      echo "OK: render-linter clean"
+    fi
+  else
+    echo "FAIL: uv not installed — render-linter not performed (install: https://docs.astral.sh/uv/)"
     FAILED=1
   fi
 else
@@ -193,6 +214,15 @@ if [ "$MODE" = "--full" ]; then
     echo "OK: link-form-migration green"
   else
     echo "FAIL: link-form-migration"
+    FAILED=1
+  fi
+
+  # --- 14. (--full only) render-linter: киллеры рендера content/, контракт AC-001…AC-021 ---
+  echo "==> render-linter"
+  if bash tests/gramax/render-linter/run.sh; then
+    echo "OK: render-linter green"
+  else
+    echo "FAIL: render-linter suite"
     FAILED=1
   fi
 fi

@@ -17,3 +17,4 @@ order: 3
 - [Правила писателя, изобретённые потребителями](2026-08-11-writer-consumer-rules.md) — FR-065…FR-076
 - [Контракт формы ссылки на артефакт в Gramax-каталоге](2026-08-13-link-form-contract.md) — FR-077…FR-092
 - [Ретракция кросс-каталожного `code:`-рецепта и миграция потребителей](2026-08-13-cross-catalog-retraction.md) — FR-093…FR-103
+- [Линтер рендер-киллеров Gramax (порт validate-gramax.py)](2026-08-12-render-killer-linter.md) — FR-104…FR-119

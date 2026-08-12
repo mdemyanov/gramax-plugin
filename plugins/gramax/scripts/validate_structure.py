@@ -20,6 +20,7 @@ from pathlib import Path
 
 import yaml
 
+from lib.md_code_mask import _mask_code
 from lib.md_link_parser import parse_md_resources
 from lib.link_resolver import resolve_no_ext, check_hash_anchor
 
@@ -241,37 +242,11 @@ def check_no_drawio(root: Path, issues: list[Issue], strict: bool):
 
 
 # ===== Плейсхолдеры / сироты / битые ссылки (FR-046…FR-048, ADR-0012 Решение 2) =======
+# _mask_code (fenced + inline) — общий примитив lib/md_code_mask.py (ADR-0019 Решение 5)
 
-_FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
-_INLINE_CODE_RE = re.compile(r"(`+)([^\n]+?)\1")
 _MD_LINK_RE = re.compile(r"!?\[[^\]\n]*\]\(([^)\n]+)\)")
 _EXTERNAL_RE = re.compile(r"^(?:[a-z][a-z0-9+.\-]*:|//)", re.IGNORECASE)
 _PLACEHOLDER_RE = re.compile(r"\{\{[^{}\n]+\}\}")
-
-
-def _mask_code(text: str) -> str:
-    """Заменяет код (fenced-блоки и inline) пробелами той же длины, сохраняя смещения строк.
-
-    Статья, документирующая Gramax-синтаксис, может показывать `[пример](ссылка.md)` или
-    `{{ИМЯ}}` как иллюстрацию, а не как реальную ссылку/протёкший плейсхолдер. Без маски
-    orphan-/broken-link-/placeholder-проверки давали бы ложные срабатывания на таких примерах.
-    """
-    out: list[str] = []
-    fence_char: str | None = None
-    fence_len = 0
-    for line in text.split("\n"):
-        m = _FENCE_RE.match(line)
-        if fence_char is None:
-            if m:
-                fence_char, fence_len = m.group(1)[0], len(m.group(1))
-                out.append(" " * len(line))
-            else:
-                out.append(line)
-            continue
-        if m and m.group(1)[0] == fence_char and len(m.group(1)) >= fence_len and not m.group(2).strip():
-            fence_char, fence_len = None, 0
-        out.append(" " * len(line))
-    return _INLINE_CODE_RE.sub(lambda m: " " * len(m.group(0)), "\n".join(out))
 
 
 def _collect_md_files(root: Path) -> list[Path]:
@@ -448,6 +423,24 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     doc_root_required = (rules_contract or {}).get("docRootRequiredFields", [])
     frontmatter_required = (rules_contract or {}).get("frontmatterRequiredFields", [])
 
+    # Демаркация с рендер-линтером (ADR-0019 Решение 3 и 6):
+    #   known = {"drawio"} ∪ killerTags ∪ allowlistedTags — W034 молчит по <th>/<colgroup>/<col>,
+    #   чтобы дефект давал ровно одну находку по гейту (BR-004);
+    #   check_tags балансит только pairedTags − balanceTags — unbalanced note/tabs/tab/color/
+    #   highlight репортит validate_render.py (FR-109), html/comment остаются за check_tags.
+    # Отсутствующий/повреждённый gramax-render-rules.json — error через load_json_contract
+    # (ADR-0012, Consequences); known_tags тогда сводится к {"drawio"}.
+    render_contract = load_json_contract(plugin_root / "gramax-render-rules.json", issues)
+    balance_tags = set((render_contract or {}).get("balanceTags", []))
+    known_tags = {"drawio"}
+    if render_contract is not None:
+        known_tags |= {
+            item.get("tag") for item in render_contract.get("killerTags", [])
+            if isinstance(item, dict) and item.get("tag")
+        }
+        known_tags |= set(render_contract.get("allowlistedTags", []))
+    effective_paired_tags = [t for t in paired_tags if t not in balance_tags]
+
     if not root.is_dir():
         issues.append(Issue("error", root, "not a directory"))
         return issues
@@ -462,13 +455,13 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
         if ".gramax" in md.parts:
             continue
         check_frontmatter(md, issues, schema, frontmatter_required)
-        check_tags(md, issues, paired_tags)
+        check_tags(md, issues, effective_paired_tags)
     check_garbage(root, issues, strict, fix, yes, garbage_files)
     check_no_drawio(root, issues, strict)
     check_placeholders(root, issues)
     check_broken_links(root, issues)
     check_orphans(root, issues, strict)
-    check_unsupported_markup(root, issues)
+    check_unsupported_markup(root, issues, known_tags)
     check_images(root, issues)
     check_diagrams(root, issues)
     return issues
@@ -508,16 +501,20 @@ def check_diagrams(root: Path, issues: list[Issue]):
             ))
 
 
-# Whitelist тегов, которые Gramax НЕ считает unsupported
-_KNOWN_TAGS = {"drawio"}
+# Whitelist тегов, которые Gramax НЕ считает unsupported.
+# <th> (killer) и <colgroup>/<col> (allowlist) владеет validate_render.py — W034 по ним
+# молчит, чтобы дефект давал ровно одну находку по гейту (ADR-0019 Решение 3, BR-004).
+# Набор вычисляется из контракта gramax-render-rules.json в validate() — не литерал:
+# новый киллер добавляется строкой в killerTags, демаркация обновляется сама.
 
 _UNSUPPORTED_HTML_RE = re.compile(r"<(?!\/)([a-z][a-z0-9]*)(?:\s[^>]*)?>", re.IGNORECASE)
 
 
-def check_unsupported_markup(root: Path, issues: list[Issue]):
+def check_unsupported_markup(root: Path, issues: list[Issue], known_tags: set[str]):
     """Проверяет наличие HTML-тегов и нестандартной разметки в markdown-статьях.
 
-    Gramax не поддерживает произвольный HTML. Исключение: <drawio path="..."/>
+    Gramax не поддерживает произвольный HTML. Исключение: <drawio path="..."/> и
+    теги из gramax-render-rules.json (killerTags + allowlistedTags).
     WARNING-уровень (W034) — некоторые HTML-теги могут быть валидны в markdown.
     """
     for md in _collect_md_files(root):
@@ -525,7 +522,7 @@ def check_unsupported_markup(root: Path, issues: list[Issue]):
         seen_tags: set[str] = set()
         for m in _UNSUPPORTED_HTML_RE.finditer(text):
             tag = m.group(1).lower()
-            if tag not in _KNOWN_TAGS and tag not in seen_tags:
+            if tag not in known_tags and tag not in seen_tags:
                 seen_tags.add(tag)
                 issues.append(Issue(
                     "warning", md,

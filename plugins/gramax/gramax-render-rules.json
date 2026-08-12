@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "killerTags": [
+    {
+      "tag": "th",
+      "message": "замените на <td>; шапку задаёт header=\"row\" у <table>"
+    }
+  ],
+  "balanceTags": ["note", "table", "tr", "td", "th", "tabs", "tab", "color", "highlight"],
+  "allowlistedTags": ["colgroup", "col"]
+}

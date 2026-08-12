@@ -5,7 +5,7 @@
     "email": "qutask@gmail.com"
   },
   "metadata": {
-    "description": "Claude Code marketplace для Gramax-документации: writer, comments, mermaid, drawio, review-agent, валидация каталога с машиночитаемым контрактом. Drawio skill делегирует внешнему плагину Agents365-ai/drawio-skill.",
+    "description": "Claude Code marketplace для Gramax-документации: writer, comments, mermaid, drawio, review-agent, валидация каталога с машиночитаемым контрактом и линтер рендер-киллеров (validate_render.py). Drawio skill делегирует внешнему плагину Agents365-ai/drawio-skill.",
     "version": "4.4.0"
   },
   "plugins": [
