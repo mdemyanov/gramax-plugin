@@ -391,7 +391,7 @@ def check_broken_links(root: Path, issues: list[Issue]):
             if not check_hash_anchor(resolved, fragment):
                 issues.append(Issue(
                     "warning", res.source,
-                    f'W033: hash-якорь "#{fragment}" не найден в {resolved.relative_to(root)} '
+                    f'W033: hash-якорь "#{fragment}" не найден в {resolved.relative_to(root.resolve())} '
                     f'(ссылка из {res.source.name})',
                 ))
 
