@@ -283,6 +283,25 @@ class LinkRef:
     in_scope: bool      # False — цель за пределами root (cross-каталожная), FR-047 граница
 
 
+# Апстрим-дефект nauta C9 (нет инференса .md/_index.md) — issue tools-ai/nauta, номер уточнит PM
+def _resolve_link_target(source_dir: Path, target: str) -> Path:
+    """Резолвит `target` ссылки относительно `source_dir` (FR-082, ADR-0016 Решение 1).
+
+    Если `target` уже оканчивается на `.md` — инференс не применяется, возвращается
+    буквальный `resolve()` (не пытается получить `цель.md.md`, AC-011b). Иначе пробует по
+    порядку: литерал `target` → `target + ".md"` → `target + "/_index.md"`, возвращает
+    первый существующий (`Path.exists()`) путь. Если ни один вариант не существует — тоже
+    возвращается буквальный `resolve()` (нужен и для текста ошибки, и для `in_scope`,
+    NFR-001: генуинно битая ссылка не должна «починиться»)."""
+    literal = (source_dir / target).resolve()
+    if target.endswith(".md"):
+        return literal
+    for candidate in (literal, (source_dir / f"{target}.md").resolve(), (source_dir / f"{target}/_index.md").resolve()):
+        if candidate.exists():
+            return candidate
+    return literal
+
+
 def _collect_links(root: Path) -> list[LinkRef]:
     """Собирает markdown-ссылки/изображения (`[текст](цель)`, `![alt](цель)`) из всех .md
     каталога.
@@ -307,7 +326,7 @@ def _collect_links(root: Path) -> list[LinkRef]:
                 continue  # якорь на текущую страницу — не файловая ссылка
             if _EXTERNAL_RE.match(target):
                 continue  # http/https/mailto/tel/protocol-relative — офлайн-инструмент их не резолвит
-            resolved = (md.parent / target).resolve()
+            resolved = _resolve_link_target(md.parent, target)
             in_scope = resolved == root_resolved or root_resolved in resolved.parents
             refs.append(LinkRef(md, raw, resolved, in_scope))
     return refs
