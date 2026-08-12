@@ -1,0 +1,5 @@
+code: broken-image-test
+title: Broken image fixture
+description: Фикстура для W030 — markdown-изображение на несуществующий файл.
+language: ru
+syntax: XML

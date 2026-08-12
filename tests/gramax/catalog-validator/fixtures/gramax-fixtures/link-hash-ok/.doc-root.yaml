@@ -1,0 +1,5 @@
+code: link-hash-ok
+title: Link hash OK fixture
+description: Фикстура — hash-якорь на существующий заголовок (должен быть OK).
+language: ru
+syntax: XML

@@ -1,0 +1,5 @@
+code: link-hash-broken
+title: Link hash broken fixture
+description: Фикстура для W033 — hash-якорь на несуществующий заголовок.
+language: ru
+syntax: XML

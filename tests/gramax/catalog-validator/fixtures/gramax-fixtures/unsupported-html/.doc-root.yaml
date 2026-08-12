@@ -1,0 +1,5 @@
+code: unsupported-html-test
+title: Unsupported HTML fixture
+description: Фикстура для W034 — HTML-теги в markdown.
+language: ru
+syntax: XML

@@ -1,0 +1,5 @@
+code: link-no-ext-broken
+title: Link no-ext broken fixture
+description: Ссылка без .md на несуществующий файл — битая ссылка (error).
+language: ru
+syntax: XML

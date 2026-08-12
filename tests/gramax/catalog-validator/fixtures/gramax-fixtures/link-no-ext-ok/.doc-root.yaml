@@ -1,0 +1,5 @@
+code: link-no-ext-ok
+title: Link no-ext OK fixture
+description: Ссылка без .md на существующий файл — no-ext резолв должен сработать.
+language: ru
+syntax: XML

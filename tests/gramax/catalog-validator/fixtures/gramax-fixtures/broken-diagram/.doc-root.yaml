@@ -1,0 +1,5 @@
+code: broken-diagram-test
+title: Broken diagram fixture
+description: Фикстура для W031 — drawio-тег на несуществующий файл.
+language: ru
+syntax: XML
