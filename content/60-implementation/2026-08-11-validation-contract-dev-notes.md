@@ -17,8 +17,8 @@ properties:
 ближайший по смыслу существующий тип: неочевидные решения, принятые при переходе
 red→green по stubs `tests/gramax/catalog-validator/` и `RootIndexTests`.
 
-**Требование:** `content/30-requirements/2026-08-11-validation-contract.md` (FR-035…FR-049)
-**ADR:** `content/00-project/adr/0012-catalog-validation-contract.md` (Решения 1–4, 6),
+**Требование:** [Валидация Gramax-каталога как публичный контракт плагина](../30-requirements/2026-08-11-validation-contract.md) (FR-035…FR-049)
+**ADR:** [Контракт валидации Gramax-каталога как публичной поверхности плагина](../00-project/adr/0012-catalog-validation-contract.md) (Решения 1–4, 6),
 `content/00-project/adr/0015-root-index-inert.md`
 **Тест-дизайн:** `content/60-implementation/acceptance/2026-08-11-validation-contract-at-design.md`
 

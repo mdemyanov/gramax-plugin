@@ -18,7 +18,7 @@ properties:
 
 ## Context
 
-Требование `content/30-requirements/2026-08-13-link-form-contract.md` (FR-077…FR-092) закрывает
+Требование [Контракт формы ссылки на артефакт в Gramax-каталоге](../../30-requirements/2026-08-13-link-form-contract.md) (FR-077…FR-092) закрывает
 находку сплошного аудита корпуса (RES-005): 103 из 136 код-спанов `content/*.md` — навигационные
 отсылки, которые должны были быть markdown-ссылкой, а не путём-текстом. Три исполняемых probe
 установили факты, на которые опирается это решение (established, не переизмеряю):
@@ -280,18 +280,18 @@ ADR-0013). `plugins/gramax/CHANGELOG.md` получает запись `Contract
 
 ## Связанные артефакты
 
-- требование: `content/30-requirements/2026-08-13-link-form-contract.md`
-- research: `content/10-domain/research/2026-08-13-link-forms-probe.md`,
-  `content/10-domain/research/2026-08-13-link-form-corpus-audit.md`,
-  `content/10-domain/research/2026-08-13-cross-catalog-links-probe.md`
-- прецедент выбора severity: `content/00-project/adr/0012-catalog-validation-contract.md` Решение 2
-- прецедент амендмента без правки старого ADR: `content/00-project/adr/0015-root-index-inert.md`
+- требование: [Контракт формы ссылки на артефакт в Gramax-каталоге](../../30-requirements/2026-08-13-link-form-contract.md)
+- research: [Формы внутренней markdown-ссылки: что резолвит движок Gramax — исполняемый probe](../../10-domain/research/2026-08-13-link-forms-probe.md),
+  [RES-005: Формы ссылок на артефакты в корпусе content/ — код-спаны, markdown-ссылки, голые идентификаторы](../../10-domain/research/2026-08-13-link-form-corpus-audit.md),
+  [Кросс-каталожные markdown-ссылки: резолвит ли их движок Gramax — исполняемый probe](../../10-domain/research/2026-08-13-cross-catalog-links-probe.md)
+- прецедент выбора severity: [Контракт валидации Gramax-каталога как публичной поверхности плагина](0012-catalog-validation-contract.md) Решение 2
+- прецедент амендмента без правки старого ADR: [Корневой _index.md инертен для движка Gramax — амендмент к ADR-0012 Решение 1](0015-root-index-inert.md)
   Решение 3
-- прецедент standalone-миграционного скрипта: `content/00-project/adr/0013-mermaid-adoption-and-migration.md`
+- прецедент standalone-миграционного скрипта: [Принятие file-based mermaid потребителями и пакетная миграция](0013-mermaid-adoption-and-migration.md)
   Решения 3–4
 - зависимость (форвард, объявлена, не решается здесь): параллельный ADR-0017 (ретракция
   кросс-каталожного `code:`-рецепта)
 - companion-статья (детали реализации, бриф Dev/DevOps, контракт QA-author):
-  `content/40-architecture/2026-08-13-link-form-contract-design.md`
+  [Контракт формы ссылки на артефакт — резолвер, миграция, интеграция с nauta](../../40-architecture/2026-08-13-link-form-contract-design.md)
 - затрагивает: `plugins/gramax/scripts/validate_structure.py`,
   `plugins/gramax/scripts/migrate_nav_codespans.py` (new), `plugins/gramax/CHANGELOG.md`

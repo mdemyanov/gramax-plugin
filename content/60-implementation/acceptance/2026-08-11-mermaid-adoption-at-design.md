@@ -14,9 +14,9 @@ properties:
 
 **Роль:** QA-author (тест-дизайн до реализации Dev — этот документ и failing stubs
 предшествуют коду DEV-003, не следуют за ним).
-**Требование:** `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md`
+**Требование:** [Принятие file-based mermaid потребителями — граница юрисдикции, обнаружение и миграция устаревшего формата](../../30-requirements/2026-08-11-mermaid-file-based-adoption.md)
 (AC-001…AC-010)
-**ADR:** `content/00-project/adr/0013-mermaid-adoption-and-migration.md` (Решения 1–6),
+**ADR:** [Принятие file-based mermaid потребителями и пакетная миграция](../../00-project/adr/0013-mermaid-adoption-and-migration.md) (Решения 1–6),
 `content/00-project/adr/0010-mermaid-file-based-workflow.md` (Решения 2, 5 — naming
 convention, дефолты размера)
 **Артефакт этой задачи:** `tests/gramax/mermaid-adoption/` — bash-suite, все 10 AC.
@@ -118,7 +118,7 @@ AC-007 («второй прогон не должен ничего измени�
 
 ## Общий проход: «может ли корректная работа DEV-003 сделать этот тест зелёным?»
 
-По прецеденту `content/60-implementation/acceptance/2026-08-11-validation-contract-at-design.md`
+По прецеденту [AT-design: Валидация Gramax-каталога как публичный контракт плагина](2026-08-11-validation-contract-at-design.md)
 (находка про `ac-011`/AC-005 в том suite'е) — каждый скрипт этого suite'а проверен на вопрос
 «переживёт ли деталь, с которой сравнивается ассерт, корректную работу Dev»:
 
@@ -145,7 +145,7 @@ AC-007 («второй прогон не должен ничего измени�
 
 ## Фикстура масштаба (AC-004) — генерируется, не коммитится
 
-`content/60-implementation/acceptance/2026-08-11-mermaid-file-based-adoption.md` требует
+`content/30-requirements/2026-08-11-mermaid-file-based-adoption.md` требует
 фикстуру «смоделированную по образцу 156 корректных тегов» (NFR-051, образец —
 `naumen-smp-mcp`). Буквально коммитить 156 пар `.md`+`.mermaid` (312 почти идентичных файлов)
 раздуло бы репозиторий без содержательного выигрыша — а сам механизм генерации (156

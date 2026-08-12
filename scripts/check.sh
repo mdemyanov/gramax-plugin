@@ -9,7 +9,8 @@
 #              tests/gramax/orphan-references + tests/gramax/nauta-integration +
 #              tests/gramax/plugin-contract + tests/gramax/doc-paths +
 #              tests/gramax/catalog-validator + tests/gramax/mermaid-adoption +
-#              tests/gramax/writer-consumer-rules
+#              tests/gramax/writer-consumer-rules + tests/gramax/link-form-resolver +
+#              tests/gramax/link-form-migration
 #
 # Exit codes:
 #   0 — all checks passed
@@ -174,6 +175,24 @@ if [ "$MODE" = "--full" ]; then
     echo "OK: writer-consumer-rules green"
   else
     echo "FAIL: writer-consumer-rules"
+    FAILED=1
+  fi
+
+  # --- 12. (--full only) link-form-resolver: инференс .md/_index.md в _collect_links ---
+  echo "==> link-form-resolver"
+  if bash tests/gramax/link-form-resolver/run.sh; then
+    echo "OK: link-form-resolver green"
+  else
+    echo "FAIL: link-form-resolver"
+    FAILED=1
+  fi
+
+  # --- 13. (--full only) link-form-migration: классификация NAV/SELF/SUBJECT + migrate_nav_codespans.py ---
+  echo "==> link-form-migration"
+  if bash tests/gramax/link-form-migration/run.sh; then
+    echo "OK: link-form-migration green"
+  else
+    echo "FAIL: link-form-migration"
     FAILED=1
   fi
 fi

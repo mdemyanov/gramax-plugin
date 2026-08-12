@@ -100,7 +100,7 @@ properties:
 
 - **FR-002:** `tests/gramax/archive/README.md` — новый файл. Для каждого архивного suite фиксирует: исходный путь, версию релиза, приёмку которой suite подтверждал (2.0.0 / 3.0.0 / 4.0.0), явную формулировку «не редактировать, не запускать, не считать в отчётах». Отдельно фиксирует ретировку AC про поле `skills` в `plugin.json` (было `routing-mermaid-drawio` ac-014) с обоснованием: поле не встречается ни в одном из проверенных установленных плагинов — AC опиралось на ложную посылку и никогда не было выполнимым.
 - **FR-003:** архивные suite перемещаются исключительно `git mv`, содержимое не меняется байт-в-байт — версионные пины `2.0.0`/`3.0.0`/`4.0.0` остаются как написаны, без `>=` и без обновления до `4.1.x`. Единственное разрешённое дополнение — новый файл `archive/mermaid-file-based/verify.sh`, добавляемый в том же коммите, что и переезд (см. FR-015); после этого коммита архив, включая `verify.sh`, не редактируется.
-- **FR-004:** `tests/gramax/diagram-on-demand/` удаляется целиком через `git rm -r` (не архивируется). Обоснование: покрывает функциональность, удалённую по ADR-0008; факт приёмки уже зафиксирован в `content/60-implementation/acceptance/2026-05-08-diagram-on-demand-acceptance.md`; история доступна через `git log`.
+- **FR-004:** `tests/gramax/diagram-on-demand/` удаляется целиком через `git rm -r` (не архивируется). Обоснование: покрывает функциональность, удалённую по ADR-0008; факт приёмки уже зафиксирован в [Acceptance: diagram-on-demand](../60-implementation/acceptance/2026-05-08-diagram-on-demand-acceptance.md); история доступна через `git log`.
 - **FR-005:** ни один suite под `tests/gramax/archive/` не вызывается никаким агрегатором (`scripts/check.sh` в любом режиме, `run.sh` любого другого suite) и не входит ни в один количественный отчёт «N passed / M failed».
 
 ### B. Состав `plugin-contract/`
@@ -357,7 +357,7 @@ print('PASS')"`
 **Требование:** `content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md`
 
 **Покрыть тестами:**
-- `plugin-contract/` — по FR-006…FR-011, с учётом, что часть проверок (AC-007, AC-010, AC-012) ожидаемо зелёные уже сегодня — оформить как regression guard, не как новый failing stub (см. `content/lessons-learned.md`, запись «TDD-stubs могут быть частично зелёными от старта»).
+- `plugin-contract/` — по FR-006…FR-011, с учётом, что часть проверок (AC-007, AC-010, AC-012) ожидаемо зелёные уже сегодня — оформить как regression guard, не как новый failing stub (см. [Lessons Learned — gramax marketplace](../lessons-learned.md), запись «TDD-stubs могут быть частично зелёными от старта»).
 - `doc-paths/` — по FR-024…FR-027, включая сценарий рассинхрона allowlist (AC-028) как отдельный тест-кейс на поведение гейта, не только на happy path.
 - `archive/mermaid-file-based/verify.sh` — параметризованный скрипт, не `ac-*.sh`; описать usage при вызове без аргументов (AC-006).
 - Паттерн `diagrams` в `sunset-registry.txt` — явно протестировать оба legit-упоминания (`staging.md:30`, `drawio.md:60`) как negative test case (открытый вопрос №1).

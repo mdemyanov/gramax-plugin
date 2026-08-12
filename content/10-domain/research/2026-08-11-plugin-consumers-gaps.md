@@ -129,7 +129,7 @@ Gramax не резолвит markdown-ссылку между двумя `.doc-r
 
 - Доказательство: `plugins/gramax/skills/writer/SKILL.md:63` против
   `knowlage/{gramax-user-docs,moex,commerical-knowlage,json-rpc-docs,tsn-assistant}/content/_index.md`
-  и `content/_index.md` в этом репозитории.
+  и [Gramax Marketplace](../../_index.md) в этом репозитории.
 - Проверено прогоном: `uv run plugins/gramax/scripts/validate_structure.py content` на собственном репозитории
   даёт `ERROR content/_index.md _index.md not allowed in catalog root`, плюс отсутствие `language`/`syntax`
   в `.doc-root.yaml` и отсутствие `title`/`order` в большинстве статей. **Репозиторий плагина не проходит

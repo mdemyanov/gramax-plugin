@@ -1,0 +1,17 @@
+code: link-form-migration-fixture
+title: "Фикстура — классификация и миграция NAV-код-спанов"
+description: >-
+  Композитная фикстура для AC-001…007 (content/30-requirements/2026-08-13-link-form-contract.md).
+  2 NAV-кандидата (nav-source→nav-target, disputed-source→disputed-target), 1 SELF
+  (self-source), 1 SUBJECT-гомоним (scope-homonym→_index.md, RES-005 3.4), 1 SUBJECT/вне
+  каталога (cross-catalog-source, FR-085). Ожидаемый --expect-count для --fix --yes = 2.
+language: ru
+syntax: XML
+
+properties:
+  - name: Тип контента
+    type: Enum
+    values:
+      - Требование
+
+filterProperties: [Тип контента]

@@ -27,7 +27,7 @@ properties:
 ушедшую версию (свидетельство приёмки), устаревшие ассерты на синтаксис (то же), реальные
 дефекты v4.1.0. Смешение мешает отличить исторический факт от того, что нужно чинить сейчас.
 
-Требование `content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md`
+Требование [Наведение порядка в test harness gramax и вычистка устаревших docs-путей](../../30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md)
 специфицирует согласованный на брейншторме дизайн в терминах FR/AC и поручает SA формализовать
 четыре архитектурных решения плюс два побочных: таксономию `tests/gramax/`, ретировку
 невыполнимого AC, точные regex sunset-registry, границу гейта `doc-paths`, формат агрегатора
@@ -62,7 +62,7 @@ Suite целиком относится к архиву, если **все** е�
 покрываемая им функциональность (внутренние drawio-скрипты, `diagrams`/`diagram-on-demand`
 skills) удалена ADR-0008 без остатка — архивный suite о полностью удалённом предмете был бы
 свидетельством о нуле, не о факте. Факт приёмки уже зафиксирован в
-`content/60-implementation/acceptance/2026-05-08-diagram-on-demand-acceptance.md`; история — в
+[Acceptance: diagram-on-demand](../../60-implementation/acceptance/2026-05-08-diagram-on-demand-acceptance.md); история — в
 git log. Дублировать это в неисполняемом suite — не документация, а балласт.
 
 **Почему версионные пины остаются литеральными (`==`), не переводятся в `>=` (FR-003, BR-001):**
@@ -428,14 +428,14 @@ Patch из ADR-0006 («bug fix, исправление описания без �
 
 ## Связанные артефакты
 
-- требование: `content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md`
-- применяет semver-policy: `content/00-project/adr/0006-marketplace-json-semver-strategy.md`
+- требование: [Наведение порядка в test harness gramax и вычистка устаревших docs-путей](../../30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md)
+- применяет semver-policy: [Стратегия версионирования marketplace.json при добавлении diagram-on-demand](0006-marketplace-json-semver-strategy.md)
   (Active)
-- прецедент разрешения на правку `marketplace.json`: `content/00-project/adr/0008-drop-internal-drawio-skills.md`
+- прецедент разрешения на правку `marketplace.json`: [Удаление внутренних drawio-skills и делегирование внешнему плагину](0008-drop-internal-drawio-skills.md)
   «Решение 7»
-- контекст архивируемых suite: `content/00-project/adr/0008-drop-internal-drawio-skills.md`,
-  `content/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md`,
-  `content/00-project/adr/0010-mermaid-file-based-workflow.md`
+- контекст архивируемых suite: [Удаление внутренних drawio-skills и делегирование внешнему плагину](0008-drop-internal-drawio-skills.md),
+  [Drawio-stub skill и удаление submodule claude-mermaid](0009-drawio-stub-and-claude-mermaid-removal.md),
+  [Mermaid skill — file-based workflow](0010-mermaid-file-based-workflow.md)
 - затрагивает: `tests/gramax/archive/` (new), `tests/gramax/plugin-contract/` (new),
   `tests/gramax/doc-paths/` (new), `tests/gramax/orphan-references/sunset-registry.txt`,
   `tests/gramax/orphan-references/run.sh` (`EXCLUDE_RE`), `scripts/check.sh`,

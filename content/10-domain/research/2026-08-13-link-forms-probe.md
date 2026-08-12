@@ -351,7 +351,7 @@ Claude), а не созданы/пересохранены через штатн
 - [secondary] [Article | Gramax Docs](https://gram.ax/resources/docs/article) и [Article | Editor |
   Gramax Docs](https://gram.ax/resources/docs/article/editor) — WebFetch, использованы для навигации
   к целевой странице про ссылки, сами по себе markdown-синтаксиса ссылок не описывают.
-- [primary] `content/10-domain/research/2026-08-11-index-md-root-probe.md` — входной прецедент по
+- [primary] [`_index.md` в корне каталога: исполняемый probe на движке Gramax](2026-08-11-index-md-root-probe.md) — входной прецедент по
   методу (клон движка, фикстура, исполняемый Jest-тест, точечная сверка с документацией); этот probe
   повторяет метод для другого компонента (резолвер ссылок вместо `FileStructure`) и на том же
   коммите движка.

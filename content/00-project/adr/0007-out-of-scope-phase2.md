@@ -87,6 +87,6 @@ Spec явно обозначает Out of Scope для MVP. SA-анализ до
 
 ## Связанные артефакты
 
-- spec: `content/30-requirements/2026-05-08-diagram-on-demand-design.md` (раздел Out of Scope)
+- spec: [Diagram on Demand](../../30-requirements/2026-05-08-diagram-on-demand-design.md) (раздел Out of Scope)
 - затрагивает: `plugins/gramax/README.md` (Tech-writer должен отразить ограничения)
 - см. также: ADR-0002 (drawio MCP backend), ADR-0005 (save flow)

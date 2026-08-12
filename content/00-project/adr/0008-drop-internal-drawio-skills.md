@@ -22,7 +22,7 @@ properties:
 
 Исследование RES-001 (2026-05-11) показало, что сторонний плагин `Agents365-ai/drawio-skill` (v1.5.2, MIT) покрывает основной сценарий — генерацию `.drawio` + экспорт в SVG/PNG — и поддерживается отдельной командой. Функциональность не идентична: внешний плагин не знает о `.doc-root.yaml`, не вставляет ссылку в md, не учитывает Gramax-теги. Это осознанный trade-off: сокращение поверхности поддержки взамен на ручной шаг вставки тега пользователем.
 
-Spec `content/30-requirements/2026-05-11-remove-diagram-skills.md` формулирует семь открытых вопросов для SA. Данный ADR отвечает на все семь и является единственной точкой архитектурных решений для фазы удаления.
+Spec [Удаление diagram-on-demand и diagrams, переход на внешний drawio-skill](../../30-requirements/2026-05-11-remove-diagram-skills.md) формулирует семь открытых вопросов для SA. Данный ADR отвечает на все семь и является единственной точкой архитектурных решений для фазы удаления.
 
 ## Решение 1 — Major bump 2.0.0 (а не 1.5.0)
 
@@ -236,7 +236,7 @@ Writer-skill подскажет правильный формат (см. раз�
 
 ## Бриф для Dev
 
-**Spec:** `content/30-requirements/2026-05-11-remove-diagram-skills.md`
+**Spec:** [Удаление diagram-on-demand и diagrams, переход на внешний drawio-skill](../../30-requirements/2026-05-11-remove-diagram-skills.md)
 **ADR:** `content/00-project/adr/0008-drop-internal-drawio-skills.md`
 
 **Реализовать в указанном порядке:**
@@ -324,8 +324,8 @@ Writer-skill подскажет правильный формат (см. раз�
 
 ## Связанные артефакты
 
-- spec: `content/30-requirements/2026-05-11-remove-diagram-skills.md`
-- research: `content/10-domain/research/2026-05-11-drawio-skill-external.md`
+- spec: [Удаление diagram-on-demand и diagrams, переход на внешний drawio-skill](../../30-requirements/2026-05-11-remove-diagram-skills.md)
+- research: [RES-001: Agents365-ai/drawio-skill](../../10-domain/research/2026-05-11-drawio-skill-external.md)
 - supersedes (в части архитектуры skills): ADR-0001, ADR-0004, ADR-0005, ADR-0007
 - historical (не действующий контракт): ADR-0002, ADR-0003
 - применяет (semver-policy): ADR-0006

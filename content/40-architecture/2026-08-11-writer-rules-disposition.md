@@ -19,7 +19,7 @@ properties:
 
 Разрешающий design-документ, не ADR. Закрывает FR-065…FR-076 из
 `content/30-requirements/2026-08-11-writer-consumer-rules.md`, на основе research
-`content/10-domain/research/2026-08-11-plugin-consumers-gaps.md` (G3, G6, G13). Enforcement и
+[RES-002: Где потребителям не хватило инструкций плагина](../10-domain/research/2026-08-11-plugin-consumers-gaps.md) (G3, G6, G13). Enforcement и
 машиночитаемый контракт валидации — параллельный **ADR-0012** («Контракт валидации
 Gramax-каталога»,
 `content/00-project/adr/0012-catalog-validation-contract.md`): здесь только ссылаюсь, не

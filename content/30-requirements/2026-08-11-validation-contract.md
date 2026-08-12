@@ -197,7 +197,7 @@ catalog root`, плюс отсутствие `language`/`syntax` в `content/.do
   ошибок уровня `error`. Устраняет находку «репозиторий плагина не проходит собственный
   валидатор»: отсутствующие `language`/`syntax` в `content/.doc-root.yaml`,
   отсутствующие `title`/`order` в большинстве статей и — при выборе варианта FR-042(a) —
-  сам `content/_index.md`.
+  сам [Gramax Marketplace](../_index.md).
 - **FR-045:** прогон `validate_structure.py` на собственном `content/` обязан быть
   частью повторяемой проверки этого репозитория, не разовым ручным фиксом. Ограничение:
   `scripts/` этого репозитория — территория nauta (`CLAUDE.md`: «Python-скрипты в
