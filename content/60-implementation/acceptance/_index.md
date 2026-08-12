@@ -13,3 +13,4 @@ order: 2
 - [AT-design: Валидация Gramax-каталога как публичный контракт плагина](2026-08-11-validation-contract-at-design.md)
 - [AT-design: Принятие file-based mermaid потребителями](2026-08-11-mermaid-adoption-at-design.md)
 - [AT-design: Правила, изобретённые потребителями поверх writer](2026-08-11-writer-consumer-rules-at-design.md)
+- [AT-design: Ретракция нерабочего кросс-каталожного code:-рецепта](2026-08-13-cross-catalog-retraction-at-design.md)

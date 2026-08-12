@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# tests/gramax/writer-consumer-rules/run.sh
+# tests/gramax/cross-catalog-retraction/run.sh
 # Aggregator: runs all ac-*.sh, prints summary, returns non-zero if any failed.
-# Изначальный красный старт (см. README.md → таблица) закрыт DEV-004: все живые AC
-# зелёные. Suite подключён к scripts/check.sh --full, по прецеденту
-# tests/gramax/mermaid-adoption/run.sh.
-# 2026-08-13: ac-002-cross-catalog-code-workflow-example.sh ретирован (ADR-0017) — см.
-# README.md → «Ретировка AC-002». Живых скриптов стало 11, не 12.
+# Изначальный красный старт (см. README.md → таблица «Стартовое состояние») ожидаем: 5 из 9 AC
+# красные до правок Dev/Tech-writer, 4 — pre-passing regression guard'ы. НЕ подключён к
+# scripts/check.sh ни в --fast, ни в --full на момент создания (см. README.md → «Подключение к
+# check.sh» — решение и обоснование); по прецеденту tests/gramax/writer-consumer-rules/run.sh
+# подключение — задача Dev/PM после того, как все живые AC станут зелёными.
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
