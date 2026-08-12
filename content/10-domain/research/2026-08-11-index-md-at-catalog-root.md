@@ -89,9 +89,9 @@ properties:
    `references/structure.md`, `references/doc-root-schema.md`, тесты плагина
    (`plugins/gramax/scripts/tests/`).
 2. **История и решения этого репозитория** — `git log -p --follow` по `SKILL.md`,
-   `content/00-project/adr/0012-catalog-validation-contract.md`,
-   `content/30-requirements/2026-08-11-validation-contract.md`,
-   `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md`,
+   [Контракт валидации Gramax-каталога как публичной поверхности плагина](../../00-project/adr/0012-catalog-validation-contract.md),
+   [Валидация Gramax-каталога как публичный контракт плагина](../../30-requirements/2026-08-11-validation-contract.md),
+   [RES-002: Где потребителям не хватило инструкций плагина](2026-08-11-plugin-consumers-gaps.md),
    `tests/gramax/nauta-integration/ac-003-doc-root-contract.sh`, `scripts/validate-content.py`.
 3. **Эталонный вендорский корпус** — локальная рабочая копия пользовательской документации Gramax
    (репозиторий `gramax-user-docs`): `content/_index.md`, `content/.doc-root.yaml`, статьи
@@ -159,7 +159,7 @@ Errors: 0 | Warnings: 0
 На момент этого исследования правка ещё не внесена: `git status` для `SKILL.md` и
 `validate_structure.py` — рабочее дерево чистое, текст обоих файлов на `HEAD` идентичен тому, что
 процитировано в разделе «Подтема 1» — ADR принят, но не исполнен. Требование
-`content/30-requirements/2026-08-11-validation-contract.md` (FR-042/FR-043) формулирует то же самое
+[Валидация Gramax-каталога как публичный контракт плагина](../../30-requirements/2026-08-11-validation-contract.md) (FR-042/FR-043) формулирует то же самое
 как открытый вопрос, переданный SA — [established].
 
 ### 4. Что показывает эталонный вендорский корпус (`gramax-user-docs`)
