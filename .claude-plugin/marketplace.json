@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code marketplace для Gramax-документации: writer, comments, mermaid, drawio, review-agent, валидация каталога с машиночитаемым контрактом. Drawio skill делегирует внешнему плагину Agents365-ai/drawio-skill.",
-    "version": "4.2.0"
+    "version": "4.2.1"
   },
   "plugins": [
     {
