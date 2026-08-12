@@ -36,6 +36,22 @@ DEV-002 её не добавит).
 собственный dev-hint в комментарии заголовка и в тексте `FAIL`-сообщения. Непокрытыми
 скриптом остаются только AC-007 (процессная) и AC-017 (композитный гейт задачи QA-author).
 
+## Healthcheck-port: ac-014 — ac-020
+
+Тесты волны healthcheck-port (портирование проверок из Gramax Healthcheck в
+`validate_structure.py`, проверки W030-W034 и флаг `--groups`). Все зелёные в составе
+suite'а (см. «Запуск»). Фикстуры — в `fixtures/gramax-fixtures/`.
+
+| Test | Requirement | Description |
+|------|-------------|-------------|
+| ac-014 | W030 (healthcheck-port) | Битое изображение → W030 warning |
+| ac-015 | W031 (healthcheck-port) | Битая диаграмма → W031 warning |
+| ac-016 | No-ext (healthcheck-port) | No-ext link resolution: OK и broken случаи |
+| ac-017 | W033 (healthcheck-port) | Hash-якорь: несуществующий → W033, существующий → OK |
+| ac-018 | W034 (healthcheck-port) | Неподдерживаемая разметка → W034 warning |
+| ac-019 | Regression (healthcheck-port) | Регрессия: все gramax-fixtures выдают ожидаемые коды |
+| ac-020 | --groups (healthcheck-port) | --groups флаг → группированный вывод CatalogErrorGroups |
+
 ## Почему все AC здесь, не в `plugin-contract`
 
 `tests/gramax/plugin-contract/` (ADR-0011 Решение 1) — suite «живых инвариантов
