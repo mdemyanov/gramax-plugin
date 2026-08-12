@@ -15,8 +15,8 @@ properties:
 Фиксирует «Тип контента: Урок» за неимением отдельного enum-значения для заметок реализации —
 тот же приём, что `2026-08-11-validation-contract-dev-notes.md`.
 
-**Требование:** `content/30-requirements/2026-08-13-cross-catalog-retraction.md` (FR-093…FR-099)
-**ADR:** `content/00-project/adr/0017-cross-catalog-retraction.md`, Решение 2 (тексты замены),
+**Требование:** [Ретракция кросс-каталожного `code:`-рецепта и миграция потребителей](../30-requirements/2026-08-13-cross-catalog-retraction.md) (FR-093…FR-099)
+**ADR:** [Ретракция рецепта cross-каталожной ссылки через `code` — амендмент к диспозиции, Тема A/FR-065](../00-project/adr/0017-cross-catalog-retraction.md), Решение 2 (тексты замены),
 Решение 4 (буллет `SKILL.md:213`)
 **Тест-дизайн:** `content/60-implementation/acceptance/
 2026-08-13-cross-catalog-retraction-at-design.md`

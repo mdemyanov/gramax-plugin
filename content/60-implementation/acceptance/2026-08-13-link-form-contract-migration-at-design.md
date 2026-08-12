@@ -14,14 +14,14 @@ properties:
 
 **Роль:** QA-author (тест-дизайн до реализации Dev — этот документ и failing-тесты
 предшествуют коду `migrate_nav_codespans.py`, не следуют за ним).
-**Требование:** `content/30-requirements/2026-08-13-link-form-contract.md` (трек классификации
+**Требование:** [Контракт формы ссылки на артефакт в Gramax-каталоге](../../30-requirements/2026-08-13-link-form-contract.md) (трек классификации
 и миграции — AC-001…007, AC-017, AC-018; AC-008…012 — параллельный QA-author-трек резолвера
 гейта, документ `2026-08-13-link-form-contract-resolver-at-design.md`, не этот; AC-013…016 —
 намеренно процессные, без автотеста, только пункт чек-листа `/nauta:pm-review`; AC-019 —
 композитный `check.sh --fast`, не специфичен этому треку).
-**ADR:** `content/00-project/adr/0016-link-form-contract.md`, Решение 2 (временный
+**ADR:** [Контракт формы ссылки на артефакт — резолвер гейта и временный протокол при расхождении с nauta](../../00-project/adr/0016-link-form-contract.md), Решение 2 (временный
 `.md`-протокол), Решение 3 (классификация без нового гейта), Решение 5 (стратегия миграции).
-**Архитектура:** `content/40-architecture/2026-08-13-link-form-contract-design.md`, «Бриф для
+**Архитектура:** [Контракт формы ссылки на артефакт — резолвер, миграция, интеграция с nauta](../../40-architecture/2026-08-13-link-form-contract-design.md), «Бриф для
 Dev» пп. 5–7, «Контракт с QA-author».
 **Артефакты этой задачи:**
 - `tests/gramax/link-form-migration/` — bash AC-suite (`ac-NNN-*.sh` + `run.sh` + независимая
@@ -101,7 +101,7 @@ self-source — SELF, scope-homonym и cross-catalog-source — SUBJECT). Все
 
 ## Находка: AC-006 уже удовлетворён по несвязанной причине
 
-По прецеденту `content/60-implementation/acceptance/2026-08-11-mermaid-adoption-at-design.md`
+По прецеденту [AT-design: Принятие file-based mermaid потребителями](2026-08-11-mermaid-adoption-at-design.md)
 (раздел «Находка», AC-001/AC-009 того suite'а) — буквальный BA-grep из текста AC-006 прогнан на
 текущем состоянии `SKILL.md` ДО того, как попал в stub:
 
@@ -321,7 +321,7 @@ Dev получает: этот документ + `tests/gramax/link-form-migrat
   FR-079, форма результата FR-080/FR-081 с временным `.md`-суффиксом (Решение 2).
 - `plugins/gramax/skills/writer/SKILL.md` — содержательный ❌-пример для FR-081 (AC-006, assert
   2 — см. «Находка» выше).
-- `content/60-implementation/acceptance/2026-08-11-mermaid-adoption-at-design.md` — правка
+- [AT-design: Принятие file-based mermaid потребителями](2026-08-11-mermaid-adoption-at-design.md) — правка
   протухшего пути (AC-017, FR-092b).
 - `content/30-requirements/2026-08-11-writer-consumer-rules.md` — правка/пометка дрейфа
   `путь:строка` (AC-018, FR-092d).

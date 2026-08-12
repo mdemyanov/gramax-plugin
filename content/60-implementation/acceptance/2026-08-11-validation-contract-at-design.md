@@ -14,8 +14,8 @@ properties:
 
 **Роль:** QA-author (тест-дизайн до реализации Dev — этот документ и стаб-тесты
 предшествуют коду, не следуют за ним).
-**Требование:** `content/30-requirements/2026-08-11-validation-contract.md` (AC-001…AC-017)
-**ADR:** `content/00-project/adr/0012-catalog-validation-contract.md`,
+**Требование:** [Валидация Gramax-каталога как публичный контракт плагина](../../30-requirements/2026-08-11-validation-contract.md) (AC-001…AC-017)
+**ADR:** [Контракт валидации Gramax-каталога как публичной поверхности плагина](../../00-project/adr/0012-catalog-validation-contract.md),
 `content/00-project/adr/0015-root-index-inert.md`
 **Артефакты этой задачи:**
 - `tests/gramax/catalog-validator/` — bash-suite (AC-001…AC-006, AC-008, AC-010…AC-016)
@@ -93,7 +93,7 @@ DRIFT_FAIL; полный контракт при синхронизирован�
 реализации (константой, литералом, конкретным путём в коде), стоит явно задать вопрос
 «переживёт ли эта деталь корректную работу Dev, которую ADR прямо предписывает» — если ADR
 предписывает деталь убрать, сравнение с ней должно быть условным (falls back to N/A), а не
-безусловным падением. См. `content/lessons-learned.md`.
+безусловным падением. См. [Lessons Learned — gramax marketplace](../../lessons-learned.md).
 
 ## Общий проход: неубиваемость остальных красных stubs
 

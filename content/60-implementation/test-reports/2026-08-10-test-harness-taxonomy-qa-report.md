@@ -17,7 +17,7 @@ properties:
 **HEAD:** `412211d`
 **Tester:** QA-runner
 **Требование:** [content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md](../../30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md)
-**ADR:** `content/00-project/adr/0011-test-harness-taxonomy.md`
+**ADR:** [Таксономия test harness tests/gramax и гейт doc-paths](../../00-project/adr/0011-test-harness-taxonomy.md)
 
 ---
 
@@ -122,7 +122,7 @@ BASE_REV="62b62f2^"
 diff <(git show "$BASE_REV:tests/gramax/<suite>/<file>") tests/gramax/archive/<suite>/<file>
 ```
 
-Результат: **62 файла, 0 расхождений** — побайтовое совпадение подтверждено (AC-003 PASS). `diagram-on-demand/` удалён целиком (`git rm -r`, не архивирован) — обоснование в `content/60-implementation/acceptance/2026-05-08-diagram-on-demand-acceptance.md`; факт приёмки уже зафиксирован там же, повторно не архивируется.
+Результат: **62 файла, 0 расхождений** — побайтовое совпадение подтверждено (AC-003 PASS). `diagram-on-demand/` удалён целиком (`git rm -r`, не архивирован) — обоснование в [Acceptance: diagram-on-demand](../acceptance/2026-05-08-diagram-on-demand-acceptance.md); факт приёмки уже зафиксирован там же, повторно не архивируется.
 
 ---
 

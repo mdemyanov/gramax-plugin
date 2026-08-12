@@ -14,11 +14,11 @@ properties:
 
 **Роль:** QA-author (тест-дизайн до реализации Dev — этот документ и failing-тесты
 предшествуют коду резолвера, не следуют за ним).
-**Требование:** `content/30-requirements/2026-08-13-link-form-contract.md` (трек резолвера —
+**Требование:** [Контракт формы ссылки на артефакт в Gramax-каталоге](../../30-requirements/2026-08-13-link-form-contract.md) (трек резолвера —
 AC-008…AC-012; остальные AC требования — AC-001…007, AC-013…018 — параллельный QA-author-трек
 классификации код-спанов и скрипта миграции, не этот документ).
-**ADR:** `content/00-project/adr/0016-link-form-contract.md`, Решение 1.
-**Архитектура:** `content/40-architecture/2026-08-13-link-form-contract-design.md`, «Бриф для
+**ADR:** [Контракт формы ссылки на артефакт — резолвер гейта и временный протокол при расхождении с nauta](../../00-project/adr/0016-link-form-contract.md), Решение 1.
+**Архитектура:** [Контракт формы ссылки на артефакт — резолвер, миграция, интеграция с nauta](../../40-architecture/2026-08-13-link-form-contract-design.md), «Бриф для
 Dev» пп.1–2, «Контракт с QA-author».
 **Артефакты этой задачи:**
 - `tests/gramax/link-form-resolver/` — bash AC-suite (`ac-NNN-*.sh` + `run.sh` + независимая
