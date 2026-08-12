@@ -77,7 +77,7 @@ QA-author.
 | `validate_structure.py` ↔ `check.sh --full` | subprocess, код возврата | ненулевой exit при `error`-уровне issue | N/A | Одноразовый запуск на коммит/CI | `check.sh --full` печатает `FAIL` и прерывает pipeline |
 | `validate-content.py` (nauta) ↔ `check.sh --fast` | subprocess, код возврата | error на буквальный `.exists()`, без инференса (расхождение, ADR-0016 Решение 2) | N/A | Каждый коммит (pre-commit hook) | Красный `--fast` до временного `.md`-протокола или апстрим-фикса |
 | `migrate_nav_codespans.py` → `content/` | файловый I/O (read+write) | `--fix --yes` мутирует; иначе только отчёт; `--expect-count=N` — hard guard | N/A | Ручной/CI запуск, не постоянный сервис | Расхождение пересчитанного числа NAV-кандидатов с ожидаемым → abort без мутаций, ненулевой exit |
-| SA/Dev → `tools-ai/nauta` (апстрим) | GitLab issue (доска `doc-hub.gitlab.yandexcloud.net/tools-ai/nauta`) | Текстовое описание дефекта + предложенный алгоритм (см. «Бриф для DevOps») | Доступ к внутреннему GitLab | N/A | Issue отслеживается вручную, релиз/пересинк — событие для снятия временного протокола |
+| SA/Dev → `tools-ai/nauta` (апстрим) | GitLab issue (доска апстрим-трекера `tools-ai/nauta`, внутренний GitLab) | Текстовое описание дефекта + предложенный алгоритм (см. «Бриф для DevOps») | Доступ к внутреннему GitLab | N/A | Issue отслеживается вручную, релиз/пересинк — событие для снятия временного протокола |
 
 ## FR/NFR Mapping
 
@@ -162,7 +162,7 @@ QA-author.
 **Архитектура:** этот файл. **NFR:** NFR-001…NFR-005.
 
 **Подготовить:**
-- Апстрим-issue в `tools-ai/nauta` (`doc-hub.gitlab.yandexcloud.net/tools-ai/nauta`), по образцу
+- Апстрим-issue в `tools-ai/nauta` (внутренний GitLab-трекер апстрима), по образцу
   уже заведённого issue №1. Черновик:
   - **Заголовок:** «`check_broken_links` (C9) не инферит `.md`/`_index.md` — ложный error на
     ссылке без расширения, соответствующей рекомендации `SKILL.md:210` потребителей».

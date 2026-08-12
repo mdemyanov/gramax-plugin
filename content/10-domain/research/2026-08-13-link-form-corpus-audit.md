@@ -41,7 +41,7 @@ ADR/Требование:»; 1 спорный. Настоящих markdown-сс�
 
 ## Метод (воспроизводимо)
 
-Все команды — из корня репозитория `/Users/mdemyanov/Devel/gramax`.
+Все команды — из корня репозитория (рабочее дерево этой волны).
 
 1. **Перечень корпуса:** `find content -name "*.md" | wc -l` → 52.
 2. **Извлечение код-спанов с путями.** Написан скрипт, повторяющий маскирование fenced-блоков и
@@ -124,9 +124,9 @@ scratch-директории сессии; таблицы ниже — их пр
 - **SUBJECT** — статья говорит о файле/каталоге как о предмете (обсуждает его свойства, поведение,
   историю), а не отправляет читателя туда. Внутри этого класса скрыт нетривиальный подкласс:
   несколько строк относятся не к `content/_index.md` **этого** репозитория, а к одноимённому файлу
-  в **другом** репозитории (`gramax-user-docs`, `nsmp-plugin`, `process_design` — эталонный
-  вендорский корпус или локальные потребители, независимо проверенные PM) — тот же относительный
-  путь, физически другой файл на другой машине. Разобрано подробнее в «Задаче 3».
+  в **другом** репозитории (эталонный вендорский корпус документации либо локальный потребитель,
+  независимо проверенные PM) — тот же относительный путь, физически другой файл на другой машине.
+  Разобрано подробнее в «Задаче 3» (там же — расшифровка меток «потребитель N»).
 - **СПОРНО** — не удалось уверенно отнести к NAV или SUBJECT; см. пояснение под таблицей.
 
 Существование цели проверено `os.path.exists()`; несуществующие цели помечены отдельно (их ровно 2
@@ -481,7 +481,7 @@ scratch-директории сессии; таблицы ниже — их пр
 | **Устаревшая раскладка `docs/` до миграции в `content/`** — упомянута либо в таблице соответствия старых/новых путей, либо в архивных QA-отчётах 2026-05-хх, либо как предмет самого гейта `doc-paths` (ADR-0011), который и существует, чтобы ловить такие упоминания | 17 | `docs/adr/`, `docs/qa-reports/2026-05-08-diagram-on-demand-qa-report.md`, `docs/superpowers/specs/2026-05-11-remove-diagram-skills.md`, `docs/lessons-learned.md` | прочитан контекст каждой строки — все либо в миграционной таблице (`content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md:154-162`), либо помечены явно «архив»/«допустимо» в QA-отчётах 2026-05-11 |
 | **Историческое упоминание удалённого/переименованного артефакта**, задокументированное конкретным ADR/FR — на момент написания абзаца путь либо ещё существовал, либо обсуждается как то, что только что удалили | 25 | `plugins/claude-mermaid(/)` (ADR-0009, submodule снят), `plugins/gramax/scripts/{drawio_convert.py,find_doc_root.sh,insert_diagram_ref.sh,save_diagram.sh,validate_diagram_type.sh}` (ADR-0008), `plugins/gramax/skills/{diagram-on-demand,diagrams,diagram-drawio,diagram-mermaid}(/)` (ADR-0001→0004→0008), `tests/gramax/{diagram-on-demand,remove-diagram-skills,routing-mermaid-drawio}` без префикса `archive/` (ADR-0011, суффикс `run.sh`/`README.md`/`ac-011` включён) | найдено явное действие удаления/переезда в тексте той же или соседней строки («удалить каталог целиком», «git rm -r», «удалён (`git rm -r`) — не существует, ожидаемо») |
 | **Явно отклонённый вариант архитектуры**, зафиксированный как «Отклонено» в теле ADR | 2 | `plugins/gramax/vendor/drawio-mcp/` (ADR-0003, вариант «git submodule» не выбран), `scripts/deprecated/` (ADR-0008: «Переход в `scripts/deprecated/` не выполняется») | цитата «Отклонено»/«не выполняется» находится в той же строке |
-| **Омоним пути из другого репозитория** — строка выглядит как путь этого репозитория, но по контексту — путь на машине потребителя или в исследуемом внешнем проекте | 3 | `scripts/testRunner.js` (RES-004: чужой jest/TS-проект, у этого репозитория нет `jest.config.js`), `scripts/test-central-plugin-checkout.sh` (RES-002 G9: `knowlage/project_template`/потребитель), `scripts/repair_png.py` (RES-001: prerequisite стороннего skill `Agents365-ai/drawio-skill`, не этого репозитория) | у каждого — соседняя фраза называет чужой репозиторий/проект явно |
+| **Омоним пути из другого репозитория** — строка выглядит как путь этого репозитория, но по контексту — путь на машине потребителя или в исследуемом внешнем проекте | 3 | `scripts/testRunner.js` (RES-004: чужой jest/TS-проект, у этого репозитория нет `jest.config.js`), `scripts/test-central-plugin-checkout.sh` (RES-002 G9: сторонний каталог-потребитель — шаблон проекта), `scripts/repair_png.py` (RES-001: prerequisite стороннего skill `Agents365-ai/drawio-skill`, не этого репозитория) | у каждого — соседняя фраза называет чужой репозиторий/проект явно |
 | **Укороченная форма без полного пути** — бэктик несёт не полный путь, а бытовое сокращение (номер AC без расширения, имя манифеста без директории) внутри абзаца, где полная форма уже была дана | 8 | `marketplace.json`/`plugin.json` (полные формы — `.claude-plugin/marketplace.json` и `plugins/gramax/.claude-plugin/plugin.json`, обе существуют и упомянуты рядом), `scripts/validate_structure.py` без префикса `plugins/gramax/` (полная форма — двумя строками ниже в том же абзаце), 4× голый `ac-0NN` без `.sh` | полная форма цели физически присутствует в том же документе (не в другом репозитории) |
 
 **Вывод:** в классе «путь вне `content/`» не обнаружено ни одной ссылки, которая выглядела бы
@@ -554,17 +554,21 @@ grep -ohE 'FR-[0-9]{3}' "$f" | sort -u; done | sort | uniq -c | sort -rn` — в
 
 Помимо примеров из Задачи 2.3 (`scripts/testRunner.js` и т. п.), тот же эффект есть и внутри
 префикса `content/` — путь синтаксически неотличим от пути этого репозитория, но по смыслу фразы
-указывает на **другую** машину/репозиторий:
+указывает на **другую** машину/репозиторий. Имена внешних репозиториев ниже заменены на устойчивые
+метки «потребитель N» (номера 1–5 — по числу различённых внешних репозиториев, встретившихся в этом
+исследовании, включая упоминание в классе SUBJECT выше) — один номер обозначает один и тот же
+репозиторий во всех упоминаниях; конкретное имя не нужно для сути находки (по образцу
+`content/lessons-learned.md`, запись 2026-08-11):
 
 | код-спан | файл:строка | чей это путь |
 |---|---|---|
-| `content/_index.md` | `content/10-domain/research/2026-08-11-index-md-at-catalog-root.md:54,97,167,257,326` | `gramax-user-docs` (эталонный вендорский корпус) и локальные потребители `nsmp-plugin`/`process_design` |
-| `content/00-project/adr/007-dr-cluster-topology.md:64` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:103` | `knowlage/moex` |
-| `content/00-project/adr/008-pii-masking-integration-log.md:159,243` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:104`, `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md:45` | `knowlage/moex` |
-| `content/00-project/plans/deploy-1-stand-smoke.md:180` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:105`, `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md:46` | `Devel/mango-cti-rest` |
-| `content/70-operations/network-prerequisites.md:30` | те же строки | `Devel/mango-cti-rest` |
-| `content/gramax-internal-docs/(.doc-root.yaml)` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:198`, `content/30-requirements/2026-08-11-writer-consumer-rules.md:88` | `knowlage/moex` (вложенный doc-root) |
-| `content/00-project/handoffs/` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:107`, `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md:47` | `Devel/naumen-smp-mcp` |
+| `content/_index.md` | `content/10-domain/research/2026-08-11-index-md-at-catalog-root.md:54,97,167,257,326` | эталонный вендорский корпус документации и локальные потребители (потребитель 3, потребитель 4) |
+| `content/00-project/adr/007-dr-cluster-topology.md:64` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:103` | сторонний каталог-потребитель («потребитель 1») |
+| `content/00-project/adr/008-pii-masking-integration-log.md:159,243` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:104`, `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md:45` | сторонний каталог-потребитель («потребитель 1») |
+| `content/00-project/plans/deploy-1-stand-smoke.md:180` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:105`, `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md:46` | сторонний каталог-потребитель («потребитель 2») |
+| `content/70-operations/network-prerequisites.md:30` | те же строки | сторонний каталог-потребитель («потребитель 2») |
+| `content/gramax-internal-docs/(.doc-root.yaml)` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:198`, `content/30-requirements/2026-08-11-writer-consumer-rules.md:88` | сторонний каталог-потребитель («потребитель 1», вложенный doc-root) |
+| `content/00-project/handoffs/` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:107`, `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md:47` | сторонний каталог-потребитель («потребитель 5») |
 
 Эти пути в принципе непроверяемы существованием в этом репозитории (некоторые каталоги — `70-operations`,
 `plans`, `handoffs` — в `content/` этого репозитория не существуют вовсе, и не должны). Риск —
@@ -618,8 +622,9 @@ POINTER, а не RECORD, и именно поэтому дрейф на 1 стр
   (сегодня 15 записей, полностью синхронных с файлами) — то есть остаётся ли механизм «голый номер +
   таблица-реестр» рабочим за пределами измеренного состояния корпуса.
 - Не проверено (не входило в задачу и не имею доступа), существуют ли на самом деле файлы
-  внешних репозиториев из Задачи 3.4 (`knowlage/moex`, `Devel/mango-cti-rest`, `gramax-user-docs`,
-  `naumen-smp-mcp`) — их корректность/актуальность вне периметра этого корпуса.
+  внешних репозиториев из Задачи 3.4 (сторонние каталоги-потребители «потребитель 1»/«потребитель 2»/
+  «потребитель 5», эталонный вендорский корпус документации) — их корректность/актуальность вне
+  периметра этого корпуса.
 
 ## Рекомендации для BA/SA
 
