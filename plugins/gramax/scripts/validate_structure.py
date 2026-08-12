@@ -21,6 +21,7 @@ from pathlib import Path
 import yaml
 
 from lib.md_link_parser import parse_md_resources
+from lib.link_resolver import resolve_no_ext, check_hash_anchor
 
 DOC_URL = "https://github.com/mdemyanov/gramax-plugin"
 EPILOG = (
@@ -353,16 +354,46 @@ def check_placeholders(root: Path, issues: list[Issue]):
 
 def check_broken_links(root: Path, issues: list[Issue]):
     """FR-048: markdown-ссылка на несуществующий файл внутри того же `.doc-root.yaml`-
-    каталога — error безусловно (ADR-0012 Решение 2). Cross-каталожные ссылки не
-    резолвятся вовсе (`in_scope=False`) — граница общая с check_orphans (FR-047)."""
-    for ref in _collect_links(root):
-        if not ref.in_scope:
+    каталога — error безусловно (ADR-0012 Решение 2).
+
+    Расширено healthcheck-портом:
+    - W032: no-ext resolution — если target не найден, но target.md существует → OK;
+      если ни target, ни target.md не найдены → предупреждение (до повышения до error
+      в будущем релизе).
+    - W033: hash anchor — если #fragment не соответствует ни одному заголовку → warning.
+    """
+    for res in parse_md_resources(root):
+        if res.target_type != "link":
             continue
-        if not ref.resolved.exists():
-            issues.append(Issue(
-                "error", ref.source,
-                f'битая ссылка (broken link) на "{ref.raw_target}" — файл не найден: {ref.resolved}',
-            ))
+        if not res.in_scope:
+            continue
+
+        raw = res.raw_target
+        fragment = raw.split("#", 1)[1] if "#" in raw else ""
+        target_no_fragment = raw.split("#", 1)[0].strip().strip("<>")
+
+        # Пробуем найти целевой файл с no-ext резолвом
+        resolved = res.resolved_path
+        if not resolved.exists():
+            # no-ext fallback
+            alt = resolve_no_ext(resolved)
+            if alt is not None:
+                resolved = alt
+            else:
+                issues.append(Issue(
+                    "error", res.source,
+                    f'битая ссылка (broken link) на "{raw}" — файл не найден: {resolved}',
+                ))
+                continue
+
+        # Проверяем hash-якорь только если файл найден
+        if fragment and resolved.suffix == ".md":
+            if not check_hash_anchor(resolved, fragment):
+                issues.append(Issue(
+                    "warning", res.source,
+                    f'W033: hash-якорь "#{fragment}" не найден в {resolved.relative_to(root)} '
+                    f'(ссылка из {res.source.name})',
+                ))
 
 
 def check_orphans(root: Path, issues: list[Issue], strict: bool):
