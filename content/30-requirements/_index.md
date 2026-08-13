@@ -18,3 +18,4 @@ order: 3
 - [Контракт формы ссылки на артефакт в Gramax-каталоге](2026-08-13-link-form-contract.md) — FR-077…FR-092
 - [Ретракция кросс-каталожного `code:`-рецепта и миграция потребителей](2026-08-13-cross-catalog-retraction.md) — FR-093…FR-103
 - [Линтер рендер-киллеров Gramax (порт validate-gramax.py)](2026-08-12-render-killer-linter.md) — FR-104…FR-119
+- [Рекурсивное обнаружение и типизация `.doc-root.yaml`](2026-08-13-doc-root-discovery-contract.md) — FR-120…FR-123

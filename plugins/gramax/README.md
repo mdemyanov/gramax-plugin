@@ -69,6 +69,12 @@ Gramax-каталога (обязательность `_index.md` в подпа�
 своего репозитория скопируйте готовый шаблон
 [`scripts/pre-commit.sh`](./scripts/pre-commit.sh).
 
+Начиная с 4.5.0 валидатор рекурсивно находит все `.doc-root.yaml` в дереве переданного
+пути (не только в корне) и проверяет типы обязательных полей `title`/`language`/`syntax`
+— значение обязано быть непустой строкой. Регресс-якорь — инцидент 2026-08-13:
+незакавыченный `title: {{PROJECT_NAME}}` во вложенных `examples/`-каталогах ронял
+редактор Gramax, тогда как валидатор давал exit 0 (ADR-0020).
+
 ```bash
 uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py" content
 uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py" --help
@@ -117,4 +123,4 @@ uv run "${CLAUDE_PLUGIN_ROOT}/scripts/migrate_mermaid.py" content --fix --yes
 
 ## Версия
 
-4.4.0 — см. [CHANGELOG.md](./CHANGELOG.md)
+4.5.0 — см. [CHANGELOG.md](./CHANGELOG.md)

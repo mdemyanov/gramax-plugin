@@ -12,6 +12,7 @@
 """
 
 import argparse
+import datetime
 import json
 import re
 import sys
@@ -67,20 +68,123 @@ def load_json_contract(path: Path, issues: list[Issue]) -> dict | None:
     return data
 
 
-def check_doc_root(root: Path, issues: list[Issue], required_fields: list[str]) -> bool:
+def check_doc_root(root: Path, issues: list[Issue], required_fields: list[str]) -> set[str]:
+    """Проверяет `.doc-root.yaml` каталога: наличие, парсинг, типы обязательных полей
+    (FR-121…FR-123, ADR-0020).
+
+    Возвращает множество токенов-плейсхолдеров `{{...}}`, чьи placeholder-находки поглощены
+    parse-error-находкой с подсказкой FR-123 (BR-004: одна находка на дефект).
+
+    FR-122: ошибка парсинга существующего файла прогон не прекращает — вызывающий код
+    продолжает остальные проверки (минимум `check_placeholders`); отсутствие файла сигналит
+    error, трактуемое вызывающим кодом как «каталога нет» (прежнее поведение).
+    """
     yaml_file = root / ".doc-root.yaml"
     if not yaml_file.exists():
         issues.append(Issue("error", root, ".doc-root.yaml not found"))
-        return False
+        return set()
+    raw = yaml_file.read_text(encoding="utf-8")
     try:
-        data = yaml.safe_load(yaml_file.read_text(encoding="utf-8"))
+        data = yaml.safe_load(raw)
     except yaml.YAMLError as e:
-        issues.append(Issue("error", yaml_file, f"invalid yaml: {e}"))
-        return False
+        return _report_doc_root_yaml_error(yaml_file, issues, raw, e)
+    if not isinstance(data, dict):
+        issues.append(Issue("error", yaml_file, "invalid yaml: top-level structure must be a mapping"))
+        return set()
+    value_lines = _value_line_map(raw)
+    lines = raw.splitlines()
     for field in required_fields:
-        if not isinstance(data, dict) or field not in data:
+        if field not in data:
             issues.append(Issue("error", yaml_file, f"missing field: {field}"))
-    return True
+            continue
+        value = data[field]
+        if isinstance(value, str) and value.strip():
+            continue
+        # FR-121: непустая строка — единственный валидный тип значения обязательного поля;
+        # сообщение несёт фактический тип и исходную строку (номер строки + raw-текст).
+        loc = ""
+        line_no = value_lines.get(field)
+        if line_no is not None and line_no - 1 < len(lines):
+            loc = f" (строка {line_no}: {lines[line_no - 1].strip()})"
+        issues.append(Issue(
+            "error", yaml_file,
+            f'invalid type for field "{field}": expected non-empty string, '
+            f"got {_value_type_name(value)}{loc}",
+        ))
+    return set()
+
+
+def _value_line_map(raw: str) -> dict[str, int]:
+    """{top-level field: 1-based номер строки его значения} из `yaml.compose` (FR-121)."""
+    result: dict[str, int] = {}
+    try:
+        node = yaml.compose(raw)
+    except yaml.YAMLError:
+        return result
+    if not isinstance(node, yaml.MappingNode):
+        return result
+    for key_node, value_node in node.value:
+        if isinstance(key_node, yaml.ScalarNode):
+            result[key_node.value] = value_node.start_mark.line + 1
+    return result
+
+
+def _value_type_name(value) -> str:
+    """Человекочитаемое имя типа значения поля `.doc-root.yaml` (FR-121)."""
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "bool"
+    if isinstance(value, str):
+        return "empty string" if not value.strip() else "string"
+    if isinstance(value, dict):
+        return "dict"
+    if isinstance(value, list):
+        return "list"
+    if isinstance(value, (int, float)):
+        return type(value).__name__
+    if isinstance(value, datetime.datetime):
+        return "datetime"
+    if isinstance(value, datetime.date):
+        return "date"
+    return type(value).__name__
+
+
+_PLACEHOLDER_AT_VALUE_RE = re.compile(r"^(\w[\w-]*)\s*:\s*(\{\{[^{}\n]+\}\})(.*)$")
+
+
+def _placeholder_quote_hint(raw: str) -> tuple[str, str] | None:
+    """FR-123: если парсинг упал из-за незакавыченного `{{...}}` на позиции значения поля
+    (эвристика по raw-строке) — возвращает (токен, текст подсказки с закавычиванием)."""
+    for line in raw.splitlines():
+        m = _PLACEHOLDER_AT_VALUE_RE.match(line)
+        if not m:
+            continue
+        field, token, rest = m.group(1), m.group(2), m.group(3).strip()
+        value_str = token + (f" {rest}" if rest else "")
+        hint = (f"незакавыченный плейсхолдер {token} на позиции значения поля; "
+                f"закавычьте значение: {field}: \"{value_str}\" "
+                f'(пример: title: "{{{{PROJECT_NAME}}}}")')
+        return token, hint
+    return None
+
+
+def _report_doc_root_yaml_error(yaml_file: Path, issues: list[Issue], raw: str, e: yaml.YAMLError) -> set[str]:
+    """FR-122/FR-123: сообщение об ошибке парсинга `.doc-root.yaml` с номером строки/колонки
+    из `problem_mark` pyyaml (fallback `str(e)` при отсутствии mark); возвращает множество
+    поглощённых placeholder-токенов (одна находка на дефект, BR-004)."""
+    mark = getattr(e, "problem_mark", None)
+    if mark is not None and getattr(mark, "line", None) is not None:
+        msg = f"invalid yaml: синтаксическая ошибка на строке {mark.line + 1}, колонке {mark.column + 1}"
+    else:
+        msg = f"invalid yaml: {e}"
+    hint = _placeholder_quote_hint(raw)
+    if hint is not None:
+        token, hint_text = hint
+        issues.append(Issue("error", yaml_file, f"{msg}; {hint_text}"))
+        return {token}
+    issues.append(Issue("error", yaml_file, msg))
+    return set()
 
 
 def load_property_schema(root: Path) -> dict[str, dict] | None:
@@ -113,17 +217,87 @@ def load_property_schema(root: Path) -> dict[str, dict] | None:
     return schema
 
 
-def check_subfolders_have_index(root: Path, issues: list[Issue]):
+# ===== Рекурсивное обнаружение catalog root и границы ownership (ADR-0020, FR-120) =====
+# Исключения обхода — явный список (Решение 1 и 6): по имени каталога на любой глубине и
+# по относительному пути от переданного корня (фикстурные пути догфудинга AC-040).
+_EXCLUDED_DIR_NAMES = {".git", ".gramax", "node_modules"}
+
+
+def _is_excluded_walk_path(root: Path, path: Path) -> bool:
+    """True — `path` (файл/каталог) лежит в поддереве, исключённом из обхода (FR-120).
+
+    Сам переданный корень не исключается никогда: `relative_to(root)` даёт `.` без частей."""
+    try:
+        rel = path.relative_to(root)
+    except ValueError:
+        return False
+    if any(part in _EXCLUDED_DIR_NAMES for part in rel.parts):
+        return True
+    if rel.parts and rel.parts[0] == "tests":
+        return True
+    if str(rel).startswith("plugins/gramax/scripts/tests/fixtures"):
+        return True
+    return False
+
+
+def _iter_doc_root_yaml(root: Path):
+    """Все вложенные `.doc-root.yaml` под `root` (кроме первичного и исключённых путей)."""
+    for candidate in root.rglob(".doc-root.yaml"):
+        d = candidate.parent
+        if d == root:
+            continue
+        if _is_excluded_walk_path(root, d):
+            continue
+        yield d
+
+
+def _nested_doc_root_dirs(root: Path) -> set[Path]:
+    """Resolved-директории вложенных `.doc-root.yaml` — их поддеревья вне структурной
+    области `root` (FR-120 граница ownership, переиспользует дух `in_scope=False`, FR-047)."""
+    return {d.resolve() for d in _iter_doc_root_yaml(root)}
+
+
+def _discover_nested_doc_roots(root: Path) -> list[Path]:
+    """Отсортированный список вложенных catalog root для валидации (FR-120, NFR-002)."""
+    return sorted(_iter_doc_root_yaml(root))
+
+
+def _in_nested_subtree(path: Path, nested: set[Path]) -> bool:
+    """True — `path` лежит внутри одного из вложенных catalog root (ownership boundary)."""
+    r = path.resolve()
+    return any(r == n or n in r.parents for n in nested)
+
+
+def _parse_resources(root: Path, nested: set[Path]):
+    """Ресурсные ссылки (`parse_md_resources`) только из структурной области `root`:
+    источники из поддеревьев вложенных root / исключённых путей отбрасываются (FR-120)."""
+    return [
+        r for r in parse_md_resources(root)
+        if not _in_nested_subtree(r.source, nested)
+        and not _is_excluded_walk_path(root, r.source)
+    ]
+
+
+def check_subfolders_have_index(root: Path, issues: list[Issue], nested: set[Path] | None = None):
     """Каждая подпапка с .md или вложенными папками обязана иметь _index.md
     (`indexPolicy.subfolder: required`, gramax-catalog-rules.json). Корень каталога в этот
     обход не входит (`subdir == root` исключён) — там `_index.md` `optional`
-    (ADR-0012 Решение 1, ADR-0015)."""
+    (ADR-0012 Решение 1, ADR-0015).
+
+    Поддеревья вложенных `.doc-root.yaml` и исключённые пути обхода (FR-120) пропускаются:
+    их политика индекса — зона вложенного root, валидируется там, не дублем от ancestor."""
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
     for subdir in root.rglob("*"):
         if not subdir.is_dir():
             continue
         if ".gramax" in subdir.parts:
             continue
         if subdir == root:
+            continue
+        if _is_excluded_walk_path(root, subdir):
+            continue
+        if _in_nested_subtree(subdir, nested):
             continue
         # has any .md file or any subdirectory inside
         has_content = any(
@@ -223,10 +397,15 @@ def check_tags(md_file: Path, issues: list[Issue], paired_tags: list[str]):
         issues.append(Issue("error", md_file, f"unpaired [comment:id]: {bc_open} open, {bc_close} close"))
 
 
-def check_garbage(root: Path, issues: list[Issue], strict: bool, fix: bool, yes: bool, garbage_files: set[str]) -> list[Path]:
+def check_garbage(root: Path, issues: list[Issue], strict: bool, fix: bool, yes: bool,
+                  garbage_files: set[str], nested: set[Path] | None = None) -> list[Path]:
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
     removed = []
     for path in root.rglob("*"):
         if path.name in garbage_files:
+            if _is_excluded_walk_path(root, path) or _in_nested_subtree(path, nested):
+                continue
             level = "error" if strict else "warning"
             issues.append(Issue(level, path, f"garbage file: {path.name}"))
             if fix and yes:
@@ -235,8 +414,12 @@ def check_garbage(root: Path, issues: list[Issue], strict: bool, fix: bool, yes:
     return removed
 
 
-def check_no_drawio(root: Path, issues: list[Issue], strict: bool):
+def check_no_drawio(root: Path, issues: list[Issue], strict: bool, nested: set[Path] | None = None):
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
     for path in root.rglob("*.drawio"):
+        if _is_excluded_walk_path(root, path) or _in_nested_subtree(path, nested):
+            continue
         level = "error" if strict else "warning"
         issues.append(Issue(level, path, ".drawio file should be converted to .svg"))
 
@@ -249,8 +432,15 @@ _EXTERNAL_RE = re.compile(r"^(?:[a-z][a-z0-9+.\-]*:|//)", re.IGNORECASE)
 _PLACEHOLDER_RE = re.compile(r"\{\{[^{}\n]+\}\}")
 
 
-def _collect_md_files(root: Path) -> list[Path]:
-    return sorted(p for p in root.rglob("*.md") if ".gramax" not in p.parts)
+def _collect_md_files(root: Path, nested: set[Path] | None = None) -> list[Path]:
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
+    return sorted(
+        p for p in root.rglob("*.md")
+        if ".gramax" not in p.parts
+        and not _is_excluded_walk_path(root, p)
+        and not _in_nested_subtree(p, nested)
+    )
 
 
 @dataclass
@@ -280,7 +470,7 @@ def _resolve_link_target(source_dir: Path, target: str) -> Path:
     return literal
 
 
-def _collect_links(root: Path) -> list[LinkRef]:
+def _collect_links(root: Path, nested: set[Path] | None = None) -> list[LinkRef]:
     """Собирает markdown-ссылки/изображения (`[текст](цель)`, `![alt](цель)`) из всех .md
     каталога.
 
@@ -290,11 +480,15 @@ def _collect_links(root: Path) -> list[LinkRef]:
     - цель, резолвящаяся ЗА пределами `root` (cross-каталожная ссылка на соседний
       `.doc-root.yaml`-каталог), помечается `in_scope=False`: ни orphan-, ни
       broken-link-проверка её не использует — не резолвится, не создаёт ложных находок
-      (AC-014).
+      (AC-014);
+    - статьи из поддеревьев вложенных `.doc-root.yaml` не собираются вовсе (FR-120
+      ownership boundary): их ссылки резолвятся в границах своего root (AC-039).
     """
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
     root_resolved = root.resolve()
     refs: list[LinkRef] = []
-    for md in _collect_md_files(root):
+    for md in _collect_md_files(root, nested):
         text = _mask_code(md.read_text(encoding="utf-8"))
         for m in _MD_LINK_RE.finditer(text):
             raw = m.group(1)
@@ -310,24 +504,34 @@ def _collect_links(root: Path) -> list[LinkRef]:
     return refs
 
 
-def check_placeholders(root: Path, issues: list[Issue]):
+def check_placeholders(root: Path, issues: list[Issue], suppressed_tokens: set[str] | None = None,
+                       nested: set[Path] | None = None):
     """FR-046: плейсхолдер шаблона `{{ИМЯ}}`, доехавший до наполненного каталога — error
     безусловно (ADR-0012 Решение 2). Сканирует `.doc-root.yaml` целиком и текст каждой
     статьи (код-блоки замаскированы — пример синтаксиса в документации не считается
-    протёкшим плейсхолдером)."""
+    протёкшим плейсхолдером).
+
+    FR-123 (BR-004): токен незакавыченного `{{...}}`, по которому уже выдана
+    parse-error-находка с подсказкой (`suppressed_tokens`), placeholder-находку не даёт;
+    прочие токены того же файла продолжают давать собственные находки."""
+    suppressed = suppressed_tokens or set()
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
     yaml_file = root / ".doc-root.yaml"
     if yaml_file.exists():
         for m in _PLACEHOLDER_RE.finditer(yaml_file.read_text(encoding="utf-8")):
+            if m.group(0) in suppressed:
+                continue
             issues.append(Issue("error", yaml_file,
                                  f"плейсхолдер шаблона {m.group(0)} не заменён (placeholder)"))
-    for md in _collect_md_files(root):
+    for md in _collect_md_files(root, nested):
         masked = _mask_code(md.read_text(encoding="utf-8"))
         for m in _PLACEHOLDER_RE.finditer(masked):
             issues.append(Issue("error", md,
                                  f"плейсхолдер шаблона {m.group(0)} не заменён (placeholder)"))
 
 
-def check_broken_links(root: Path, issues: list[Issue]):
+def check_broken_links(root: Path, issues: list[Issue], nested: set[Path] | None = None):
     """FR-048: markdown-ссылка на несуществующий файл внутри того же `.doc-root.yaml`-
     каталога — error безусловно (ADR-0012 Решение 2).
 
@@ -337,7 +541,9 @@ def check_broken_links(root: Path, issues: list[Issue]):
       в будущем релизе).
     - W033: hash anchor — если #fragment не соответствует ни одному заголовку → warning.
     """
-    for res in parse_md_resources(root):
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
+    for res in _parse_resources(root, nested):
         if res.target_type != "link":
             continue
         if not res.in_scope:
@@ -371,7 +577,7 @@ def check_broken_links(root: Path, issues: list[Issue]):
                 ))
 
 
-def check_orphans(root: Path, issues: list[Issue], strict: bool):
+def check_orphans(root: Path, issues: list[Issue], strict: bool, nested: set[Path] | None = None):
     """FR-047: статья без входящих markdown-ссылок внутри каталога — warning по умолчанию,
     error под `--strict` (ADR-0012 Решение 2, тот же переключатель, что check_garbage/
     check_no_drawio).
@@ -384,19 +590,23 @@ def check_orphans(root: Path, issues: list[Issue], strict: bool):
     отнимается — инициализация нулём на файл, не декремент (симметрично C10).
 
     Cross-каталожные ссылки (FR-047 граница, `_collect_links` → `in_scope=False`) не
-    засчитываются как входящие — AC-014.
+    засчитываются как входящие — AC-014. Статьи из поддеревьев вложенных `.doc-root.yaml`
+    в учёт не входят вовсе (FR-120 ownership boundary) — их orphan-статус — зона
+    вложенного root, AC-039.
     """
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
     level = "error" if strict else "warning"
     incoming: dict[Path, int] = {}
     display: dict[Path, Path] = {}
-    for md in _collect_md_files(root):
+    for md in _collect_md_files(root, nested):
         if md.name == "_index.md":
             continue
         key = md.resolve()
         incoming[key] = 0
         display[key] = md
 
-    for ref in _collect_links(root):
+    for ref in _collect_links(root, nested):
         if not ref.in_scope:
             continue
         if ref.resolved == ref.source.resolve():
@@ -444,35 +654,57 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     if not root.is_dir():
         issues.append(Issue("error", root, "not a directory"))
         return issues
-    if not check_doc_root(root, issues, doc_root_required):
+    # FR-122: отсутствие `.doc-root.yaml` на переданном корне — error + прекращение
+    # (прежнее поведение): директория без catalog root не является каталогом, структурным
+    # проверкам не к чему привязаться. Это НЕ про ошибку парсинга — та прогон не глушит.
+    if not (root / ".doc-root.yaml").exists():
+        issues.append(Issue("error", root, ".doc-root.yaml not found"))
         return issues
-    check_subfolders_have_index(root, issues)
+    # FR-120: обход всего дерева переданного пути, каждый найденный `.doc-root.yaml`
+    # валидируется как отдельный catalog root полным структурным suite'ом. Первичный
+    # root — всегда первым, вложенные — в отсортированном порядке (NFR-002).
+    for catalog_root in [root, *_discover_nested_doc_roots(root)]:
+        _validate_catalog_root(catalog_root, issues, strict, fix, yes, garbage_files,
+                               doc_root_required, frontmatter_required,
+                               effective_paired_tags, known_tags)
+    return issues
+
+
+def _validate_catalog_root(root: Path, issues: list[Issue], strict: bool, fix: bool, yes: bool,
+                           garbage_files: set[str], doc_root_required: list[str],
+                           frontmatter_required: list[str], effective_paired_tags: list[str],
+                           known_tags: set[str]):
+    """Полный структурный suite для одного catalog root (FR-120: каждый найденный
+    `.doc-root.yaml` валидируется как отдельный root). Ошибка парсинга `.doc-root.yaml`
+    прогон не прекращает (FR-122) — все проверки, включая `check_placeholders`, выполняются."""
+    nested = _nested_doc_root_dirs(root)
+    suppressed = check_doc_root(root, issues, doc_root_required)
+    check_subfolders_have_index(root, issues, nested)
     schema = load_property_schema(root)
     if schema is None:
         issues.append(Issue("warning", root / ".doc-root.yaml",
                             "schema использует экспериментальный формат values; V4/V5 пропущены"))
-    for md in root.rglob("*.md"):
-        if ".gramax" in md.parts:
-            continue
+    for md in _collect_md_files(root, nested):
         check_frontmatter(md, issues, schema, frontmatter_required)
         check_tags(md, issues, effective_paired_tags)
-    check_garbage(root, issues, strict, fix, yes, garbage_files)
-    check_no_drawio(root, issues, strict)
-    check_placeholders(root, issues)
-    check_broken_links(root, issues)
-    check_orphans(root, issues, strict)
-    check_unsupported_markup(root, issues, known_tags)
-    check_images(root, issues)
-    check_diagrams(root, issues)
-    return issues
+    check_garbage(root, issues, strict, fix, yes, garbage_files, nested)
+    check_no_drawio(root, issues, strict, nested)
+    check_placeholders(root, issues, suppressed, nested)
+    check_broken_links(root, issues, nested)
+    check_orphans(root, issues, strict, nested)
+    check_unsupported_markup(root, issues, known_tags, nested)
+    check_images(root, issues, nested)
+    check_diagrams(root, issues, nested)
 
 
-def check_images(root: Path, issues: list[Issue]):
+def check_images(root: Path, issues: list[Issue], nested: set[Path] | None = None):
     """Проверяет существование файлов изображений, на которые ссылаются markdown-статьи.
 
     ![alt](path) → path должен существовать на диске. WARNING-уровень (W030).
     """
-    for res in parse_md_resources(root):
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
+    for res in _parse_resources(root, nested):
         if res.target_type != "image":
             continue
         if not res.in_scope:
@@ -484,12 +716,14 @@ def check_images(root: Path, issues: list[Issue]):
             ))
 
 
-def check_diagrams(root: Path, issues: list[Issue]):
+def check_diagrams(root: Path, issues: list[Issue], nested: set[Path] | None = None):
     """Проверяет существование .drawio-файлов, на которые ссылаются статьи.
 
     <drawio path="..."/> → path должен существовать на диске. WARNING-уровень (W031).
     """
-    for res in parse_md_resources(root):
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
+    for res in _parse_resources(root, nested):
         if res.target_type != "drawio":
             continue
         if not res.in_scope:
@@ -510,14 +744,17 @@ def check_diagrams(root: Path, issues: list[Issue]):
 _UNSUPPORTED_HTML_RE = re.compile(r"<(?!\/)([a-z][a-z0-9]*)(?:\s[^>]*)?>", re.IGNORECASE)
 
 
-def check_unsupported_markup(root: Path, issues: list[Issue], known_tags: set[str]):
+def check_unsupported_markup(root: Path, issues: list[Issue], known_tags: set[str],
+                             nested: set[Path] | None = None):
     """Проверяет наличие HTML-тегов и нестандартной разметки в markdown-статьях.
 
     Gramax не поддерживает произвольный HTML. Исключение: <drawio path="..."/> и
     теги из gramax-render-rules.json (killerTags + allowlistedTags).
     WARNING-уровень (W034) — некоторые HTML-теги могут быть валидны в markdown.
     """
-    for md in _collect_md_files(root):
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
+    for md in _collect_md_files(root, nested):
         text = _mask_code(md.read_text(encoding="utf-8"))
         seen_tags: set[str] = set()
         for m in _UNSUPPORTED_HTML_RE.finditer(text):

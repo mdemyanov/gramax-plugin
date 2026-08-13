@@ -16,3 +16,4 @@ order: 1
 - [Ретракция cross-каталожного code:-рецепта (hotfix 4.2.1)](2026-08-13-cross-catalog-retraction-qa-report.md)
 - [Контракт формы ссылки на артефакт (link-form-contract, 4.3.0)](2026-08-13-link-form-contract-qa-report.md)
 - [Линтер рендер-киллеров (validate_render.py, 4.4.0)](2026-08-13-render-killer-linter-qa-report.md)
+- [Рекурсивное обнаружение .doc-root.yaml и типизация полей (FR-120…123, 4.5.0)](2026-08-13-doc-root-discovery-qa-report.md)

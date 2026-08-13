@@ -1,6 +1,6 @@
 {
   "name": "gramax",
-  "version": "4.4.0",
+  "version": "4.5.0",
   "description": "Gramax: writer, comments-read, comments-write, mermaid, drawio, review-agent. Плюс валидаторы Gramax-каталога: структурный с машиночитаемым контрактом тегов и правил (gramax-tags.json, gramax-catalog-rules.json) и контент-линтер рендер-киллеров (validate_render.py, gramax-render-rules.json). Офлайн-мигратор устаревшего inline-mermaid. Mermaid — file-based workflow: .mermaid-файл рядом со статьёй + тег-ссылка в md. Drawio делегирует Agents365-ai/drawio-skill.",
   "author": {
     "name": "mdemyanov",

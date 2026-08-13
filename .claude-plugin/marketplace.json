@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Claude Code marketplace для Gramax-документации: writer, comments, mermaid, drawio, review-agent, валидация каталога с машиночитаемым контрактом и линтер рендер-киллеров (validate_render.py). Drawio skill делегирует внешнему плагину Agents365-ai/drawio-skill.",
-    "version": "4.4.0"
+    "version": "4.5.0"
   },
   "plugins": [
     {
       "name": "gramax",
       "source": "./plugins/gramax",
-      "description": "Документация Gramax: writer, comments-read, comments-write, mermaid, drawio, review-agent. Mermaid skill — file-based workflow: создаёт .mermaid-файл рядом со статьёй, плюс офлайн-мигратор устаревшего inline-формата. Валидатор каталога читает машиночитаемый контракт тегов и правил (gramax-tags.json, gramax-catalog-rules.json). Drawio делегирует внешнему плагину Agents365-ai/drawio-skill."
+      "description": "Документация Gramax: writer, comments-read, comments-write, mermaid, drawio, review-agent. Mermaid skill — file-based workflow: создаёт .mermaid-файл рядом со статьёй, плюс офлайн-мигратор устаревшего inline-формата. Валидатор каталога читает машиночитаемый контракт тегов и правил (gramax-tags.json, gramax-catalog-rules.json), рекурсивно находит все .doc-root.yaml в дереве и проверяет типы обязательных полей (title/language/syntax). Drawio делегирует внешнему плагину Agents365-ai/drawio-skill."
     }
   ]
 }

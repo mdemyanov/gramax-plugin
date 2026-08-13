@@ -13,6 +13,11 @@ from pathlib import Path
 SCRIPT = Path(__file__).parent.parent / "validate_structure.py"
 FIXTURES = Path(__file__).parent / "fixtures"
 
+# ADR-0020 (FR-120…FR-123, AC-036…AC-040): новые кейсы валидируют ТЕ ЖЕ фикстуры, что и
+# acceptance-suite tests/gramax/catalog-validator/ac-021…ac-024.sh — один набор фикстур на
+# два прогона, без дублирования. parents[4] — корень репозитория (tests/scripts/gramax/plugins).
+AC_FIXTURES = Path(__file__).resolve().parents[4] / "tests" / "gramax" / "catalog-validator" / "fixtures"
+
 
 def run_validator(target: Path, *args: str) -> subprocess.CompletedProcess:
     return subprocess.run(
@@ -96,6 +101,76 @@ class BadCatalogTests(unittest.TestCase):
     def test_v2_index_with_properties(self):
         self.assertIn("index-with-properties/_index.md", self.result.stdout)
         self.assertIn("не должен содержать properties", self.result.stdout)
+
+
+class NestedDocRootDiscoveryTests(unittest.TestCase):
+    """ADR-0020 / FR-120 (AC-036): рекурсивное обнаружение вложенных .doc-root.yaml.
+    Регресс-якорь инцидента 2026-08-13 — до FR-120 фикстура даёт exit 0."""
+
+    def test_nested_doc_root_discovered(self):
+        result = run_validator(AC_FIXTURES / "nested-doc-root-discovery")
+        self.assertNotEqual(result.returncode, 0, f"stdout: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("examples/project-example/content/.doc-root.yaml", result.stdout)
+
+
+class NestedDocRootDemarcationTests(unittest.TestCase):
+    """ADR-0020 / FR-120 граница ownership (AC-039): вложенный root валидируется как
+    отдельный root, его статьи не orphan-ы внешнего, дефект — ровно одна находка."""
+
+    def test_nested_root_validated_and_single_finding(self):
+        result = run_validator(AC_FIXTURES / "nested-doc-root-demarcation")
+        self.assertNotEqual(result.returncode, 0, f"stdout: {result.stdout}\nstderr: {result.stderr}")
+        self.assertEqual(result.stdout.count('invalid type for field "title"'), 1,
+                         "дефект вложенного .doc-root.yaml обязан давать ровно одну находку (BR-004)")
+
+    def test_nested_articles_not_orphans_of_outer(self):
+        result = run_validator(AC_FIXTURES / "nested-doc-root-demarcation")
+        # inner.md связана ссылкой внутри вложенного root — не сирота внешнего
+        self.assertIn("outer-orphan.md", result.stdout, "orphan-проверка внешнего каталога обязана работать")
+        self.assertNotIn("inner.md", result.stdout,
+                         "статья вложенного root не должна считаться сиротой внешнего каталога")
+
+
+class DocRootTitleTypeTests(unittest.TestCase):
+    """ADR-0020 / FR-121 (AC-037): значение обязательного поля обязано быть непустой строкой;
+    dict/list/bool/int/float/date/null/пустая строка → error с фактическим типом."""
+
+    CASES = {
+        "float": "got float",
+        "bool": "got bool",
+        "null": "got null",
+        "dict": "got dict",
+    }
+
+    def test_non_string_title_errors_with_type(self):
+        for name, expected_type in self.CASES.items():
+            with self.subTest(name=name):
+                result = run_validator(AC_FIXTURES / "doc-root-title-type" / name)
+                self.assertNotEqual(result.returncode, 0, f"stdout: {result.stdout}")
+                self.assertIn(expected_type, result.stdout,
+                              f"title в фикстуре {name} обязан давать error с фактическим типом")
+
+    def test_quoted_title_passes(self):
+        result = run_validator(AC_FIXTURES / "doc-root-title-type" / "quoted")
+        self.assertEqual(result.returncode, 0, f"stdout: {result.stdout}\nstderr: {result.stderr}")
+        self.assertEqual(result.stdout.strip(), "", "закавыченный title: \"4.21\" должен проходить чисто")
+
+
+class DocRootParseErrorTests(unittest.TestCase):
+    """ADR-0020 / FR-122 + FR-123 (AC-038): невалидный YAML не глушит диагностику;
+    сообщение несёт номер строки, слово о плейсхолдере и подсказку закавычивания."""
+
+    def test_unquoted_placeholder_diagnostics(self):
+        result = run_validator(AC_FIXTURES / "doc-root-parse-error")
+        self.assertNotEqual(result.returncode, 0, f"stdout: {result.stdout}")
+        self.assertRegex(result.stdout, r"строк[а-я]* \d+",
+                         "сообщение обязано содержать номер строки (FR-122)")
+        self.assertRegex(result.stdout, r"плейсхолдер|placeholder",
+                         "сообщение обязано упоминать плейсхолдер как причину (FR-123)")
+        self.assertIn('title: "{{PROJECT_NAME}}"', result.stdout,
+                      "сообщение обязано предлагать закавычивание (FR-123)")
+        self.assertNotIn("плейсхолдер шаблона {{PROJECT_NAME}} не заменён", result.stdout,
+                         "parse-error-находка с подсказкой поглощает placeholder того же токена (BR-004)")
 
 
 if __name__ == "__main__":
