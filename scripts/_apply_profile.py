@@ -33,27 +33,6 @@ from _validate_common import MalformedYamlError, parse_yaml_file, require_yaml  
 BASELINE_CONTENT_MAX_BYTES = 500
 
 
-def _resolve_plugin_slug(repo_root: Path = Path(".")) -> str:
-    """Resolve current plugin slug. Precedence: env PLUGIN_SLUG > marketplace.json > 'project'.
-
-    Used to build paths like .claude/plugins/<slug>/agents/ which used to be hardcoded
-    to 'project' before plugin-rename-on-init epic.
-    """
-    env_slug = os.environ.get("PLUGIN_SLUG", "").strip()
-    if env_slug:
-        return env_slug
-    mf = repo_root / ".claude-plugin" / "marketplace.json"
-    if mf.exists():
-        try:
-            data = json.loads(mf.read_text(encoding="utf-8"))
-            slug = data.get("plugins", [{}])[0].get("name", "")
-            if slug:
-                return slug
-        except (ValueError, KeyError, IndexError):
-            pass
-    return "project"
-
-
 class ProfileError(Exception):
     """Profile manifest load/parse/mutation error — caller should catch and exit cleanly."""
 
@@ -70,7 +49,7 @@ def load_manifest(profile_dir: Path) -> dict:
     try:
         return parse_yaml_file(manifest_path)
     except MalformedYamlError as e:
-        # Мутатор прерывается — работать по нечитаемому входу нельзя (ADR-007 Д5).
+        # Сценарий «The mutator aborts» — работать по нечитаемому входу нельзя (ADR-007 Д5).
         raise ProfileError(str(e)) from e
 
 
@@ -238,19 +217,13 @@ def emit_plan(manifest: dict, init: bool) -> dict:
             "reason": reason,
             "verdict": compute_verdict(op_decl, init),
         })
-    # W4a-T11: emit resolve_agents step if profile declares agent_overrides
-    # Resolver pipeline: _resolve_agents.py reads manifest + overrides, writes resolved
-    # prompts to .claude/plugins/<slug>/agents/ (slug resolved via env > marketplace.json
-    # > 'project'). Bash consumes this op in apply-overlay.sh
-    # (op: resolve_agents → do_resolve_agents handler).
-    if manifest.get("agent_overrides"):
-        plan_ops.append({
-            "op": "resolve_agents",
-            "source": "agent-overrides/",
-            "target": f".claude/plugins/{_resolve_plugin_slug()}/agents/",
-            "verdict": "safe",
-            "reason": "resolve agent prompts (base + delta)",
-        })
+    # Шаг 4 PT-EPIC-14: op `resolve_agents` больше не эмитится. Он писал слитые промты
+    # в `.claude/plugins/<slug>/agents/` -- каталог локальной копии плагина, удалённой
+    # этим шагом. Второго приёмника у резолвера не было, а сама копия была выключена в
+    # поставке с `0e80830`, поэтому per-profile override не действовал ни у одного
+    # потомка ещё до удаления: снимается инертный механизм, не работающий.
+    # Оживление на платформенном пути (`.claude/agents/`, лестница приоритетов PD-27)
+    # требует зонда -- PD-27 наполовину опровергнут живым замером, см. TPL-104.
     return {
         "profile": manifest.get("name", ""),
         "init": init,

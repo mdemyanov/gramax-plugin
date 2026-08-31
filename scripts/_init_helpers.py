@@ -15,11 +15,6 @@ Subcommands:
   init-prompts <prof>     — JSON-массив prompt-объектов
   prompt-field <i> <fld>  — значение поля prompt по индексу (JSON на stdin)
   compat-stacks <prof>    — compatible_stacks через запятую
-  slugify <name>          — kebab-case slug; exit 1 если пусто
-  detect-plugin-state     — JSON {slug, marketplace, inconsistent}; exit 0 OK, 1 при ошибке чтения
-  rename-marketplace <slug> — mutate marketplace.json под slug
-  rename-plugin-json <slug> — mutate plugin.json под slug
-  rename-settings <slug>    — mutate settings.json под slug
 
 CLI: uv run scripts/_init_helpers.py <subcommand> [args...]
 """
@@ -30,7 +25,6 @@ import glob
 import json
 import os
 import sys
-from pathlib import Path
 
 
 def load_manifest(profile: str) -> dict:
@@ -44,149 +38,6 @@ def load_manifest(profile: str) -> dict:
         print(f"Warning: cannot read manifest for profile {profile!r}: {e}", file=sys.stderr)
         return {}
 
-
-def slugify(name: str) -> str:
-    """Превратить произвольную строку в kebab-case slug [a-z0-9-]+.
-
-    Правила:
-      - lowercase
-      - strip accents (NFKD + ascii-encode)
-      - non-ASCII символы выкидываются
-      - runs of non-alnum → одно '-'
-      - leading/trailing '-' trim'аются
-    """
-    import re  # noqa: PLC0415
-    import unicodedata  # noqa: PLC0415
-
-    s = name.lower()
-    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
-    s = re.sub(r"[^a-z0-9]+", "-", s)
-    s = s.strip("-")
-    return s
-
-
-def detect_plugin_state(repo_root: Path) -> dict:
-    """Прочитать текущее состояние plugin/marketplace из артефактов репо.
-
-    Возвращает {'slug': str, 'marketplace': str, 'inconsistent': bool}.
-    'inconsistent' = True если slug в marketplace.json != name в plugin.json.
-
-    Контракт: словарь всегда содержит все 3 ключа. Downstream-код (init.sh)
-    проверяет 'inconsistent' явно.
-    """
-    mf_path = repo_root / ".claude-plugin" / "marketplace.json"
-    with open(mf_path, encoding="utf-8") as f:
-        mf = json.load(f)
-
-    marketplace_name = mf.get("name", "")
-    plugins = mf.get("plugins") or [{}]
-    slug_in_marketplace = plugins[0].get("name", "")
-
-    # Найти plugin.json (по slug_in_marketplace или fallback на 'project')
-    candidate_dirs = [slug_in_marketplace, "project"]
-    plugin_slug = ""
-    for d in candidate_dirs:
-        if not d:
-            continue
-        pj = repo_root / ".claude" / "plugins" / d / ".claude-plugin" / "plugin.json"
-        if pj.exists():
-            with open(pj, encoding="utf-8") as f:
-                plugin_slug = json.load(f).get("name", "")
-            break
-
-    inconsistent = slug_in_marketplace != plugin_slug
-    return {
-        "slug": slug_in_marketplace,
-        "marketplace": marketplace_name,
-        "inconsistent": inconsistent,
-    }
-
-
-def _atomic_write_json(path: Path, data: dict) -> None:
-    """Записать JSON атомарно: tmp → rename. 2-space indent, ensure_ascii=False."""
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-        f.write("\n")
-    os.replace(tmp, path)
-
-
-def rename_marketplace(repo_root: Path, slug: str) -> None:
-    """Mutate .claude-plugin/marketplace.json: name, plugins[0].name, plugins[0].source."""
-    mf_path = repo_root / ".claude-plugin" / "marketplace.json"
-    with open(mf_path, encoding="utf-8") as f:
-        mf = json.load(f)
-    mf["name"] = f"{slug}-local"
-    if mf.get("plugins"):
-        mf["plugins"][0]["name"] = slug
-        mf["plugins"][0]["source"] = f"./.claude/plugins/{slug}"
-    _atomic_write_json(mf_path, mf)
-
-
-def rename_plugin_json(repo_root: Path, slug: str) -> None:
-    """Mutate .claude/plugins/<slug>/.claude-plugin/plugin.json: поле name."""
-    pj_path = repo_root / ".claude" / "plugins" / slug / ".claude-plugin" / "plugin.json"
-    with open(pj_path, encoding="utf-8") as f:
-        pj = json.load(f)
-    pj["name"] = slug
-    _atomic_write_json(pj_path, pj)
-
-
-def find_local_marketplace_key(settings: dict) -> str:
-    """Имя локального marketplace'а в settings.json — того, что смотрит на сам репо.
-
-    Ищем по признаку `source.source == "directory"`, а не по литералу имени: имя
-    менялось (`pt-local` → `project-template-local`) и будет меняться на каждом /init,
-    а признак «directory-источник» — инвариант локального marketplace'а.
-    Приоритет у path == "."; при нескольких кандидатах без "." берётся первый.
-    Пустая строка = локального marketplace'а в settings нет.
-    """
-    markets = settings.get("extraKnownMarketplaces") or {}
-    fallback = ""
-    for name, entry in markets.items():
-        src = (entry or {}).get("source") or {}
-        if src.get("source") != "directory":
-            continue
-        if src.get("path") == ".":
-            return name
-        if not fallback:
-            fallback = name
-    return fallback
-
-
-def rename_settings(repo_root: Path, slug: str) -> None:
-    """Mutate .claude/settings.json:
-       - заменить ключ enabledPlugins["<old-plugin>@<old-market>"] → ["<slug>@<slug>-local"]
-       - заменить ключ extraKnownMarketplaces["<old-market>"] → ["<slug>-local"]
-       Старые имена определяются по структуре (см. find_local_marketplace_key), а не
-       по захардкоженным литералам. Если локального marketplace'а нет или он уже
-       переименован — no-op.
-    """
-    s_path = repo_root / ".claude" / "settings.json"
-    with open(s_path, encoding="utf-8") as f:
-        s = json.load(f)
-
-    new_plugin_id = f"{slug}@{slug}-local"
-    new_marketplace = f"{slug}-local"
-
-    old_marketplace = find_local_marketplace_key(s)
-    if not old_marketplace or old_marketplace == new_marketplace:
-        _atomic_write_json(s_path, s)
-        return
-
-    # enabledPlugins: любой ключ вида "<что-угодно>@<old_marketplace>"
-    enabled = s.get("enabledPlugins") or {}
-    for key in [k for k in enabled if k.endswith(f"@{old_marketplace}")]:
-        enabled[new_plugin_id] = enabled.pop(key)
-
-    # extraKnownMarketplaces
-    markets = s.get("extraKnownMarketplaces") or {}
-    markets[new_marketplace] = markets.pop(old_marketplace)
-
-    _atomic_write_json(s_path, s)
-
-
-# ===== Subcommand implementations =====
 
 def cmd_list_profiles(args: argparse.Namespace) -> None:
     """list-profiles: JSON-массив профилей, отсортированных (project first, stable alphabetically)."""
@@ -347,46 +198,6 @@ def cmd_compat_stacks(args: argparse.Namespace) -> None:
         print("")
 
 
-def cmd_slugify(args: argparse.Namespace) -> None:
-    """slugify <name>: kebab-case на stdout; exit 1 если результат пустой."""
-    result = slugify(args.name)
-    print(result)
-    if not result:
-        sys.exit(1)
-
-
-def cmd_detect_plugin_state(args: argparse.Namespace) -> None:
-    """detect-plugin-state: JSON {slug, marketplace, inconsistent}.
-
-    Exit codes:
-      0 — JSON успешно сформирован (caller проверяет поле 'inconsistent').
-      1 — не удалось прочитать/распарсить marketplace.json или plugin.json.
-    """
-    try:
-        state = detect_plugin_state(Path(args.repo_root))
-    except FileNotFoundError as e:
-        print(f"detect-plugin-state: файл не найден: {e}", file=sys.stderr)
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        print(f"detect-plugin-state: невалидный JSON: {e}", file=sys.stderr)
-        sys.exit(1)
-    print(json.dumps(state))
-
-
-def cmd_rename_marketplace(args: argparse.Namespace) -> None:
-    rename_marketplace(Path(args.repo_root), args.slug)
-
-
-def cmd_rename_plugin_json(args: argparse.Namespace) -> None:
-    rename_plugin_json(Path(args.repo_root), args.slug)
-
-
-def cmd_rename_settings(args: argparse.Namespace) -> None:
-    rename_settings(Path(args.repo_root), args.slug)
-
-
-# ===== Argument parsing =====
-
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="_init_helpers.py — helper subcommands для init.sh",
@@ -425,28 +236,6 @@ def build_parser() -> argparse.ArgumentParser:
     p_cs = sub.add_parser("compat-stacks", help="compatible_stacks через запятую")
     p_cs.add_argument("profile", help="имя профиля")
 
-    # slugify
-    p_sl = sub.add_parser("slugify", help="slugify(name) → stdout; exit 1 если пусто")
-    p_sl.add_argument("name", help="произвольная строка")
-
-    # detect-plugin-state
-    p_dps = sub.add_parser("detect-plugin-state", help="JSON {slug, marketplace, inconsistent}")
-    p_dps.add_argument("--repo-root", default=".", help="корень репо (default: .)")
-
-    # rename-marketplace
-    p_rm = sub.add_parser("rename-marketplace", help="mutate marketplace.json под slug")
-    p_rm.add_argument("slug", help="kebab-case slug")
-    p_rm.add_argument("--repo-root", default=".", help="корень репо")
-
-    # rename-plugin-json
-    p_rpj = sub.add_parser("rename-plugin-json", help="mutate plugin.json под slug")
-    p_rpj.add_argument("slug", help="kebab-case slug")
-    p_rpj.add_argument("--repo-root", default=".", help="корень репо")
-
-    # rename-settings
-    p_rs = sub.add_parser("rename-settings", help="mutate settings.json под slug")
-    p_rs.add_argument("slug", help="kebab-case slug")
-    p_rs.add_argument("--repo-root", default=".", help="корень репо")
 
     return parser
 
@@ -460,11 +249,6 @@ COMMANDS = {
     "prompt-field":        cmd_prompt_field,
     "json-count":          cmd_json_count,
     "compat-stacks":       cmd_compat_stacks,
-    "slugify":             cmd_slugify,
-    "detect-plugin-state": cmd_detect_plugin_state,
-    "rename-marketplace":  cmd_rename_marketplace,
-    "rename-plugin-json":  cmd_rename_plugin_json,
-    "rename-settings":     cmd_rename_settings,
 }
 
 

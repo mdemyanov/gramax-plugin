@@ -8,25 +8,9 @@
 
 set -euo pipefail
 
-# resolve_plugin_slug: env PLUGIN_SLUG > marketplace.json plugins[0].name > "project"
-# Используется при построении путей .claude/plugins/<slug>/... после plugin-rename-on-init.
-resolve_plugin_slug() {
-  if [[ -n "${PLUGIN_SLUG:-}" ]]; then
-    echo "$PLUGIN_SLUG"
-    return
-  fi
-  if [[ -f ".claude-plugin/marketplace.json" ]]; then
-    local slug
-    slug=$(uv run --no-project python -c '
-import json, sys
-try:
-    print(json.load(open(".claude-plugin/marketplace.json"))["plugins"][0]["name"])
-except Exception:
-    sys.exit(1)
-' 2>/dev/null) && [[ -n "$slug" ]] && echo "$slug" && return
-  fi
-  echo "project"
-}
+# Шаг 4 PT-EPIC-14: resolve_plugin_slug() удалена вместе с локальной копией плагина и
+# её манифестом -- слаг существовал ради уникальности ЛОКАЛЬНОГО плагина, которого
+# больше нет (решение владельца по Д7 п.4 ADR-009). Ролевой слой поставляет `nauta`.
 
 ACTION="apply"
 OVERLAY_NAME=""
@@ -266,33 +250,10 @@ is_safe_to_delete() {
   return 1
 }
 
-op_resolve_agents() {
-  # W4a-T12: invoke _resolve_agents.py to merge base prompts + per-profile overrides
-  # into resolved prompts in target dir. Op emitted by _apply_profile.py when manifest
-  # contains agent_overrides:.
-  # Args (consistent с другими op_* — реально не используются helper'ом, у которого
-  # своя логика resolve через manifest):
-  #   $1 — profile_dir (passed для symmetry; helper читает manifest сам)
-  #   $2 — source (relative path "agent-overrides/" — informational)
-  #   $3 — target (target dir для resolved prompts; e.g. ".claude/plugins/<slug>/agents/")
-  #   $4 — reason (human-readable, для логов)
-  local profile_dir="$1" source="$2" target="$3" reason="$4"
-
-  echo "[RESOLVE_AGENTS] $source → $target  ($reason)"
-
-  if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "  [DRY-RUN] would invoke _resolve_agents.py"
-    return 0
-  fi
-
-  uv run scripts/_resolve_agents.py \
-    "$profile_dir" \
-    --base-dir ".claude/plugins/$(resolve_plugin_slug)/agents/" \
-    --target-dir "$target" \
-    || { echo "ERROR: _resolve_agents.py failed для $profile_dir" >&2; exit 1; }
-
-  echo "  ✓ resolved"
-}
+# Шаг 4 PT-EPIC-14: op_resolve_agents() удалена. Handler писал слитые промты в каталог
+# локальной копии плагина, которую удаляет этот шаг; `_apply_profile.py` op больше не
+# эмитит, поэтому ветка была бы мёртвой. Стрэй-op `resolve_agents` теперь падает громко
+# на общей ветке `*) ERROR: unknown op`, а не исполняется наполовину.
 
 op_delete() {
   local target="$1" reason="$2" verdict="${3:-}"
@@ -429,7 +390,6 @@ for op in plan["ops"]:
       add)            op_add "$profile_dir" "$source" "$target" "$reason" ;;
       replace)        op_replace "$profile_dir" "$source" "$target" "$reason" ;;
       delete)         op_delete "$target" "$reason" "$verdict" ;;
-      resolve_agents) op_resolve_agents "$profile_dir" "$source" "$target" "$reason" ;;  # W4a-T12
       *)              echo "ERROR: unknown op '$op'" >&2; exit 1 ;;
     esac
   done <<< "$plan_tsv"
@@ -448,12 +408,10 @@ fi
 [[ -f "$OVERLAY_DIR/claude-md-patch.md" ]] && process_md_target "CLAUDE.md" "$OVERLAY_DIR/claude-md-patch.md"
 
 # === Agent patches ===
-PLUGIN_SLUG_RESOLVED=$(resolve_plugin_slug)
-for role in ba sa dev; do
-  patch="$OVERLAY_DIR/agent-patches/$role-smp-extension.md"
-  agent=".claude/plugins/${PLUGIN_SLUG_RESOLVED}/agents/$role-agent.md"
-  [[ -f "$patch" ]] && [[ -f "$agent" ]] && process_md_target "$agent" "$patch"
-done
+# Шаг 4 PT-EPIC-14: блок удалён. Он патчил `.claude/plugins/<slug>/agents/<role>-agent.md`
+# -- файлы локальной копии плагина, снятой этим шагом. Цель патча больше не существует ни
+# в шаблоне, ни у потомка; ролевые промты поставляет `nauta` и правятся они в нём.
+# Сами патчи (`agent-patches/*-smp-extension.md`) удалены вместе с блоком, живы в `81bc667`.
 
 # === .doc-root.yaml ===
 yaml_patch="$OVERLAY_DIR/doc-root-properties-smp.yaml"
