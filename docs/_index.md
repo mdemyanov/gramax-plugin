@@ -1,6 +1,6 @@
 ---
 title: Документы
-order: 1
+order: 0
 ---
 
 # Документы
@@ -9,6 +9,13 @@ order: 1
 С инверсией раскладки (ADR-0021) этот индекс вбирает роль корневого индекса
 объединённого каталога — единственного doc-roots дерева.
 
+## Разделы
+
+- [Проект](00-project/_index.md) — архитектурные решения
+- [Домен](10-domain/_index.md) — исследования
+- [Требования](30-requirements/_index.md) — спеки фич плагина
+- [Архитектура](40-architecture/_index.md) — разрешающие design-документы
+- [Реализация](60-implementation/_index.md) — отчёты прогона и приёмки
+- [Эксплуатация](70-operations/_index.md) — runbook'и
+- [Lessons Learned — gramax marketplace](lessons-learned.md) — журнал находок команды
 - [Онбординг: роли nauta на чистой машине](onboarding-nauta.md)
-- [Диспозиция 55 упоминаний `docs/`-путей внутри `content/`](doc-paths-disposition.md)
-- [Артефакты процесса superpowers](superpowers/_index.md)
