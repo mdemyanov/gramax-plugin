@@ -232,8 +232,10 @@ properties:
 - [ ] **AC-004 (FR-125/FR-129, указателей на удалённое нет):**
   `grep -rn "doc-paths-disposition\|superpowers/\|2026-05-08-diagram-on-demand-qa-report\|
   2026-08-10-test-harness-taxonomy" --include="*.md" --include="*.sh" docs/ plugins/
-  tests/ scripts/ | grep -v "adr/"` → пусто (упоминания в исторических ADR — RECORD,
-  допустимы по NFR-003).
+  tests/ scripts/ | grep -v "adr/"` → пусто, КРОМЕ построчных RECORD-исключений,
+  зафиксированных в `tests/gramax/docs-migration/at-design.md` (напр. выживший отчёт
+  wave-4.2.0:258 цитирует удалённый отчёт — RECORD; само требование цитирует FR-129
+  дословно — самоссылка); упоминания в исторических ADR — RECORD, допустимы по NFR-003.
 - [ ] **AC-005 (FR-126, гейты переехали):** `grep -v '^#' .nauta-gates.yaml |
   grep -n "content/"` → пусто; `grep -n "documentaryCircuit" .nauta-gates.yaml` → пусто;
   `uv run scripts/validate-content.py` → exit 0.
@@ -242,8 +244,10 @@ properties:
   карте резолвятся в `docs/`. (Проверка по правой стороне пары: писатель карты
   `bin/init.sh:590` захардкоживает левую `content/<home>/ →`, grep по ней вечно красный,
   а правка managed-блока не переживает следующий прогон — ADR-0021, останов ветки SA.)
-- [ ] **AC-007 (FR-128, один doc-root):** `find . -name ".doc-root.yaml"
-  -not -path "./.git/*"` → ровно одна строка, `docs/.doc-root.yaml`;
+- [ ] **AC-007 (FR-128, один doc-root):** `find . -maxdepth 2 -name ".doc-root.yaml"
+  -not -path "./.git/*"` → ровно одна строка, `docs/.doc-root.yaml` (ограничение глубины
+  обязательно: в дереве 39 отслеживаемых `.doc-root.yaml`, из них 37 — фикстуры сюит
+  и payload плагина, кл. 6 ECOSYSTEM — переживают миграцию);
   `grep -c "Требование" docs/.doc-root.yaml` → ≥ 1 (модель свойств вобрана);
   `grep -c "_index.md" docs/_index.md` → ≥ 6 (разделы-дома + журнал).
 - [ ] **AC-008 (FR-129, список удаления исполнен):** для каждого из 19 путей FR-129
@@ -256,11 +260,16 @@ properties:
 - [ ] **AC-010 (NFR-001/002/005, только R и одобренные D):**
   `git diff --name-status <base>..HEAD -- content/ docs/` — строки `A` отсутствуют;
   строки `D` — только 19 путей FR-129 + `content/.doc-root.yaml` + `content/_index.md`;
-  остальные строки — `R`/`R100`. `<base>` — HEAD на момент старта работ.
+  строки `M` — только на стороне `docs/` (слияние ролей: `docs/_index.md`,
+  `docs/.doc-root.yaml`), на стороне `content/` M запрещены (там только `R`/`D`);
+  остальные строки — `R`/`R100`. `<base>` — HEAD на момент старта работ Dev
+  (после коммита сюиты docs-migration: новые файлы сюиты в диф не попадают).
 - [ ] **AC-011 (NFR-003, RECORD дословен):** `sed -n '272p'
   docs/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md` содержит
   `docs/adr/` дословно.
-- [ ] **AC-012 (NFR-004):** `bash scripts/check.sh --fast` → exit 0.
+- [ ] **AC-012 (NFR-004):** `bash scripts/check.sh --fast` → exit 0. (Warden-семантика:
+  честного «красного сейчас» нет — NFR-004 требует зелёный на каждом коммите, включая
+  текущий; stub краснеет, если любой коммит цепочки сломает быстрый гейт.)
 
 ## Инварианты и Safeguards
 
