@@ -31,9 +31,11 @@ if [ "$DOGFOOD_EXIT" -ne 0 ]; then
 fi
 
 # --- AC-011: прогон воспроизводится автоматически при каждом PR/коммите — не разовый
-# ручной прогон. Точку подключения (DEV-002) ищем в scripts/check.sh.
-assert_grep "$ROOT/scripts/check.sh" "tests/gramax/catalog-validator" \
-  "AC-011: scripts/check.sh обязан вызывать tests/gramax/catalog-validator/run.sh (DEV-002 подключает восьмым/девятым шагом --full, по прецеденту plugin-contract/doc-paths)"
+# ручной прогон. Точку подключения (DEV-002) ищем в scripts/check-gramax.sh — вызов
+# живёт в проектном гейт-раннере (qa-057 F5); canon-раннер scripts/check.sh делегирует
+# через projectGates (.nauta-gates.yaml → scripts/gate-gramax-full.sh → check-gramax.sh).
+assert_grep "$ROOT/scripts/check-gramax.sh" "tests/gramax/catalog-validator" \
+  "AC-011: scripts/check-gramax.sh обязан вызывать tests/gramax/catalog-validator/run.sh (секция --full, qa-057 F5)"
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-001: $FAIL assertion(s) failed"; exit 1; fi
 pass_msg "ac-001: догфудинг чистый и подключён к повторяемой проверке"

@@ -19,18 +19,22 @@ assert_grep "scripts/check.sh" "validate-content.py" \
   "AC-9: check.sh должен вызывать валидатор docs/"
 assert_grep "scripts/check.sh" "uv run" \
   "AC-9: валидатор должен запускаться через uv run (PEP 723)"
-assert_no_grep "scripts/check.sh" "validate-profile.py" \
-  "профильный валидатор не подключается — профилей в gramax нет"
-
-# Ветка "uv not installed" обязана ставить FAILED=1 сразу следующей строкой,
-# а не только печатать сообщение. Ассерт по подстроке "FAILED=1" был бы бесполезен —
-# оно уже встречается в других (не связанных с uv) секциях check.sh — поэтому
-# смотрим именно на строку, идущую сразу за сообщением об отсутствии uv.
-UV_BRANCH_NEXT_LINE="$(grep -A1 'uv not installed' scripts/check.sh 2>/dev/null | tail -1)"
-if ! printf '%s' "$UV_BRANCH_NEXT_LINE" | grep -q 'FAILED=1'; then
-  echo "  FAIL: AC-9: ветка отсутствия uv должна ставить FAILED=1, а не только сообщать" >&2
+# qa-057 F3 (позиция PM): проводка validate-profile.py в canon-раннере ПРИНЯТА —
+# обязательность решает базис доставки (ADR-037), дереву валидатор доставлен, а
+# посылка «профилей в gramax нет» умерла с 2.23.0 (профиль classic, Поправка B).
+# Вместо no-grep — поведенческий контракт: профильный валидатор штатно завершается
+# нулём на profile-less дереве («профилей нет — нечего валидировать»).
+if ! uv run scripts/validate-profile.py >/dev/null 2>&1; then
+  echo "  FAIL: AC-9: validate-profile.py обязан завершаться нулём на profile-less дереве (проводка принята, qa-057 F3)" >&2
   FAIL=$((FAIL + 1))
 fi
+
+# Канон-раннер обязан отказывать ГРОМКО без uv: русский uv-guard с exit 1.
+# qa-057 F3: прежний текстовый ассерт ловил английскую ветку старого gramax check.sh
+# («uv not installed» + FAILED=1 следующей строкой) — она умерла вместе с каноном;
+# дух стража («молчаливого отказа без uv не бывает») переносится на канон-текст.
+assert_grep "scripts/check.sh" "не найден в PATH" \
+  "AC-9: canon check.sh несёт громкий uv-guard («не найден в PATH» + exit 1 при отсутствии uv)"
 
 set +e
 OUT="$(bash scripts/check.sh --fast 2>&1)"
@@ -84,18 +88,13 @@ else
       FAIL=$((FAIL + 1))
     fi
 
-    if ! printf '%s\n' "$OUT_NOUV" | grep -q "OK: no whitespace issues"; then
-      echo "  FAIL: AC-9: секция whitespace не отработала штатно без uv в PATH (git недоступен?)" >&2
-      FAIL=$((FAIL + 1))
-    fi
+    # qa-057 F3: подпроверки «whitespace/json отработали штатно без uv» сняты — их
+    # посылка принадлежала старому gramax check.sh, где uv-зависимые секции шли
+    # последними; канон-раннер стерилизует контур uv-guard'ом ДО всяких секций
+    # (громкий exit 1 — см. ассерты выше), поэтому без uv секций просто нет.
 
-    if ! printf '%s\n' "$OUT_NOUV" | grep -qE "OK: JSON validated|OK: no JSON files tracked"; then
-      echo "  FAIL: AC-9: секция json не отработала штатно без uv в PATH (python3 недоступен?)" >&2
-      FAIL=$((FAIL + 1))
-    fi
-
-    if ! printf '%s\n' "$OUT_NOUV" | grep -qi "uv not installed"; then
-      echo "  FAIL: AC-9: без uv в PATH сообщение об отсутствии uv не выведено" >&2
+    if ! printf '%s\n' "$OUT_NOUV" | grep -qi "не найден в PATH"; then
+      echo "  FAIL: AC-9: без uv в PATH сообщение об отсутствии uv не выведено (qa-057 F3: канон-текст — «не найден в PATH»)" >&2
       FAIL=$((FAIL + 1))
     fi
   fi
@@ -105,4 +104,4 @@ if [ "$FAIL" -gt 0 ]; then
   fail_msg "ac-008: $FAIL assertion(s) failed"
   exit 1
 fi
-pass_msg "ac-008: check.sh --fast включает validate-content.py, требует uv (FAILED=1 при отсутствии) и зелёный"
+pass_msg "ac-008: check.sh --fast включает validate-content.py, отказывает громко без uv, профильный валидатор штатен (qa-057 F3) и зелёный"

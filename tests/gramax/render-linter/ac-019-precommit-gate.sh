@@ -12,8 +12,8 @@ source "$SCRIPT_DIR/lib/assert.sh"
 
 FAIL=0
 
-assert_grep "$ROOT/scripts/check.sh" "validate_render.py" \
-  "AC-019: scripts/check.sh обязан вызывать validate_render.py (pre-commit-перехват киллеров рендера)"
+assert_grep "$ROOT/scripts/check-gramax.sh" "validate_render.py" \
+  "AC-019: scripts/check-gramax.sh обязан вызывать validate_render.py (pre-commit-перехват киллеров рендера; qa-057 F6 — вызов живёт в проектном гейт-раннере, канон делегирует через projectGates)"
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-019: $FAIL assertion(s) failed"; exit 1; fi
-pass_msg "ac-019: validate_render.py подключён к check.sh (гейт исполняет шаг)"
+pass_msg "ac-019: validate_render.py подключён к check-gramax.sh (гейт исполняет шаг)"
