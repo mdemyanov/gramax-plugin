@@ -422,9 +422,9 @@ fi
 
 claude_patch="$OVERLAY_DIR/claude-md-patch.md"
 yaml_patch="$OVERLAY_DIR/doc-root-properties-smp.yaml"
-yaml_target="content/.doc-root.yaml"
+yaml_target="docs/.doc-root.yaml"
 glossary_patch="$OVERLAY_DIR/glossary-skeleton.md"
-glossary_target="content/10-domain/glossary.md"
+glossary_target="docs/10-domain/glossary.md"
 
 # === Preflight: разбор ВСЕХ патчей стека ДО первой записи (DEV-464, issue #22) ===========
 # Единственная цель стека, чей патч может отказать НА РАЗБОРЕ — YAML (`_apply_yaml_patch.py`,

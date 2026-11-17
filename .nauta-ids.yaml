@@ -27,13 +27,13 @@
 # заведёшь первый эпик — образец в конце файла.
 namespaces:
   # Дом появляется вместе с первым решением: `/nauta:sa adr <решение>` создаёт
-  # `content/00-project/adr/` вместе с его `_index.md` (правило скаффолда, ADR-041; C1
+  # `docs/00-project/adr/` вместе с его `_index.md` (правило скаффолда, ADR-041; C1
   # `validate-content.py` ловит подкаталог без индекса громко). До этого момента glob
   # пуст — это и есть объявленная пустота.
   - namespace: adr
     prefix: "ADR-"
     width: 3
-    home: ["content/00-project/adr/ADR-*.md"]
+    home: ["docs/00-project/adr/ADR-*.md"]
     definition: filename-prefix
     scope: namespace
     allocation: allocated
@@ -42,12 +42,12 @@ namespaces:
     # Кладбище отменённых номеров — индекс раздела ADR (`- ADR-007 — отменён, …`).
     # Проверка невозврата читает его только когда в `home` есть хотя бы одно определение,
     # то есть ровно тогда, когда `_index.md` уже обязан существовать.
-    graveyard: content/00-project/adr/_index.md
+    graveyard: docs/00-project/adr/_index.md
 
   - namespace: res
     prefix: "RES-"
     width: 3
-    home: ["content/10-domain/research/*.md"]
+    home: ["docs/10-domain/research/*.md"]
     definition: h1-suffix
     scope: namespace
     allocation: allocated
@@ -61,7 +61,7 @@ namespaces:
   - namespace: ac
     prefix: "AC-"
     width: 3
-    home: ["content/30-requirements/*.md"]
+    home: ["docs/30-requirements/*.md"]
     definition: list-or-row-head
     scope: file
     allocation: closed
@@ -73,7 +73,7 @@ namespaces:
   - namespace: decision-clause
     prefix: "Д"
     width: 1
-    home: ["content/00-project/adr/ADR-*.md"]
+    home: ["docs/00-project/adr/ADR-*.md"]
     definition: list-or-row-head
     scope: file
     allocation: derived
@@ -93,7 +93,7 @@ namespaces:
     populated: false
 
   # `external` + пустой `home`: идентификаторы задач (`DEV-007`, `SA-003`) живут в сторе
-  # задач, а не в `content/`. Объявление нужно именно затем, чтобы гейт не принял `SA-003` в
+  # задач, а не в `docs/`. Объявление нужно именно затем, чтобы гейт не принял `SA-003` в
   # шапке статьи за определение в документарном контуре.
   - namespace: task
     prefix: ""
@@ -105,14 +105,14 @@ namespaces:
     populated: false
 
 # Образец записи под эпики твоего проекта. Раскомментируй и подставь СВОЙ префикс, когда
-# заведёшь `content/00-project/roadmap.md` и первый эпик в нём. Заготовка закомментирована
+# заведёшь `docs/00-project/roadmap.md` и первый эпик в нём. Заготовка закомментирована
 # намеренно: объявленное пространство без предмета — фикция, гейт обязан проверять то, что
 # в дереве есть.
 #
 #  - namespace: epic
 #    prefix: "XX-EPIC-"        # префикс проекта, не донора
 #    width: 2
-#    home: ["content/00-project/roadmap.md"]
+#    home: ["docs/00-project/roadmap.md"]
 #    definition: list-or-row-head   # снимает заголовок, ТЕКСТ которого открыт идентификатором
 #                                   # («## XX-EPIC-01 — …»). Форма «id в скобках в середине
 #                                   # заголовка» (heading-anchored, §4.1 ADR-038-spec) в

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/check-gramax.sh — проектный гейт gramax-marketplace (бывший scripts/check.sh; зовётся из check.sh nauta через projectGates).
-# Без profile-валидаторов (профилей нет). Валидатор content/ — из nauta,
+# Без profile-валидаторов (профилей нет). Валидатор каталога docs/ — из nauta,
 # доставлен через /nauta:sync-scripts, обновляется тем же каналом.
 #
 # Modes:
@@ -8,7 +8,7 @@
 #              (uv обязателен; для pre-commit hook)
 #   --full   : --fast + shellcheck (если установлен) + проверка submodule status +
 #              tests/gramax/orphan-references + tests/gramax/nauta-integration +
-#              tests/gramax/plugin-contract + tests/gramax/doc-paths +
+#              tests/gramax/plugin-contract +
 #              tests/gramax/catalog-validator + tests/gramax/mermaid-adoption +
 #              tests/gramax/writer-consumer-rules + tests/gramax/link-form-resolver +
 #              tests/gramax/link-form-migration + tests/gramax/render-linter
@@ -53,32 +53,32 @@ else
   echo "OK: no JSON files tracked"
 fi
 
-# --- 2.5. Gramax content/ validation (валидатор nauta, PEP 723) ---
+# --- 2.5. Gramax docs/ validation (валидатор nauta, PEP 723) ---
 echo "==> content"
-if [ -d content ]; then
+if [ -d docs ]; then
   if command -v uv > /dev/null 2>&1; then
     if ! uv run scripts/validate-content.py; then
-      echo "FAIL: content/ validation"
+      echo "FAIL: docs/ validation"
       FAILED=1
     else
-      echo "OK: content validated"
+      echo "OK: docs validated"
     fi
   else
-    echo "FAIL: uv not installed — content/ validation not performed (install: https://docs.astral.sh/uv/)"
+    echo "FAIL: uv not installed — docs/ validation not performed (install: https://docs.astral.sh/uv/)"
     FAILED=1
   fi
 else
-  echo "OK: no content/ directory"
+  echo "OK: no docs/ directory"
 fi
 
-# --- 2.6. Gramax content/ render-linter (рендер-киллеры, ADR-0019 Решение 4) ---
+# --- 2.6. Gramax docs/ render-linter (рендер-киллеры, ADR-0019 Решение 4) ---
 # Киллер рендера (HTTP 500 на GES) блокирует pre-commit: exit 1/2 → FAILED=1.
-# --errors-only: принятый H1-WARN-шум по content/ не спамит pre-commit, exit-контракт тот же.
+# --errors-only: принятый H1-WARN-шум по docs/ не спамит pre-commit, exit-контракт тот же.
 echo "==> render"
-if [ -d content ]; then
+if [ -d docs ]; then
   if command -v uv > /dev/null 2>&1; then
-    if ! uv run plugins/gramax/scripts/validate_render.py content --errors-only; then
-      echo "FAIL: render-linter — киллер рендера в content/"
+    if ! uv run plugins/gramax/scripts/validate_render.py docs --errors-only; then
+      echo "FAIL: render-linter — киллер рендера в docs/"
       FAILED=1
     else
       echo "OK: render-linter clean"
@@ -88,7 +88,7 @@ if [ -d content ]; then
     FAILED=1
   fi
 else
-  echo "OK: no content/ directory"
+  echo "OK: no docs/ directory"
 fi
 
 # --- 3. (--full only) Shellcheck on tracked .sh files, if installed ---
@@ -163,16 +163,7 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
-  # --- 8. (--full only) doc-paths: нет нерабочих docs/-указателей в content/ ---
-  echo "==> doc-paths"
-  if bash tests/gramax/doc-paths/run.sh; then
-    echo "OK: doc-paths clean"
-  else
-    echo "FAIL: doc-paths gate"
-    FAILED=1
-  fi
-
-  # --- 9. (--full only) catalog-validator: контракт validate_structure.py, догфудинг ---
+  # --- 8. (--full only) catalog-validator: контракт validate_structure.py, догфудинг ---
   echo "==> catalog-validator"
   if bash tests/gramax/catalog-validator/run.sh; then
     echo "OK: catalog-validator green"
@@ -181,7 +172,7 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
-  # --- 10. (--full only) mermaid-adoption: юрисдикция + обнаружение/миграция legacy mermaid ---
+  # --- 9. (--full only) mermaid-adoption: юрисдикция + обнаружение/миграция legacy mermaid ---
   echo "==> mermaid-adoption"
   if bash tests/gramax/mermaid-adoption/run.sh; then
     echo "OK: mermaid-adoption green"
@@ -190,7 +181,7 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
-  # --- 11. (--full only) writer-consumer-rules: триаж правил потребителей поверх writer ---
+  # --- 10. (--full only) writer-consumer-rules: триаж правил потребителей поверх writer ---
   echo "==> writer-consumer-rules"
   if bash tests/gramax/writer-consumer-rules/run.sh; then
     echo "OK: writer-consumer-rules green"
@@ -199,7 +190,7 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
-  # --- 12. (--full only) link-form-resolver: инференс .md/_index.md в _collect_links ---
+  # --- 11. (--full only) link-form-resolver: инференс .md/_index.md в _collect_links ---
   echo "==> link-form-resolver"
   if bash tests/gramax/link-form-resolver/run.sh; then
     echo "OK: link-form-resolver green"
@@ -208,7 +199,7 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
-  # --- 13. (--full only) link-form-migration: классификация NAV/SELF/SUBJECT + migrate_nav_codespans.py ---
+  # --- 12. (--full only) link-form-migration: классификация NAV/SELF/SUBJECT + migrate_nav_codespans.py ---
   echo "==> link-form-migration"
   if bash tests/gramax/link-form-migration/run.sh; then
     echo "OK: link-form-migration green"
@@ -217,7 +208,7 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
-  # --- 14. (--full only) render-linter: киллеры рендера content/, контракт AC-001…AC-021 ---
+  # --- 13. (--full only) render-linter: киллеры рендера docs/, контракт AC-001…AC-021 ---
   echo "==> render-linter"
   if bash tests/gramax/render-linter/run.sh; then
     echo "OK: render-linter green"
