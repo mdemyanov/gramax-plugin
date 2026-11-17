@@ -750,3 +750,176 @@ def check_lesson_destiny(registry_path: Path, repo_root: Path) -> list[Issue]:
     for sha in live.keys() - seen:  # И1
         issues.append(issue("живая строка без записи исхода", sha))
     return issues
+
+
+# ===== контраст-контракт журнала уроков (NA-EPIC-134 лист .17, QA-179) ======================
+# Конвенция «Схема урока с уликой» (NA-EPIC-85) живёт в шапке
+# docs/60-operations/postmortems/lessons-learned.md прозой с 2026-10-20; до этого акта
+# grep `helped|NO_ENTRY|confounded` по приборам валидатора давал 0 -- контракт не имел
+# замка, и живое нарушение (строка NA-EPIC-108 от 2026-11-08: причинное правило без
+# колонок вердикта/улики) ничего не красило. Решение PM по триаж-карте: класс строки
+# объявляется ЯВНЫМ маркером -- тег `[CAUSAL]` в начале колонки контекста, объявленным
+# той же шапкой журнала; замок связывает ТОЛЬКО помеченные строки, отсутствие маркера
+# и есть гандфазер (исторические строки не реинтерпретируются, append-only). NO_ENTRY
+# остаётся наутовским «нет урока» (разветка владельца с донорским «нет контраста»
+# не проводится); поддержка урока только на `confounded` -- warning, не error.
+_LESSON_CAUSAL_MARKER = "[CAUSAL]"
+_LESSON_VERDICTS = ("helped", "hurt", "no observed effect", "confounded", "NO_ENTRY")
+_LESSON_CELL_SPLIT_RE = re.compile(r"(?<!\\)\|")
+
+
+def _lesson_cells(line: str) -> list[str]:
+    """Ячейки строки таблицы. Экранированная `\\|` (M1) ячейку не рвёт -- та же граница,
+    что у идентичности строки в check_lesson_destiny: sha считается от строки ЦЕЛИКОМ,
+    разбор полей на него не влияет."""
+    parts = _LESSON_CELL_SPLIT_RE.split(line.strip())
+    if parts and parts[0].strip() == "":
+        parts = parts[1:]
+    if parts and parts[-1].strip() == "":
+        parts = parts[:-1]
+    return [p.strip() for p in parts]
+
+
+def check_lesson_contrast(journal_path: Path) -> list[Issue]:
+    """Контраст-контракт журнала уроков (NA-EPIC-134 лист .17): помеченная `[CAUSAL]`
+    строка обязана нести колонку вердикта (дословно из _LESSON_VERDICTS) и непустую
+    улику; `confounded` -- warning («догадка: сузь или откажись», проза шапки NA-EPIC-85
+    остаётся прозой). Немаркированные строки не связываются -- гандфазер это отсутствие
+    маркера. Шапка, объявляющая маркер, обязательна при наличии помеченных строк (без
+    объявления маркер недиагностируем); журнал без помеченных строк и без объявления --
+    легален (некому недиагностировать). Журнала нет -- тихий проход (ADR-031 Д3,
+    ADR-088 Д1, симметрично check_lesson_destiny). Один отказ на строку за ветку,
+    агрегирование по всем строкам -- прогон не прерывается."""
+    if not journal_path.is_file():
+        return []
+    lines = journal_path.read_text(encoding="utf-8").splitlines()
+    issues: list[Issue] = []
+    marked = 0
+    for ln in _lesson_table_rows(journal_path):
+        cells = _lesson_cells(ln)
+        if not (len(cells) > 2 and cells[2].startswith(_LESSON_CAUSAL_MARKER)):
+            continue  # немаркированная -- историческая, не реинтерпретируется
+        marked += 1
+        row_id = f"{_lesson_row_sha12(ln)} {ln[:72]}..."
+        if len(cells) < 6:
+            issues.append(Issue("error", str(journal_path),
+                f"строка помечена {_LESSON_CAUSAL_MARKER}, но не несёт колонок "
+                f"вердикта и улики (дословный набор: {', '.join(_LESSON_VERDICTS)}) "
+                f"-- контраст-контракт NA-EPIC-134 .17 -- {row_id}"))
+            continue
+        verdict = cells[5]
+        if verdict not in _LESSON_VERDICTS:
+            issues.append(Issue("error", str(journal_path),
+                f"вердикт {verdict!r} вне дословного набора "
+                f"({', '.join(_LESSON_VERDICTS)}) -- контраст-контракт NA-EPIC-134 .17 "
+                f"-- {row_id}"))
+        elif verdict == "confounded":
+            issues.append(Issue("warning", str(journal_path),
+                f"вердикт confounded -- урок на confounded-наблюдениях догадка: "
+                f"сузь или откажись (шапка журнала, NA-EPIC-85) -- {row_id}"))
+        if len(cells) < 7 or not cells[6]:
+            issues.append(Issue("error", str(journal_path),
+                f"помеченная строка без улики (evidence): колонка улики пуста или "
+                f"отсутствует -- контраст-контракт NA-EPIC-134 .17 -- {row_id}"))
+    if marked:
+        header = []
+        for ln in lines:
+            if _LESSON_ROW_RE.match(ln):
+                break
+            header.append(ln)
+        if not any(_LESSON_CAUSAL_MARKER in ln for ln in header):
+            issues.append(Issue("error", str(journal_path),
+                f"в журнале есть строки с маркером {_LESSON_CAUSAL_MARKER}, а шапка "
+                f"конвенцию маркера не объявляет -- маркер недиагностируем, верни "
+                f"объявление в шапку (контраст-контракт NA-EPIC-134 .17)"))
+    return issues
+
+
+# ===== C26 (NA-EPIC-110, В1, BA-112): реестр запретов промт-полос ==========================
+# Спека openspec/specs/prohibition-registry/spec.md. Единица регистрации — СТРОКА с литералом
+# `Do NOT` в agents/*.md (строка с несколькими запретами = одна запись, остаток — в note).
+# detector — адрес форм §8.2 ADR-117 (тот же резолвер, что у судьб уроков); advisory —
+# непустая причина «прибора нет, судит ревью/дисциплина». Файла нет — тихий проход
+# (ADR-088 Д1, симметрично check_lesson_destiny): у потребителя нет корпуса agents/,
+# реестр не доставляется (`grep -c "nauta-never-registry" bin/deliver.sh` -> 0).
+_NEVER_MARK = "Do NOT"
+
+
+def check_never_registry(registry_path: Path, repo_root: Path) -> list[Issue]:
+    """C26-форма: якорь/детектор-или-причина/полнота корпуса. Тихий проход без файла —
+    «нечего проверять», не «не смог проверить» (ADR-007 Д1); битый YAML — error."""
+    carrier = registry_path.name
+    if not registry_path.is_file():
+        return []
+    try:
+        data = parse_yaml_file(registry_path)
+    except MalformedYamlError as e:
+        return [issue_from_yaml_error(e)]
+    records = data.get("records") if isinstance(data, dict) else None
+    if not isinstance(records, list):
+        return [Issue("error", carrier, f"{carrier}: ключ records обязан быть списком")]
+
+    def issue(msg: str, rec) -> Issue:
+        f = rec.get("file", "?") if isinstance(rec, dict) else rec
+        q = (rec.get("quote", "?")[:60] if isinstance(rec, dict) else "?")
+        return Issue("error", carrier, f"{carrier}: {msg} -- {f} :: {q}")
+
+    # Корпус: живые строки запретов по файлам (лениво, один проход на файл).
+    corpus: dict[str, list[str]] = {}
+    agents_dir = repo_root / "agents"
+    if agents_dir.is_dir():
+        for p in sorted(agents_dir.glob("*.md")):
+            lines = [ln for ln in p.read_text(encoding="utf-8").splitlines()
+                     if _NEVER_MARK in ln]
+            if lines:
+                corpus[f"agents/{p.name}"] = lines
+
+    issues: list[Issue] = []
+    covered: dict[str, set[int]] = {}
+    det_n = 0
+    for rec in records:
+        if not isinstance(rec, dict):
+            issues.append(issue("запись задана не отображением меток", rec))
+            continue
+        f, quote = rec.get("file"), rec.get("quote")
+        detector, advisory = rec.get("detector"), rec.get("advisory")
+        if not isinstance(f, str) or f not in corpus:
+            issues.append(issue("файл вне корпуса запретов (agents/*.md)", rec))
+            continue
+        if not isinstance(quote, str) or not quote.strip():
+            issues.append(issue("запись без дословной цитаты строки", rec))
+            continue
+        hits = [i for i, ln in enumerate(corpus[f]) if quote in ln]
+        if not hits:  # якорь умер вместе со строкой
+            issues.append(issue("цитата не является подстрокой ни одной строки запретов файла", rec))
+            continue
+        covered.setdefault(f, set()).update(hits)
+        if detector and advisory:  # ровно одно — XOR
+            issues.append(issue("detector и advisory одновременно — ровно одно поле", rec))
+        elif detector is not None and detector != "":
+            if not isinstance(detector, str) or not detector.strip():
+                issues.append(issue("пустой detector — маскированный отказ (ADR-007 Д1)", rec))
+            else:
+                msg = _lesson_carrier_unresolved(detector, repo_root)
+                if msg is not None:
+                    issues.append(issue(msg, rec))
+                else:
+                    det_n += 1
+        elif isinstance(advisory, str) and advisory.strip():
+            pass  # законная advisory-причина: прибора нет, судит ревью/дисциплина
+        else:
+            issues.append(issue(
+                "ни детектора, ни непустой причины — пустая advisory никуда не ведёт", rec))
+    for f, lines in corpus.items():  # полнота: каждая строка запретов покрыта записью
+        got = covered.get(f, set())
+        for i, ln in enumerate(lines):
+            if i not in got:
+                issues.append(Issue(
+                    "error", carrier,
+                    f"{carrier}: строка запретов без записи реестра -- {f}: "
+                    f"{ln.strip()[:70]}"))
+    if not issues:
+        total = sum(len(v) for v in corpus.values())
+        print(f"конфигурация C26 (never-registry): corpus {total}, "
+              f"detector-backed {det_n}, advisory {total - det_n}")
+    return issues

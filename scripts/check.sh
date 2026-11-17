@@ -1450,6 +1450,17 @@ _delivery_unreadable() {
   failed=1
 }
 
+_dc_entry_in_list() {
+  # $1 = искомая верхнеуровневая запись, $2 = \n-разделённый список; чистый bash, ноль
+  # спавнов интерпретаторов — пин состава ADR-123 Д6 П-1/П-2 не расширяют.
+  local needle="$1" line
+  [[ -n "$2" ]] || return 1
+  while IFS= read -r line; do
+    [[ "$line" == "$needle" ]] && return 0
+  done <<< "$2"
+  return 1
+}
+
 run_delivery_composition_gate() {
   # §2.3: у потребителя сторож не зовётся ВОВСЕ — ни строки вывода, exit-код не меняется.
   # Различитель тот же, которым check.sh уже отличает два дерева (ORIGIN, строки 80-87):
@@ -1583,6 +1594,75 @@ run_delivery_composition_gate() {
     failed=1
     return
   fi
+
+  # ---------------------------------------------------------------------------
+  # П-1/П-2 (ADR-156 Д5, SA-159 §6) — пара механической сходимости границ состава.
+  # Граница КОПИИ (PAYLOAD_FILES) читается ИЗ ТЕКСТА bin/deliver.sh (прецедент
+  # bin/upgrade.sh:77-81 — состав не дублируется руками; чтение файла циклом без
+  # спавнов — пин состава ADR-123 Д6 не расширяется); граница РЕЛИЗА — исключённые
+  # каталоги носителя, разобранные выше. Позиция под исключённым каталогом доезжает
+  # на релизное дерево громкой инъекцией шага 2.5 (bin/release-delivery.sh) — класс
+  # reinjected делает акт инъекции видимым; остальные — direct. Позиция, которой нет
+  # в дереве файлом, класса не получает — громкий ERROR: на дереве-источнике это
+  # фильтр-лик (инъекции шага 2.5 не из чего делать), на подготовленном релизном
+  # дереве тот же отказ именует дрейф фильтра/инъекции — зубы П-2 (AC-006b/c).
+  # Перечень печатается классификацией, БЕЗ счётчиков: пара классифицирует, а не
+  # считает — семантика числа 24 и его пять зеркал (RES-106 §1.1.3) не меняются
+  # (AC-006d). Третий перечень состава session-start код-путь не заводит: хук
+  # сравнивает записи базиса, который пишется синком из PAYLOAD_FILES.
+  # ---------------------------------------------------------------------------
+  local _pf_pos="" _pf_top="" _pf_line=""
+  local _pf_direct="" _pf_reinjected="" _pf_missing=""
+  local _pf_in=0
+  while IFS= read -r _pf_line || [[ -n "$_pf_line" ]]; do
+    if [[ "$_pf_line" == "PAYLOAD_FILES=(" ]]; then
+      _pf_in=1
+      continue
+    fi
+    [[ "$_pf_in" == 1 ]] || continue
+    if [[ "$_pf_line" == ")" ]]; then
+      break
+    fi
+    _pf_pos="${_pf_line#"${_pf_line%%[![:space:]]*}"}"
+    _pf_pos="${_pf_pos%\"}"
+    _pf_pos="${_pf_pos#\"}"
+    [[ -n "$_pf_pos" ]] || continue
+    if [[ ! -f "$REPO_ROOT/$_pf_pos" ]]; then
+      _pf_missing+="$_pf_pos"$'\n'
+      continue
+    fi
+    _pf_top="${_pf_pos%%/*}/"
+    if _dc_entry_in_list "$_pf_top" "$excluded_paths"; then
+      _pf_reinjected+="  reinjected: $_pf_pos (под исключённым каталогом ${_pf_top} — на релизное дерево доезжает громкой инъекцией шага 2.5)"$'\n'
+    else
+      _pf_direct+="  direct: $_pf_pos"$'\n'
+    fi
+  done < "$REPO_ROOT/bin/deliver.sh"
+
+  if [[ -z "${_pf_direct}${_pf_reinjected}${_pf_missing}" ]]; then
+    _delivery_unreadable "PAYLOAD_FILES не прочитан из bin/deliver.sh: срез массива в тексте доставщика не нашёлся" ""
+    return
+  fi
+
+  if [[ -n "$_pf_missing" ]]; then
+    echo "  ✗ delivery-composition FAILED" >&2
+    while IFS= read -r _pf_pos; do
+      [[ -n "$_pf_pos" ]] || continue
+      echo "  ERROR: позиция PAYLOAD_FILES '$_pf_pos' отсутствует в дереве файлом и класса" >&2
+      echo "  не получает (П-1/П-2, ADR-156 Д5). На дереве-источнике фильтр релиза её вырежет," >&2
+      echo "  а громкой инъекции шага 2.5 не из чего делать — фильтр-лик; на подготовленном" >&2
+      echo "  релизном дереве это отказ П-2: дрейф фильтра/инъекции назван, не замолчан." >&2
+      echo "  Почини: верни файл в дерево либо сними позицию с границы копии" >&2
+      echo "  (PAYLOAD_FILES в bin/deliver.sh)." >&2
+    done <<< "$_pf_missing"
+    failed=1
+    return
+  fi
+
+  echo "  П-1 классификация PAYLOAD_FILES (состав читается из текста bin/deliver.sh):"
+  printf '%s' "$_pf_direct"
+  printf '%s' "$_pf_reinjected"
+  echo "  П-2: каждая позиция PAYLOAD_FILES присутствует в дереве файлом — на подготовленном релизном дереве дрейф фильтра/инъекции ловится фактом отсутствия."
 
   sample_count="$(printf '%s\n' "$sample" | grep -c . || true)"
   excluded_count="$(printf '%s\n' "$excluded_paths" | grep -c . || true)"
@@ -2469,6 +2549,7 @@ if [[ "$MODE" == "--full" ]]; then
 # NOT-DELIVERED: check-verdict-signatures — предмет — репозиторий nauta
   run_gate_if_declared "check-verdict-signatures"
 
+
   # check-based-on-freshness (ADR-140 Д5, спутник SA-147 §3/§4, DEV-539) — прибор дрейфа
   # привязок based_on: реестр openspec/specs/based-on-bindings.yaml (запись keyed by путь
   # производного артефакта, полные sha256 источников, потолка нет) против ТЕКУЩИХ байт
@@ -2492,6 +2573,64 @@ if [[ "$MODE" == "--full" ]]; then
   # строки: отступ блока --full сделал бы запись невидимой обоим её читателям.
 # NOT-DELIVERED: check-based-on-freshness — предмет — репозиторий nauta
   run_gate_if_declared "check-based-on-freshness"
+
+  # measure-specs-strict (NA-EPIC-141 qa186, бусина kui5) — advisory-счётчик strict-проходов
+  # корпуса спек: сколько каталогов openspec/specs/* проходят `openspec validate --specs
+  # --strict`. Ряд `specs-strict-pass` в .nauta-ratchet.yaml рождён СЛЕДЯЩИМ, без потолка:
+  # решение владельца — strict НЕ становится обязательным гейтом. Блокирующее сравнение
+  # строки ряда делает ступень check-ratchet (мягкий код 3, существующая механика P2/P3);
+  # сам прибор всегда rc 0 — исходы TOTAL/SKIP/NOT-MEASURED, каждый назван словами
+  # (УТР-образец BA-116: advisory-отчёт не фьюз). Пин версии CLI читается у ЕДИНСТВЕННОГО
+  # носителя scripts/spec-validate.sh (ADR-149 Д2), второй литерал пина не заводится.
+  #
+  # Позиция в ростере: блок стоит ПОСЛЕ check-verdict-signatures и check-based-on-freshness,
+  # НЕ сразу за check-ratchet: смежность check-ratchet ↔ check-verdict-signatures зафиксирована
+  # замком QA-151 ac3c (ADR-139 Д4), а check-verdict-signatures ↔ check-based-on-freshness —
+  # замком QA-152 ac2a (ADR-140 Д5); advisory-прибор места у храповика не требует — его
+  # блокирует только сравнение строки ряда у читателя (перестановка NA-EPIC-141, 2026-11-14;
+  # прежнее место — сразу за check-ratchet, провенанс акта qa186).
+  #
+  # Позиция: --full, НЕ --fast — состав --fast заморожен (ADR-123-spec, замок QA-118), а
+  # предмет ступени — состояние КОРПУСА спек целиком, не отдельный коммит; в --fast он бил бы
+  # по каждому шагу TDD внутри волны.
+  #
+  # NOT-DELIVERED ниже — классификация доставки акта qa186: манифесты (PAYLOAD_FILES) акт не
+  # трогает, классификацию объявляет координатор; без объявления сторож roster-declaration
+  # был бы красным на имя без поставки (ишью #14).
+# NOT-DELIVERED: measure-specs-strict — предмет не доставляется
+  run_gate_if_declared "measure-specs-strict"
+
+  # text-clarity-check (NA-EPIC-141, qa188; capability text-clarity-ratchet; вердикт gate-ba
+  # approve с условиями, BA-116) — прибор понятности текстов по двум объявленным
+  # поверхностям, сплит по ПУТИ: docs/**/*.md — UTR-норма (вендор erwinete/asd-ste100-ru,
+  # режим strict), openspec/specs/**/spec.md — ASD-STE100 (вендор danyuchn/asd-ste100-skill).
+  # Отчёт ADVISORY (требование 2 спеки): exit 0 при любом числе находок; exit 2 —
+  # использование/IO/кросс-применение рулсета вне своей поверхности (AC-001a). Блокирует
+  # только сравнение строк храповика (.nauta-ratchet.yaml: utr-docs-hard-findings,
+  # ste-specs-hard-findings; check-ratchet.py, код 3) — новых блокирующих гейтов прибор не
+  # вводит. Вендорные копии — пинованные (provenance в шапке), stdlib-only, без сети, без
+  # автообновления; запуск python3 -I.
+  # Позиция: --full, НЕ --fast — состав --fast заморожен ADR-123-spec (замок QA-118), а
+  # предмет ступени — состояние КОРПУСОВ целиком (959 md + 60 spec.md, замер прибора на
+  # живом дереве qa188 ~7 с суммарно), не отдельный коммит; то же основание, что у соседей
+  # выше.
+  # Предмет — этот же репозиторий (корпуса docs/ и openspec/specs этого дерева); дерево-
+  # потребитель получит объявленное молчание (INFO-NOT-DELIVERED, ADR-037 §3), exit-код
+  # не изменится. PAYLOAD-классификацию объявляет координатор (прибор разработки, ожидание —
+  # NOT-DELIVERED). Объявление невхождения §3.2 ADR-085 в нулевой колонке, метка дословно
+  # из перечня замка QA-083, форма якорена на начало строки.
+# NOT-DELIVERED: text-clarity-check — предмет — репозиторий nauta
+  run_gate_if_declared "text-clarity-check"
+  # check-stall (NA-EPIC-110 В2, BA-113, capability route-stall-watcher; донор aida
+  # check stall @5e89617, RES-100 §B) — сторож немых рабочих стадий маршрута: эпики на
+  # стадиях test-design..acceptance, чей новейший state-change старше окна
+  # .nauta-gates.yaml::stallWatch.windowDays. ADVISORY-ступень --full (без --strict в
+  # ростере): стопор чужого эпика не блокирует выпуск чужого релижа — будильник, не гейт;
+  # координатор зовёт с --strict в ритуале волны. Живёт в --full по тем же основаниям, что
+  # соседи выше: предмет — СТОР ЦЕЛИКОМ, состав --fast заморожен ADR-123-spec (QA-118).
+  # У потребителя стора нет: объявленное молчание прибора + NOT-DELIVERED ниже.
+# NOT-DELIVERED: check-stall — предмет — репозиторий nauta
+  run_gate_if_declared "check-stall"
 
   # id-check (ADR-038 Д3/Д8, ADR-038-spec §4.3/§5; решение владельца Р22, roadmap 2026-08-18)
   # — коллизии, невозврат отменённого номера, расхождение реестра .nauta-ids.yaml с корпусом.

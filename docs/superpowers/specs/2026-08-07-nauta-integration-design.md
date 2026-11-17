@@ -1,5 +1,5 @@
 ---
-title: Переход gramax-marketplace на nauta как ролевую команду
+title: Переход gramax-marketplace на nauta
 order: 3
 status: accepted
 date: 2026-08-07

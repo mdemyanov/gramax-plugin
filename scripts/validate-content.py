@@ -52,6 +52,8 @@ from _validate_common import (
     grandfather_issue,  # C11 (DEV-123, ADR-078) — форма отчёта о потолке, общая двум веткам
     companion_spec_issues, companion_pattern_issue,  # C11 (DEV-137, BA-060) — вынесено, §ниже
     check_lesson_destiny,  # C20-форма (DEV-139, ADR-088 Д4) — тело в _validate_common.py
+    check_lesson_contrast,  # контраст-контракт журнала уроков (NA-EPIC-134 .17) — там же
+    check_never_registry,  # C26 (NA-EPIC-110, В1, BA-112) — тело в _validate_common.py
 )
 from _conflict_markers import check_conflict_markers  # C19 (DEV-090) — вынесено, см. §ниже
 
@@ -416,19 +418,53 @@ def _strip_frontmatter(text: str) -> str:
 
 # Модульный уровень, рядом с остальными компилированными паттернами файла (например
 # _LINK_PATTERNS). Единственное определение "структурной строки" -- C8 и C11 (§3.4) читают
-# ОДНУ константу, не два независимых regex (ADR-010 Д2). Известный дефект (TPL-67 -- слеп к
-# блочному Gramax {% table %}, код-fence, юникод-рамкам) НЕ чинится этим ADR -- T_S откалиброван
-# RES-026 на этом же regex; правка сдвинула бы run-распределение без данных на замену.
+# ОДНУ константу, не два независимых regex (ADR-010 Д2).
+# TPL-67 (NA-EPIC-102 D3): дефект «слеп к блочному Gramax {% table %}, код-fence,
+# юникод-рамкам» исправлен в общей точке -- строка считается структурной также когда она
+# (а) содержит Gramax block-тег `{%`, (б) содержит юникодный символ псевдографики из
+# консервативного набора ниже, (в) лежит внутри код-fence (```-маркеры и содержимое --
+# структура ЦЕЛИКОМ, unclosed fence по CommonMark тянется до конца тела). Правка сдвинула
+# run-распределение прибитого среза вывода T_S (qa066: Архитектура 113→85, Исследование
+# 38→31) -- T_S перевыведена тем же методом (ADR-067 Д6), живой каталог и замки qa066/dev036
+# поправлены тем же актом NA-EPIC-102.
 HAS_STRUCTURE_RE = re.compile(r"(?m)^\s*\||<view|<note|^#{2,}\s")
+_FENCE_MARKER_RE = re.compile(r"^\s*`{3,}")          # ```-маркер (язык после -- не мешает)
+_GRAMAX_BLOCK_TAG_RE = re.compile(r"\{%")            # {% table %}, {% endtable %}, ...
+_BOX_DRAWING_RE = re.compile(r"[│├└┌┐┘┤┴┬─┼═║╠╣╦╩╬]")
+
+
+def _structure_flags(body: str) -> list[bool]:
+    """Построчная классификация «структурная строка» -- ЕДИНСТВЕННАЯ общая точка C8 и C11
+    (TPL-67): списковый флаг на строку тела, fence-aware. `HAS_STRUCTURE_RE` оставлен
+    линейным и вошёл в классификатор как один из трёх дизъюнктивных признаков; построчный
+    поиск эквивалентен прежнему `re.search` по всему телу (все альтернативы регекса
+    строковые, через границы строк не идут -- `\n` в классах нет)."""
+    flags: list[bool] = []
+    in_fence = False
+    for line in body.splitlines():
+        if in_fence:
+            flags.append(True)
+            if _FENCE_MARKER_RE.match(line):
+                in_fence = False
+            continue
+        if _FENCE_MARKER_RE.match(line):
+            flags.append(True)
+            in_fence = True
+            continue
+        flags.append(bool(HAS_STRUCTURE_RE.search(line)
+                          or _GRAMAX_BLOCK_TAG_RE.search(line)
+                          or _BOX_DRAWING_RE.search(line)))
+    return flags
 
 
 def check_bloat(content_dir: Path, threshold: int = 40) -> list[Issue]:
-    """C8 -- логика не меняется, только ссылка на модульную HAS_STRUCTURE_RE вместо
-    локальной переменной."""
+    """C8 -- ссылка на общую точку `_structure_flags` (TPL-67): для тел без fence/тегов/
+    псевдографики поведение прежнее (построчный поиск эквивалентен multiline `re.search`),
+    тела с новыми структурными формами больше не читаются как «без структуры»."""
     issues = []
     for index_path in content_dir.rglob("_index.md"):
         body = _strip_frontmatter(index_path.read_text(encoding="utf-8"))
-        has_structure = bool(HAS_STRUCTURE_RE.search(body))
+        has_structure = any(_structure_flags(body))
         prose = [ln for ln in body.splitlines()
                  if ln.strip() and not ln.lstrip()[:1] in {"#", "|", "-", "*", ">", "<"}]
         if len(prose) > threshold and not has_structure:
@@ -815,17 +851,74 @@ def _strip_leading_frontmatter(content: str) -> str:
 
 def _longest_run_without_structure(body: str) -> int:
     """RES-026 определение: самый длинный участок ПОДРЯД идущих строк тела, ни одна из
-    которых не матчит HAS_STRUCTURE_RE ПОСТРОЧНО (не re.search по всему телу разом --
+    которых не структурна (классификация -- общая точка `_structure_flags`, TPL-67;
+    прежде -- построчный `HAS_STRUCTURE_RE`; не re.search по всему телу разом --
     иначе один заголовок в конце файла "обелил" бы всё тело, как C8 уже делает для generic
     случая -- этот признак намеренно другой, RES-026/BA-027b)."""
     longest = current = 0
-    for line in body.splitlines():
-        if HAS_STRUCTURE_RE.search(line):
+    for flag in _structure_flags(body):
+        if flag:
             current = 0
         else:
             current += 1
             longest = max(longest, current)
     return longest
+
+
+# TPL-69 (NA-EPIC-102 D3): вторая ось run-измерения -- СИМВОЛЬНАЯ. Склейка переносов строк
+# внутри абзаца уменьшает ОБА признака пары T/T_S не сокращая содержания (прецедент SA-019,
+# lessons-learned 2026-07-28: черновик 179→73 строк при росте до 17 604 символов). Сигнальная
+# форма -- КОНЪЮНКЦИЯ двух порогов: run > 1500 символов И в среднем > 120 симв/строку.
+# Замер на живом docs/ (NA-EPIC-102, 2026-11-04): только `> 1500 символов` -- 535 файлов
+# (шум: гигантские нормально разбитые run'ы, напр. глоссарий 20346 симв × 72 симв/строку);
+# конъюнкция -- 55 файлов (warning-класс, грандфазеринг счётом -- замок
+# tests/test_naepic102_structure_detector.py::test_ac69_5).
+GLUED_RUN_CHAR_THRESHOLD = 1500
+GLUED_RUN_CHARS_PER_LINE_THRESHOLD = 120
+
+
+def _longest_run_chars(body: str) -> tuple[int, int]:
+    """Максимальный по СИМВОЛАМ structure-less run: (символов, строк). Ось независима от
+    `_longest_run_without_structure` (та берёт max по СТРОКАМ): склейка даёт короткий по
+    строкам, но огромный по символам run, который мог бы и не быть линейным рекордом тела
+    -- поэтому ось своя, max берётся по всем run'ам."""
+    best_chars = best_lines = cur_chars = cur_lines = 0
+    for line, flag in zip(body.splitlines(), _structure_flags(body)):
+        if flag:
+            cur_chars = cur_lines = 0
+            continue
+        cur_chars += len(line) + 1  # +1 за перенос, соединяющий строки run'а
+        cur_lines += 1
+        if cur_chars > best_chars:
+            best_chars, best_lines = cur_chars, cur_lines
+    return best_chars, best_lines
+
+
+def check_glued_runs(content_dir: Path) -> list[Issue]:
+    """C19: TPL-69-детектор (warning-класс, своя ось -- не пара BR-004): склеенный абзац --
+    structure-less run, огромный в символах при подозрительно длинных строках.
+    Итерация и срезы как у C11 (без `_index.md` и плейсхолдеров); тип-каталог НЕ читается:
+    склейке всё равно, какой у файла «Тип контента», и гнать ось только по бюджетным
+    типам значило бы отпустить обход у файла с опечаткой в типе."""
+    issues: list[Issue] = []
+    for md_path in content_dir.rglob("*.md"):
+        if md_path.name == "_index.md":
+            continue
+        if has_placeholder(md_path):
+            continue
+        chars, lines = _longest_run_chars(_strip_frontmatter(md_path.read_text(encoding="utf-8")))
+        if chars <= GLUED_RUN_CHAR_THRESHOLD or lines == 0:
+            continue
+        cpl = chars // lines
+        if cpl <= GLUED_RUN_CHARS_PER_LINE_THRESHOLD:
+            continue
+        issues.append(Issue("warning", str(md_path),
+            f"склеенный абзац: участок без структуры {chars} символов (>{GLUED_RUN_CHAR_THRESHOLD}) "
+            f"всего в {lines} строк -- в среднем {cpl} симв/строку "
+            f"(>{GLUED_RUN_CHARS_PER_LINE_THRESHOLD}); переносы строк склеены, оба признака "
+            f"объёма (строки) уменьшены без сокращения содержания (TPL-69): разбей текст "
+            "на абзацы/списки/заголовки."))
+    return issues
 
 
 def _type_content_value(fm: dict | None) -> str | None:
@@ -1946,6 +2039,468 @@ def check_spec_norm_anchors(repo_root: Path) -> list[Issue]:
     return issues
 
 
+# ===== C22–C25: карта скафолда и проводка промтов (ADR-148, NA-EPIC-104, DEV-546) ====
+# Носитель ответов «дом+форма+регистрация+свойства+id» — один файл docs/00-vision/scaffold-map.md
+# (ADR-148 Д1); проводка — строка входа/согласования в десяти промтах ролей (SA-153 Д3).
+# Четыре правила ниже — машиночитаемая половина носителя: born-red заглушки QA-158
+# (tests/test_qa158_scaffold_map_c22_c25_locks.py) остаются постоянными мутационными замками.
+# Парсинг таблиц карты терпим к объёму, но скелет заголовков фиксирован (ADR-148 Д2); порча
+# формы таблицы («не смог проверить») — именованный error, не тихий проход и не трейсбек
+# (прецедент формы — C21).
+
+SCAFFOLD_MAP_REL = "00-vision/scaffold-map.md"  # под корнем контура (ADR-148 Д1)
+SCAFFOLD_MAP_CONTOUR_REL = "docs/" + SCAFFOLD_MAP_REL  # литерал проводки (ADR-148 Д1)
+#: шесть промтов исполнения (SA-153 Д3); секция входа может называться и
+#: «Naming convention and the target directory» (compliance)
+SCAFFOLD_EXECUTION_PROMPTS = (
+    "dev-agent.md",
+    "devops-agent.md",
+    "devsecops-agent.md",
+    "compliance-agent.md",
+    "qa-author-agent.md",
+    "qa-runner-agent.md",
+)
+SCAFFOLD_REGISTRY_FILENAME = ".nauta-ids.yaml"
+#: префиксы контура Д: литералы с ними резолвятся на полную глубину; остальные префиксы
+#: (scripts/, tests/, agents/, depth/, bin/) — предмет C23 только по самому префиксу:
+#: глубина за именованным префиксом (несуществующий `scripts/tests/` шаблонного текста
+#: донора в секциях входа) вне предмета валидатора контура — иначе живое дерево красилось
+#: бы шаблонными путями донора (замер DEV-546: `scripts/tests/` в nauta отсутствует,
+#: SA-153 замер №5 при этом видел единственным сиротой корпуса только :26 qa-runner)
+SCAFFOLD_CONTOUR_PREFIXES = ("docs", "openspec")
+SCAFFOLD_WAVES_PARTS = ("90-decisions-log", "waves")  # хроника волн заморожена (SA-153 замер №7)
+SCAFFOLD_TABLE_GENRES = "Жанры"                        # фиксированный скелет ADR-148 Д2
+SCAFFOLD_TABLE_WINDOWS = "Окна и исторические дома"
+SCAFFOLD_TABLE_EMPTY = "Пустые объявленные дома"
+_SCAFFOLD_PATH_LIT_RE = re.compile(
+    r"(?:docs|openspec|scripts|tests|agents|depth|bin)/[A-Za-z0-9_./<>\-\*]*")
+_SCAFFOLD_ID_TOKEN_RE = re.compile(r"(?<![a-zA-Z0-9])(res|ba|qa|dev|sa|ops)-\d{2,3}(?![a-zA-Z0-9])")
+_SCAFFOLD_ADR_PREFIX_RE = re.compile(r"^ADR-\d{3}")
+_SCAFFOLD_H1_SUFFIX_RE = re.compile(r"\((?:RES|BA|QA|SA|DEV|OPS|ADR)-(\d{2,3})\)$")
+_SCAFFOLD_FORM_TOKEN_RE = re.compile(r"(?<![a-zA-Z0-9])(res|ba|qa|dev|sa|ops)-NNN(?![a-zA-Z0-9])")
+_SCAFFOLD_FORM_ADR_RE = re.compile(r"(?<![a-zA-Z0-9])ADR-NNN(?![a-zA-Z0-9])")
+
+
+def _scaffold_map_text(content_dir: Path) -> str | None:
+    path = content_dir / SCAFFOLD_MAP_REL
+    if not path.is_file():
+        return None
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
+def _scaffold_table_rows(map_text: str, table_name: str) -> list[dict[str, str]]:
+    """Строки таблицы `table_name` карты как словари по заголовку. Заголовок секции —
+    «## <имя>»; строки — линии `|…|`, разделительная `|---|` пропускается. Секции нет —
+    тихий [] (носителя нет — предмет других правил и исходов вызова); порча формы таблицы
+    (нет шапки) даёт пустые словари колонок и не красит здесь — содержательные правила
+    (C24/C25) дают именованный отказ на «не смог проверить»."""
+    section = re.search(rf"^##\s+.*{re.escape(table_name)}.*$", map_text, flags=re.M)
+    if section is None:
+        return []
+    rest = map_text[section.end():]
+    stop = re.search(r"^##\s+", rest, flags=re.M)
+    if stop:
+        rest = rest[:stop.start()]
+    lines = [line for line in rest.splitlines() if line.strip().startswith("|")]
+    if len(lines) < 2:
+        return []
+    header = [cell.strip() for cell in lines[0].strip().strip("|").split("|")]
+    rows: list[dict[str, str]] = []
+    for line in lines[1:]:
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if all(set(cell) <= set("-: ") for cell in cells):
+            continue
+        rows.append(dict(zip(header, cells)))
+    return rows
+
+
+def _scaffold_literals_with_lines(text: str) -> list[tuple[str, int]]:
+    """Литералы путей дерева с номерами строк; дубликаты схлопываются на первое вхождение."""
+    found: list[tuple[str, int]] = []
+    seen: set[str] = set()
+    for lineno, line in enumerate(text.splitlines(), 1):
+        for m in _SCAFFOLD_PATH_LIT_RE.finditer(line):
+            lit = m.group(0).rstrip(".,;:)")
+            if lit and lit not in seen:
+                seen.add(lit)
+                found.append((lit, lineno))
+    return found
+
+
+def _scaffold_prompt_section_lines(prompt_path: Path) -> list[tuple[int, str]]:
+    """(номер строки, строка) внутри секции входа промта исполнения («Target directories» /
+    «Naming convention and the target directory», SA-153 Д3) — до следующего `## `.
+    Секции нет — []: иллюстративные пути вне её правилом не читаются (SA-153 замер №5)."""
+    try:
+        lines = prompt_path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError):
+        return []
+    start = None
+    for i, line in enumerate(lines):
+        if line.startswith("## ") and re.search(r"target director", line, re.I):
+            start = i
+            break
+    if start is None:
+        return []
+    out: list[tuple[int, str]] = []
+    for i in range(start + 1, len(lines)):
+        if lines[i].startswith("## "):
+            break
+        out.append((i + 1, lines[i]))
+    return out
+
+
+def _scaffold_prefix_tuple(literal: str) -> tuple[str, ...]:
+    """Фиксируемая часть литерала: сегменты до первого плейсхолдера/wildcard-сегмента."""
+    parts: list[str] = []
+    for seg in literal.split("/"):
+        if not seg:
+            continue
+        if "<" in seg or ">" in seg or "*" in seg:
+            break
+        parts.append(seg)
+    return tuple(parts)
+
+
+def _scaffold_tuple_prefix_of(a: tuple[str, ...], b: tuple[str, ...]) -> bool:
+    return len(a) <= len(b) and b[:len(a)] == a
+
+
+def _scaffold_tuple_related(a: tuple[str, ...], b: tuple[str, ...]) -> bool:
+    """Пути пересекаются адресно: один — префикс другого (литерал — либо под объявленным
+    домом, либо объявленный дом живёт внутри литерала-секции)."""
+    return _scaffold_tuple_prefix_of(a, b) or _scaffold_tuple_prefix_of(b, a)
+
+
+def _scaffold_literal_resolves(base: Path, literal: str) -> tuple[str, str]:
+    """(исход, причина) для литерала карты/промта; исход ∈ {"ok", "skip", "fail"}.
+    Предмет правила — КАТАЛОГОВАЯ часть (ADR-148 Д4: «у литерала-формы файла каталоговая
+    часть (плейсхолдеры сняты) обязана существовать»): последний сегмент — форма будущего
+    артефакта, его отсутствие литерал не красит; промежуточный несуществующий сегмент —
+    fail. Файл-литерал с хвостом не разрешается (fail). "skip" — каталога-префикса
+    верхнего уровня нет в дереве (docs-only песочница/произведённое дерево: правило
+    СПИТ именованной строкой, не error — форма отсутствующего ключа конфигурации
+    «absent (проверка не выполняется)», C18-прецедент). Глубина НЕ контурного префикса
+    за его собственным первым сегментом — "ok" (вне предмета контура; см.
+    SCAFFOLD_CONTOUR_PREFIXES)."""
+    segments = [s for s in literal.split("/") if s]
+    if not segments:
+        return "ok", "пустой литерал"
+    if not (base / segments[0]).is_dir():
+        return "skip", f"каталога-префикса «{segments[0]}/» нет в дереве"
+    contour = segments[0] in SCAFFOLD_CONTOUR_PREFIXES
+    prefix = base
+    for i, seg in enumerate(segments):
+        if "<" in seg or ">" in seg or "*" in seg:
+            return "ok", f"плейсхолдер-сегмент после существующего префикса {prefix}"
+        candidate = prefix / seg
+        if candidate.is_dir():
+            prefix = candidate
+            continue
+        if i == len(segments) - 1:
+            if candidate.is_file():
+                return "ok", "файл-литерал разрешается"
+            return "ok", "каталог-часть существует; последний сегмент — форма артефакта"
+        if candidate.is_file():
+            return "fail", ("файл-литерал " + str(candidate) + " с хвостом "
+                            + "/".join(segments[i + 1:]))
+        if not contour and i > 0:
+            return "ok", f"вне контура Д: глубина за префиксом {segments[0]}/ — не предмет C23"
+        return "fail", f"сегмент «{seg}» не существует (префикс {prefix})"
+    return "ok", "весь литерал — существующий каталог"
+
+
+def _scaffold_content_relative(path_tuple: tuple[str, ...]) -> tuple[str, ...]:
+    """Путь относительно корня контура: ведущий «docs» снят (дома карты и каталоги файлов
+    внутри контура сравниваются в одних координатах)."""
+    if path_tuple and path_tuple[0] == "docs":
+        return path_tuple[1:]
+    return path_tuple
+
+
+def check_title_h1(content_dir: Path) -> list[Issue]:
+    """C22: frontmatter `title` дословно равен H1 СТАТЬИ по каждому md контура (ADR-148 Д4).
+    Класс был виден только именному тесту закрытого эпика qa141 ac4b; правило несёт его в
+    приёмочный прогон роли. Страницы-секции (`_index.md`/`README.md`) вне предмета
+    правила: их title свободен — контроль qa154 F5 (метаданные индекса «Valid» против
+    H1 «Корень» обязан быть зелёным), strict-метаданные индексов — предмет qa154/ADR-143.
+    Статьи без title или без H1 — тоже нечего сравнивать; yaml-ошибка frontmatter
+    рапортуется правилами C3–C5 и здесь не дублируется."""
+    issues: list[Issue] = []
+    for md_path in sorted(content_dir.rglob("*.md")):
+        if md_path.name in ("_index.md", "README.md"):
+            continue  # титулы страниц-секций свободны (контроль qa154 F5, ADR-143)
+        try:
+            frontmatter = parse_frontmatter(md_path)
+        except MalformedYamlError:
+            continue  # «не смог прочитать» уже назван правилами свойств (ADR-007 Д5)
+        title = (frontmatter or {}).get("title")
+        if not isinstance(title, str):
+            continue
+        body = _strip_frontmatter(md_path.read_text(encoding="utf-8", errors="replace"))
+        heading = _H1_RE.search(body)
+        if heading is None:
+            continue
+        if title != heading.group(1):
+            rel = _repo_relative(md_path, content_dir)
+            issues.append(Issue("error", rel,
+                f"C22: frontmatter title не равен H1 статьи: «{title}» против "
+                f"«{heading.group(1)}» — title берётся из H1 дословно (ADR-148 Д4)"))
+    return issues
+
+
+def _scaffold_declared_path_tuples(map_text: str | None) -> list[tuple[str, ...]]:
+    """Объявленные картой пути: пути окон (таблица «Окна и исторические дома») и
+    объявленных пустых домов. Носителя нет — пусто (тогда C23 красит сироту входа на
+    проводке, а исключение окна просто не действует)."""
+    covered: list[tuple[str, ...]] = []
+    if map_text is None:
+        return covered
+    for table in (SCAFFOLD_TABLE_WINDOWS, SCAFFOLD_TABLE_EMPTY):
+        for row in _scaffold_table_rows(map_text, table):
+            for lit, _lineno in _scaffold_literals_with_lines(row.get("Путь", "")):
+                covered.append(_scaffold_prefix_tuple(lit))
+    return covered
+
+
+def check_scaffold_path_truthfulness(content_dir: Path) -> list[Issue]:
+    """C23: правдивость путей (ADR-148 Д4) — литералы таблиц карты и литералы секций входа
+    шести промтов исполнения: каталог-литерал обязан существовать; у литерала-формы файла
+    каталоговая часть (плейсхолдеры сняты) обязана существовать; сирота — error с файлом,
+    строкой и литералом. Литерал, покрытый записью окна (таблица 2) или объявленным пустым
+    домом (таблица 3 — пустой каталог не выживает в git archive), не красит; вход в саму
+    карту (`docs/00-vision/scaffold-map.md`) резолвится самим носителем."""
+    issues: list[Issue] = []
+    base = content_dir.parent
+    map_text = _scaffold_map_text(content_dir)
+    covered = _scaffold_declared_path_tuples(map_text)
+    map_rel = content_dir.name + "/" + SCAFFOLD_MAP_REL
+
+    def _check(literal: str, where: str, lineno: int | None) -> None:
+        state, why = _scaffold_literal_resolves(base, literal)
+        if state == "ok":
+            return
+        if state == "skip":
+            # named skip, не error и не тишина: префикс-неймспейса нет в этой копии
+            # дерева (docs-only песочница/произведённое дерево) — форме «absent
+            # (проверка не выполняется)» отсутствующего ключа конфигурации (C18)
+            prefix = literal.split("/")[0]
+            issues.append(Issue("warning", where,
+                f"C23: проверка литералов с префиксом «{prefix}/» не выполняется — "
+                "каталога-префикса нет в дереве (named skip; ADR-148 Д4)",
+                dedupe_key=f"C23-skip:{where}:{prefix}"))
+            return
+        lit_tuple = _scaffold_prefix_tuple(literal)
+        if any(_scaffold_tuple_related(lit_tuple, covered_tuple)
+               for covered_tuple in covered):
+            return  # путь окна или объявленного пустого дома — исключение (ADR-148 Д2/Д4)
+        issues.append(Issue("error", where,
+            f"C23: литерал «{literal}»"
+            + (f" (строка {lineno})" if lineno else "")
+            + f" не разрешается: {why} — правдивость путей носителя/проводки (ADR-148 Д4)"))
+
+    if map_text is not None:
+        for lit, lineno in _scaffold_literals_with_lines(map_text):
+            _check(lit, map_rel, lineno)
+    agents_dir = base / "agents"
+    for prompt_name in SCAFFOLD_EXECUTION_PROMPTS:
+        prompt_path = agents_dir / prompt_name
+        if not prompt_path.is_file():
+            continue  # дерево без промт-слоя: проводки нет — нечего проверять
+        for lineno, line in _scaffold_prompt_section_lines(prompt_path):
+            for lit, _ in _scaffold_literals_with_lines(line):
+                _check(lit, f"agents/{prompt_name}", lineno)
+    return issues
+
+
+def check_genre_home_placement(content_dir: Path) -> list[Issue]:
+    """C24: жанр ↔ каталог (ADR-148 Д4) — детекторы жанров выводятся из колонки «Форма
+    имени» (токен-грамматика) и суффикса H1; файл жанра обязан лежать в доме своей строки
+    карты либо в пути таблицы «Окна и исторические дома» того же жанра; хроника волн
+    исключена (заморожена). Файл с id-токеном без строки жанра — именованный отказ («не
+    смог проверить жанр»), не тихий пропуск. Дома строк `res`/`adr` сверяются с home-глобами
+    `.nauta-ids.yaml`. Второй дом в ячейке «Дом» без записи окна того же жанра — error
+    (один вопрос — один ответ, ADR-148 Д2/Б3). Каждый docs-литерал секций входа промтов
+    обязан быть покрыт таблицами карты (дом жанра, окно или пустой дом; сама карта —
+    проводка, не размещение)."""
+    issues: list[Issue] = []
+    base = content_dir.parent
+    map_text = _scaffold_map_text(content_dir)
+    if map_text is None:
+        return issues  # носителя нет: сироту входа в проводке красит C23, жанрам нечем отвечать
+    map_rel = content_dir.name + "/" + SCAFFOLD_MAP_REL
+
+    genres = _scaffold_table_rows(map_text, SCAFFOLD_TABLE_GENRES)
+    windows = _scaffold_table_rows(map_text, SCAFFOLD_TABLE_WINDOWS)
+    genre_names = {row.get("Жанр", "").strip() for row in genres}
+
+    windows_by_genre: dict[str, list[tuple[str, ...]]] = {}
+    for window in windows:
+        genre = window.get("Жанр", "").strip()
+        if genre and genre not in genre_names:
+            issues.append(Issue("error", map_rel,
+                f"C24: окно называет жанр «{genre}», строки которого в таблице "
+                f"«{SCAFFOLD_TABLE_GENRES}» нет — не смог проверить жанр окна (ADR-148 Д2)"))
+            continue
+        for lit, _ in _scaffold_literals_with_lines(window.get("Путь", "")):
+            windows_by_genre.setdefault(genre, []).append(_scaffold_prefix_tuple(lit))
+
+    homes_by_genre: dict[str, list[tuple[str, ...]]] = {}
+    for row in genres:
+        genre = row.get("Жанр", "").strip()
+        docs_literals = [lit for lit, _ in _scaffold_literals_with_lines(row.get("Дом", ""))
+                         if lit.split("/")[0] in SCAFFOLD_CONTOUR_PREFIXES]
+        for k, lit in enumerate(docs_literals):
+            lit_tuple = _scaffold_prefix_tuple(lit)
+            if k == 0:
+                homes_by_genre.setdefault(genre, []).append(lit_tuple)
+            elif not any(_scaffold_tuple_related(lit_tuple, window_tuple)
+                         for window_tuple in windows_by_genre.get(genre, [])):
+                issues.append(Issue("error", map_rel,
+                    f"C24: второй дом «{lit}» в строке жанра «{genre}» без записи окна того "
+                    f"же жанра в таблице «{SCAFFOLD_TABLE_WINDOWS}» — конкурирующий "
+                    "немаркированный ответ (ADR-148 Д2/Б3)"))
+
+    detectors: dict[str, list[str]] = {}
+    for row in genres:
+        genre = row.get("Жанр", "").strip()
+        form = row.get("Форма имени (де-факто)", "")
+        for m in _SCAFFOLD_FORM_TOKEN_RE.finditer(form):
+            detectors.setdefault(m.group(1), []).append(genre)
+        if _SCAFFOLD_FORM_ADR_RE.search(form):
+            detectors.setdefault("adr", []).append(genre)
+
+    registry_path = base / SCAFFOLD_REGISTRY_FILENAME
+    if registry_path.is_file():
+        try:
+            registry = parse_yaml_file(registry_path)
+        except MalformedYamlError as e:
+            issues.append(issue_from_yaml_error(e))
+            registry = None
+        if isinstance(registry, dict):
+            for record in registry.get("namespaces") or []:
+                if not isinstance(record, dict):
+                    continue
+                namespace = str(record.get("namespace", ""))
+                if namespace not in ("res", "adr"):
+                    continue  # сверка только жанров, чьи номера ведёт реестр (ADR-148 Д4)
+                genre = (detectors.get(namespace) or [None])[0]
+                row_tuples = homes_by_genre.get(genre, []) if genre else []
+                for home in record.get("home") or []:
+                    if not isinstance(home, str) or not row_tuples:
+                        continue
+                    registry_tuple = _scaffold_prefix_tuple(home)
+                    if not any(_scaffold_tuple_related(registry_tuple, row_tuple)
+                               for row_tuple in row_tuples):
+                        issues.append(Issue("error", map_rel,
+                            f"C24: дом строки жанра «{genre}» расходится с home-глобом "
+                            f"реестра `{namespace}` ({home}) — карта и "
+                            "`.nauta-ids.yaml` должны называть один дом (ADR-148 Д4)"))
+
+    declared: list[tuple[str, ...]] = []
+    for tuples in homes_by_genre.values():
+        declared.extend(tuples)
+    for tuples in windows_by_genre.values():
+        declared.extend(tuples)
+    declared.extend(_scaffold_declared_path_tuples(map_text))
+    carrier_tuple = _scaffold_prefix_tuple(SCAFFOLD_MAP_CONTOUR_REL)
+    agents_dir = base / "agents"
+    for prompt_name in SCAFFOLD_EXECUTION_PROMPTS:
+        prompt_path = agents_dir / prompt_name
+        if not prompt_path.is_file():
+            continue
+        for _lineno, line in _scaffold_prompt_section_lines(prompt_path):
+            for lit, _ in _scaffold_literals_with_lines(line):
+                if lit.split("/")[0] != "docs":
+                    continue  # покрытие — предмет карты документного контура
+                lit_tuple = _scaffold_prefix_tuple(lit)
+                if lit_tuple == carrier_tuple:
+                    continue  # вход в саму карту — проводка, не размещение
+                if not any(_scaffold_tuple_related(lit_tuple, declared_tuple)
+                           for declared_tuple in declared):
+                    issues.append(Issue("error", f"agents/{prompt_name}",
+                        f"C24: путь «{lit}» из секции входа не покрыт таблицами карты "
+                        "(дом жанра, окно или объявленный пустой дом) — карта обязана "
+                        "отвечать о каждом доме промт-слоя (ADR-148 Д2)"))
+
+    for md_path in sorted(content_dir.rglob("*.md")):
+        rel_parts = md_path.relative_to(content_dir).parts
+        if rel_parts[:len(SCAFFOLD_WAVES_PARTS)] == SCAFFOLD_WAVES_PARTS:
+            continue  # хроника волн заморожена (SA-153 замер №7)
+        name = md_path.name
+        tokens = {m.group(1) for m in _SCAFFOLD_ID_TOKEN_RE.finditer(name)}
+        if _SCAFFOLD_ADR_PREFIX_RE.match(name):
+            tokens.add("adr")
+        heading = _SCAFFOLD_H1_SUFFIX_RE.search(
+            _strip_frontmatter(md_path.read_text(encoding="utf-8", errors="replace")))
+        if heading is not None:
+            tokens.add(heading.group(0)[1:].split("-")[0].lower())
+        if not tokens:
+            continue
+        dir_parts = rel_parts[:-1]
+        for token in sorted(tokens):
+            genre_list = detectors.get(token)
+            if not genre_list:
+                issues.append(Issue("error", _repo_relative(md_path, content_dir),
+                    f"C24: не смог проверить жанр файла «{name}»: токен «{token}-» не несёт "
+                    f"ни одной строки в таблице «{SCAFFOLD_TABLE_GENRES}» карты скафолда — "
+                    "добавь строку жанра (именованный отказ, не тихий пропуск; ADR-148 Д4)"))
+                continue
+            allowed: list[tuple[str, ...]] = []
+            for genre in genre_list:
+                allowed.extend(homes_by_genre.get(genre, []))
+                allowed.extend(windows_by_genre.get(genre, []))
+            if not any(_scaffold_tuple_prefix_of(_scaffold_content_relative(allowed_tuple),
+                                                 dir_parts)
+                       for allowed_tuple in allowed):
+                issues.append(Issue("error", _repo_relative(md_path, content_dir),
+                    f"C24: файл жанра «{token}» лежит вне дома своей строки карты и вне "
+                    f"путей её окон ({'/'.join(dir_parts) or '<корень контура>'}) — жанр "
+                    "обязан лежать в каталоге строки «Жанры» либо в пути таблицы "
+                    "«Окна и исторические дома» (ADR-148 Д4)"))
+    return issues
+
+
+def check_declared_empty_homes(content_dir: Path) -> list[Issue]:
+    """C25: объявленный пустой дом назван громко основанием (ADR-148 Д4) — каждая строка
+    таблицы «Пустые объявленные дома» несёт литерал пути и НЕПУСТОЕ основание; дом,
+    объявленный пустым, но содержащий артефакты, — ошибка устаревшего объявления
+    («заселить — так снять с объявления»). Сегодня объявлен-и-пуст молчит (BA-110 №8)."""
+    issues: list[Issue] = []
+    map_text = _scaffold_map_text(content_dir)
+    if map_text is None:
+        return issues
+    map_rel = content_dir.name + "/" + SCAFFOLD_MAP_REL
+    for row in _scaffold_table_rows(map_text, SCAFFOLD_TABLE_EMPTY):
+        literals = [lit for lit, _ in _scaffold_literals_with_lines(row.get("Путь", ""))]
+        grounds = row.get("Основание", "").strip()
+        if not literals:
+            issues.append(Issue("error", map_rel,
+                f"C25: строка таблицы «{SCAFFOLD_TABLE_EMPTY}» без литерала пути — не смог "
+                "проверить, о каком доме объявление (ADR-148 Д2)"))
+            continue
+        literal = literals[0]
+        if not grounds:
+            issues.append(Issue("error", map_rel,
+                f"C25: пустой дом «{literal}» объявлен без основания — громко назови его "
+                "судьбу (жанр контракта, лист, намеренное отклонение) в колонке "
+                "«Основание» (ADR-148 Д4)"))
+            continue
+        prefix = literal.split("/")[0]
+        if prefix in SCAFFOLD_CONTOUR_PREFIXES:
+            home = content_dir.joinpath(
+                *[seg for seg in literal.split("/") if seg and seg != prefix])
+            if home.is_dir():
+                articles = [p.name for p in sorted(home.rglob("*.md"))
+                            if p.name != "_index.md"]
+                if articles:
+                    issues.append(Issue("error", map_rel,
+                        f"C25: дом «{literal}» объявлен пустым, но содержит артефакты "
+                        f"({articles[:3]}{'…' if len(articles) > 3 else ''}) — засели "
+                        "осознанно: сними дом с объявления в карте (ADR-148 Д4)"))
+    return issues
+
+
 def main(argv: list[str]) -> int:
     require_yaml()
     parser = argparse.ArgumentParser(description="Validate Gramax docs/ structure")
@@ -2003,11 +2558,19 @@ def main(argv: list[str]) -> int:
     # проверка обязана исполняться во всех трёх состояниях контура Д (Д4 ADR-041).
     issues.extend(check_absence_records(repo_root / ABSENCE_RECORDS_FILENAME, repo_root))
     issues.extend(check_lesson_destiny(repo_root / ".nauta-lesson-destiny.yaml", repo_root))
+    # Контраст-контракт журнала уроков (NA-EPIC-134 .17) — наравне с C20: предмет —
+    # журнал docs/, вызов безусловный, журнала нет — тихий проход (ADR-088 Д1).
+    issues.extend(check_lesson_contrast(
+        repo_root / "docs" / "60-operations" / "postmortems" / "lessons-learned.md"))
     # C21 (ADR-125) — наравне с C13/C14/C18/C20: предмет (openspec/specs/) лежит в корне,
     # не в docs/, и проверка обязана исполняться во всех трёх состояниях контура Д (Д4
     # ADR-041). Вызов безусловный, в `_content_side_issues` не входит — S1_CHECK_IDS и его
     # AST-замок (test_dev048) не тронуты (ADR-125-spec §2).
     issues.extend(check_spec_norm_anchors(repo_root))
+    # C26 (NA-EPIC-110, В1) — наравне с C20/C21: предмет (.nauta-never-registry.yaml +
+    # корпус agents/*.md) лежит в корне, не в docs/; вызов безусловный, без файла — тихий
+    # проход (потребитель: корпуса agents/ нет, реестр не доставляется).
+    issues.extend(check_never_registry(repo_root / ".nauta-never-registry.yaml", repo_root))
 
     # Один битый файл видят несколько независимых rglob-проходов. Схлопываем ДО подсчёта:
     # `Errors: N` считается из списка, а не на печати (ADR-007 Д5).
@@ -2051,7 +2614,8 @@ def main(argv: list[str]) -> int:
 # константы; замок на её согласие с ФАКТИЧЕСКИМ составом вызовов внутри
 # `_content_side_issues` — `tests/test_dev048_s1_check_ids_enumeration.py` (AST-разбор
 # тела функции, не текстовый grep).
-S1_CHECK_IDS: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 16, 17, 19)
+S1_CHECK_IDS: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 16, 17, 19,
+                                 22, 23, 24, 25)  # 22–25: карта скафолда (ADR-148 Д4, DEV-546)
 
 
 def _format_check_id_ranges(check_ids: tuple[int, ...]) -> str:
@@ -2090,8 +2654,8 @@ S3_MESSAGE = (
 
 
 def _content_side_issues(content_dir: Path, gates: dict) -> list[Issue]:
-    """S1: половина гейта, у которой предмет — сам каталог (C1-C12, C15-C17, см.
-    `S1_CHECK_IDS`). Вынесена из `main` целиком, чтобы репо-половина
+    """S1: половина гейта, у которой предмет — сам каталог (C1-C12, C15-C17, C19, C22-C25,
+    см. `S1_CHECK_IDS`). Вынесена из `main` целиком, чтобы репо-половина
     (C13/C14/провенанс) осталась вне ветвления по состоянию предмета — Д4 ADR-041.
 
     Режим `gramaxPublication` (ADR-143 §6.1) читается здесь один раз: `live-docs-v1`
@@ -2135,11 +2699,20 @@ def _content_side_issues(content_dir: Path, gates: dict) -> list[Issue]:
     # `main` (один раз, до ветвления по состоянию предмета) и передаёт сюда: C11 —
     # content-половина, C13/C14 из того же словаря — репо-половина (Д4 ADR-041).
     issues.extend(check_size_budget(content_dir, gates))
+    issues.extend(check_glued_runs(content_dir))  # TPL-69 (NA-EPIC-102 D3): вторая ось run-а
     issues.extend(check_placeholders(content_dir))
     issues.extend(check_doc_root_placeholders(content_dir))
     issues.extend(check_type_content_declared(content_dir))          # C12, новое (ADR-018 Д6)
     issues.extend(check_capability_link(content_dir))                # C15, дизайн трёх домов
     issues.extend(check_orphan_capabilities(content_dir, content_dir.parent))  # C16 ~ C10
+    # C22–C25 (ADR-148 Д4, DEV-546) — карта скафолда и проводка промтов: предмет — таблицы
+    # носителя docs/00-vision/scaffold-map.md и секции входа промтов исполнения (читаются
+    # от content_dir.parent, тот же якорь, что у C16 — прецедент content-проверки с
+    # репо-половиной предмета).
+    issues.extend(check_title_h1(content_dir))                       # C22 (ADR-148 Д4)
+    issues.extend(check_scaffold_path_truthfulness(content_dir))     # C23 (ADR-148 Д4)
+    issues.extend(check_genre_home_placement(content_dir))           # C24 (ADR-148 Д4)
+    issues.extend(check_declared_empty_homes(content_dir))           # C25 (ADR-148 Д4)
     return issues
 
 

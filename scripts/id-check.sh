@@ -516,6 +516,13 @@ def main(argv: list[str]) -> int:
             # даёт ~29 ложных ERROR на companion-файлах docs/30-architecture/).
             if path.endswith("-spec.md"):
                 continue
+            # Архив волны ADR-082 Д1/Д4 (waves/NA-EPIC-104/, трансферные акты z6yk 2026-11-05,
+            # ym7w 2026-11-06): перенесённая статья несёт имя решения ДОСЛОВНО, а дом волн
+            # заморожен и правилами размещения не проверяется (карта скафолда, «Правила
+            # чтения»; держатель обнаружимости — waves/NA-EPIC-104/_index.md + могильная
+            # строка в adr/_index.md). Тот же объявленный пропуск, что у -spec выше.
+            if path.startswith("docs/90-decisions-log/waves/"):
+                continue
             for token, is_numeric, lineno, _role in _match_entry(path, definition, prefix):
                 violations.append(
                     f"ERROR: не смог определить пространство имён — {prefix}{token} найден в "

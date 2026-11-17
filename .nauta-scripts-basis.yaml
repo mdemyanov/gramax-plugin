@@ -2,35 +2,36 @@
 # редактируйте руками значения; секцию `skip:` — можно (ADR-030-spec §5/§6).
 # Доставленные файлы — MIT, Copyright (c) 2026 mdemyanov (tools-ai/nauta).
 # Полный текст лицензии: LICENSE в корне репозитория плагина.
-nauta_version: "2.9.0"
-nauta_ref_sha: "b579b5475aab6757a6d66896bc45d4e5f8cb9105"
-synced_at: "2026-11-04T08:52:13Z"
+nauta_version: "2.22.0"
+nauta_ref_sha: "01b89ed808986a1549c05aeeb831a6ea9139c342"
+synced_at: "2026-11-17T12:04:28Z"
 delivery_complete: true
-files_count: 23
+files_count: 24
 files:
   scripts/_conflict_markers.py: "sha256:aca4969cc2205a95ce56be39c2ca6b8205864ab7f9c6b11add4214fd9a17ce6c"
   scripts/_drift_check.py: "sha256:11df574687a9d683d629dbdf61c94bfb22b12af36759d32b8c72621a5ee39554"
-  scripts/_validate_common.py: "sha256:f65667d581078b62eec00428a347dfb8e87f827f48e33012bfea188a714bdb30"
-  scripts/assemble-gate-evidence.sh: "sha256:fd05d04401939443f91da90be0578dbf3732d867a0a236c952f8379e24f16cb2"
-  scripts/check-branch-discipline.py: "sha256:faece4b9334c83406e765c2130de19cd5485d0149b30db7e9ee993b20cc5befd"
+  scripts/_validate_common.py: "sha256:9048de385ecce0a4d38ce4887a033bca500ce510fa40da9a0714c57273b6e027"
+  scripts/assemble-gate-evidence.sh: "sha256:6d11e14761dae1b66e050b10e1854c93f6458ada1b3ad77efbe1228c72160044"
+  scripts/check-branch-discipline.py: "sha256:7d6f2ab399b7f8c7b48473195ec2efd36b49f4f99c6471a1f3e0c99de9bd260b"
   scripts/check-content-actuality.py: "sha256:7363e9efdfcd20f0ff787024482945d675567c3805c819a2f7538cfd2b2ee5e4"
-  scripts/check-ratchet.py: "sha256:ae65951f8d11ee009ea5005ff51b736c0deca96ed0dbe1562a30783dca0a367e"
+  scripts/check-ratchet.py: "sha256:eaedd2a0bd9137c817735009b008d69978f0514669b624897f812b4feefafdfe"
   scripts/check-hooks-path.sh: "sha256:ba9e0a5f1d9bfc03f34cec078fdcfb6f11106256aba70ac403f4d614dac50be1"
   scripts/check-readiness.sh: "sha256:46d56a8a21434eaa17c3fb69639fb120c64dc809118e5b7490410390ee47e60b"
   scripts/check-status-drift.py: "sha256:8fa9ed3e0358131bee5a663c90df8b7d1ba2560cf40efc1e3ad343b5a835a6da"
-  scripts/check.sh: "sha256:970570fc4bb68e6684995b52c9a25e96dbe486eeaf8197667aba4ab555a0ffc6"
-  scripts/id-check.sh: "sha256:7ed07511f51a03df804f532e8f8ff6145a7d7a04c8b0b79828360f756fe8bb92"
+  scripts/check.sh: "sha256:6c94d818c7919b28e3c93355263921eaa5511cb52ec4fab71b654aea8f05ff14"
+  scripts/decide.py: "sha256:554934e1261cf7eef1c937522be3b83b4f5bda20de5f99fd19ca34d005e4d6ca"
+  scripts/id-check.sh: "sha256:62c0efd23c4458906612ff5924836cf26b13c78d25dc598566a455a8ab13b65c"
   scripts/install-hooks.sh: "sha256:b0ff9b521bc09e1f7d0b2980158a20dc0d1b7739381927526a9c1ce31018f4c1"
   scripts/measure-session-cost.py: "sha256:668e51f8ac0b30e3879193db0741aaa1d6069fe8ed5b62cacc3b1d0b96bdefd1"
-  scripts/role-postflight.sh: "sha256:72596f50d28e63af06637689c282256bde2df52f50a440ecde960f0c654c5863"
+  scripts/role-postflight.sh: "sha256:5f2a7e225c8ff3220bcc65bfcda378ebcebd1eca23fbd2d1b17c81f53a377c71"
   scripts/role-preflight.sh: "sha256:3db01a826961416b52670dfdab4e6ff783b6e55396d82d16073fd27cab6f2e7f"
   scripts/run-quiet.sh: "sha256:051a959a5fd3fa7b675ce109aa6c2125c318f822a0b5fd1d080de9f67939b8f2"
   scripts/test-check-id.sh: "sha256:111cf6e4902175bf70a6ff8bb7453c839ddff1ce7053ad67f6f031a2c85101c4"
   scripts/test-validate-content.sh: "sha256:684187ac8ba08148a3a77a25e0a862cc27c57baea9a1ff08fc4223ac100ba7ac"
-  scripts/validate-content.py: "sha256:8fb92c004b58036cb2c11d8d41d6236a2f8317a1b4f6ba5e7612c2c5dcf4ee2b"
+  scripts/validate-content.py: "sha256:50679345f440ed162175b3c70d81cbddbe4f9a88e30f0d07dd053ca758c59052"
   scripts/validate-profile.py: "sha256:5bb4a8c9faaf30300ffa74fa3b678ffb40c875f35e9dd36de0dd7d1fa8bbe7ca"
-  .githooks/pre-commit: "sha256:3d8da0944e3c482d3d4ea717c46e3939bef471727d039301170333d06c17e34f"
-  .claude/skills/subagent-delegation-brief/SKILL.md: "sha256:28fc33e67b45d60b87275b3db82177b44bf672fc40837f35294fc9c643a786f6"
+  .githooks/pre-commit: "sha256:e36e19650fa6d1d891dbe42b88eafd58b610c2b9472eb96acf96df9089c4fd1c"
+  .claude/skills/subagent-delegation-brief/SKILL.md: "sha256:4961a60d9ca7199edd2b15995607daf527ef885d84279f6452371b6f65137938"
 skip_count: 0
 skip:
 conflicts_count: 0
@@ -40,10 +41,3 @@ adopted:
   scripts/check.sh: "foreign"
   scripts/install-hooks.sh: "foreign"
   .githooks/pre-commit: "foreign"
-upgrades_count: 1
-upgrades:
-  - from: "0.42.0"
-    to: "2.9.0"
-    redBefore: 2
-    redAfter: 2
-    seconds: 26

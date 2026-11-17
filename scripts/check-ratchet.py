@@ -32,7 +32,10 @@
   0 — сравнено и не хуже; ЛИБО объявленный отказ; ЛИБО носителя в дереве нет (ГРОМКИЙ ноль:
       строка называет отсутствующий файл и что он даёт, ADR-085 Д1(3));
   1 — НЕ СМОГ ПРОВЕРИТЬ: нет строки прошлой волны, коммит не резолвится, две базы без
-      `crossBase`, ряд разошёлся с контуром И, `bd` недоступен на предусловии;
+      `crossBase`, `.nauta-gates.yaml` рядом с носителем есть и не разбирается (qa182:
+      ошибка чтения не сворачивается в тихий пустой словарь), ряд разошёлся с контуром
+      И, `bd` недоступен на предусловии, дублирующийся ключ носителя (qa184: парсер
+      молча теряет первое значение — ряд читается не весь, ключ и волна названы);
   2 — использование и конфигурация: носитель назван и не читается, носитель не разбирается,
       размерность без команды, `absent` без трёх полей, ключ-путь файла в ряду;
   3 — НАРУШЕНИЕ РЯДА: хуже без записи об ухудшении, пустая причина записи, правка закрытой
@@ -119,15 +122,27 @@ def commit_resolves(cwd: Path, sha: str) -> bool:
     return _git(cwd, "cat-file", "-e", f"{sha}^{{commit}}").returncode == 0
 
 
-def gates_dimensions(carrier: Path, cwd: Path) -> dict[str, object]:
+def gates_dimensions(carrier: Path, cwd: Path, rep: Report) -> dict[str, object]:
     """Базы `sessionCostBudget` из `.nauta-gates.yaml` — ЧТЕНИЕ, и только оно (Д2: ключ ADR-102
-    не переезжает и не правится). Ищется рядом с носителем, затем в корне дерева cwd."""
+    не переезжает и не правится). Ищется рядом с носителем, затем в корне дерева cwd.
+    Исходы различаются (qa182, gate-failure-semantics): файла НЕТ — тихое «нечего
+    проверять» (пустой словарь); файл ЕСТЬ и не читается (битый YAML, корень не запись) —
+    громкий код 1 «НЕ СМОГ ПРОВЕРИТЬ»: пустой словарь от ошибки чтения выдал бы зелёный
+    вердикт без сравнения (ADR-007 Д1)."""
     for candidate in (carrier.parent / GATES_NAME, cwd / GATES_NAME):
         if not candidate.is_file():
             continue
         try:
             doc = yaml.safe_load(candidate.read_text(encoding="utf-8")) or {}
-        except yaml.YAMLError:
+        except (yaml.YAMLError, UnicodeDecodeError) as exc:
+            cause = " ".join(str(exc).split())  # многострочный PyYAML — одна строка
+            rep.fail(RC_CANNOT, f"  ✗ {candidate} не разбирается как YAML: {cause} — "
+                                f"сравнение с {CEILING_CARRIER} НЕ выполнено: не смог "
+                                f"проверить ≠ нечего проверять (ADR-007 Д1).")
+            return {}
+        if not isinstance(doc, dict):
+            rep.fail(RC_CANNOT, f"  ✗ {candidate} не является записью YAML — базы "
+                                f"{CEILING_CARRIER} неоткуда прочитать (не смог проверить).")
             return {}
         dims = (doc.get("sessionCostBudget") or {}).get("dimensions") or []
         return {d.get("name"): d.get("base") for d in dims if isinstance(d, dict)}
@@ -669,8 +684,50 @@ def main() -> int:
     if carrier is None:
         return rc
 
+    # Строгий читатель носителя — ЛОКАЛЬНЫЙ инструмент точки входа (qa184), а не модульный:
+    # его декларации не расходуют top-level бюджет файла (ADR-063), и потребителю поставляется
+    # ровно один payload-файл без соседних модулей. Отказ на дублирующийся ключ: парсер YAML
+    # по стандарту молча отбрасывает ПЕРВОЕ значение — так у волны epic-na-epic-05-golden-
+    # slice-jjmv выпали три метрики из двух блоков `values:` (5cb538be). Это ошибка ЧТЕНИЯ,
+    # не конфигурации: вердикт о ряде, собранном по неполным данным, недоказан (код 1).
+    class DuplicateKeyError(yaml.YAMLError):
+        """Маркер отказа: дубль ключа, ключ и волна названы в сообщении."""
+
+    class StrictCarrierLoader(yaml.SafeLoader):
+        """SafeLoader с отказом на дубль: «прибор видит ровно те строки, что несёт файл»."""
+
+    def construct_mapping_no_dupes(loader: yaml.SafeLoader, node: yaml.MappingNode,
+                                   deep: bool = False) -> dict:
+        mapping: dict = {}
+        for key_node, value_node in node.value:
+            key = loader.construct_object(key_node, deep=True)
+            if key in mapping:
+                # Имя волны — соседний ключ того же блока: скалярный узел читается
+                # напрямую, без рекурсивной конструкции (якорь может ссылаться на
+                # сам блок — цикл).
+                wave = ""
+                for kn, vn in node.value:
+                    if (isinstance(kn, yaml.ScalarNode) and kn.value == "wave"
+                            and isinstance(vn, yaml.ScalarNode)):
+                        wave = f" (волна {vn.value})"
+                        break
+                raise DuplicateKeyError(
+                    f"дублирующийся ключ {key!r}{wave}, строка "
+                    f"{key_node.start_mark.line + 1}: парсер YAML по стандарту "
+                    f"отбрасывает первое значение — ряд читается не весь")
+            mapping[key] = loader.construct_object(value_node, deep=deep)
+        return mapping
+
+    StrictCarrierLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping_no_dupes)
+
     try:
-        doc = yaml.safe_load(carrier.read_text(encoding="utf-8"))
+        doc = yaml.load(carrier.read_text(encoding="utf-8"), Loader=StrictCarrierLoader)
+    except DuplicateKeyError as exc:
+        print(f"ОШИБКА: носитель {carrier} не прочитан целиком — {exc}. Это НЕ СМОГ "
+              f"ПРОВЕРИТЬ (код 1), а не «чисто»: вердикт о ряде, собранном по неполным "
+              f"данным, недоказан (qa184).", file=sys.stderr)
+        return RC_CANNOT
     except (yaml.YAMLError, UnicodeDecodeError) as exc:
         print(f"ОШИБКА: носитель {carrier} не разбирается как YAML: {exc}", file=sys.stderr)
         return RC_USAGE
@@ -684,7 +741,7 @@ def main() -> int:
     check_tree_anchors(carrier, declared, rep)
     degradations = check_degradations(doc, rep)
     blocks = split_series(doc, declared, retired_names(doc), rep)
-    check_crossbase(carrier, declared, gates_dimensions(carrier, cwd), rep)
+    check_crossbase(carrier, declared, gates_dimensions(carrier, cwd, rep), rep)
     check_instrument_units(carrier, declared, rep, root)
     check_open_wave(doc, blocks, args.closing, rep)
 

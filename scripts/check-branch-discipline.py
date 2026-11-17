@@ -61,6 +61,26 @@ CARRIER_SPEC_PATH = (
     "docs/30-architecture/ADR-081-isolation-by-simultaneity-branch-per-role-task-spec.md")
 
 
+def _prefix_tuple(raw: str) -> tuple[str, ...]:
+    """Скаляр или список префиксов объявления -> кортеж для сопоставления.
+
+    Скалярная форма значила ровно один префикс и значит его же. Форма `[a, b]` (NA-EPIC-104,
+    слепой прогон пожеланий NSDWRK-34926: владелец выделил прогону ветку `wishes-*` вне
+    канонического префикса, и объявление расширено списком равноправных префиксов) читается
+    построчным `_read_block` как строка — здесь она разбирается в кортеж. Многострочный
+    перечень (`- элемент` с отступом под ключом) сюда не доходит: `main` складывает его в эту
+    же скобочную форму через `_list_items`. Пустые элементы
+    отсеиваются: `startswith("")` матчит любую ветку и превратил бы сторож в молчание, а
+    заданный-но-пустой список не бывает умолчанием (ADR-072 Д6) — пустой кортеж main
+    обрабатывает громким отказом.
+    """
+    text = (raw or "").strip()
+    if not (text.startswith("[") and text.endswith("]")):
+        return (text,) if text else ()
+    items = tuple(part.strip().strip("'\"") for part in text[1:-1].split(","))
+    return tuple(part for part in items if part)
+
+
 def _read_block(text: str, name: str) -> dict[str, str] | None:
     """Верхнеуровневый блок как плоский словарь. None — блока в тексте нет.
 
@@ -81,6 +101,40 @@ def _read_block(text: str, name: str) -> dict[str, str] | None:
             if m:
                 out[m.group(1)] = m.group(2).strip().strip("\"'")
     return out if found else None
+
+
+def _list_items(text: str, name: str, key: str) -> list[str]:
+    """Элементы многострочного перечня `key:` внутри блока `name` (строки `- элемент`).
+
+    Построчный `_read_block` видит только `ключ: значение`; перечень с отступом под ключом
+    в его словарь не попадает, и заданный-перечнем ключ деградировал бы в умолчание кода —
+    молчание, запрещённое ADR-072 Д6. Пустые строки перечня отсеиваются: пустой элемент
+    префикса матчит любую ветку. Индентированная строка-комментарий нейтральна и до первого
+    элемента, и между элементами: обрыв перечня на ней читал бы валидный YAML молча
+    (находка скоуп-ревью раунда 2 волны NA-EPIC-104).
+    """
+    items: list[str] = []
+    inside = under_key = False
+    for line in text.splitlines():
+        if not inside:
+            inside = bool(re.match(rf"^{re.escape(name)}\s*:\s*(?:#.*)?$", line))
+            continue
+        if line.strip() and not line.startswith((" ", "\t")):
+            break                                        # конец блока — перечень не продолжается
+        if under_key:
+            m = re.match(r"^\s+-\s*(.*?)\s*(?:#.*)?$", line)
+            if m:
+                item = m.group(1).strip("\"'")
+                if item:
+                    items.append(item)
+                continue
+            if line.lstrip().startswith("#"):
+                continue                                # комментарий — не конец перечня
+            if line.strip():
+                under_key = False                        # другой ключ — перечень кончился
+        else:
+            under_key = bool(re.match(rf"^\s+{re.escape(key)}\s*:\s*(?:#.*)?$", line))
+    return items
 
 
 def _git(root: Path, *args: str) -> subprocess.CompletedProcess:
@@ -107,7 +161,7 @@ def _worktrees(root: Path) -> list[dict[str, str]]:
     return entries
 
 
-def _guard_branch_names(root: Path, prefix: str, profile: str) -> tuple[list[str], list[str]]:
+def _guard_branch_names(root: Path, prefixes: tuple[str, ...], profile: str) -> tuple[list[str], list[str]]:
     """Сторож шва §4.4: «роль переименовала свою ветку» — наблюдаемо, а не на честном слове.
 
     Вердикт владельца 2026-08-31 закрыл развилку §6 в пользу шва: имя ветки копии даёт
@@ -163,7 +217,7 @@ def _guard_branch_names(root: Path, prefix: str, profile: str) -> tuple[list[str
         except ValueError:
             continue                       # копия вне корня дерева (граница 3 выше)
         name = branch.replace("refs/heads/", "")
-        if name.startswith(prefix):
+        if name.startswith(prefixes):
             continue                       # интеграционная ветка эпика — не ветка роли
         if PLATFORM_BRANCH_RE.match(name):
             denials.append(
@@ -192,7 +246,7 @@ def _guard_branch_names(root: Path, prefix: str, profile: str) -> tuple[list[str
     return denials, warnings
 
 
-def _guard_stale_copies(root: Path, prefix: str) -> list[str]:
+def _guard_stale_copies(root: Path, prefixes: tuple[str, ...]) -> list[str]:
     """Сторож #20 (ADR-115 Д4, область СУЖЕНА решением координатора 2026-09-24, DEV-478 Н-3):
     копия отстаёт от HEAD ветки эпика — ПРЕДУПРЕЖДЕНИЕ, не отказ.
 
@@ -223,7 +277,7 @@ def _guard_stale_copies(root: Path, prefix: str) -> list[str]:
         if not path_raw or not branch or not head:
             continue                       # detached или неполная запись — судить нечем
         name = branch.replace("refs/heads/", "")
-        if name.startswith(prefix):
+        if name.startswith(prefixes):
             continue                       # интеграционная ветка эпика — не копия роли
         proc = _git(root, "merge-base", "--is-ancestor", epic_head, head)
         if proc.returncode != 0:
@@ -237,8 +291,8 @@ def _guard_stale_copies(root: Path, prefix: str) -> list[str]:
     return warnings
 
 
-def _guard_out_of_location_copies(root: Path, location: str, prefix: str,
-                                  declared: bool) -> tuple[list[str], list[str]]:
+def _guard_out_of_location_copies(root: Path, location: str,
+                                  prefixes: tuple[str, ...], declared: bool) -> tuple[list[str], list[str]]:
     """Сторож #23 (ADR-115 Д4, СУЖЕННЫЙ поправкой владельца 2026-09-22, вариант (а)).
 
     Исходная формулировка Д4 («указатель копии разрешается ВНЕ `worktreeLocation`» без
@@ -268,7 +322,7 @@ def _guard_out_of_location_copies(root: Path, location: str, prefix: str,
         except ValueError:
             continue                       # копия вне корня дерева — не судится (поправка)
         name = branch.replace("refs/heads/", "")
-        if name.startswith(prefix):
+        if name.startswith(prefixes):
             continue                       # интеграционная ветка эпика — не копия роли
         try:
             path.relative_to(location_root)
@@ -335,7 +389,8 @@ def _epic_branch(root: Path, epic: str) -> str | None:
     return str(branch) if branch else None
 
 
-def _guard_open_epic_branches(root: Path, prefix: str) -> tuple[list[str], list[str]]:
+def _guard_open_epic_branches(root: Path, prefixes: tuple[str, ...],
+                              declared: str) -> tuple[list[str], list[str]]:
     """В7 (ADR-122, backlog:1382-1385): открытие эпика подчинено дисциплине ветки. Ветка
     КАЖДОЙ открытой записи эпика стора сверяется с объявленным `integrationBranchPrefix`;
     вердикт перестаёт зависеть только от ветки текущей сессии.
@@ -365,11 +420,11 @@ def _guard_open_epic_branches(root: Path, prefix: str) -> tuple[list[str], list[
         if branch is None:
             continue                    # без измерения branch судить нечем (см. докстроку)
         judged += 1
-        if branch.startswith(prefix):
+        if branch.startswith(prefixes):
             continue
         denials.append(
             f"эпик `{epic}` открыт с ветки `{branch}` -- вне объявленного префикса "
-            f"`{prefix}`. Открытие эпика подчинено дисциплине ветки (В7 ADR-122, "
+            f"`{declared}`. Открытие эпика подчинено дисциплине ветки (В7 ADR-122, "
             f"backlog:1382-1385); носитель префикса -- branchDiscipline."
             f"integrationBranchPrefix в .nauta-gates.yaml."
         )
@@ -378,7 +433,7 @@ def _guard_open_epic_branches(root: Path, prefix: str) -> tuple[list[str], list[
                          "(объявленный пропуск, В7 ADR-122)"]
     if not denials:
         return denials, [f"открытых записей эпика с веткой: {judged}, "
-                         f"все внутри префикса `{prefix}`"]
+                         f"все внутри префиксов `{declared}`"]
     return denials, []
 
 
@@ -388,15 +443,34 @@ def main(argv: list[str]) -> int:
 
     if not gates.is_file():
         block = None
+        gates_text = ""
         source = f"default (файла {gates.name} в дереве нет)"
     else:
-        block = _read_block(gates.read_text(encoding="utf-8", errors="replace"),
-                            "branchDiscipline")
+        gates_text = gates.read_text(encoding="utf-8", errors="replace")
+        block = _read_block(gates_text, "branchDiscipline")
         source = ("configured (.nauta-gates.yaml, блок branchDiscipline)" if block is not None
                   else f"default (блока branchDiscipline в {gates.name} нет)")
 
     profile = None if block is None else block.get("profile")
-    prefix = ((block or {}).get("integrationBranchPrefix") or DEFAULT_INTEGRATION_PREFIX)
+    key_value = (block or {}).get("integrationBranchPrefix")
+    if block is not None and "integrationBranchPrefix" in block and not key_value:
+        # Ключ задан без инлайн-значения: многострочный перечень `- элемент` построчный
+        # _read_block в словарь не кладёт — без _list_items и перечень, и заданный-но-пустой
+        # ключ деградировали бы в умолчание `epic-` (ADR-072 Д6: заданное не молчит).
+        items = _list_items(gates_text, "branchDiscipline", "integrationBranchPrefix")
+        prefix = "[" + ", ".join(items) + "]" if items else ""
+    else:
+        prefix = key_value or DEFAULT_INTEGRATION_PREFIX
+    prefixes = _prefix_tuple(prefix)
+    if not prefixes:
+        print("ERROR: branchDiscipline.integrationBranchPrefix задан пустым — значение или "
+              "перечень пусты, объявление без значения не бывает умолчанием (ADR-072 Д6).",
+              file=sys.stderr)
+        print(f"  норма branchDiscipline: {source}", file=sys.stderr)
+        print("  Почини: впиши скаляр `epic-`, список `[epic-, wishes-]`, перечень строками "
+              "`- epic-`", file=sys.stderr)
+        print("  под ключом, либо убери ключ.", file=sys.stderr)
+        return _EXIT_ERROR
     location = ((block or {}).get("worktreeLocation") or DEFAULT_WORKTREE_LOCATION)
 
     if profile is not None and profile not in PROFILES:
@@ -422,8 +496,8 @@ def main(argv: list[str]) -> int:
     # Каждая группа сторожей несёт СВОЙ заголовок и СВОЮ строку «сторож не ловит» (DEV-478
     # Н-6): общий заголовок под тремя разными сторожами прятал бы, какой из них отказал и
     # где искать его слепые зоны.
-    name_denials, name_warnings = _guard_branch_names(root, prefix, profile)
-    stale_warnings = _guard_stale_copies(root, prefix)                    # #20 — ПРЕДУПРЕЖДЕНИЕ
+    name_denials, name_warnings = _guard_branch_names(root, prefixes, profile)
+    stale_warnings = _guard_stale_copies(root, prefixes)                    # #20 — ПРЕДУПРЕЖДЕНИЕ
     # #23 — отказ ТОЛЬКО против объявления самого потребителя. Место, взятое умолчанием
     # кода, даёт предупреждение: денить за раскладку, которой мы никогда не запрещали,
     # значило бы наказать человека ровно за тот шаг, который ему предлагает онбординг
@@ -431,8 +505,8 @@ def main(argv: list[str]) -> int:
     # не объявлен — сторож молчал; объявление профиля включило бы отказ на живой раскладке).
     location_declared = isinstance(block, dict) and block.get("worktreeLocation") is not None
     location_denials, location_warnings = _guard_out_of_location_copies(
-        root, location, prefix, location_declared)
-    epic_denials, epic_notes = _guard_open_epic_branches(root, prefix)
+        root, location, prefixes, location_declared)
+    epic_denials, epic_notes = _guard_open_epic_branches(root, prefixes, prefix)
     warnings = name_warnings + stale_warnings + location_warnings
     denials = name_denials + location_denials + epic_denials
     # Строка вердикта печатается ПОСЛЕ опроса сторожа: иначе один прогон печатал бы «OK»

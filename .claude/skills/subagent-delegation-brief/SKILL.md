@@ -39,6 +39,31 @@ scratch — without it the agent reopens the call graph itself, at up to twice t
 brief falls on its AUTHOR, before sending it — not only on the reader who re-measures later; a
 number the author never ran reaches the agent unchecked.
 
+### The fifth rule — a diagnosis in a brief is a hypothesis, not an assignment
+
+Name the OBSERVATION ("the lock does not redden on mutation X") and leave the cause to the role:
+a brief that named ONE defect where there were two kept the second behind a fix that looked like
+success. The closing check is set on the observation — run the same mutation again and require
+the outcome to have changed, not the named cause to be gone.
+
+### The sixth rule — "the blocker pre-exists the task" is proven by categories, not by `rc`
+
+Red-before and red-after are equal in return code and different in composition: a refusal
+category that moved 0 → 1 across the task is a NEW refusal the task added, whatever the total
+says. A brief claiming a pre-existing blocker carries the per-category breakdown of the gate's
+output before and after; an override without that breakdown may hide a refusal of a category
+nobody mentioned.
+
+### The seventh rule — verified facts are not re-derived
+
+Rules 2 and 4 make every fact carry its command; they do not make the agent re-research the
+fact. A fact the brief marks **[verified]** (`path:line`, a resolved identifier, a checked
+signature — the command that verified it sits next to it) is USED, not re-established: run the
+named command when you need the value live, but do not re-derive the surrounding picture by
+search around it. In a measured session a third of a role's tool calls was exactly that
+re-derivation of facts the coordinator had already verified. A [verified] fact that turns out
+wrong on the spot is a reportable finding — quote both sides, do not silently mass re-verify.
+
 ### Test run — named files inside a task; the full suite is the coordinator's
 
 A role runs only the test files of its own subject: `uv run --with pytest pytest tests/test_x.py -q`.
@@ -55,16 +80,15 @@ full lettered AC id in the test's name (`ac2a`, not the bare digit `ac2`: as a p
 matches `ac20`…`ac28`). A per-AC run covers the named ACs only and never substitutes the release
 ritual (ADR-137 Д5).
 
-**Measurements taken while other agents are running are contended and are not comparable.** Same
-subject, same night: `gitleaks dir .` measured 41.3 s under load and 22.3 s quiet — a factor of two
-from the machine, not the tree. Prefer countable quantities the tool prints itself (scanned bytes,
-test count) over seconds; when you must quote seconds, say what else was running.
+**Measurements taken while other agents are running are contended and are not comparable** — same
+subject, same night: `gitleaks dir .` measured 41.3 s under load, 22.3 s quiet. Prefer countable
+quantities the tool prints itself (scanned bytes, test count) over seconds; quoting seconds, say
+what else was running.
 
-Three runs do not prove
-parallel-safety forever: **caught a divergence between sequential and parallel — stop and report
-it, that is a finding**. Current rule: the parallel run during the wave may run in the
-background (the coordinator, not a subagent); the sequential run before a merge into `stable` is
-mandatory and is not skipped because a parallel run already passed.
+Three runs do not prove parallel-safety forever: **caught a divergence between sequential and
+parallel — stop and report it, that is a finding**. The wave's parallel run may go to the
+background (the coordinator's, never a subagent's); the sequential run before a merge into
+`stable` is mandatory — a passed parallel run does not skip it.
 
 ### Model and effort by role
 
@@ -78,16 +102,11 @@ mandatory and is not skipped because a parallel run already passed.
 
 Each role declares its own `effort:` in its frontmatter; the call's `model` parameter can override the model, but there is no per-call `effort` parameter — `effort` always comes from the role's frontmatter.
 
-Platform validity: on the base delivery platform (Claude Code) the frontmatter `model:` and
-`effort:` fields of a role are executed — both are live statements there.
+Platform validity: on the base delivery platform (Claude Code) the frontmatter `model:` and `effort:` fields of a role are executed — both are live statements there.
 
-On hosts that resolve the model at runtime (ZCode), the frontmatter declaration is not applied;
-the invalidity is documented in the delivered docs — `README.md`, `docs/getting-started.md`
-(ADR-129).
+On hosts that resolve the model at runtime (ZCode) the frontmatter statement is not applied; the per-provider difference registry owns validity — `docs/30-architecture/provider-declarations.md` (row 5, ADR-129).
 
-Tier does not prevent factual errors: an Opus author got numbers wrong just as often as Sonnet.
-The command catches them, not the reasoning. So tier and effort are spent on **checking**, not on
-composing.
+Tier does not prevent factual errors: an Opus author gets numbers wrong as often as Sonnet — the command catches them, not the reasoning. Tier and effort are spent on **checking**, not on composing.
 
 ### Isolating parallel work
 
@@ -100,18 +119,11 @@ read and can work in parallel with anyone.
 
 ### Checking the environment on start
 
-Role prompts arrive via plugin install, not sync, and the runtime can be holding a previous
-version for a whole epic while the repository holds the next one.
-
-**Comparing cache versions with the repository does not catch this:**
-`ls ~/.claude/plugins/cache/nauta/nauta/` lists every downloaded version, including the needed one,
-while an older one is executing. The cache shows what was downloaded, not what is active.
-
-The working check is to ask the runtime itself. Put in the first subagent's brief of the epic:
-
-> "As the first line of the report, quote verbatim the first sentence of the ‘Red lines' section
-> of your own role prompt".
-
-and compare it against the file in the repository (`agents/<role>-agent.md`). If it diverges —
-either update the plugin before the epic starts, or write the key constraints into every brief by
-hand and know that the prompt will not help with it.
+Role prompts arrive via plugin install, and the runtime can execute a previous version while the
+repository holds the next one; comparing cache versions does not catch this — the cache lists what
+was downloaded, not what is active. The working check: the first subagent's brief of the epic asks
+to quote verbatim the `PROMPT-EDITION:` line of its own role prompt as the first line of the
+report; compare it against `agents/<role>-agent.md`. The marker is language-independent (ASCII,
+NA-EPIC-99): a paraphrase, a translation or a mismatching value means the runtime holds a cached
+or translated prompt — update the plugin before the epic starts, or carry the key constraints in
+every brief by hand.

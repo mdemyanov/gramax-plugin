@@ -22,7 +22,14 @@
 # NAUTA_TASK_SUBJECT='capability=<slug> adr=ADR-NNN' — шаг разворачивает её в аргументы прибора.
 # У самого прибора переменной предмета НЕТ: она меняла бы исход прямого замера молча.
 #
-# Usage: bash scripts/role-postflight.sh [tests/test_x.py tests/test_y.py::test_z …]
+# ПЯТЫЙ БЛОК — ДИФ-СКОУПИНГ (замер сессии 28.10.2026). Красное в выводах гейтов делится на
+# «моё» и «предсуществующее»; без этой сводки роль доказывает разделение сама — грепает
+# сохранённые выводы руками (в замере: два хода только на то, чтобы показать, что чужие
+# «Errors» не про её файлы). Блок берёт изменённые файлы из `git status` и ищет их в выводах
+# ЭТОГО прогона (файлы run-quiet моложе метки старта). Блок информационный и в свёртку rc НЕ
+# входит: он сортирует уже названные шагами нарушения, исход шага не меняет.
+#
+# Usage: bash scripts/role-postflight.sh [--no-task] [tests/test_x.py tests/test_y.py::test_z …]
 set -u
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -34,6 +41,29 @@ QUIET="$REPO/scripts/run-quiet.sh"
 # рамка).
 export NAUTA_QUIET_MAX_LINES="${NAUTA_QUIET_MAX_LINES:-17}"
 
+# Метка старта прогона: пятый блок берёт только логи run-quiet, созданные после неё.
+POSTFLIGHT_MARK="$(mktemp)"
+trap 'rm -f "$POSTFLIGHT_MARK"' EXIT
+
+# РАЗВЕДЕНИЕ ФЛАГОВ ЗАДАЧИ И АРГУМЕНТОВ ТЕСТОВ — до какого-либо вызова (SA-154 §3). Обёртка
+# разбирает СВОИ аргументы списком известных флагов: `--no-task` (семантика как у префлайта
+# DEV-481) поглощается с одной строкой в сводке — это флаг задачи, НЕ «пропустить тесты»:
+# бриф без задачи вправе называть файлы. Неизвестный `--*`-токен — именованный отказ с токеном
+# и путём носителя одной записью (gate-failure-semantics), не тихая пересылка в pytest, где он
+# падал бы usage-ошибкой rc=4. Файлы тестов передаются дословно, порядок сохранён.
+NO_TASK_ACCEPTED=""
+TEST_ARGS=()
+for _arg in "$@"; do
+  case "$_arg" in
+    --no-task) NO_TASK_ACCEPTED="$_arg" ;;
+    --*)
+      echo "ОТКАЗ: scripts/role-postflight.sh — неизвестный флаг '$_arg': обёртка знает только --no-task (флаг задачи); прочие --*-токены в argv pytest не пересылаются (SA-154 §3)" >&2
+      exit 2
+      ;;
+    *) TEST_ARGS+=("$_arg") ;;
+  esac
+done
+
 printf '===== ПОСТФЛАЙТ РОЛИ (%s) =====\n' "$REPO"
 
 printf '[1/4] check.sh --fast\n'
@@ -44,12 +74,15 @@ printf '[2/4] validate-content.py\n'
 bash "$QUIET" uv run "$REPO/scripts/validate-content.py"
 rc_content=$?
 
-if [ "$#" -eq 0 ]; then
+if [ -n "$NO_TASK_ACCEPTED" ]; then
+  printf '%s принят: флаг задачи, не тестов — в argv pytest не попадёт (SA-154 §3)\n' "$NO_TASK_ACCEPTED"
+fi
+if [ "${#TEST_ARGS[@]}" -eq 0 ]; then
   printf '[3/4] тесты НЕ названы — шаг не исполнен (сбор по каталогу внутри роли запрещён)\n'
   rc_tests=0
 else
-  printf '[3/4] pytest %s\n' "$*"
-  bash "$QUIET" uv run --with pytest pytest "$@" -q
+  printf '[3/4] pytest %s\n' "${TEST_ARGS[*]}"
+  bash "$QUIET" uv run --with pytest pytest "${TEST_ARGS[@]}" -q
   rc_tests=$?
 fi
 
@@ -68,6 +101,37 @@ else
   # shellcheck disable=SC2086 — разбиение на слова здесь предмет, а не оплошность
   bash "$QUIET" uv run "$HOOD" --run $hood_subject
   rc_neighbourhood=$?
+fi
+
+# Пятый блок — диф-скоупинг (описание в шапке). Меняет умолчание NAUTA_QUIET_DIR тем же
+# правилом, что и run-quiet.sh: явная переменная → общий git-каталог, иначе системный TMPDIR.
+printf '[диф] изменённые файлы против выводов шагов\n'
+if ! _changed="$(git status --porcelain 2>/dev/null | sed -e 's/^...//' -e 's/.* -> //' | grep -v '^$')"; then
+  _changed=""
+fi
+if [ -z "$_changed" ]; then
+  printf 'изменённых файлов нет — дерево чистое\n'
+else
+  _quiet_dir="${NAUTA_QUIET_DIR:-}"
+  if [ -z "$_quiet_dir" ]; then
+    _quiet_dir="$(git rev-parse --git-common-dir 2>/dev/null || true)"
+    _quiet_dir="${_quiet_dir%/}/nauta-quiet"
+  fi
+  # shellcheck disable=SC2086 — пути git и run-quiet без пробелов; разбиение здесь предмет
+  _step_logs="$(find "$_quiet_dir" -maxdepth 1 -name 'run-quiet-*' -newer "$POSTFLIGHT_MARK" 2>/dev/null | sort)"
+  _mentioned=""
+  for _f in $_changed; do
+    _cnt="$(grep -a -l -F "$_f" $_step_logs 2>/dev/null | wc -l | tr -d ' ')"
+    if [ "$_cnt" -gt 0 ]; then _mentioned="${_mentioned}${_f} — упомянут в ${_cnt} выводе/ах\n"; fi
+  done
+  if [ -z "$_step_logs" ]; then
+    printf 'выводов этого прогона не найдено — сверить не с чем\n'
+  elif [ -z "$_mentioned" ]; then
+    printf 'изменённые файлы в выводах шагов НЕ упомянуты — красное (если есть) предсуществующее\n'
+  else
+    printf 'упомянуты — проверять в первую очередь:\n'
+    printf '%b' "$_mentioned" | head -5
+  fi
 fi
 
 # Носитель отказов записи стадии (ADR-133 Ш-3/З-3). Трасса отказа в stderr процесса хука
