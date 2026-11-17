@@ -1,5 +1,5 @@
 ---
-title: Резервирование версии 4.3.0 волны link-form-contract и разрешение на синхронную правку marketplace.json
+title: "ADR-0018: Резервирование версии 4.3.0 волны link-form-contract и разрешение на синхронную правку marketplace.json"
 order: 18
 properties:
   - name: Тип контента

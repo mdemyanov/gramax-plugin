@@ -7,11 +7,9 @@ order: 1
 
 Результаты прогона тестовых suite по фичам плагина.
 
-- [QA Report: diagram-on-demand](2026-05-08-diagram-on-demand-qa-report.md)
-- [QA Report: remove-diagram-skills](2026-05-11-remove-diagram-skills-qa-report.md)
-- [QA Report — routing-mermaid-drawio-v2 (gramax 3.0.0)](2026-05-11-routing-mermaid-drawio.md)
-- [Test Report — 2026-05-12 — gramax / mermaid-file-based (QA-R-007)](2026-05-12-mermaid-file-based-qa-report.md)
-- [QA Report — наведение порядка в test harness gramax и doc-paths (gramax 4.1.1)](2026-08-10-test-harness-taxonomy-qa-report.md)
+Отчёты эпохи superpowers (2026-05…2026-08-10) удалены при инверсии раскладки
+2026-11-17 (FR-129, ADR-0021); содержательное зерно — в требованиях 30-requirements.
+
 - [QA Report — волна 4.2.0 (ADR-0012/0013/0015 + writer-consumer-rules)](2026-08-12-wave-4.2.0-qa-report.md)
 - [QA Report — ретракция cross-каталожного `code:`-рецепта (hotfix 4.2.1)](2026-08-13-cross-catalog-retraction-qa-report.md)
 - [QA Report — контракт формы ссылки на артефакт (`link-form-contract`, 4.3.0)](2026-08-13-link-form-contract-qa-report.md)

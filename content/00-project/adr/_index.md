@@ -35,6 +35,7 @@ order: 1
 | [0018](0018-link-form-version-authorization.md) | Резервирование версии 4.3.0 волны link-form-contract и разрешение на синхронную правку marketplace.json | Accepted | 2026-08-12 | gramax / marketplace |
 | [0019](0019-render-killer-linter.md) | Линтер рендер-киллеров (порт validate-gramax.py) — отдельный контент-валидатор, гибридный контракт, демаркация с W034 | Accepted | 2026-08-12 | gramax / marketplace |
 | [0020](0020-doc-root-recursive-discovery.md) | Рекурсивное обнаружение .doc-root.yaml и типизация обязательных полей в validate_structure.py | Accepted | 2026-08-13 | gramax / marketplace |
+| [0021](0021-docs-layout-inversion.md) | Инверсия раскладки документации — переезд `content/` → `docs/`, слияние doc-roots, зачистка исторических артефактов | Accepted | 2026-11-17 | gramax / marketplace |
 
 ## Связи между ADR
 

@@ -19,3 +19,4 @@ order: 3
 - [Ретракция кросс-каталожного `code:`-рецепта и миграция потребителей](2026-08-13-cross-catalog-retraction.md) — FR-093…FR-103
 - [Линтер рендер-киллеров Gramax (порт validate-gramax.py)](2026-08-12-render-killer-linter.md) — FR-104…FR-119
 - [Контракт `.doc-root.yaml`: рекурсивное обнаружение и типизация title](2026-08-13-doc-root-discovery-contract.md) — FR-120…FR-123
+- [Инверсия раскладки документации — `content/` → `docs/` с зачисткой исторических артефактов](2026-11-17-docs-layout-inversion.md) — FR-124…FR-130

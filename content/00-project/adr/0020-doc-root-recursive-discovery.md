@@ -1,5 +1,5 @@
 ---
-title: Рекурсивное обнаружение .doc-root.yaml и типизация обязательных полей в validate_structure.py
+title: "ADR-0020: Рекурсивное обнаружение `.doc-root.yaml` и типизация обязательных полей в `validate_structure.py`"
 order: 20
 properties:
   - name: Тип контента

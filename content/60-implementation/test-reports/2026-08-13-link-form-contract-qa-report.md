@@ -1,5 +1,5 @@
 ---
-title: "QA Report — контракт формы ссылки на артефакт (link-form-contract, 4.3.0)"
+title: "QA Report — контракт формы ссылки на артефакт (`link-form-contract`, 4.3.0)"
 order: 8
 properties:
   - name: Тип контента

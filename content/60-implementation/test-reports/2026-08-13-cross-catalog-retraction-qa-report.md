@@ -1,5 +1,5 @@
 ---
-title: "QA Report — ретракция cross-каталожного code:-рецепта (hotfix 4.2.1)"
+title: "QA Report — ретракция cross-каталожного `code:`-рецепта (hotfix 4.2.1)"
 order: 7
 properties:
   - name: Тип контента

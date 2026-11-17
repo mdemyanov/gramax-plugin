@@ -1,5 +1,5 @@
 ---
-title: "QA Report — линтер рендер-киллеров (validate_render.py, 4.4.0)"
+title: "QA Report — линтер рендер-киллеров Gramax (`validate_render.py`, 4.4.0)"
 order: 9
 properties:
   - name: Тип контента

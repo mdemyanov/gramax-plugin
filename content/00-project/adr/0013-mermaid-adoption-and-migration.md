@@ -1,5 +1,5 @@
 ---
-title: Принятие file-based mermaid потребителями и пакетная миграция
+title: "ADR-0013: Принятие file-based mermaid потребителями — граница юрисдикции, обнаружение и миграция"
 order: 13
 properties:
   - name: Тип контента

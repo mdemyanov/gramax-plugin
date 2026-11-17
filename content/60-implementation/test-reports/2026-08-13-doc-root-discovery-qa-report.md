@@ -1,5 +1,5 @@
 ---
-title: "QA Report — рекурсивное обнаружение .doc-root.yaml и типизация полей (validate_structure.py, 4.5.0)"
+title: "QA Report — рекурсивное обнаружение `.doc-root.yaml` и типизация полей (FR-120…123, ADR-0020)"
 order: 10
 properties:
   - name: Тип контента

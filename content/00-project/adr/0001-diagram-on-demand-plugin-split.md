@@ -1,5 +1,5 @@
 ---
-title: Размещение навыков diagram-on-demand внутри плагина gramax (без split)
+title: "ADR-0001: Размещение навыков diagram-on-demand внутри плагина gramax (без split)"
 order: 1
 properties:
   - name: Тип контента

@@ -1,5 +1,5 @@
 ---
-title: Стратегия версионирования marketplace.json при добавлении diagram-on-demand
+title: "ADR-0006: Стратегия версионирования marketplace.json при добавлении diagram-on-demand"
 order: 6
 properties:
   - name: Тип контента

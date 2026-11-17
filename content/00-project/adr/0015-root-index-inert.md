@@ -1,5 +1,5 @@
 ---
-title: "Корневой _index.md инертен для движка Gramax — амендмент к ADR-0012 Решение 1"
+title: "ADR-0015: Корневой `_index.md` инертен для движка Gramax — амендмент к ADR-0012 Решение 1"
 order: 15
 properties:
   - name: Тип контента

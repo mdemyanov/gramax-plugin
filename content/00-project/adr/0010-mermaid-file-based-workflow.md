@@ -1,5 +1,5 @@
 ---
-title: Mermaid skill — file-based workflow
+title: "ADR-0010: Mermaid skill — file-based workflow"
 order: 10
 properties:
   - name: Тип контента

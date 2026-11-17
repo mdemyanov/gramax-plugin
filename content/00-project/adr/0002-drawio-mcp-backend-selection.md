@@ -1,5 +1,5 @@
 ---
-title: Выбор drawio MCP-бэкенда и роль LLM в генерации XML
+title: "ADR-0002: Выбор drawio MCP-бэкенда и роль LLM в генерации XML"
 order: 2
 properties:
   - name: Тип контента

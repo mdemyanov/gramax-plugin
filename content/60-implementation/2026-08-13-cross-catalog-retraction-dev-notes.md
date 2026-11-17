@@ -1,5 +1,5 @@
 ---
-title: "Dev notes: ретракция кросс-каталожного code:-рецепта (ADR-0017)"
+title: "Dev notes: ретракция кросс-каталожного `code:`-рецепта (ADR-0017)"
 order: 2
 properties:
   - name: Тип контента

@@ -1,5 +1,5 @@
 ---
-title: Routing mermaid/drawio v3.0.0 — два явных skill'а + уточняющий вопрос
+title: "Routing mermaid/drawio v3.0.0"
 order: 3
 status: draft
 date: 2026-05-11
@@ -14,6 +14,12 @@ properties:
 ---
 
 # Routing mermaid/drawio v3.0.0
+
+**Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
+
+## Уезжает в стор (Фаза 3)
+
+Каркас требования (все разделы ниже) целиком уезжает в стор в Фазе 3; собственной capability у документа нет, поэтому пара дрейфа с openspec/ не объявляется.
 
 ## Goal
 

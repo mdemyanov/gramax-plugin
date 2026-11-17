@@ -1,5 +1,5 @@
 ---
-title: Механизм выбора движка (router и engine selection)
+title: "ADR-0004: Механизм выбора движка (router и engine selection)"
 order: 4
 properties:
   - name: Тип контента

@@ -1,5 +1,5 @@
 ---
-title: "AT-design: Резолвер гейта — инференс расширения .md/_index.md (link-form-contract)"
+title: "AT-design: Резолвер гейта — инференс расширения `.md`/`_index.md` (link-form-contract)"
 order: 8
 properties:
   - name: Тип контента
