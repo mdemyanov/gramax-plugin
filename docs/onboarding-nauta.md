@@ -6,6 +6,8 @@ properties:
     value: [Гайд]
   - name: Статус
     value: [Active]
+  - name: Плагин
+    value: [marketplace]
 ---
 
 # Онбординг: роли nauta на чистой машине

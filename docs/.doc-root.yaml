@@ -1,11 +1,14 @@
-# .doc-root.yaml — объявления свойств корня docs/. После flip Ф9 (NA-EPIC-83) дефолтный
-# корень валидации scripts/validate-content.py — docs/ (первый существующий из пары,
-# одно-корневая валидация). Типы План/Спека/Гайд/Прочее — честные метки легасных
-# артефактов рабочих процессов (superpowers, 2026-05…2026-08), а не подгонка под каталог
-# типов content/. Своё дерево — своя калибровка (ADR-031).
-code: GRAMAX-PLUGIN-DOCS
-title: Документы
-description: Внутренние документы репозитория gramax-marketplace
+# .doc-root.yaml — объявления свойств ЕДИНСТВЕННОГО корня каталога docs/ (FR-128,
+# ADR-0021 Решение 1: слияние doc-roots). Идентичность — от корня content/
+# (code: GRAMAX-PLUGIN, title, description); модель свойств — объединение обоих
+# корней на дату слияния. Этапы enum: коммит A — супермножество (объединение без
+# вычёркиваний), коммит D3 — тримм до живых значений (ADR-0021 Решение 1).
+# Калибровка схемы — ADR-031: канон носит дерево плагина nauta
+# (content/40-architecture/ADR-031-…, templates/content-scaffold/.doc-root.yaml),
+# не путь этого дерева.
+code: GRAMAX-PLUGIN
+title: Gramax Marketplace
+description: Документация плагина gramax для Claude Code
 language: ru
 syntax: XML
 editors:
@@ -13,8 +16,11 @@ editors:
 properties:
   - name: Тип контента
     type: Enum
-    values: [План, Спека, Гайд, Прочее, ADR, Урок]
+    values: [План, Спека, Гайд, Прочее, ADR, Урок, Требование, Research, Тест-отчёт, Приёмка, Архитектура]
   - name: Статус
     type: Enum
     values: [Draft, Active, Accepted, Superseded, Historical, Done]
-filterProperties: [Тип контента, Статус]
+  - name: Плагин
+    type: Enum
+    values: [gramax, marketplace]
+filterProperties: [Тип контента, Статус, Плагин]
