@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-006-unbalanced.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-006 (FR-109)
-# ADR: content/00-project/adr/0019-render-killer-linter.md, Решение 6
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-006 (FR-109)
+# ADR: docs/00-project/adr/0019-render-killer-linter.md, Решение 6
 # Проверка: <note> без </note> и <tabs> без </tabs> → ERROR с именами тегов и числами.
 
 set -u -o pipefail

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/writer-consumer-rules/ac-010-writer-authoritative-source-declared.sh
-# Требование: content/30-requirements/2026-08-11-writer-consumer-rules.md, AC-010 (FR-074).
-# Диспозиция: content/40-architecture/2026-08-11-writer-rules-disposition.md, раздел F —
+# Требование: docs/30-requirements/2026-08-11-writer-consumer-rules.md, AC-010 (FR-074).
+# Диспозиция: docs/40-architecture/2026-08-11-writer-rules-disposition.md, раздел F —
 #   2–3 строки в SKILL.md → "Core Principles": writer — единственный authoritative источник
 #   Gramax-соглашений.
 # Природа: живой контракт — КРАСНЫЙ на момент создания (DEV-004 не начат).

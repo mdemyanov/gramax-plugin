@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-015-emoji-h2.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-015 (FR-116)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-015 (FR-116)
 # Проверка: эмодзи в заголовке уровня ## → ни ERROR, ни WARN, exit 0 (не краш рендера).
 
 set -u -o pipefail

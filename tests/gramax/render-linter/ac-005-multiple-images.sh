@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-005-multiple-images.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-005 (FR-108)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-005 (FR-108)
 # Проверка: строка с двумя вхождениями ![]( → ERROR с номером строки.
 
 set -u -o pipefail

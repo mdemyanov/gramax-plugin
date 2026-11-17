@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/cross-catalog-retraction/ac-008-marketplace-json-sync-decision.sh
-# Требование: content/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-008 (FR-103).
+# Требование: docs/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-008 (FR-103).
 # «Ровно одно из двух»: либо (а) diff marketplace.json пуст И ADR явно откладывает
 # синхронизацию; либо (б) marketplace.json version == plugin.json version (4.2.1) И ADR явно
 # авторизует bump. Молчание (diff не пуст, но ADR ничего не говорит о версии) — провал AC.
@@ -28,11 +28,11 @@ source "$SCRIPT_DIR/lib/baseline-commit.sh"
 FAIL=0
 MARKET_JSON="$ROOT/.claude-plugin/marketplace.json"
 PLUGIN_JSON="$ROOT/plugins/gramax/.claude-plugin/plugin.json"
-ADR="$ROOT/content/00-project/adr/0017-cross-catalog-retraction.md"
+ADR="$ROOT/docs/00-project/adr/0017-cross-catalog-retraction.md"
 
 assert_file_exists "$MARKET_JSON" "AC-008: marketplace.json должен существовать"
 assert_file_exists "$PLUGIN_JSON" "AC-008: plugin.json должен существовать"
-assert_file_exists "$ADR" "AC-008: content/00-project/adr/0017-cross-catalog-retraction.md должен существовать"
+assert_file_exists "$ADR" "AC-008: docs/00-project/adr/0017-cross-catalog-retraction.md должен существовать"
 
 if [ ! -f "$MARKET_JSON" ] || [ ! -f "$PLUGIN_JSON" ] || [ ! -f "$ADR" ]; then
   : # предыдущие assert_file_exists уже зафиксировали FAIL; дальше проверять нечего

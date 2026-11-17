@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-011-tags-contract-content-sync.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-005 (FR-038, FR-039)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 3 (JSON — единый
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-005 (FR-038, FR-039)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 3 (JSON — единый
 #      источник; validate_structure.py ЧИТАЕТ его вместо хардкода PAIRED_TAGS/SELF_CLOSING —
 #      целевое состояние стирает сами литералы кода).
 # Природа: живой контракт — КРАСНЫЙ на момент создания.

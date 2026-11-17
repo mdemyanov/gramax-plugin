@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-009-hook-template-discoverable.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-003 (FR-037)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 4
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-003 (FR-037)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 4
 #      (plugins/gramax/scripts/pre-commit.sh — копируемый hook-шаблон для потребителя).
 # Природа: живой контракт — КРАСНЫЙ на момент создания (hook-шаблон ещё не создан —
 #   DEV-001).

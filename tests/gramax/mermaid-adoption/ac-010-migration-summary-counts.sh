@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-adoption/ac-010-migration-summary-counts.sh
-# Требование: content/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-010
+# Требование: docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-010
 #   (FR-064).
-# ADR: content/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 4.
+# ADR: docs/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 4.
 # Природа: живой контракт — КРАСНЫЙ на момент создания.
 #
 # FR-064 фиксирует СОСТАВ сводки (мигрировано / вне юрисдикции / уже соответствует), не
 # точную формулировку. QA-author предложил конкретный минимальный формат как контракт (см.
 # README.md, раздел «Интерпретация AC-010»). Этот тест правлен PM-приёмкой (см. запись
-# content/lessons-learned.md, дефект «Migrated: N в отчётном режиме до всякой мутации» —
+# docs/lessons-learned.md, дефект «Migrated: N в отчётном режиме до всякой мутации» —
 # найден догфудингом при приёмке DEV-003, не BA/QA-author): исходная версия ассертила
 # буквальный `Migrated: 2` даже в режиме отчёта (без `--fix`), где ни один файл не
 # изменён — потребитель, читающий вывод самого частого сценария (первый вызов, всегда
@@ -24,7 +24,7 @@
 # фикстуры — «Migrated: 2» и реально смигрировать.
 #
 # Если Dev/PM в будущем снова изменит формулировку — поправьте regex ниже вместе с
-# обоснованием (прецедент AC-014, content/60-implementation/acceptance/
+# обоснованием (прецедент AC-014, docs/60-implementation/acceptance/
 # 2026-08-11-validation-contract-at-design.md), не убирайте ассерт молча.
 
 set -u -o pipefail

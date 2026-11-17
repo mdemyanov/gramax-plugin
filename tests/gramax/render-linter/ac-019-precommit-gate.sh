@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-019-precommit-gate.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-019 (FR-119)
-# ADR: content/00-project/adr/0019-render-killer-linter.md, Решение 4
-# Проверка: прогон линтера на content/ подключён к повторяемой проверке (check.sh),
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-019 (FR-119)
+# ADR: docs/00-project/adr/0019-render-killer-linter.md, Решение 4
+# Проверка: прогон линтера на docs/ подключён к повторяемой проверке (check.sh),
 #           а не разовый ручной — команда присутствует в шаге, исполняемом гейтом.
 
 set -u -o pipefail

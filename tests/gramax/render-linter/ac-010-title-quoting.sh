@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-010-title-quoting.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-010 (FR-112)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-010 (FR-112)
 # Проверка: frontmatter `title: А: Б` без кавычек → WARN, exit 0;
 #           `title: "А: Б"` в кавычках → чисто (нет WARN), exit 0.
 

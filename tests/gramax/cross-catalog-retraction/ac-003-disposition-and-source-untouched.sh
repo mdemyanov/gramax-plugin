@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/cross-catalog-retraction/ac-003-disposition-and-source-untouched.sh
-# Требование: content/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-003 (FR-097).
-# ADR: content/00-project/adr/0017-cross-catalog-retraction.md, Решение 1 — коррекция отдельным
+# Требование: docs/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-003 (FR-097).
+# ADR: docs/00-project/adr/0017-cross-catalog-retraction.md, Решение 1 — коррекция отдельным
 #      документом (этот ADR), БЕЗ правки тела/статуса/frontmatter диспозиции и исходного
 #      требования.
 #
@@ -9,7 +9,7 @@
 #
 # Природа: regression guard — ЗЕЛЁНЫЙ на момент создания (HEAD == BASELINE_COMMIT, diff пуст по
 # определению) и обязан ОСТАВАТЬСЯ зелёным весь TDD-цикл: Dev касается только
-# plugins/gramax/skills/writer/**, content/40-architecture/_index.md (аннотация) — не
+# plugins/gramax/skills/writer/**, docs/40-architecture/_index.md (аннотация) — не
 # тела/статуса/frontmatter диспозиции/исходного требования. Если этот тест покраснеет в
 # процессе Dev-фазы — это САМО по себе дефект (BR-001), а не сигнал «функциональность ещё не
 # реализована».
@@ -21,13 +21,13 @@ source "$SCRIPT_DIR/lib/assert.sh"
 source "$SCRIPT_DIR/lib/baseline-commit.sh"
 
 FAIL=0
-DISPOSITION="content/40-architecture/2026-08-11-writer-rules-disposition.md"
-SOURCE_REQ="content/30-requirements/2026-08-11-writer-consumer-rules.md"
+DISPOSITION="docs/40-architecture/2026-08-11-writer-rules-disposition.md"
+SOURCE_REQ="docs/30-requirements/2026-08-11-writer-consumer-rules.md"
 
 # Позитивное предусловие: оба файла обязаны существовать на BASELINE_COMMIT — иначе `git diff`
 # на несуществующий путь тихо ничего не покажет (0 строк) ПО ПРИЧИНЕ отсутствия файла, не по
 # факту «ничего не менялось». Пустой diff на несуществующий путь — та же ловушка «пустой ввод ⇒
-# молчаливый PASS», что и в content/lessons-learned.md (2026-08-11, xargs на пустом stdin).
+# молчаливый PASS», что и в docs/lessons-learned.md (2026-08-11, xargs на пустом stdin).
 for f in "$DISPOSITION" "$SOURCE_REQ"; do
   if ! git -C "$ROOT" cat-file -e "$BASELINE_COMMIT:$f" 2>/dev/null; then
     echo "  FAIL: AC-003 — файл $f не существует на baseline $BASELINE_COMMIT — diff не может служить содержательной проверкой" >&2

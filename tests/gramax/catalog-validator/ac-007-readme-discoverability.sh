@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-007-readme-discoverability.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-001 (FR-035)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 4 (новый
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-001 (FR-035)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 4 (новый
 #      заголовок «## Валидация каталога», четвёртым — после «## Установка», «## Skills»,
 #      перед «## Agents»/«## Scripts»).
 # Природа: живой контракт — КРАСНЫЙ на момент создания (README-раздел ещё не создан —

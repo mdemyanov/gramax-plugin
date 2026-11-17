@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-adoption/ac-002-detection-true-positives.sh
-# Требование: content/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-002
+# Требование: docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-002
 #   (FR-054, FR-056).
-# ADR: content/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 3.
+# ADR: docs/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 3.
 # Природа: живой контракт — КРАСНЫЙ на момент создания (migrate_mermaid.py — DEV-003, не начат;
 #   uv run на несуществующий файл завершается ненулевым кодом, вывод не содержит ожидаемых
 #   строк — тест падает по правильной причине).
@@ -11,7 +11,7 @@
 # формат `<путь>:<строка>` как ближайшую естественную реализацию; ассерты ищут подстроку
 # `<имя файла>:<число>` где угодно в stdout, не привязываясь к абсолютности/относительности
 # пути. Если реальный формат Dev расходится — поправьте regex вместе с обоснованием (прецедент
-# AC-014, content/60-implementation/acceptance/2026-08-11-validation-contract-at-design.md),
+# AC-014, docs/60-implementation/acceptance/2026-08-11-validation-contract-at-design.md),
 # не убирайте ассерт молча.
 
 set -u -o pipefail

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/writer-consumer-rules/ac-009-absolute-path-leak-warning.sh
-# Требование: content/30-requirements/2026-08-11-writer-consumer-rules.md, AC-009 (FR-072).
-# Диспозиция: content/40-architecture/2026-08-11-writer-rules-disposition.md, раздел E —
+# Требование: docs/30-requirements/2026-08-11-writer-consumer-rules.md, AC-009 (FR-072).
+# Диспозиция: docs/40-architecture/2026-08-11-writer-rules-disposition.md, раздел E —
 #   одна строка в SKILL.md → "## Guardrails": риск двойной — утечка идентификационных данных
 #   контрибьютора И битая ссылка, называть оба, не только техническое последствие.
 # Природа: живой контракт — КРАСНЫЙ на момент создания (DEV-004 не начат).

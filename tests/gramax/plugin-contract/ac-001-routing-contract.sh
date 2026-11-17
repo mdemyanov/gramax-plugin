@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/plugin-contract/ac-001-routing-contract.sh
-# Требование: content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md FR-006
+# Требование: docs/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md FR-006
 # Происхождение: обобщает archive/routing-mermaid-drawio ac-001…008 и
 #                archive/remove-diagram-skills ac-014 — живая часть, без версионных пинов.
 # Природа: regression guard — зелёный на момент создания.

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-resolver/ac-008-no-extension-resolves.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-008 (FR-080, FR-082)
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 1
-# Архитектура: content/40-architecture/2026-08-13-link-form-contract-design.md, «Бриф для Dev» п.1
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-008 (FR-080, FR-082)
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 1
+# Архитектура: docs/40-architecture/2026-08-13-link-form-contract-design.md, «Бриф для Dev» п.1
 # Природа: живой контракт — КРАСНЫЙ на момент создания. `_collect_links`
 #   (plugins/gramax/scripts/validate_structure.py:286-313) резолвит цель ссылки буквально
 #   (`(md.parent / target).resolve()`), без попытки `target + ".md"` — ссылка `[X](doc)` на

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-resolver/ac-010-doc-root-prefix-antipattern-stays-broken.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-010 (FR-081, FR-082)
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 1
-# Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. Цель `content/section/doc.md`
-#   уже оканчивается на `.md` — по брифу для Dev (content/40-architecture/
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-010 (FR-081, FR-082)
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 1
+# Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. Цель `docs/section/doc.md`
+#   уже оканчивается на `.md` — по брифу для Dev (docs/40-architecture/
 #   2026-08-13-link-form-contract-design.md, «Бриф для Dev» п.1) инференс расширения НЕ
 #   применяется к целям, уже оканчивающимся на `.md` — резолв остаётся буквальным и
 #   сегодня, и после FR-082. Тест защищает NFR-001/BR-002/AC-010: расширение резолвера не

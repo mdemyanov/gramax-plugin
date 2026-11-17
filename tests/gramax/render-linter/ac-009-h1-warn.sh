@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-009-h1-warn.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-009 (FR-111)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-009 (FR-111)
 # Проверка: строка `# Заголовок` в теле → WARN (не ERROR), exit 0.
 
 set -u -o pipefail

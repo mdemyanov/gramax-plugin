@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-004-orphan-cross-catalog-boundary.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-014 (FR-047, граница)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 2
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-014 (FR-047, граница)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 2
 # Природа: живой контракт — КРАСНЫЙ на момент создания.
 #
 # Интерпретация границы (см. at-design.md, AC-014 — точная формулировка FR-047

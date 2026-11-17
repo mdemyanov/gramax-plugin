@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/writer-consumer-rules/ac-004-nested-doc-root-decision-documented.sh
-# Требование: content/30-requirements/2026-08-11-writer-consumer-rules.md, AC-004 (FR-067).
-# Диспозиция: content/40-architecture/2026-08-11-writer-rules-disposition.md, раздел B —
+# Требование: docs/30-requirements/2026-08-11-writer-consumer-rules.md, AC-004 (FR-067).
+# Диспозиция: docs/40-architecture/2026-08-11-writer-rules-disposition.md, раздел B —
 #   решение "у потребителя" (вариант (в) FR-067), явная пометка в
 #   references/doc-root-schema.md, не молчание.
 # Природа: живой контракт — КРАСНЫЙ на момент создания (DEV-004 не начат).

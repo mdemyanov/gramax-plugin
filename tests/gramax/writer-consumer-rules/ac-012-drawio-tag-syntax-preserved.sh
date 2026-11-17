@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/writer-consumer-rules/ac-012-drawio-tag-syntax-preserved.sh
-# Требование: content/30-requirements/2026-08-11-writer-consumer-rules.md, AC-012 (NFR-002).
+# Требование: docs/30-requirements/2026-08-11-writer-consumer-rules.md, AC-012 (NFR-002).
 # Диспозиция: NFR Mapping — "ни одно решение не переименовывает skill-имена и не меняет
 #   подтверждённый синтаксис (<drawio path=.../>, inline-code ссылка, object-нотация)".
 # Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. Синтаксис `<drawio path="..."

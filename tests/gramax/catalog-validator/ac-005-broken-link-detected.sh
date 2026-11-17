@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-005-broken-link-detected.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-015 (FR-048)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 2 (уровень: error)
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-015 (FR-048)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 2 (уровень: error)
 # Природа: живой контракт — КРАСНЫЙ на момент создания (проверка битых ссылок в
 #   validate_structure.py ещё не реализована — DEV-001).
 

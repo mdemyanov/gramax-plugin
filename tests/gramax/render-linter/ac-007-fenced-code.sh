@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-007-fenced-code.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-007 (FR-110)
-# ADR: content/00-project/adr/0019-render-killer-linter.md, Решение 5
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-007 (FR-110)
+# ADR: docs/00-project/adr/0019-render-killer-linter.md, Решение 5
 # Проверка: внутри ```-блока <th>, <note>…</note>, ![]( ×2, # H1 — НЕ флагаются;
 #           реальный <th> ВНЕ кода в той же фикстуре ловится (AC-001).
 

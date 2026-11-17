@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/writer-consumer-rules/ac-003-backtick-trap-warning.sh
-# Требование: content/30-requirements/2026-08-11-writer-consumer-rules.md, AC-003 (FR-066).
-# Диспозиция: content/40-architecture/2026-08-11-writer-rules-disposition.md, раздел A —
+# Требование: docs/30-requirements/2026-08-11-writer-consumer-rules.md, AC-003 (FR-066).
+# Диспозиция: docs/40-architecture/2026-08-11-writer-rules-disposition.md, раздел A —
 #   1–2 строки в SKILL.md рядом со строками 204–208 (тот же ❌/✅-блок, что и правило AC-001):
 #   чужой regex-валидатор не отличает код-спан `` `[X](Y)` `` от markdown-ссылки `[X](Y)`.
 # Природа: живой контракт — КРАСНЫЙ на момент создания (DEV-004 не начат).

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/writer-consumer-rules/ac-007-status-source-of-truth-rule.sh
-# Требование: content/30-requirements/2026-08-11-writer-consumer-rules.md, AC-007 (FR-070).
-# Диспозиция: content/40-architecture/2026-08-11-writer-rules-disposition.md, раздел C —
+# Требование: docs/30-requirements/2026-08-11-writer-consumer-rules.md, AC-007 (FR-070).
+# Диспозиция: docs/40-architecture/2026-08-11-writer-rules-disposition.md, раздел C —
 #   тело статьи — источник истины, frontmatter — проекция, обновляется тем же изменением;
 #   расхождение носителей — дефект.
 # Природа: живой контракт — КРАСНЫЙ на момент создания (DEV-004 не начат).

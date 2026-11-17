@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-resolver/ac-009-section-index-resolves.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-009 (FR-080, FR-082)
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 1
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-009 (FR-080, FR-082)
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 1
 # Природа: живой контракт — КРАСНЫЙ на момент создания. Ссылка `[X](section/_index)` (без
 #   `.md`) на существующий `section/_index.md` — второй шаг инференса FR-082
 #   (`target + ".md"`) ещё не реализован, сегодня буквальный `.exists()` не находит файл.

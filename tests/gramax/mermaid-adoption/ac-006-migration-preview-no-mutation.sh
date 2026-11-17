@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-adoption/ac-006-migration-preview-no-mutation.sh
-# Требование: content/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-006
+# Требование: docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-006
 #   (FR-058, NFR-053).
-# ADR: content/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 3/4.
+# ADR: docs/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 3/4.
 # Природа: живой контракт — КРАСНЫЙ на момент создания.
 #
 # Ловушка вакуумной истины: если migrate_mermaid.py не существует (текущее состояние —

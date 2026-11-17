@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-migration/ac-007-cross-catalog-not-migrated.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-007 (FR-085).
-# ADR: content/00-project/adr/0016-link-form-contract.md, Context — «зависимость на ADR-0017,
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-007 (FR-085).
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Context — «зависимость на ADR-0017,
 #   не решается здесь»: практический вывод FR-085 (кросс-каталожная ссылка остаётся
 #   код-спаном) остаётся в силе для этой миграции независимо от исхода ADR-0017.
 # Природа: живой контракт — КРАСНЫЙ на момент создания (migrate_nav_codespans.py не существует).

@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-resolver/ac-010b-doc-root-prefix-antipattern-no-ext-stays-broken.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md — edge case из
-#   content/40-architecture/2026-08-13-link-form-contract-design.md, «Контракт с
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md — edge case из
+#   docs/40-architecture/2026-08-13-link-form-contract-design.md, «Контракт с
 #   QA-author» → «Edge cases»: «путь, начинающийся с имени doc-root-папки, но БЕЗ `.md` —
 #   не тестировался явно ни в требовании, ни в RES-004 ... поведение не specified фактом,
 #   кандидат для теста».
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 1
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 1
 #
 # Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. Поведение здесь НЕ выведено из
 #   явной формулировки требования (пересечение антипаттерна FR-081 и инференса FR-082 не
 #   specified буквально) — единственный исход, механически вычислимый из 3-шагового
 #   алгоритма FR-082 применительно к этой фикстуре: все три попытки
-#   (`content/section/doc`, `content/section/doc.md`, `content/section/doc/_index.md`) не
-#   находят файла, потому что в фикстуре НЕТ каталога `content/` вовсе (реальная цель —
+#   (`docs/section/doc`, `docs/section/doc.md`, `docs/section/doc/_index.md`) не
+#   находят файла, потому что в фикстуре НЕТ каталога `docs/` вовсе (реальная цель —
 #   `section/doc.md`, без вложенности). Итог совпадает и для сегодняшнего буквального
 #   резолвера, и для целевого 3-шагового — тест не навязывает трактовку, которую
 #   требование не фиксирует, а лишь защищает единственный уже-детерминированный исход.

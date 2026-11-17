@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-021-existing-suites.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-021 (NFR-003)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-021 (NFR-003)
 # Проверка: существующие suite'ы --full не сломаны. Реально гоняем два названных в
 #           требовании (orphan-references, nauta-integration) напрямую — без вложенного
 #           `check.sh --full` (он рекурсивно запустил бы этот suite снова). Остальные

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-011-th-severity.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-011 (FR-113)
-# ADR: content/00-project/adr/0019-render-killer-linter.md, Решение 8
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-011 (FR-113)
+# ADR: docs/00-project/adr/0019-render-killer-linter.md, Решение 8
 # Проверка: severity <th> = ERROR безусловно — вывод содержит ERROR и не содержит warn/WARN по <th>.
 
 set -u -o pipefail

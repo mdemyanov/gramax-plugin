@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-004-note-in-note.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-004 (FR-107)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-004 (FR-107)
 # Проверка: <note> вложенный в <note> → ERROR на строке вложенного <note>.
 
 set -u -o pipefail

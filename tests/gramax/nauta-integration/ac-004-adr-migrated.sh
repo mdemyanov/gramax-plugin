@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/nauta-integration/ac-004-adr-migrated.sh
-# Spec: docs/superpowers/specs/2026-08-07-nauta-integration-design.md FR-3, FR-5
+# Спека: спека волны nauta-integration (2026-08-07; историческая, прародитель удалён при инверсии раскладки 2026-11-17 — FR-129, ADR-0021) FR-3, FR-5
 # AC coverage:
 #   AC-3 → ADR переехали, docs/adr/ отсутствует
 #   AC-7 → каждая статья объявляет «Тип контента»
@@ -13,12 +13,12 @@ source "$SCRIPT_DIR/lib/assert.sh"
 cd "$ROOT"
 
 FAIL=0
-ADR_DIR="content/00-project/adr"
+ADR_DIR="docs/00-project/adr"
 
 assert_dir_not_exists "docs/adr" "AC-3: docs/adr должен быть пуст и удалён"
-assert_dir_exists "$ADR_DIR" "AC-3: ADR должны переехать в content/00-project/adr"
+assert_dir_exists "$ADR_DIR" "AC-3: ADR должны переехать в docs/00-project/adr"
 assert_file_exists "$ADR_DIR/_index.md" "C1: раздел ADR должен иметь _index.md"
-assert_file_exists "content/00-project/_index.md" "C1: 00-project должен иметь _index.md"
+assert_file_exists "docs/00-project/_index.md" "C1: 00-project должен иметь _index.md"
 
 for n in 0001 0002 0003 0004 0005 0006 0007 0008 0009 0010; do
   f=$(find "$ADR_DIR" -maxdepth 1 -name "${n}-*.md" 2>/dev/null | head -1)

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-016-brackets-attr.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-016 (FR-117)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-016 (FR-117)
 # Проверка: скобки ( ) [ ] и спецсимволы в значениях XML-атрибутов → ни ERROR, ни WARN.
 
 set -u -o pipefail

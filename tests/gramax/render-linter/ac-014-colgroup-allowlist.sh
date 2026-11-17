@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-014-colgroup-allowlist.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-014 (FR-115)
-# ADR: content/00-project/adr/0019-render-killer-linter.md, Решение 2 (allowlistedTags)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-014 (FR-115)
+# ADR: docs/00-project/adr/0019-render-killer-linter.md, Решение 2 (allowlistedTags)
 # Проверка: <colgroup>/<col> в таблице → ни ERROR, ни WARN, exit 0 (BR-002).
 
 set -u -o pipefail

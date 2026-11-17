@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # tests/gramax/cross-catalog-retraction/ac-005-registry-annotations.sh
-# Требование: content/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-005 (FR-099).
+# Требование: docs/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-005 (FR-099).
 #
 # Природа: смешанная.
-#   (a) content/40-architecture/_index.md — строка диспозиции — КРАСНАЯ сегодня: буллет ещё не
+#   (a) docs/40-architecture/_index.md — строка диспозиции — КРАСНАЯ сегодня: буллет ещё не
 #       несёт отметку вида «(Тема A дополнена ADR-0017)» — задача Dev (ADR-0017, «Бриф для
 #       Dev», шаг 3).
-#   (b) content/00-project/adr/_index.md — строка ADR-0017 — ЗЕЛЁНАЯ сегодня (regression
+#   (b) docs/00-project/adr/_index.md — строка ADR-0017 — ЗЕЛЁНАЯ сегодня (regression
 #       guard): PM уже внёс строку реестра, чьё название решения само несёт формулировку
 #       «амендмент к диспозиции Тема A/FR-065» — это и есть отметка частичного амендмента для
 #       (б)-половины AC-005. Dev не трогает этот файл (ADR-0017, «Примечание для PM»: «строку в
-#       content/00-project/adr/_index.md не добавляет и SA этого ADR»).
+#       docs/00-project/adr/_index.md не добавляет и SA этого ADR»).
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -18,19 +18,19 @@ ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 source "$SCRIPT_DIR/lib/assert.sh"
 
 FAIL=0
-ARCH_INDEX="$ROOT/content/40-architecture/_index.md"
-ADR_INDEX="$ROOT/content/00-project/adr/_index.md"
+ARCH_INDEX="$ROOT/docs/40-architecture/_index.md"
+ADR_INDEX="$ROOT/docs/00-project/adr/_index.md"
 DISPOSITION_FILENAME="2026-08-11-writer-rules-disposition.md"
 ADR_FILENAME="0017-cross-catalog-retraction.md"
 
-assert_file_exists "$ARCH_INDEX" "AC-005(a): content/40-architecture/_index.md должен существовать"
-assert_file_exists "$ADR_INDEX" "AC-005(b): content/00-project/adr/_index.md должен существовать"
+assert_file_exists "$ARCH_INDEX" "AC-005(a): docs/40-architecture/_index.md должен существовать"
+assert_file_exists "$ADR_INDEX" "AC-005(b): docs/00-project/adr/_index.md должен существовать"
 
-# (a) — строка диспозиции в content/40-architecture/_index.md
+# (a) — строка диспозиции в docs/40-architecture/_index.md
 if [ -f "$ARCH_INDEX" ]; then
   DISPOSITION_LINE="$(grep -F "$DISPOSITION_FILENAME" "$ARCH_INDEX" 2>/dev/null | head -1 || true)"
   if [ -z "$DISPOSITION_LINE" ]; then
-    echo "  FAIL: AC-005(a) — content/40-architecture/_index.md не содержит строку про $DISPOSITION_FILENAME вовсе" >&2
+    echo "  FAIL: AC-005(a) — docs/40-architecture/_index.md не содержит строку про $DISPOSITION_FILENAME вовсе" >&2
     FAIL=$((FAIL + 1))
   else
     if ! printf '%s' "$DISPOSITION_LINE" | grep -qiE '0017'; then
@@ -43,11 +43,11 @@ if [ -f "$ARCH_INDEX" ]; then
   fi
 fi
 
-# (b) — строка ADR-0017 в content/00-project/adr/_index.md
+# (b) — строка ADR-0017 в docs/00-project/adr/_index.md
 if [ -f "$ADR_INDEX" ]; then
   ADR_LINE="$(grep -F "$ADR_FILENAME" "$ADR_INDEX" 2>/dev/null | head -1 || true)"
   if [ -z "$ADR_LINE" ]; then
-    echo "  FAIL: AC-005(b) — content/00-project/adr/_index.md не содержит строку реестра для $ADR_FILENAME (FR-099б)" >&2
+    echo "  FAIL: AC-005(b) — docs/00-project/adr/_index.md не содержит строку реестра для $ADR_FILENAME (FR-099б)" >&2
     FAIL=$((FAIL + 1))
   else
     if ! printf '%s' "$ADR_LINE" | grep -qiE 'Тема A|FR-065'; then

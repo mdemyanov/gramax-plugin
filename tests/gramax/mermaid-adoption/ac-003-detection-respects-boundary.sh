@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-adoption/ac-003-detection-respects-boundary.sh
-# Требование: content/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-003
+# Требование: docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-003
 #   (FR-055).
-# ADR: content/00-project/adr/0013-mermaid-adoption-and-migration.md, Решения 1 и 3.
+# ADR: docs/00-project/adr/0013-mermaid-adoption-and-migration.md, Решения 1 и 3.
 # Природа: живой контракт — КРАСНЫЙ на момент создания.
 #
 # Та же составная фикстура, что ac-002 — буквально по тексту AC-003 требования («та же
-# фикстура дополнена соседним файлом вне поддерева content/»).
+# фикстура дополнена соседним файлом вне поддерева docs/»).
 #
 # Ловушка вакуумной истины: если инструмент не запускается (сейчас — файла не существует),
 # проверка «outside/no-doc-root.md отсутствует в выводе» тривиально истинна просто потому, что

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-001-dogfood-clean-exit.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-010, AC-011
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 5
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-010, AC-011
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 5
 # Природа: живой контракт — КРАСНЫЙ на момент создания.
-#   AC-010 закрывает DEV-001 (backfill title/order/language/syntax по content/,
+#   AC-010 закрывает DEV-001 (backfill title/order/language/syntax по docs/,
 #   резолюция _index.md в корне — ADR-0012 Решение 1 / ADR-0015).
 #   AC-011 закрывает DEV-002 (строка подключения этого suite к scripts/check.sh).
 #   QA-author НЕ подключает suite к check.sh сам — см. README.md.
@@ -16,14 +16,14 @@ source "$SCRIPT_DIR/lib/assert.sh"
 FAIL=0
 
 # --- AC-010: uv run plugins/gramax/scripts/validate_structure.py content; echo "exit=$?" → exit=0
-if DOGFOOD_OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py content 2>&1); then
+if DOGFOOD_OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py docs 2>&1); then
   DOGFOOD_EXIT=0
 else
   DOGFOOD_EXIT=$?
 fi
 
 assert_eq "$DOGFOOD_EXIT" "0" \
-  "AC-010: 'uv run validate_structure.py content' обязан завершаться exit=0 на собственном content/ (BR-004, FR-044)"
+  "AC-010: 'uv run validate_structure.py content' обязан завершаться exit=0 на собственном docs/ (BR-004, FR-044)"
 
 if [ "$DOGFOOD_EXIT" -ne 0 ]; then
   echo "  --- первые 10 строк вывода валидатора (DEV-001: backfill title/order/language/syntax) ---" >&2

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/cross-catalog-retraction/ac-002-skill-md-links-block-consistent.sh
-# Требование: content/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-002
+# Требование: docs/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-002
 #             (FR-095/FR-096).
-# ADR: content/00-project/adr/0017-cross-catalog-retraction.md, Решение 2 — точный текст замены
+# ADR: docs/00-project/adr/0017-cross-catalog-retraction.md, Решение 2 — точный текст замены
 #      блока «## Ссылки» SKILL.md (закрывает FR-095 и FR-096 одним изменением).
 #
 # Природа: смешанная, три независимых сигнала разной природы.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-002-placeholder-detected.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-012 (FR-046)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 2 (уровень: error)
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-012 (FR-046)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 2 (уровень: error)
 # Природа: живой контракт — КРАСНЫЙ на момент создания (проверка плейсхолдеров {{...}} в
 #   validate_structure.py ещё не реализована — DEV-001).
 

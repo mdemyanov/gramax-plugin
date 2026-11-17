@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-023-unparseable-doc-root-diagnostics.sh
-# Требование: content/30-requirements/2026-08-13-doc-root-discovery-contract.md AC-038 (FR-122, FR-123)
-# ADR: content/00-project/adr/0020-doc-root-recursive-discovery.md, Решение 3
+# Требование: docs/30-requirements/2026-08-13-doc-root-discovery-contract.md AC-038 (FR-122, FR-123)
+# ADR: docs/00-project/adr/0020-doc-root-recursive-discovery.md, Решение 3
 # Природа: живой контракт — КРАСНЫЙ на момент создания.
 #   До FR-122/FR-123 ошибка парсинга схлопывалась до `invalid yaml: <str(e)>` без номера
 #   строки, слова о плейсхолдере и подсказки закавычивания. После — сообщение несёт

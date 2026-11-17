@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-migration/ac-001-nav-classification-deterministic.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-001 (FR-077).
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 3 (existence+scope —
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-001 (FR-077).
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 3 (existence+scope —
 #   механичны; directionality — эвристика по маркерным фразам «см.», «зафиксировано в» и т.п.).
 # Природа: живой контракт — КРАСНЫЙ на момент создания (migrate_nav_codespans.py — Dev-задача,
 #   не начата; `uv run` на несуществующий файл завершается ненулевым кодом, отчёт не содержит
@@ -12,10 +12,10 @@
 # tests/gramax/mermaid-adoption/ac-002-detection-true-positives.sh, не привязываясь к точному
 # словесному лейблу класса кроме регистронезависимого вхождения "nav". Если реальный формат
 # Dev расходится — поправьте regex вместе с обоснованием прямо в этом файле, не убирайте
-# ассерт молча (прецедент AC-014, content/60-implementation/acceptance/
+# ассерт молча (прецедент AC-014, docs/60-implementation/acceptance/
 # 2026-08-11-validation-contract-at-design.md).
 #
-# «Вакуумная истина» (content/lessons-learned.md, tests/gramax/mermaid-adoption/README.md):
+# «Вакуумная истина» (docs/lessons-learned.md, tests/gramax/mermaid-adoption/README.md):
 # если бы инструмент вообще не запускался, оба прогона report-mode дали бы ОДИНАКОВУЮ ошибку
 # uv run — diff двух прогонов был бы пустым тривиально. Поэтому детерминизм проверяется ТОЛЬКО
 # после позитивной гарантии, что run1 реально нашёл nav-source.md кандидатом.

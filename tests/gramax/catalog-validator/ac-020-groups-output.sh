@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-020-groups-output.sh
-# Требование: docs/superpowers/specs/2026-08-12-healthcheck-port-design.md — --groups
+# Требование: спека healthcheck-port (2026-08-12; историческая, прародитель удалён при инверсии раскладки 2026-11-17 — FR-129, ADR-0021); живой наследник темы — docs/30-requirements/2026-08-13-doc-root-discovery-contract.md — --groups
 # Проверка: флаг --groups выводит группированный вывод с заголовками групп
 
 set -u -o pipefail

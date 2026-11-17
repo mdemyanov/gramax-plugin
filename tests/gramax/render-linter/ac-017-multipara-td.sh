@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-017-multipara-td.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-017 (FR-118)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-017 (FR-118)
 # Проверка: многоабзацная ячейка <td> (пустые строки между абзацами) → ни ERROR, ни WARN.
 
 set -u -o pipefail

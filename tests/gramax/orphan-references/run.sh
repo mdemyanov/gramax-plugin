@@ -2,7 +2,7 @@
 # tests/gramax/orphan-references/run.sh
 # Постоянный гейт: ни один живой файл репозитория не ссылается на удалённые артефакты.
 # Реестр — sunset-registry.txt рядом. Обобщение ac-016 из remove-diagram-skills.
-# Spec: docs/superpowers/specs/2026-08-07-nauta-integration-design.md FR-8
+# Спека: спека волны nauta-integration (2026-08-07; историческая, прародитель удалён при инверсии раскладки 2026-11-17 — FR-129, ADR-0021) FR-8
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -27,7 +27,7 @@ SEARCH_PATHS=(plugins scripts tests CLAUDE.md AGENTS.md README.md)
 # Архив исключён по принципу, а не по списку имён: tests/gramax/archive/ — замороженные
 # свидетельства приёмки прошлых релизов, они обязаны называть удалённые артефакты как
 # предмет своих ассертов (ADR-0011, Решение 1). CHANGELOG, ADR и отчёты — то же основание.
-EXCLUDE_RE='(^|/)CHANGELOG\.md$|^content/00-project/adr/|^content/60-implementation/|^docs/|^tests/gramax/orphan-references/|^tests/gramax/archive/'
+EXCLUDE_RE='(^|/)CHANGELOG\.md$|^docs/00-project/adr/|^docs/60-implementation/|^docs/|^tests/gramax/orphan-references/|^tests/gramax/archive/'
 
 TOTAL=0
 while IFS= read -r pattern; do

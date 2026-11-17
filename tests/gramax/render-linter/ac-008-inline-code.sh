@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-008-inline-code.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-008 (FR-110)
-# ADR: content/00-project/adr/0019-render-killer-linter.md, Решение 5
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-008 (FR-110)
+# ADR: docs/00-project/adr/0019-render-killer-linter.md, Решение 5
 # Проверка: `<note>`, `<tabs>`, `<th>` в прозе как inline-код → ни ERROR, ни WARN, exit 0.
 # Регрессия на BA факт 2: исходник коллег давал на inline-коде 11 ложных ERROR.
 

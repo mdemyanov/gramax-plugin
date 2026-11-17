@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/nauta-integration/ac-008-check-includes-validator.sh
-# Spec: docs/superpowers/specs/2026-08-07-nauta-integration-design.md FR-7
+# Спека: спека волны nauta-integration (2026-08-07; историческая, прародитель удалён при инверсии раскладки 2026-11-17 — FR-129, ADR-0021) FR-7
 # AC coverage:
 #   AC-9 → check.sh --fast включает validate-content.py и зелёный
 #   AC-9 → отсутствие uv — провал гейта (FAILED=1), а не WARN с exit 0
@@ -16,7 +16,7 @@ cd "$ROOT"
 FAIL=0
 
 assert_grep "scripts/check.sh" "validate-content.py" \
-  "AC-9: check.sh должен вызывать валидатор content/"
+  "AC-9: check.sh должен вызывать валидатор docs/"
 assert_grep "scripts/check.sh" "uv run" \
   "AC-9: валидатор должен запускаться через uv run (PEP 723)"
 assert_no_grep "scripts/check.sh" "validate-profile.py" \
@@ -48,8 +48,8 @@ fi
 # существует. "OK: content validated" появляется только если uv run
 # scripts/validate-content.py реально отработал и прошёл — доказательство работы,
 # а не только наличия шага.
-if ! printf '%s\n' "$OUT" | grep -q "OK: content validated"; then
-  echo "  FAIL: AC-9: в выводе check.sh нет подтверждения, что content/ реально провалидирован" >&2
+if ! printf '%s\n' "$OUT" | grep -q "OK: docs validated"; then
+  echo "  FAIL: AC-9: в выводе check.sh нет подтверждения, что docs/ реально провалидирован" >&2
   FAIL=$((FAIL + 1))
 fi
 

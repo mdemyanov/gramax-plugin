@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-010-tags-contract-exists.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-004 (FR-038)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 3
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-004 (FR-038)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 3
 #      (plugins/gramax/gramax-tags.json — новый файл, корень plugins/gramax/, не scripts/).
 # Природа: живой контракт — КРАСНЫЙ на момент создания (файл ещё не создан — DEV-001).
 

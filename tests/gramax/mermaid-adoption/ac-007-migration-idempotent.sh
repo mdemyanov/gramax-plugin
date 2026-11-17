@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-adoption/ac-007-migration-idempotent.sh
-# Требование: content/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-007
+# Требование: docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-007
 #   (NFR-050).
-# ADR: content/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 4
+# ADR: docs/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 4
 #   («Идемпотентность — структурная: после миграции инлайн-блок физически не существует —
 #   повторный прогон даёт ноль совпадений по построению regex, не по флагу состояния»).
 # Природа: живой контракт — КРАСНЫЙ на момент создания.

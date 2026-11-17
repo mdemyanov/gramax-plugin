@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/writer-consumer-rules/ac-008-xml-blocks-as-structure-list.sh
-# Требование: content/30-requirements/2026-08-11-writer-consumer-rules.md, AC-008 (FR-071).
-# Диспозиция: content/40-architecture/2026-08-11-writer-rules-disposition.md, раздел D —
+# Требование: docs/30-requirements/2026-08-11-writer-consumer-rules.md, AC-008 (FR-071).
+# Диспозиция: docs/40-architecture/2026-08-11-writer-rules-disposition.md, раздел D —
 #   новый раздел "XML-блоки, засчитываемые как структура" в references/structure.md:
 #   <note>, <tabs>, <view>, <snippet>, <mermaid>, <drawio>, <image>, <openapi>.
 # Природа: живой контракт — КРАСНЫЙ на момент создания (DEV-004 не начат).

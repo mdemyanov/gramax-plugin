@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-migration/ac-002-self-priority.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-002 (FR-078, BR-001).
-# ADR: content/00-project/adr/0016-link-form-contract.md, «Границы» companion-статьи —
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-002 (FR-078, BR-001).
+# ADR: docs/00-project/adr/0016-link-form-contract.md, «Границы» companion-статьи —
 #   «миграционный скрипт не переписывает SELF- и SUBJECT-код-спаны — только NAV».
 # Природа: живой контракт — КРАСНЫЙ на момент создания (migrate_nav_codespans.py не существует).
 #
-# «Вакуумная истина» (урок content/lessons-learned.md, tests/gramax/mermaid-adoption/README.md
+# «Вакуумная истина» (урок docs/lessons-learned.md, tests/gramax/mermaid-adoption/README.md
 # «Вакуумная истина»): AC-002 формулируется как ОТСУТСТВИЕ эффекта (self-source.md не должен
 # измениться). Пока инструмента нет, --fix --yes не мутирует НИЧЕГО — негативная проверка была
 # бы тривиально верна без единой строчки кода Dev. Поэтому сначала — позитивная гарантия, что

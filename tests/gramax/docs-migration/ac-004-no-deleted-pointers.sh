@@ -70,6 +70,11 @@ while IFS= read -r hit; do
   grep -Fxq -- "$f" "$TRACKED" || continue
   printf '%s' "$hit" | grep -q "adr/" && continue
   printf '%s' "$hit" | grep -q "^tests/gramax/docs-migration/" && continue
+  # instrument suite'а: ac-007 nauta-integration — детектор мёртвых префиксов
+  # (PATTERN_SPECS называет docs/superpowers/specs/ как ассерт ОТСУТСТВИЯ ссылок на
+  # него, не указатель; шапка файла именует принцип «устаревшие пути — предмет
+  # ассертов их отсутствия»; то же основание, что у исключения в ac-003)
+  printf '%s' "$hit" | grep -q "^tests/gramax/nauta-integration/ac-007-no-stale-doc-paths.sh:" && continue
   printf '%s' "$hit" | grep -qE "$RECORD_FILE_RE" && continue
   HITS="${HITS}${hit}
 "

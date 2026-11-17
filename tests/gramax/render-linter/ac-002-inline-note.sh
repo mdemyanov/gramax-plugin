@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-002-inline-note.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-002 (FR-105)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-002 (FR-105)
 # Проверка: <note>…</note> в одну строку → ERROR с номером строки, упоминание блочного формата.
 
 set -u -o pipefail

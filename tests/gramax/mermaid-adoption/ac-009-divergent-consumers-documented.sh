@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-adoption/ac-009-divergent-consumers-documented.sh
-# Требование: content/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-009
+# Требование: docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-009
 #   (FR-061, FR-062).
-# ADR: content/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 5.
+# ADR: docs/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 5.
 # Природа: живой контракт — КРАСНЫЙ на момент создания.
 #
 # Assert 1 — буквальный BA-grep из текста AC-009 ('валидатор'); проверено вручную, что он

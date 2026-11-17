@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/cross-catalog-retraction/ac-004-corrective-adr-exists-and-links.sh
-# Требование: content/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-004 (FR-098).
+# Требование: docs/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-004 (FR-098).
 #
 # Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. ADR-0017 уже написан SA и Accepted —
 # работа SA этой волны предшествует QA-author по каноническому порядку
@@ -15,7 +15,7 @@ ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 source "$SCRIPT_DIR/lib/assert.sh"
 
 FAIL=0
-ADR_DIR="$ROOT/content/00-project/adr"
+ADR_DIR="$ROOT/docs/00-project/adr"
 REQ_FILENAME="2026-08-13-cross-catalog-retraction.md"
 RES_FILENAME="2026-08-13-cross-catalog-links-probe.md"
 DISPOSITION_FILENAME="2026-08-11-writer-rules-disposition.md"
@@ -29,7 +29,7 @@ while IFS= read -r f; do [ -n "$f" ] && CANDIDATES+=("$f"); done \
   < <(grep -rlF "$REQ_FILENAME" "$ADR_DIR" 2>/dev/null)
 
 if [ "${#CANDIDATES[@]}" -eq 0 ]; then
-  echo "  FAIL: AC-004(a) — ни один файл content/00-project/adr/ не упоминает $REQ_FILENAME — корректирующий ADR не найден (FR-098)" >&2
+  echo "  FAIL: AC-004(a) — ни один файл docs/00-project/adr/ не упоминает $REQ_FILENAME — корректирующий ADR не найден (FR-098)" >&2
   FAIL=$((FAIL + 1))
 else
   # (б)(в)(г) — среди кандидатов ищем ЕДИНСТВЕННЫЙ файл, несущий ВСЕ три оставшихся сигнала

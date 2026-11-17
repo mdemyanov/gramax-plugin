@@ -1,10 +1,10 @@
 # tests/gramax/catalog-validator/ — контракт `validate_structure.py` как публичного инструмента
 
 Suite тест-дизайна (QA-author, до реализации Dev) для требования
-`content/30-requirements/2026-08-11-validation-contract.md`. Покрывает все AC требования,
+`docs/30-requirements/2026-08-11-validation-contract.md`. Покрывает все AC требования,
 кроме AC-007 (процессная, непокрываема скриптом) и AC-017 (композитный гейт задачи QA-author,
 не отдельный скрипт) — 15 из 17. Структуру suite'а под догфудинг/покрытие пробелов/границу
-задаёт `content/00-project/adr/0012-catalog-validation-contract.md` (Решение 5); остальные
+задаёт `docs/00-project/adr/0012-catalog-validation-contract.md` (Решение 5); остальные
 AC (обнаружимость, JSON-контракты, разрешение противоречия `_index.md`) размещены здесь же
 по решению PM — обоснование в разделе «Почему все AC здесь, не в `plugin-contract`».
 
@@ -162,14 +162,14 @@ scratchpad): (а) контракт без `drawio`, хардкод жив → SU
 (сверка `git log` файла контракта и `CHANGELOG.md` человеком/ревьюером), не единичный
 факт состояния репозитория на момент прогона suite'а. Скрипта в этом suite нет — имитация
 процессной проверки скриптом создала бы ложное ощущение автоматического гейта там, где
-его нет. См. `content/60-implementation/acceptance/2026-08-11-validation-contract-at-design.md`.
+его нет. См. `docs/60-implementation/acceptance/2026-08-11-validation-contract-at-design.md`.
 
 ## AC-009 — не в этом suite
 
 Покрыта не здесь, а Python-тестом `RootIndexTests` в
 `plugins/gramax/scripts/tests/test_validate_structure.py` (фикстура
 `plugins/gramax/scripts/tests/fixtures/root-index/`) — по прямому указанию
-`content/00-project/adr/0015-root-index-inert.md`, Решение 5: тестовое покрытие плагина
+`docs/00-project/adr/0015-root-index-inert.md`, Решение 5: тестовое покрытие плагина
 на стороне Python, где уже живёт `test_validate_structure.py`, а не bash-обёрткой поверх
 него.
 

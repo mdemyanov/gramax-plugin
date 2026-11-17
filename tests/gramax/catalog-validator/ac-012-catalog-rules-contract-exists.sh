@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-012-catalog-rules-contract-exists.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-006 (FR-040)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 3
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-006 (FR-040)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 3
 #      (plugins/gramax/gramax-catalog-rules.json: docRootRequiredFields,
 #      frontmatterRequiredFields, indexPolicy, garbageFiles[]).
-#      content/00-project/adr/0015-root-index-inert.md, Решение 4 (indexPolicy.root:
+#      docs/00-project/adr/0015-root-index-inert.md, Решение 4 (indexPolicy.root:
 #      optional — значение не меняется, только сопровождающая документация).
 # Природа: живой контракт — КРАСНЫЙ на момент создания (файл ещё не создан — DEV-001,
 #   подтверждено ADR-0015: `find plugins/gramax -iname '*catalog-rules*'` — пусто).

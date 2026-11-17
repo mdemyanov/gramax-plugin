@@ -2,7 +2,7 @@
 # tests/gramax/render-linter/run.sh
 # Aggregator: runs all ac-*.sh, prints summary, returns non-zero if any failed.
 # Покрывает поведенческий контракт validate_render.py — AC-001…AC-021
-# (требование content/30-requirements/2026-08-12-render-killer-linter.md,
+# (требование docs/30-requirements/2026-08-12-render-killer-linter.md,
 # ADR-0019 Решение 4). Подключён к scripts/check.sh --full шагом 14.
 
 set -u -o pipefail

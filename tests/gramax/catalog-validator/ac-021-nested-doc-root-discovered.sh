@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-021-nested-doc-root-discovered.sh
-# Требование: content/30-requirements/2026-08-13-doc-root-discovery-contract.md AC-036 (FR-120)
-# ADR: content/00-project/adr/0020-doc-root-recursive-discovery.md, Решение 1
+# Требование: docs/30-requirements/2026-08-13-doc-root-discovery-contract.md AC-036 (FR-120)
+# ADR: docs/00-project/adr/0020-doc-root-recursive-discovery.md, Решение 1
 # Природа: живой контракт — КРАСНЫЙ на момент создания.
 #   Регресс-якорь инцидента 2026-08-13: до FR-120 валидатор читает только root/.doc-root.yaml,
-#   битый вложенный examples/project-example/content/.doc-root.yaml даёт exit 0.
+#   битый вложенный examples/project-example/docs/.doc-root.yaml даёт exit 0.
 #   После FR-120 вложенный root обнаруживается и валидируется полным suite'ом → exit ≠ 0,
 #   в выводе — путь вложенного файла.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-013-exit-codes.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-013 (FR-113, NFR-001)
-# ADR: content/00-project/adr/0019-render-killer-linter.md, Решение 8
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-013 (FR-113, NFR-001)
+# ADR: docs/00-project/adr/0019-render-killer-linter.md, Решение 8
 # Проверка: каталог без ERROR, но с WARN → exit 0; каталог с ERROR → exit 1.
 
 set -u -o pipefail

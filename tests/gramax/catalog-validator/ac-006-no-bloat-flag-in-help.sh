@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-006-no-bloat-flag-in-help.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-016 (FR-049, граница)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 6
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-016 (FR-049, граница)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 6
 # Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. Граница «плагин не берёт на
 #   себя числовые бюджеты объёма (C11-C14-эквивалент)» уже соблюдена сегодняшним
 #   --help — этот тест защищает её от случайного нарушения будущим PR, а не ждёт DEV-001.

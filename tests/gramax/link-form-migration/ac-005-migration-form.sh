@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-migration/ac-005-migration-form.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-005 (FR-080, FR-081,
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-005 (FR-080, FR-081,
 #   BR-002).
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 2 — временный протокол:
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 2 — временный протокол:
 #   собственный корпус пишет НОВЫЕ ссылки с явным `.md`-суффиксом, пока апстрим nauta не
 #   починен. Это НЕ буквальная формулировка FR-080 «без расширения» — фактический проверяемый
 #   контракт для ЭТОГО репозитория, см. заголовок задачи QA-author.
@@ -38,7 +38,7 @@ if ! grep -qE '\[Цель миграции NAV\]\([./]*nav-target\.md\)' "$WORKD
 fi
 
 # (3): href НЕ несёт префикс имени doc-root-каталога (FR-081/BR-002) — антипаттерн
-# `content/nav-target.md` внутри href запрещён инвариантно.
+# `docs/nav-target.md` внутри href запрещён инвариантно.
 if grep -qE '\]\([./]*content/nav-target\.md\)' "$WORKDIR/content/nav-source.md"; then
   echo "  FAIL: AC-005 — href содержит запрещённый префикс имени doc-root-каталога ('content/nav-target.md') — антипаттерн FR-081/BR-002" >&2
   FAIL=$((FAIL + 1))

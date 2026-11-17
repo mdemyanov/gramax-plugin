@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/nauta-integration/ac-003-doc-root-contract.sh
-# Spec: docs/superpowers/specs/2026-08-07-nauta-integration-design.md FR-4
+# Спека: спека волны nauta-integration (2026-08-07; историческая, прародитель удалён при инверсии раскладки 2026-11-17 — FR-129, ADR-0021) FR-4
 # AC coverage:
 #   AC-6 → validate-content.py зелёный (ноль errors)
 
@@ -12,19 +12,19 @@ cd "$ROOT"
 
 FAIL=0
 
-assert_file_exists "content/.doc-root.yaml" ".doc-root.yaml должен существовать"
-assert_file_exists "content/_index.md" "корневой _index.md должен существовать"
+assert_file_exists "docs/.doc-root.yaml" ".doc-root.yaml должен существовать"
+assert_file_exists "docs/_index.md" "корневой _index.md должен существовать"
 
 # Контракт схемы: type: Enum с заглавной, значения в ключе values.
-assert_grep_regex "content/.doc-root.yaml" '^\s+type: Enum' \
+assert_grep_regex "docs/.doc-root.yaml" '^\s+type: Enum' \
   "properties должны объявлять type: Enum (регистр важен)"
-assert_grep "content/.doc-root.yaml" "filterProperties" \
+assert_grep "docs/.doc-root.yaml" "filterProperties" \
   "filterProperties должен быть объявлен"
-assert_grep "content/.doc-root.yaml" "Тип контента" \
+assert_grep "docs/.doc-root.yaml" "Тип контента" \
   "свойство «Тип контента» должно быть объявлено"
 
 # C2: _index.md не несёт properties.
-assert_no_grep "content/_index.md" "properties:" \
+assert_no_grep "docs/_index.md" "properties:" \
   "C2: _index.md не должен содержать properties"
 
 set +e

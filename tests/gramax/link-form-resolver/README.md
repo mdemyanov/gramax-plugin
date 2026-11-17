@@ -1,17 +1,17 @@
 # tests/gramax/link-form-resolver/ — контракт инференса расширения `.md`/`_index.md`
 
 Suite тест-дизайна (QA-author, до реализации Dev) для резолвера гейта — трек
-`FR-082`/AC-008…012 требования `content/30-requirements/2026-08-13-link-form-contract.md`.
+`FR-082`/AC-008…012 требования `docs/30-requirements/2026-08-13-link-form-contract.md`.
 Прецедент структуры — `tests/gramax/catalog-validator/` (ADR-0012 Решение 5): `ac-NNN-*.sh` +
 `run.sh` + независимая копия `lib/assert.sh`, читаем `$?`, не grep по stdout как источник
 истины об успехе/провале (grep используется только для проверки СОДЕРЖИМОГО сообщения, после
 того как код возврата уже проверен отдельным ассертом).
 
-Дизайн — `content/60-implementation/acceptance/2026-08-13-link-form-contract-resolver-at-design.md`.
+Дизайн — `docs/60-implementation/acceptance/2026-08-13-link-form-contract-resolver-at-design.md`.
 
 ## Почему shell-suite, а не только pytest
 
-`content/40-architecture/2026-08-13-link-form-contract-design.md` («Контракт с QA-author» →
+`docs/40-architecture/2026-08-13-link-form-contract-design.md` («Контракт с QA-author» →
 «Test-pyramid рекомендация») классифицирует AC-008…012 как **integration**, с явным
 обоснованием «уже принятый паттерн репозитория (`tests/gramax/catalog-validator/`, ADR-0012
 Решение 5)» — то есть сам design-документ указывает на этот прецедент, не на pytest.

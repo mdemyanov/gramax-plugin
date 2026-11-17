@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-013-adr-resolves-root-index.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-008 (FR-042)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md (Решение 1) +
-#      content/00-project/adr/0015-root-index-inert.md (амендмент, Решение 1)
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-008 (FR-042)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md (Решение 1) +
+#      docs/00-project/adr/0015-root-index-inert.md (амендмент, Решение 1)
 # Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. Условие уже выполнено: ADR-0012
 #   и ADR-0015 оба существуют и оба упоминают `_index.md` — противоречие FR-042 уже
 #   разрешено на уровне ADR (реализация в SKILL.md/JSON — отдельно, DEV-001, AC-009/012).
@@ -16,7 +16,7 @@ source "$SCRIPT_DIR/lib/assert.sh"
 
 FAIL=0
 
-if ! find "$ROOT/content/00-project/adr" -iname '*.md' -print0 2>/dev/null \
+if ! find "$ROOT/docs/00-project/adr" -iname '*.md' -print0 2>/dev/null \
     | xargs -0 grep -l '_index.md' 2>/dev/null | grep -q .; then
   echo "  FAIL: AC-008 — ни один ADR не упоминает _index.md; противоречие FR-042 обязано быть разрешено в ADR (ADR-0012 Решение 1, ADR-0015)" >&2
   FAIL=$((FAIL + 1))

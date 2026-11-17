@@ -1,12 +1,12 @@
 # tests/gramax/mermaid-adoption/ — принятие file-based mermaid потребителями
 
 Suite тест-дизайна (QA-author, до реализации Dev) для требования
-`content/30-requirements/2026-08-11-mermaid-file-based-adoption.md`. Покрывает все 10 AC
+`docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md`. Покрывает все 10 AC
 требования (AC-001…AC-010) — молчаливых пропусков нет. Архитектура — по
-`content/00-project/adr/0013-mermaid-adoption-and-migration.md` (Решения 1–6) и
-`content/00-project/adr/0010-mermaid-file-based-workflow.md` (Решения 2, 5).
+`docs/00-project/adr/0013-mermaid-adoption-and-migration.md` (Решения 1–6) и
+`docs/00-project/adr/0010-mermaid-file-based-workflow.md` (Решения 2, 5).
 
-Полный тест-дизайн с обоснованиями — `content/60-implementation/acceptance/
+Полный тест-дизайн с обоснованиями — `docs/60-implementation/acceptance/
 2026-08-11-mermaid-adoption-at-design.md`.
 
 **Обновление DEV-003:** все 10 AC зелёные — `migrate_mermaid.py` и справочные материалы
@@ -40,7 +40,7 @@ pre-passing regression guard, как в `tests/gramax/catalog-validator/` — з
 
 Перед коммитом каждого stub'а буквальный grep из текста AC был прогнан на текущем состоянии
 репозитория — не только чтобы убедиться «тест может стать зелёным при корректной работе»
-(урок `content/lessons-learned.md`, запись 2026-08-11), но и чтобы исключить обратную
+(урок `docs/lessons-learned.md`, запись 2026-08-11), но и чтобы исключить обратную
 ситуацию: тест уже зелёный СЕЙЧАС по причине, не имеющей отношения к содержанию AC.
 
 - **AC-001:** `grep -rliE '\.doc-root\.yaml' plugins/gramax/skills/mermaid/
@@ -75,7 +75,7 @@ AC-003, AC-006, AC-007 формулируются как отсутствие э
 
 ```
 fixtures/composite/
-  content/
+  docs/
     .doc-root.yaml
     legacy-fenced.md            — ```mermaid fenced-блок (легаси-паттерн 1)
     legacy-paired.md            — <mermaid>…</mermaid> paired-тег (легаси-паттерн 2)
@@ -139,7 +139,7 @@ ADR-0013 оставляет открытыми точные форматы вы�
 
 Если реализация Dev расходится с любым из трёх пунктов — поправьте регулярку/фикстуру вместе
 с обоснованием прямо в соответствующем `ac-*.sh`, не убирайте ассерт молча (прецедент —
-«Интерпретация AC-014» в `content/60-implementation/acceptance/
+«Интерпретация AC-014» в `docs/60-implementation/acceptance/
 2026-08-11-validation-contract-at-design.md`).
 
 ## AC-005 — DSL-оракул независим от парсера Dev

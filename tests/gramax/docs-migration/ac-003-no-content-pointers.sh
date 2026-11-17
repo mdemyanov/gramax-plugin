@@ -100,6 +100,40 @@ file_excluded() {
     ./tests/gramax/docs-migration/*) return 0 ;;
     # кл.3 — sha-пиновые доставленные скрипты (Решение 5 ADR-0021)
     ./scripts/validate-content.py | ./scripts/decide.py | ./scripts/test-validate-content.sh) return 0 ;;
+    # кл.2 — RECORD-провенанс nauta/шаблона (ADR-0021, Поправка 2): docstring-пример
+    # «…the ADR-018 ordering warning in `content/.doc-root.yaml`» — запись о дереве-шаблоне
+    # на момент дизайна; замена пути превратила бы запись в утверждение о сегодняшней
+    # раскладке; правка сломала бы провенанс («KEEP_EXACT ships to descendants»)
+    ./scripts/_apply_yaml_patch.py) return 0 ;;
+    # кл.2 — RECORD (ADR-0021, Поправка 2): цитаты `git show --stat ce4228d` / `git log -1`
+    # о верификации базового коммита 2026-08-13; исполняемая строка файла путей не несёт
+    ./tests/gramax/cross-catalog-retraction/lib/baseline-commit.sh) return 0 ;;
+    # кл.6 — suite целиком на синтетическом content/-дереве фикстур: lib/fixtures.sh строит
+    # $WORKDIR/content/ (клон дерева-потребителя во временном каталоге — конвенция
+    # экосистемы), ассерты антипаттерна content/-префикса (link-form-контракт FR-081:
+    # «href не несёт префикс имени doc-root-каталога потребителя») — переименование
+    # литералов сломало бы контракт suite'а на антипаттерн. Шапочные пины переписаны в D2.
+    ./tests/gramax/link-form-migration/*) return 0 ;;
+    # кл.6 — те же синтетические content/-деревья фикстур (fixtures.sh строит $WORKDIR/content/;
+    # сообщения ассертов называют файлы фикстуры по имени каталога потребителя).
+    # Шапочные пины переписаны в D2.
+    ./tests/gramax/mermaid-adoption/ac-002-detection-true-positives.sh | \
+      ./tests/gramax/mermaid-adoption/ac-003-detection-respects-boundary.sh | \
+      ./tests/gramax/mermaid-adoption/ac-005-migration-preserves-dsl-and-defaults.sh | \
+      ./tests/gramax/mermaid-adoption/ac-006-migration-preview-no-mutation.sh | \
+      ./tests/gramax/mermaid-adoption/ac-007-migration-idempotent.sh | \
+      ./tests/gramax/mermaid-adoption/ac-008-migration-naming-convention.sh | \
+      ./tests/gramax/mermaid-adoption/ac-010-migration-summary-counts.sh | \
+      ./tests/gramax/mermaid-adoption/lib/fixtures.sh) return 0 ;;
+    # инструмент suite'а: предмет — ассерты ОТСУТСТВИЯ устаревших путей (шапка самого
+    # файла: «suite'ы, чей предмет — сами устаревшие пути… обязаны называть эти пути
+    # дословно»); литералы в негативных ассертах и их сообщениях — прибор, не указатель.
+    # Позитивные пины ac-005/ac-006/ac-004/ac-003 переписаны в D2 и НЕ исключены.
+    ./tests/gramax/nauta-integration/ac-007-no-stale-doc-paths.sh) return 0 ;;
+    # кл.2 — исторический тест-дизайн QA-author: таблица «Стартовое состояние (на момент
+    # создания suite'а)» несёт RECORD-путь (NFR-003: переписывание сделало бы запись об
+    # утверждением о сегодняшней раскладке); указатели в файле переписаны в D2
+    ./tests/gramax/catalog-validator/README.md) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -120,6 +154,17 @@ line_allowed() {
   # модель чужого каталога из брифа link-form; тела ассертов suite'ов не меняются,
   # ADR-0021 Решение 3)
   if printf '%s' "$line" | grep -qF 'content/section/'; then
+    return 0
+  fi
+  # кл.6 — фикстурная модель дерева потребителя в catalog-validator: путь
+  # examples/project-example/content/… живёт ВНУТРИ fixtures/nested-doc-root-discovery/
+  # (данные модели, не путь этого дерева); ассерт сверяется с путём из вывода валидатора
+  if printf '%s' "$line" | grep -qF 'examples/project-example/content/'; then
+    return 0
+  fi
+  # инструмент suite'а nauta-integration — негативные ассерты на старые пути (их
+  # предмет — отсутствие; литерал необходим, шапка ac-007 именует принцип)
+  if printf '%s' "$line" | grep -qE 'assert_(file|dir)_not_exists "content/'; then
     return 0
   fi
   # кл.6 ECOSYSTEM — «голый» токен-конвенция: ни одного путеподобного вхождения.

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-adoption/ac-008-migration-naming-convention.sh
-# Требование: content/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-008
+# Требование: docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-008
 #   (FR-060).
-# ADR: content/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 4 —
+# ADR: docs/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 4 —
 #   «переиспользуется fallback-слаг `existing` из ADR-0010 Решение 3
 #   (<page-slug>-existing.mermaid) — у batch-прогона нет пользовательской темы». Это
 #   архитектурный закон ADR (Accepted), не деталь реализации на усмотрение Dev — тест вправе

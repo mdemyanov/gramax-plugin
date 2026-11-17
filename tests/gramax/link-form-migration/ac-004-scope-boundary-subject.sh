@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-migration/ac-004-scope-boundary-subject.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-004 (FR-077 тест 3
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-004 (FR-077 тест 3
 #   «scope», по образцу RES-005 3.4 — гомоним пути из другого репозитория).
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 3 — «existence+scope уже
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 3 — «existence+scope уже
 #   механичны» ссылается на _collect_links (markdown-ссылки), НЕ на код-спаны с прозой вокруг;
 #   этот тест — регрессионная защита от НАИВНОЙ механики применительно к код-спанам: код-спан
-#   `content/_index.md` физически СУЩЕСТВУЕТ внутри фикстурного каталога (существование
+#   `docs/_index.md` физически СУЩЕСТВУЕТ внутри фикстурного каталога (существование
 #   мехонически истинно), но по тексту абзаца относится к ДРУГОМУ репозиторию — наивная
 #   проверка «файл существует внутри .doc-root.yaml» классифицировала бы его как NAV;
 #   корректный классификатор обязан учитывать контекст абзаца, не только резолвить путь.

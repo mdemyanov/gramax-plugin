@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-resolver/ac-011-genuinely-broken-link-detected.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-011 (FR-082, NFR-001)
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 1
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-011 (FR-082, NFR-001)
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 1
 # Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. Ни `missing-target`, ни
 #   `missing-target.md`, ни `missing-target/_index.md` не существуют — все три шага
 #   инференса FR-082 промахиваются, как и сегодняшний буквальный резолв. Тест — прямая

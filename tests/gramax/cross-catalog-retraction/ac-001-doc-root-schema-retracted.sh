@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/cross-catalog-retraction/ac-001-doc-root-schema-retracted.sh
-# Требование: content/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-001
+# Требование: docs/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-001
 #             (FR-093/FR-094).
-# ADR: content/00-project/adr/0017-cross-catalog-retraction.md, Решение 2 — точный текст
+# ADR: docs/00-project/adr/0017-cross-catalog-retraction.md, Решение 2 — точный текст
 #      замены таблицы «Корневые ключи» (строка `code`) и раздела «## Cross-каталожные ссылки
 #      через `code`» в references/doc-root-schema.md.
 #
@@ -18,7 +18,7 @@
 #       не запускает ни один suite `tests/gramax/**` и не проверяет прозу writer-skill вообще
 #       (см. README.md suite'а, «Стартовое состояние»). Проверка (в) — самостоятельный сигнал,
 #       который может независимо покраснеть, если правка Dev случайно сломает structural-
-#       валидацию content/ (сироты, битые ссылки, JSON) — не имеет отношения к тексту
+#       валидацию docs/ (сироты, битые ссылки, JSON) — не имеет отношения к тексту
 #       doc-root-schema.md конкретно.
 
 set -u -o pipefail
@@ -34,7 +34,7 @@ assert_file_exists "$DOC_ROOT_SCHEMA" "AC-001: references/doc-root-schema.md д�
 if [ -f "$DOC_ROOT_SCHEMA" ]; then
   # Все многословные проверки идут по FLAT-версии файла (переводы строк схлопнуты в пробел), не
   # по сырым строкам. Причина, найденная эмпирически при написании ac-006 этого suite'а на
-  # синтетической фикстуре CHANGELOG: content/*.md и ADR-тексты в этом репозитории пишутся с
+  # синтетической фикстуре CHANGELOG: docs/*.md и ADR-тексты в этом репозитории пишутся с
   # ручным переносом строк на ~90 столбце (в отличие от plugins/gramax/skills/writer/**, где
   # принят стиль «один длинный абзац — одна строка», но полагаться на конвенцию конкретного
   # файла — хрупко). Многословная фраза, случайно разорванная переносом строки ровно между её
@@ -65,7 +65,7 @@ if [ -f "$DOC_ROOT_SCHEMA" ]; then
 fi
 
 # (в) композитный гейт задачи — код возврата полного непрефильтрованного прогона, не grep по
-# stdout (content/lessons-learned.md, 2026-08-10 «зелёный по грепу — не зелёный»).
+# stdout (docs/lessons-learned.md, 2026-08-10 «зелёный по грепу — не зелёный»).
 LOG_FILE="$(mktemp)"
 ( cd "$ROOT" && bash scripts/check.sh --fast ) > "$LOG_FILE" 2>&1
 CHECK_EXIT=$?

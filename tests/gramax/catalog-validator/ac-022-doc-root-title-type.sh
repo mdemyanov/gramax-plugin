@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-022-doc-root-title-type.sh
-# Требование: content/30-requirements/2026-08-13-doc-root-discovery-contract.md AC-037 (FR-121)
-# ADR: content/00-project/adr/0020-doc-root-recursive-discovery.md, Решение 2
+# Требование: docs/30-requirements/2026-08-13-doc-root-discovery-contract.md AC-037 (FR-121)
+# ADR: docs/00-project/adr/0020-doc-root-recursive-discovery.md, Решение 2
 # Природа: живой контракт — КРАСНЫЙ на момент создания.
 #   До FR-121 check_doc_root проверяет только присутствие ключа (field not in data) —
 #   title: 4.21/yes/null/{a: b} проходили чисто (exit 0). После FR-121 каждый не-строковый

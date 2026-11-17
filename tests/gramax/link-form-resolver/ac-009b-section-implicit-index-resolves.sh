@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-resolver/ac-009b-section-implicit-index-resolves.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-009 (FR-082) —
-#   edge case из content/40-architecture/2026-08-13-link-form-contract-design.md,
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-009 (FR-082) —
+#   edge case из docs/40-architecture/2026-08-13-link-form-contract-design.md,
 #   раздел «Контракт с QA-author» → «Edge cases»: «Цель — раздел без явного `_index` в
 #   тексте ссылки (`[X](section)`, не `[X](section/_index)`) — третий шаг инференса
 #   (`section/_index.md`) описан FR-082 текстуально, но не был отдельно прогнан
 #   исполняемым probe».
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 1
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 1
 #
 # Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. `[X](section)` резолвится
 #   сегодня уже сейчас, но ПОБОЧНО: `(md.parent / "section").resolve()` указывает на

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-resolver/ac-011b-no-double-md-extension.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md — edge case из
-#   content/40-architecture/2026-08-13-link-form-contract-design.md, «Контракт с
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md — edge case из
+#   docs/40-architecture/2026-08-13-link-form-contract-design.md, «Контракт с
 #   QA-author» → «Edge cases»: «Цель уже оканчивается на `.md`, но файла нет ... инференс
 #   НЕ должен пытаться добавить второе `.md` (AC-011 не должен «случайно починиться»)».
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 1 («Бриф для Dev» п.1:
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 1 («Бриф для Dev» п.1:
 #   «если target не оканчивается на .md — попробовать литерал → target+.md → .../_index.md;
 #   ИНАЧЕ (либо ничего не найдено) — вернуть литеральный resolve(), как сегодня»).
 # Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. `missing.md` уже несёт

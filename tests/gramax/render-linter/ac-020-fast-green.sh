@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-020-fast-green.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-020 (NFR-004)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-020 (NFR-004)
 # Проверка: bash scripts/check.sh --fast → exit 0 (рендер-линтер в --fast не красит гейт).
 
 set -u -o pipefail

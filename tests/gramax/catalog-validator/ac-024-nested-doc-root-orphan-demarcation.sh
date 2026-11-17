@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-024-nested-doc-root-orphan-demarcation.sh
-# Требование: content/30-requirements/2026-08-13-doc-root-discovery-contract.md AC-039 (FR-120 граница ownership)
-# ADR: content/00-project/adr/0020-doc-root-recursive-discovery.md, Решение 1 (in_scope=False, FR-047)
+# Требование: docs/30-requirements/2026-08-13-doc-root-discovery-contract.md AC-039 (FR-120 граница ownership)
+# ADR: docs/00-project/adr/0020-doc-root-recursive-discovery.md, Решение 1 (in_scope=False, FR-047)
 # Природа: живой контракт — КРАСНЫЙ на момент создания.
 #   До FR-120 вложенный root не валидируется вовсе (exit 0, дефект title: 4.21 невидим).
 #   После: вложенный каталог валидируется как отдельный root, его статьи не orphan-ы
@@ -9,7 +9,7 @@
 #
 #   Сценарий фикстуры:
 #     - внешний каталог: outer-orphan.md без входящих ссылок → orphan внешнего (1 находка);
-#     - вложенный examples/project-example/content/ — отдельный root, его статьи
+#     - вложенный examples/project-example/docs/ — отдельный root, его статьи
 #       (inner.md) ссылками связаны внутри вложенного root → НЕ orphan-ы внешнего;
 #     - вложенный .doc-root.yaml несёт дефект title: 4.21 → ровно ОДНА находка
 #       invalid type (каждый root валидирует свой .doc-root.yaml один раз).

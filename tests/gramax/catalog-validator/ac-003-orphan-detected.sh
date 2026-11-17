@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-003-orphan-detected.sh
-# Требование: content/30-requirements/2026-08-11-validation-contract.md AC-013 (FR-047)
-# ADR: content/00-project/adr/0012-catalog-validation-contract.md, Решение 2 (уровень: warning)
+# Требование: docs/30-requirements/2026-08-11-validation-contract.md AC-013 (FR-047)
+# ADR: docs/00-project/adr/0012-catalog-validation-contract.md, Решение 2 (уровень: warning)
 # Природа: живой контракт — КРАСНЫЙ на момент создания (проверка статей-сирот в
 #   validate_structure.py ещё не реализована — DEV-001).
 

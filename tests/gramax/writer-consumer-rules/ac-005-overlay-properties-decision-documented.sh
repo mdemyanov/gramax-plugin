@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/writer-consumer-rules/ac-005-overlay-properties-decision-documented.sh
-# Требование: content/30-requirements/2026-08-11-writer-consumer-rules.md, AC-005 (FR-068).
-# Диспозиция: content/40-architecture/2026-08-11-writer-rules-disposition.md, раздел B —
+# Требование: docs/30-requirements/2026-08-11-writer-consumer-rules.md, AC-005 (FR-068).
+# Диспозиция: docs/40-architecture/2026-08-11-writer-rules-disposition.md, раздел B —
 #   overlay-расширение `properties` технически не запрещено, но не валидируется; рекомендована
 #   необязывающая конвенция провенанса (комментарий `# добавлено overlay'ем <имя>`) в
 #   references/doc-root-schema.md.

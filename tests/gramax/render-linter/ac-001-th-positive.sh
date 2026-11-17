@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-001-th-positive.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-001 (FR-104)
-# ADR: content/00-project/adr/0019-render-killer-linter.md, Решение 3
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-001 (FR-104)
+# ADR: docs/00-project/adr/0019-render-killer-linter.md, Решение 3
 # Проверка: <th> вне кода → ERROR с номером строки, exit 1; сообщение с <td> + header="row".
 
 set -u -o pipefail

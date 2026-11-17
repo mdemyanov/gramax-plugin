@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # tests/gramax/writer-consumer-rules/ac-011-permitting-adr-references-requirement.sh
-# Требование: content/30-requirements/2026-08-11-writer-consumer-rules.md, AC-011 (FR-076).
+# Требование: docs/30-requirements/2026-08-11-writer-consumer-rules.md, AC-011 (FR-076).
 # Правка PM (2026-08-11): AC-011 переформулирован в самом требовании. FR-076 называет ADR
 # ОЖИДАЕМОЙ, не единственной формой разрешающего документа; проверка идёт по наличию ссылки на
 # требование ПО ИМЕНИ ФАЙЛА и по ПОЛНОТЕ ТРИАЖА всех шести тем A–F — не по каталогу
-# размещения. Кандидаты ищутся и в content/00-project/adr/, и в content/40-architecture/.
-# Диспозиция: content/40-architecture/2026-08-11-writer-rules-disposition.md — фактически
+# размещения. Кандидаты ищутся и в docs/00-project/adr/, и в docs/40-architecture/.
+# Диспозиция: docs/40-architecture/2026-08-11-writer-rules-disposition.md — фактически
 # принятый разрешающий документ (Accepted), сама объясняет, почему она не ADR: enforcement и
 # машиночитаемый контракт закреплены параллельным ADR-0012, здесь только триаж.
 #
@@ -18,7 +18,7 @@
 # тему или ссылку на требование, гейт покраснеет.
 #
 # Реализовано явным циклом по кандидатам (не grep|xargs|grep) — по прецеденту ac-002 в этом
-# suite'е (см. content/lessons-learned.md, запись 2026-08-11 про vacuous truth в xargs на
+# suite'е (см. docs/lessons-learned.md, запись 2026-08-11 про vacuous truth в xargs на
 # пустом stdin).
 
 set -u -o pipefail
@@ -32,10 +32,10 @@ REQ_NAME='2026-08-11-writer-consumer-rules'
 CANDIDATES=()
 while IFS= read -r f; do
   [ -n "$f" ] && CANDIDATES+=("$f")
-done < <(grep -rl "$REQ_NAME" "$ROOT/content/00-project/adr" "$ROOT/content/40-architecture" 2>/dev/null)
+done < <(grep -rl "$REQ_NAME" "$ROOT/docs/00-project/adr" "$ROOT/docs/40-architecture" 2>/dev/null)
 
 if [ "${#CANDIDATES[@]}" -eq 0 ]; then
-  echo "  FAIL: AC-011 — ни один документ в content/00-project/adr/ или content/40-architecture/ не ссылается на $REQ_NAME по имени файла (FR-076)" >&2
+  echo "  FAIL: AC-011 — ни один документ в docs/00-project/adr/ или docs/40-architecture/ не ссылается на $REQ_NAME по имени файла (FR-076)" >&2
   FAIL=$((FAIL + 1))
 else
   FOUND_FULL_TRIAGE=0

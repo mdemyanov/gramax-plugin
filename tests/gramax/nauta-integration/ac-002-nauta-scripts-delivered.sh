@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/nauta-integration/ac-002-nauta-scripts-delivered.sh
-# Spec: docs/superpowers/specs/2026-08-07-nauta-integration-design.md FR-7
+# Спека: спека волны nauta-integration (2026-08-07; историческая, прародитель удалён при инверсии раскладки 2026-11-17 — FR-129, ADR-0021) FR-7
 # AC coverage:
 #   AC-10 → свои check.sh / install-hooks.sh / pre-commit не перезаписаны синком
 #   (валидатор доставлен и запускается)
@@ -14,7 +14,7 @@ cd "$ROOT"
 FAIL=0
 
 assert_file_exists "scripts/validate-content.py" \
-  "валидатор content/ должен быть доставлен"
+  "валидатор каталога должен быть доставлен"
 assert_file_exists "scripts/_validate_common.py" \
   "общий модуль валидаторов должен быть доставлен"
 assert_file_exists ".nauta-scripts-basis.yaml" \

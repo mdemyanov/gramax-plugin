@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-adoption/ac-004-detection-zero-false-positives-scale.sh
-# Требование: content/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-004
+# Требование: docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-004
 #   (NFR-051).
-# ADR: content/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 3.
+# ADR: docs/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 3.
 #   Самозакрывающийся <mermaid path="…"/> не совпадает ни с одним легаси-паттерном по
 #   построению — уже корректные вхождения не задеваются на любом масштабе (образец — 156
 #   тегов naumen-smp-mcp).

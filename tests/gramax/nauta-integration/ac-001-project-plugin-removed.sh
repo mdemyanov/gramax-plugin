@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/nauta-integration/ac-001-project-plugin-removed.sh
-# Spec: docs/superpowers/specs/2026-08-07-nauta-integration-design.md FR-1
+# Спека: спека волны nauta-integration (2026-08-07; историческая, прародитель удалён при инверсии раскладки 2026-11-17 — FR-129, ADR-0021) FR-1
 # AC coverage:
 #   AC-1  → локальный плагин project удалён, settings.json без упоминаний
 #   AC-11 → tests/project/ удалён

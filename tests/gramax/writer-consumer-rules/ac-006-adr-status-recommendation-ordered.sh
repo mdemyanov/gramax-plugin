@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/gramax/writer-consumer-rules/ac-006-adr-status-recommendation-ordered.sh
-# Требование: content/30-requirements/2026-08-11-writer-consumer-rules.md, AC-006 (FR-069).
-# Диспозиция: content/40-architecture/2026-08-11-writer-rules-disposition.md, раздел C —
+# Требование: docs/30-requirements/2026-08-11-writer-consumer-rules.md, AC-006 (FR-069).
+# Диспозиция: docs/40-architecture/2026-08-11-writer-rules-disposition.md, раздел C —
 #   новый подраздел "Content type ADR — `Статус`" в references/doc-root-schema.md.
 # Природа: живой контракт — КРАСНЫЙ на момент создания (DEV-004 не начат).
 #

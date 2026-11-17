@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/render-linter/ac-003-note-in-cell.sh
-# Требование: content/30-requirements/2026-08-12-render-killer-linter.md — AC-003 (FR-106)
+# Требование: docs/30-requirements/2026-08-12-render-killer-linter.md — AC-003 (FR-106)
 # Проверка: <note>, открытый внутри <td>/<th>, → ERROR на строке открытия <note>;
 #           сообщение упоминает <td>/<th> и инлайн-замену.
 

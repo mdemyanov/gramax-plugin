@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-adoption/ac-001-jurisdiction-boundary-documented.sh
-# Требование: content/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-001
+# Требование: docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-001
 #   (FR-050, FR-051).
-# ADR: content/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 1.
+# ADR: docs/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 1.
 #   Носитель: короткая формулировка в skills/mermaid/SKILL.md (грузится при каждом вызове) +
 #   развёрнутый on-demand skills/mermaid/references/jurisdiction-and-validation.md (new) +
 #   одна ссылочная строка в README.md.
@@ -18,7 +18,7 @@
 # (сама по себе — недостаточный барьер, уже удовлетворена случайно). Assert 2 — обязательная
 # семантическая проверка QA-author: ключевое слово «юрисдикц» обязано встречаться в тех же
 # материалах — это то, что реально сигнализирует «граница задокументирована», а не случайное
-# совпадение подстроки. См. content/60-implementation/acceptance/
+# совпадение подстроки. См. docs/60-implementation/acceptance/
 # 2026-08-11-mermaid-adoption-at-design.md, раздел «Находка: буквальный AC уже удовлетворён».
 
 set -u -o pipefail

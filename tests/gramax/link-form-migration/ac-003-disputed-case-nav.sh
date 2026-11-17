@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-migration/ac-003-disputed-case-nav.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-003 (FR-079,
-#   прецедент RES-005 «Задача 1», строка #83 — content/10-domain/research/
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-003 (FR-079,
+#   прецедент RES-005 «Задача 1», строка #83 — docs/10-domain/research/
 #   2026-08-13-link-form-corpus-audit.md, «Пояснение к спорной строке (# 83)»).
-# ADR: content/40-architecture/2026-08-13-link-form-contract-design.md, FR/NFR Mapping —
+# ADR: docs/40-architecture/2026-08-13-link-form-contract-design.md, FR/NFR Mapping —
 #   «FR-079 — уже решено требованием, миграционный скрипт применяет решённое правило».
 # Природа: живой контракт — КРАСНЫЙ на момент создания (migrate_nav_codespans.py не существует).
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # tests/gramax/link-form-resolver/ac-012-outside-catalog-codespan-ignored.sh
-# Требование: content/30-requirements/2026-08-13-link-form-contract.md AC-012 (FR-084)
-# ADR: content/00-project/adr/0016-link-form-contract.md, Решение 3 (FR-084 уже
+# Требование: docs/30-requirements/2026-08-13-link-form-contract.md AC-012 (FR-084)
+# ADR: docs/00-project/adr/0016-link-form-contract.md, Решение 3 (FR-084 уже
 #   удовлетворена архитектурой `_mask_code` + `in_scope`, без нового кода — см.
-#   content/40-architecture/2026-08-13-link-form-contract-design.md, «FR/NFR Mapping»)
+#   docs/40-architecture/2026-08-13-link-form-contract-design.md, «FR/NFR Mapping»)
 # Природа: regression guard — ЗЕЛЁНЫЙ на момент создания. Код-спан (backtick), не
 #   markdown-ссылка — `_mask_code` вырезает его до сканирования `_MD_LINK_RE`, поэтому
 #   `_collect_links` никогда не видит этот путь как ссылку, независимо от инференса

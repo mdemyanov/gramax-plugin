@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/gramax/mermaid-adoption/ac-005-migration-preserves-dsl-and-defaults.sh
-# Требование: content/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-005
+# Требование: docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md AC-005
 #   (FR-057, дефолты — ADR-0010 Решение 5).
-# ADR: content/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 4.
+# ADR: docs/00-project/adr/0013-mermaid-adoption-and-migration.md, Решение 4.
 # Природа: живой контракт — КРАСНЫЙ на момент создания (migrate_mermaid.py — DEV-003, не
 #   начат; ни один .mermaid-файл не создаётся — оба assert_file_exists-эквивалента ниже
 #   падают).

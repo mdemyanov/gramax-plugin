@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/cross-catalog-retraction/ac-007-plugin-json-version.sh
-# Требование: content/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-007 (FR-102).
+# Требование: docs/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-007 (FR-102).
 # Точечная проверка через jq (реальный парсинг JSON), не grep по сырому файлу — так прямо
 # предписано и требованием, и ADR-0017 (Решение 3, «Bump выполняет Tech-writer... после Dev +
 # QA-runner»).

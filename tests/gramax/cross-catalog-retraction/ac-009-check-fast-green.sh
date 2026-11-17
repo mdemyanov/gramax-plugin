@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # tests/gramax/cross-catalog-retraction/ac-009-check-fast-green.sh
-# Требование: content/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-009
+# Требование: docs/30-requirements/2026-08-13-cross-catalog-retraction.md, AC-009
 #             (композитный). «bash scripts/check.sh --fast; echo exit=$?» — exit=0, проверено
-#             по коду возврата, не по grep на PASS в выводе (content/lessons-learned.md,
+#             по коду возврата, не по grep на PASS в выводе (docs/lessons-learned.md,
 #             2026-08-10 «зелёный по грепу — не зелёный»).
 #
 # Природа: PRE-PASSING regression guard — ЗЕЛЁНЫЙ на момент создания. `--fast` не запускает ни
 # один suite tests/gramax/** (только whitespace + JSON + `uv run scripts/validate-content.py` —
 # см. scripts/check.sh, шаги 1-2.5) — текст writer-skill вне его периметра. Тест защищает от
 # регрессии в ДРУГОМ измерении: что правки Dev/Tech-writer (doc-root-schema.md, SKILL.md,
-# CHANGELOG.md, plugin.json, marketplace.json) не сломают structural-валидацию content/
+# CHANGELOG.md, plugin.json, marketplace.json) не сломают structural-валидацию docs/
 # (сироты, битые ссылки, JSON-синтаксис) — то, что --fast реально проверяет.
 #
 # Отдельный от AC-001(в) скрипт — намеренное дублирование прогона check.sh --fast (лишняя
