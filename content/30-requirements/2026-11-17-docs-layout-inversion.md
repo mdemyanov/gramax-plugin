@@ -129,7 +129,9 @@ properties:
   документарного контура», он его переносит).
 - **FR-127 (карта раскладки и корневой промт-слой):** карта раскладки в `AGENTS.md`
   перегенерируется повторным прогоном
-  `/Users/mdemyanov/.zcode/cli/plugins/cache/nauta/nauta/2.22.0/bin/init.sh` так, чтобы
+  `/Users/mdemyanov/.zcode/cli/plugins/cache/nauta/nauta/2.23.0/bin/init.sh` (канон на
+  момент работ; точная командная строка с `--profile classic` и шестью
+  `--map-home content/<home>=docs/<home>` — ADR-0021, Поправка B1) так, чтобы
   пары домов читались как `content/<home>` → `docs/<home>` (канон-маркер плагина
   переразрешается на новые адреса); упоминания
   `content/` в `AGENTS.md` и `CLAUDE.md` (в сумме 42 файла-упоминания входят в те же
