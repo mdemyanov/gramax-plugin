@@ -451,7 +451,13 @@ def check_open_wave(doc: dict, blocks: list[dict], closing: str | None, rep: Rep
 def check_immutability(carrier: Path, doc: dict, since: str | None, rep: Report,
                        root: Path | None) -> None:
     """P3 — неизменяемость закрытых строк. Правка прошлой строки есть подгонка порога под
-    измеренное; новая величина порогом не становится."""
+    измеренное; новая величина порогом не становится.
+
+    Сравнение — ФИНАЛ ПРОТИВ ФИНАЛА (qa196): у многофазной истории ключа (волна, метрика)
+    порог есть последняя запись ряда — «the quantity of the LAST CLOSED wave» (спека
+    wave-metric-ratchet); записи-фазы — собственная хроника волны, их правка этим прибором
+    не ловится. Прежнее сравнение «каждая запись против базе-последней» давало ложные флаги
+    на живом многофазном ряде (NA-EPIC-141/144) при байт-равной базе."""
     if since is None:
         rep.say("  [INFO] P3 (неизменяемость закрытых строк) не исполнен: база дифа не названа "
                 "(--since <ref>). Это объявленный пропуск, а не проверка.")
@@ -470,20 +476,21 @@ def check_immutability(carrier: Path, doc: dict, since: str | None, rep: Report,
     except yaml.YAMLError:
         rep.say(f"  [INFO] P3 не исполнен: носитель в {since} не разбирается как YAML.")
         return
-    old_rows = {
-        (str(b.get("wave")), str(r.get("metric"))): r.get("value")
-        for b in (old.get("series") or []) if isinstance(b, dict) and b.get("closed") is True
-        for r in (b.get("values") or []) if isinstance(r, dict)
-    }
-    for block in doc.get("series") or []:
-        if not isinstance(block, dict) or block.get("closed") is not True:
-            continue
-        for row in block.get("values") or []:
-            key = (str(block.get("wave")), str(row.get("metric")))
-            if key in old_rows and old_rows[key] != row.get("value"):
-                rep.fail(RC_VIOLATION, f"  ✗ ПРАВКА ЗАКРЫТОЙ СТРОКИ: волна {key[0]}, метрика "
-                                       f"{key[1]} — {old_rows[key]} в {since}, {row.get('value')} "
-                                       f"сегодня. Новая величина порогом НЕ становится.")
+
+    def final_rows(source: dict) -> dict:
+        return {
+            (str(b.get("wave")), str(r.get("metric"))): r.get("value")
+            for b in (source.get("series") or []) if isinstance(b, dict) and b.get("closed") is True
+            for r in (b.get("values") or []) if isinstance(r, dict)
+        }
+
+    old_rows = final_rows(old)
+    new_rows = final_rows(doc)
+    for key, today_final in new_rows.items():
+        if key in old_rows and old_rows[key] != today_final:
+            rep.fail(RC_VIOLATION, f"  ✗ ПРАВКА ЗАКРЫТОЙ СТРОКИ: волна {key[0]}, метрика "
+                                   f"{key[1]} — {old_rows[key]} в {since}, {today_final} "
+                                   f"сегодня. Новая величина порогом НЕ становится.")
 
 
 _UPGRADE_COST_SECTION_RE = re.compile(r"^###\s*Цена обновления\s*$", re.MULTILINE)

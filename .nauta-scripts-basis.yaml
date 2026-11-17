@@ -2,9 +2,9 @@
 # редактируйте руками значения; секцию `skip:` — можно (ADR-030-spec §5/§6).
 # Доставленные файлы — MIT, Copyright (c) 2026 mdemyanov (tools-ai/nauta).
 # Полный текст лицензии: LICENSE в корне репозитория плагина.
-nauta_version: "2.22.0"
-nauta_ref_sha: "01b89ed808986a1549c05aeeb831a6ea9139c342"
-synced_at: "2026-11-17T12:04:28Z"
+nauta_version: "2.23.0"
+nauta_ref_sha: "d776618b74ea3f1af8fd98a6ca1840f64b2b3096"
+synced_at: "2026-11-17T21:30:16Z"
 delivery_complete: true
 files_count: 24
 files:
@@ -14,7 +14,7 @@ files:
   scripts/assemble-gate-evidence.sh: "sha256:6d11e14761dae1b66e050b10e1854c93f6458ada1b3ad77efbe1228c72160044"
   scripts/check-branch-discipline.py: "sha256:7d6f2ab399b7f8c7b48473195ec2efd36b49f4f99c6471a1f3e0c99de9bd260b"
   scripts/check-content-actuality.py: "sha256:7363e9efdfcd20f0ff787024482945d675567c3805c819a2f7538cfd2b2ee5e4"
-  scripts/check-ratchet.py: "sha256:eaedd2a0bd9137c817735009b008d69978f0514669b624897f812b4feefafdfe"
+  scripts/check-ratchet.py: "sha256:3a8ab30a7eb78909a30953c13be7599fdbb5d8abcf39a93a14851c35b420dc0a"
   scripts/check-hooks-path.sh: "sha256:ba9e0a5f1d9bfc03f34cec078fdcfb6f11106256aba70ac403f4d614dac50be1"
   scripts/check-readiness.sh: "sha256:46d56a8a21434eaa17c3fb69639fb120c64dc809118e5b7490410390ee47e60b"
   scripts/check-status-drift.py: "sha256:8fa9ed3e0358131bee5a663c90df8b7d1ba2560cf40efc1e3ad343b5a835a6da"
