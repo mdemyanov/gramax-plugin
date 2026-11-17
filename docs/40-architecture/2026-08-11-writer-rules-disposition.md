@@ -18,11 +18,11 @@ properties:
 ## Контекст
 
 Разрешающий design-документ, не ADR. Закрывает FR-065…FR-076 из
-`content/30-requirements/2026-08-11-writer-consumer-rules.md`, на основе research
+`docs/30-requirements/2026-08-11-writer-consumer-rules.md`, на основе research
 [RES-002: Где потребителям не хватило инструкций плагина](../10-domain/research/2026-08-11-plugin-consumers-gaps.md) (G3, G6, G13). Enforcement и
 машиночитаемый контракт валидации — параллельный **ADR-0012** («Контракт валидации
 Gramax-каталога»,
-`content/00-project/adr/0012-catalog-validation-contract.md`): здесь только ссылаюсь, не
+`docs/00-project/adr/0012-catalog-validation-contract.md`): здесь только ссылаюсь, не
 дублирую. Свободный следующий номер в реестре — **ADR-0014** (ADR-0013 занят параллельным
 решением по mermaid-миграции).
 
@@ -43,7 +43,7 @@ Gramax-каталога»,
 назначение `code`, но не показывает сквозной пример. Добавить подраздел с реальным значением:
 
 ```yaml
-# content/.doc-root.yaml (этот репозиторий)
+# docs/.doc-root.yaml (этот репозиторий)
 code: GRAMAX-PLUGIN
 ```
 `` `GRAMAX-PLUGIN/40-architecture/2026-08-11-writer-rules-disposition.md` `` — ссылка из статьи другого каталога.
@@ -84,7 +84,7 @@ Overlay-расширение `properties` технически не запрещ
 - **FR-070:** тело статьи — источник истины; frontmatter — проекция, обновляется тем же
   изменением. Расхождение носителей — дефект.
 
-**Не решено здесь:** enum `Статус` в `content/.doc-root.yaml` этого репозитория не содержит
+**Не решено здесь:** enum `Статус` в `docs/.doc-root.yaml` этого репозитория не содержит
 `Proposed` — структурная правка `properties`, требует отдельного SA-разбора перед внесением.
 Follow-up для PM/Dev, не ADR-кандидат — правка данных, не архитектура.
 
@@ -138,18 +138,18 @@ leak) весомее числа повторов, поэтому предупр�
    **0014**.
 2. Верификация примера FR-065 на реальном двухкаталожном сетапе — блокирует публикацию
    «проверенного» примера, не блокирует объявляющую половину.
-3. Приведение `content/.doc-root.yaml` этого репозитория к рекомендации темы C (`Proposed`) —
+3. Приведение `docs/.doc-root.yaml` этого репозитория к рекомендации темы C (`Proposed`) —
    follow-up для PM/Dev, не ADR-кандидат.
 
 ## Бриф для Dev / DevOps
 
 **Dev.** Архитектура — этот файл; требование —
-`content/30-requirements/2026-08-11-writer-consumer-rules.md`; фаза документационная, код
+`docs/30-requirements/2026-08-11-writer-consumer-rules.md`; фаза документационная, код
 `plugins/gramax/scripts/**` не трогается. Порядок: 1) `references/doc-root-schema.md` — темы
 A/B/C → 2) `references/structure.md` — тема D → 3) новый `references/authoritative-source.md`
 — тема F → 4) `SKILL.md` — точечные вставки (A backtick, E guardrail, F декларация+ссылка) →
 5) прогнать AC-001…AC-012 и `bash scripts/check.sh --fast` (AC-013). AC — весь список
-AC-001…AC-013 из требования. Не менять `content/.doc-root.yaml` (вопрос 3), не переименовывать
+AC-001…AC-013 из требования. Не менять `docs/.doc-root.yaml` (вопрос 3), не переименовывать
 skill-имена.
 
 **DevOps.** N/A — изменения документационные, в пределах `plugins/gramax/skills/writer/**`;

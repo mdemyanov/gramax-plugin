@@ -148,7 +148,7 @@ Errors: 0 | Warnings: 0
 
 ### 3. Что уже решено — ADR-0012 (Accepted, но не реализовано)
 
-`content/00-project/adr/0012-catalog-validation-contract.md`, «Решение 1», принято сегодня
+`docs/00-project/adr/0012-catalog-validation-contract.md`, «Решение 1», принято сегодня
 (2026-08-11, Status: Accepted): `check_no_index_in_root` **удаляется** из `validate_structure.py`,
 `_index.md` в корне становится **разрешён и не обязателен**. Формулировка ADR прямо признаёт предел
 своей доказательной базы:
@@ -266,7 +266,7 @@ PM указал шесть репозиториев с `_index.md` в корне
 | `writer/SKILL.md:63,95`, `references/structure.md:94-118` | `_index.md` в корне каталога **запрещён** | `_index.md` в корне есть во всех 6 проверенных PM репозиториях (2 перепроверены лично), в `gramax-user-docs` (эталон вендора) и в этом репозитории |
 | `plugins/gramax/scripts/validate_structure.py::check_no_index_in_root` | Возвращает `error`, если `_index.md` в корне | Прогон сегодня на `content/`: `ERROR _index.md not allowed in catalog root` — воспроизведено |
 | `scripts/validate-content.py::check_indexes` (C1, nauta) | `_index.md` **обязателен** в каждой папке, включая корень | Прогон сегодня: `content/: OK, 0 errors` — тот же `content/`, противоположный вердикт |
-| `content/00-project/adr/0012-catalog-validation-contract.md`, Решение 1 | `_index.md` в корне — **разрешён, не обязателен**; явно: «нет данных о фактическом поведении Gramax» | Принят (Accepted) сегодня, но `SKILL.md`/`validate_structure.py` не правлены — решение не исполнено на момент исследования |
+| `docs/00-project/adr/0012-catalog-validation-contract.md`, Решение 1 | `_index.md` в корне — **разрешён, не обязателен**; явно: «нет данных о фактическом поведении Gramax» | Принят (Accepted) сегодня, но `SKILL.md`/`validate_structure.py` не правлены — решение не исполнено на момент исследования |
 | Вендорский корпус `gramax-user-docs` (практика) | Корневой `_index.md` несёт содержательный дашборд (`<view>`, таблица навигации) — подразумевает, что контент отображается читателю | Чтение кода движка: `content` корневой категории захардкожен `null`, `_index.md` отфильтровывается из списка статей папки — движок не подтверждает, что этот текст где-либо показывается |
 | `github.com/Gram-ax/gramax` (исходный код, primary) | `_index.md` в любой папке, включая корень, физически безвреден — ошибки не возникает | Одновременно: движок явно не использует корневой `_index.md` для чего-либо — ни ошибка, ни функция; вопрос «зачем он тогда есть в 6/6 репозиториев» остаётся открытым |
 
@@ -317,11 +317,11 @@ PM указал шесть репозиториев с `_index.md` в корне
 - [primary] `scripts/validate-content.py` (`check_indexes`, `check_index_no_properties`) и
   `tests/gramax/nauta-integration/ac-003-doc-root-contract.sh` — противоположное требование,
   подключённое к `check.sh --fast`.
-- [primary] `content/00-project/adr/0012-catalog-validation-contract.md` — уже принятое (Accepted,
+- [primary] `docs/00-project/adr/0012-catalog-validation-contract.md` — уже принятое (Accepted,
   2026-08-11) архитектурное решение по этому же вопросу, включая явное признание пробела в данных.
-- [primary] `content/30-requirements/2026-08-11-validation-contract.md` (FR-042, FR-043) — постановка
+- [primary] `docs/30-requirements/2026-08-11-validation-contract.md` (FR-042, FR-043) — постановка
   вопроса как открытого для SA.
-- [primary] `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md` (находка G7) —
+- [primary] `docs/10-domain/research/2026-08-11-plugin-consumers-gaps.md` (находка G7) —
   предыдущая разведка, впервые зафиксировавшая противоречие.
 - [primary] Локальная рабочая копия `gramax-user-docs` (`content/_index.md`,
   `content/.doc-root.yaml`, `guides/structure-catalog.md`, `reference/catalog-properties.md`,

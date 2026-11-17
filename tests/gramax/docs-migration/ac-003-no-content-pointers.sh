@@ -134,6 +134,15 @@ file_excluded() {
     # создания suite'а)» несёт RECORD-путь (NFR-003: переписывание сделало бы запись об
     # утверждением о сегодняшней раскладке); указатели в файле переписаны в D2
     ./tests/gramax/catalog-validator/README.md) return 0 ;;
+    # кл.2 — research-probe'ы 2026-08: записи замеров на дату исследования (таблицы hits,
+    # процитированные PROBE-выводы, находки о тогдашней раскладке) + фикстурные деревья
+    # чужих каталогов (catalog-a/other-catalog/workspace-catalog/content/…, кл.6).
+    # Указатели («Связанные артефакты», path:line-цитаты) переписаны в D4 по
+    # построчному дискриминатору Поправки 3; остаток — RECORD, прецедент —
+    # whole-file запись allowlist suite doc-paths за link-form-corpus-audit.
+    ./docs/10-domain/research/2026-08-11-index-md-at-catalog-root.md | \
+      ./docs/10-domain/research/2026-08-13-cross-catalog-links-probe.md | \
+      ./docs/10-domain/research/2026-08-13-link-forms-probe.md) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -165,6 +174,52 @@ line_allowed() {
   # инструмент suite'а nauta-integration — негативные ассерты на старые пути (их
   # предмет — отсутствие; литерал необходим, шапка ac-007 именует принцип)
   if printf '%s' "$line" | grep -qE 'assert_(file|dir)_not_exists "content/'; then
+    return 0
+  fi
+  # кл.6 — таблица находок по ЧУЖИМ репозиториям-потребителям (moex, mango-cti-rest,
+  # naumen-smp-mcp): пути content/ их корпусов, колонка-источник «research G5»
+  if printf '%s' "$line" | grep -qF 'research G5'; then
+    return 0
+  fi
+  # кл.6 — пути чужих репозиториев-потребителей knowlage/moex и knowlage/tsn-assistant
+  if printf '%s' "$line" | grep -qF 'knowlage/'; then
+    return 0
+  fi
+  # кл.6 — dogfood-фикстуры примеров в дереве плагина (plugins/…/examples/)
+  if printf '%s' "$line" | grep -qF 'examples/{kb-team,project}-example'; then
+    return 0
+  fi
+  # кл.6 — описание синтетической фикстуры валидатора (дерево собирается в tmp)
+  if printf '%s' "$line" | grep -qF 'Фикстура: валидный'; then
+    return 0
+  fi
+  # кл.6 — антипаттерн-корпус link-form-контракта (пример формы с чужим префиксом)
+  if printf '%s' "$line" | grep -qF 'с соседним упоминанием чужого проекта'; then
+    return 0
+  fi
+  # кл.2 — процитированный вывод прогона валидатора (запись о замере на дату)
+  if printf '%s' "$line" | grep -qE 'ERROR +content/_index\.md'; then
+    return 0
+  fi
+  # кл.6 — находка о ПЯТИ внешних докъ-репозиториях (чужие корпуса)
+  if printf '%s' "$line" | grep -qF 'присутствует во всех пяти'; then
+    return 0
+  fi
+  if printf '%s' "$line" | grep -qF 'пяти внешних докъ-репозиториях'; then
+    return 0
+  fi
+  # кл.2 — RECORD об отсутствовавших тогда полях схемы (дефект закрыт коммитом A:
+  # language/syntax в объединённом корне есть; переписывание превратило бы запись
+  # об оценке в утверждение о сегодняшней раскладке; форма «отсутствию» — перенос
+  # фразы догфудинг-находки через строку)
+  if printf '%s' "$line" | grep -qE 'отсутств(ие|ующие|ю) `language`/`syntax` в `content/'; then
+    return 0
+  fi
+  if printf '%s' "$line" | grep -qF '`content/.doc-root.yaml`, отсутствию'; then
+    return 0
+  fi
+  # кл.6 — плейсхолдеры чужого корпуса tsn-assistant ({{TSN_CODE}}, {{EDITOR_EMAIL}})
+  if printf '%s' "$line" | grep -qF '{{TSN_CODE}}'; then
     return 0
   fi
   # кл.6 ECOSYSTEM — «голый» токен-конвенция: ни одного путеподобного вхождения.

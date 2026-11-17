@@ -193,7 +193,7 @@ title: Gramax Docs
 ```
 
 с описанием `code` как «краткое наименование каталога» — то есть значение нашего репозитория
-`code: GRAMAX-PLUGIN` в `content/.doc-root.yaml` синтаксически валидно как YAML-ключ, признанный
+`code: GRAMAX-PLUGIN` в `docs/.doc-root.yaml` синтаксически валидно как YAML-ключ, признанный
 вендором. Но чтение кода settings-формы редактирования каталога
 (`core/extensions/catalog/actions/propsEditor/logic/createFormSchema.ts:58-63`) показывает: поле
 провалидировано как строка **не длиннее 4 символов** (`z.string().max(4, ...)`) — то есть
@@ -236,7 +236,7 @@ title: Gramax Docs
 зарегистрирован в фейковом `Workspace.getBaseCatalog`), и чтением кода (`linkCreator` вызывает
 только `WorkspaceManager.current()`, без обхода прочих сконфигурированных workspace — Подтема 2,
 пункт 3). Это прямо отвечает на вопрос брифа №4: правило `SKILL.md:215` **гарантированно верно**
-для типового потребителя плагина — согласно RES-002 (`content/10-domain/research/
+для типового потребителя плагина — согласно RES-002 (`docs/10-domain/research/
 2026-08-11-plugin-consumers-gaps.md`, G3), все пять проектов, продублировавших правило, работают с
 **одним** клонированным репозиторием = **одним** каталогом в своём workspace. В такой конфигурации
 `workspace.getBaseCatalog("любое-чужое-имя")` вернёт `null` при любой форме ссылки просто потому,
@@ -373,10 +373,10 @@ markdown-ссылку, для межкаталожных ссылок») — б�
   вендора («краткое наименование каталога»), с точным примером `code: GX`.
 - [primary] `plugins/gramax/skills/writer/SKILL.md:208-220` — правило и его ❌/✅-примеры, объект
   проверки.
-- [primary] `content/40-architecture/2026-08-11-writer-rules-disposition.md` (тема A, FR-065) —
+- [primary] `docs/40-architecture/2026-08-11-writer-rules-disposition.md` (тема A, FR-065) —
   диспозиция, чей рецепт через `code:` проверен и опровергнут этим probe.
-- [primary] `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md` (G3) — свидетельство
+- [primary] `docs/10-domain/research/2026-08-11-plugin-consumers-gaps.md` (G3) — свидетельство
   о пяти проектах-потребителях, использованное для оценки последствий в разделе выше.
-- [primary] `content/10-domain/research/2026-08-13-link-forms-probe.md` (RES-004) — входной
+- [primary] `docs/10-domain/research/2026-08-13-link-forms-probe.md` (RES-004) — входной
   прецедент по методу и источник открытого вопроса, закрываемого этим probe; Подтема 3 (рендер
   нерезолвленной ссылки) перенесена оттуда без повторного исполнения.

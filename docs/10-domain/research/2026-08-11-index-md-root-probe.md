@@ -231,6 +231,6 @@ Tests:       1 passed, 1 total
   — WebFetch.
 - [secondary] [.doc-root.yaml | Gramax Docs](https://gram.ax/resources/docs/catalog/settings/doc-root-yaml)
   — WebFetch, наиболее релевантная страница вопросу.
-- [primary] `content/10-domain/research/2026-08-11-index-md-at-catalog-root.md` (RES-003) — входной
+- [primary] `docs/10-domain/research/2026-08-11-index-md-at-catalog-root.md` (RES-003) — входной
   артефакт, чей вывод («Подтема 6», «Что НЕ удалось выяснить») этот probe закрывает частично
   (исполняемое подтверждение) и частично оставляет открытым (визуальный рендер).

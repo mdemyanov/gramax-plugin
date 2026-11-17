@@ -18,7 +18,7 @@ properties:
 ## Контекст
 
 Реализация решений [ADR-0016](../00-project/adr/0016-link-form-contract.md) для требования
-`content/30-requirements/2026-08-13-link-form-contract.md` (FR-077…FR-092). ADR фиксирует пять
+`docs/30-requirements/2026-08-13-link-form-contract.md` (FR-077…FR-092). ADR фиксирует пять
 решений: единая точка инференса расширения в резолвере (`_collect_links`), временный `.md`-
 протокол при расхождении с `scripts/validate-content.py` (nauta), отказ от нового гейта для
 классификации NAV/SELF/SUBJECT, отказ от автоматизации проверки цитирования и forward/back-

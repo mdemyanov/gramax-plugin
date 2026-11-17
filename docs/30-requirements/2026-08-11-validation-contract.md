@@ -48,7 +48,7 @@ properties:
 `plugins/gramax/scripts/validate_structure.py` — pre-publish валидатор Gramax-каталога
 (`check_doc_root`, `check_no_index_in_root`, `check_subfolders_have_index`,
 `check_frontmatter`, `check_tags`, `check_no_drawio`). Разведка 2026-08-11
-(`content/10-domain/research/2026-08-11-plugin-consumers-gaps.md`, находки G1, G2, G7,
+(`docs/10-domain/research/2026-08-11-plugin-consumers-gaps.md`, находки G1, G2, G7,
 G13) показала, что ни один из ~30 разобранных проектов-потребителей на него не
 ссылается. Вместо этого около 20 репозиториев несут собственный форк
 `scripts/validate-content.py` с кодами C1–C14, покрывающими частично те же и частично
@@ -327,7 +327,7 @@ catalog root`, плюс отсутствие `language`/`syntax` в `content/.do
 
 ### C. Противоречие `_index.md`
 
-- [ ] **AC-008:** ADR, разрешающий противоречие FR-042, существует (номер — за SA): `find content/00-project/adr -iname '*.md' | xargs grep -l '_index.md' | grep -q . && echo PASS`.
+- [ ] **AC-008:** ADR, разрешающий противоречие FR-042, существует (номер — за SA): `find docs/00-project/adr -iname '*.md' | xargs grep -l '_index.md' | grep -q . && echo PASS`.
 - [ ] **AC-009 (Given/When/Then):** Given правило после ADR описано в `writer/SKILL.md`, When `check_no_index_in_root`/аналог исполняется на `content/` этого репозитория, Then результат не `error` — согласованность подтверждена на собственном `content/` плагина (пересекается с AC-011).
 
 ### D. Догфудинг
@@ -398,7 +398,7 @@ catalog root`, плюс отсутствие `language`/`syntax` в `content/.do
 
 ## Бриф для SA
 
-**Требование:** `content/30-requirements/2026-08-11-validation-contract.md`
+**Требование:** `docs/30-requirements/2026-08-11-validation-contract.md`
 **Фаза:** контракт валидации Gramax-каталога (обнаружимость + машиночитаемый контракт +
 резолюция противоречия `_index.md` + догфудинг + покрытие пробелов C7/C9/C10).
 
