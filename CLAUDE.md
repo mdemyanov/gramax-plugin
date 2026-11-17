@@ -8,11 +8,11 @@
 |---------|------|----------------|-----------|
 | `/nauta:pm` | PM (orchestrator) | main (Opus) | Декомпозиция, координация |
 | `/nauta:pm-review` | PM | main (Opus) | Финальная валидация перед merge в main |
-| `/nauta:research` | Researcher | subagent (Sonnet) | `content/10-domain/research/` |
-| `/nauta:ba` | BA | subagent (Sonnet) | `content/30-requirements/` |
-| `/nauta:sa` | SA | subagent (Sonnet) | `content/00-project/adr/`, `content/40-architecture/` |
+| `/nauta:research` | Researcher | subagent (Sonnet) | `docs/10-domain/research/` |
+| `/nauta:ba` | BA | subagent (Sonnet) | `docs/30-requirements/` |
+| `/nauta:sa` | SA | subagent (Sonnet) | `docs/00-project/adr/`, `docs/40-architecture/` |
 | `/nauta:dev` | Dev | subagent (Sonnet) | Код в `plugins/gramax/` (TDD) |
-| `/nauta:qa` | QA (author/runner) | subagent (Sonnet) | `content/60-implementation/test-reports/` |
+| `/nauta:qa` | QA (author/runner) | subagent (Sonnet) | `docs/60-implementation/test-reports/` |
 | `/nauta:tech-writer` | Tech-writer | subagent (Sonnet) | README, CHANGELOG, marketplace descriptions |
 | `/nauta:devsecops` | DevSecOps (opt-in) | subagent (Sonnet) | Secrets sweep перед публичным релизом |
 
@@ -40,7 +40,7 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 
 ## Команды сборки и проверки
 
-- `bash scripts/check.sh --fast` — pre-commit gate (whitespace, JSON, валидация `content/`).
+- `bash scripts/check.sh --fast` — pre-commit gate (whitespace, JSON, валидация `docs/`).
 - `bash scripts/check.sh --full` — то же плюс shellcheck, submodule status и suite'ы
   `tests/gramax/orphan-references` + `tests/gramax/nauta-integration` (полный прогон, не для
   pre-commit — вызывается вручную или в CI).
@@ -54,11 +54,11 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 ## Архитектурные правила
 
 - Skills и команды плагина — в `plugins/<name>/skills/` и `plugins/<name>/commands/`.
-- Артефакты продукта (ADR, требования, research, отчёты) — в `content/` по таксономии Gramax.
+- Артефакты продукта (ADR, требования, research, отчёты) — в `docs/` по таксономии Gramax.
   Мета-артефакты о самом репозитории и процессе (спеки по тулингу, планы исполнения) — в `docs/`.
 - Решения по структуре marketplace, разделению плагинов, изменению manifests — через ADR
-  (`content/00-project/adr/`).
-- Новый подраздел `content/` обязан нести `_index.md` и ссылку на него из родительского
+  (`docs/00-project/adr/`).
+- Новый подраздел `docs/` обязан нести `_index.md` и ссылку на него из родительского
   `_index.md` — иначе `check.sh --fast` красный (C1: отсутствие `_index.md` — error;
   C10: статья-сирота без входящих ссылок — warning).
 
@@ -94,7 +94,7 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 
 ## Self-improvement
 
-- `content/lessons-learned.md` — append-only журнал.
+- `docs/lessons-learned.md` — append-only журнал.
 - Субагенты сохраняют находки в auto-memory (типы: `reference`, `project`, `feedback`).
 - `/nauta:pm-review` читает lessons + memory и предлагает обновления `CLAUDE.md` / промптов.
 
@@ -178,12 +178,12 @@ its report as unadapted, and a role that needs it stops the step and names the
 divergence (no silent assumption). The map is regenerated in full on every
 run — re-run `/nauta:init` after moving or renaming homes.
 
-- content/00-project/ → content/00-project
-- content/10-domain/ → content/10-domain
-- content/30-requirements/ → content/30-requirements
-- content/40-architecture/ → content/40-architecture
-- content/60-implementation/ → content/60-implementation
-- content/70-operations/ → content/70-operations
+- content/00-project/ → docs/00-project
+- content/10-domain/ → docs/10-domain
+- content/30-requirements/ → docs/30-requirements
+- content/40-architecture/ → docs/40-architecture
+- content/60-implementation/ → docs/60-implementation
+- content/70-operations/ → docs/70-operations
 <!-- nauta:layout-map:end -->
 
 <!-- nauta:managed:end -->

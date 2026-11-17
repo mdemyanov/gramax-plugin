@@ -32,14 +32,14 @@ marketplace нет. Включаются явным запросом, если �
 
 **Конвенции передавай в промпте, а не надейся, что агент их прочитает.** Из десяти агентов
 nauta только три вообще упоминают `CLAUDE.md`, и то точечно (секции «Стек», «Команды сборки»);
-`AGENTS.md` не читает ни один. Целевой путь артефакта, таксономию `content/` и красные линии
+`AGENTS.md` не читает ни один. Целевой путь артефакта, таксономию `docs/` и красные линии
 включай в текст задачи явно.
 
 Пример корректного prompt'а для `/nauta:dev`:
 
 ```
 Цель: добавить skill `gramax:diagrams-export` в плагин gramax.
-Входы: content/30-requirements/2026-05-09-diagrams-export-design.md,
+Входы: docs/30-requirements/2026-05-09-diagrams-export-design.md,
        plugins/gramax/skills/mermaid/SKILL.md (для стиля),
        tests/gramax/diagrams-export/ac-001-skill-exists.sh (failing stub от qa-author)
 Артефакт: plugins/gramax/skills/diagrams-export/SKILL.md
@@ -49,7 +49,7 @@ nauta только три вообще упоминают `CLAUDE.md`, и то �
 
 Субагент **не ищет контекст «вокруг»** — работает по явно переданному скопу.
 
-Новый подраздел `content/` обязан нести `_index.md` и ссылку на него из родительского
+Новый подраздел `docs/` обязан нести `_index.md` и ссылку на него из родительского
 `_index.md` — иначе `check.sh --fast` красный (C1: отсутствие `_index.md` — error;
 C10: статья-сирота без входящих ссылок — warning).
 
@@ -67,7 +67,7 @@ PM координирует на каждом этапе: приоритизир
 
 ## Self-improvement
 
-- `content/lessons-learned.md` — append-only журнал.
+- `docs/lessons-learned.md` — append-only журнал.
 - Субагенты сохраняют находки в auto-memory (типы: `reference`, `project`, `feedback`).
 - `/nauta:pm-review` читает lessons + memory и предлагает обновления `CLAUDE.md` / промтов агентов.
 
@@ -76,7 +76,7 @@ PM координирует на каждом этапе: приоритизир
 - НЕ публиковать секреты (`.env`, токены, API-ключи, credentials).
 - НЕ включать PII (реальные имена, контакты, персональные данные).
 - НЕ менять корневой `.claude-plugin/marketplace.json` (публичный) без ADR.
-- НЕ добавлять vendored submodule без ADR (vendored-плагины удаляются через ADR, см. content/00-project/adr/).
+- НЕ добавлять vendored submodule без ADR (vendored-плагины удаляются через ADR, см. docs/00-project/adr/).
 - НЕ принимать задачи `/nauta:dev` без артефакта SA для нетривиальных фич.
 - НЕ передавать тесты из Dev в qa-runner до прохождения qa-author stub'ов (TDD-цепочка).
 - Tests/линтеры (если есть) — зелёные перед commit.
@@ -162,12 +162,12 @@ its report as unadapted, and a role that needs it stops the step and names the
 divergence (no silent assumption). The map is regenerated in full on every
 run — re-run `/nauta:init` after moving or renaming homes.
 
-- content/00-project/ → content/00-project
-- content/10-domain/ → content/10-domain
-- content/30-requirements/ → content/30-requirements
-- content/40-architecture/ → content/40-architecture
-- content/60-implementation/ → content/60-implementation
-- content/70-operations/ → content/70-operations
+- content/00-project/ → docs/00-project
+- content/10-domain/ → docs/10-domain
+- content/30-requirements/ → docs/30-requirements
+- content/40-architecture/ → docs/40-architecture
+- content/60-implementation/ → docs/60-implementation
+- content/70-operations/ → docs/70-operations
 <!-- nauta:layout-map:end -->
 
 <!-- nauta:managed:end -->
