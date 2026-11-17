@@ -64,5 +64,6 @@ if [ "$FAIL" -gt 0 ]; then
   printf "${RED}[FAIL]${NC} ac-006: %d assertion(s) failed\n" "$FAIL" >&2
   exit 1
 fi
+# shellcheck disable=SC2059  # color codes in the format string are the intended output styling
 printf "${GREEN}[PASS]${NC} ac-006: карта раскладки адресует все шесть дома через docs/\n"
 exit 0

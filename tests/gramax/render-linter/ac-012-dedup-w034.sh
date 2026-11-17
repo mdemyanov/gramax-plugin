@@ -15,9 +15,9 @@ DIR="$SCRIPT_DIR/fixtures/ac-012-dedup-dir"
 
 # --- validate_structure.py: W034 молчит по <th> (тег в known = drawio ∪ killerTags ∪ allowlistedTags) ---
 if OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$DIR" 2>&1); then
-  RC=0
+  : # rc 0 допустим — предмет проверки ниже: '<th>' в выводе отсутствует
 else
-  RC=$?
+  : # ненулевой rc здесь не ассертится — контракт проверяет вывод, не код (SC2034: RC не читается)
 fi
 
 if printf '%s\n' "$OUT" | grep -q '<th>'; then

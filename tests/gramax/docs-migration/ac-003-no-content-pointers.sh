@@ -212,9 +212,11 @@ line_allowed() {
   # language/syntax в объединённом корне есть; переписывание превратило бы запись
   # об оценке в утверждение о сегодняшней раскладке; форма «отсутствию» — перенос
   # фразы догфудинг-находки через строку)
+# shellcheck disable=SC2016  # literal grep pattern (single quotes intentional, no shell expansion)
   if printf '%s' "$line" | grep -qE 'отсутств(ие|ующие|ю) `language`/`syntax` в `content/'; then
     return 0
   fi
+# shellcheck disable=SC2016  # literal grep pattern (single quotes intentional, no shell expansion)
   if printf '%s' "$line" | grep -qF '`content/.doc-root.yaml`, отсутствию'; then
     return 0
   fi
@@ -289,5 +291,6 @@ if [ "$FAIL" -gt 0 ]; then
   printf "${RED}[FAIL]${NC} ac-003: %d assertion(s) failed\n" "$FAIL" >&2
   exit 1
 fi
+# shellcheck disable=SC2059  # color codes in the format string are the intended output styling
 printf "${GREEN}[PASS]${NC} ac-003: литерал content/ вне исключений Решения 3 ADR-0021 не встречается\n"
 exit 0

@@ -66,5 +66,6 @@ if [ "$FAIL" -gt 0 ]; then
   printf "${RED}[FAIL]${NC} ac-007: %d assertion(s) failed\n" "$FAIL" >&2
   exit 1
 fi
+# shellcheck disable=SC2059  # color codes in the format string are the intended output styling
 printf "${GREEN}[PASS]${NC} ac-007: один doc-root docs/, модель свойств объединена, индекс поглотил роль корневого\n"
 exit 0
