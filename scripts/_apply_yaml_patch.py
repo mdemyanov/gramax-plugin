@@ -21,13 +21,21 @@ KEEP_EXACT (ships to descendants), а ADR-022/ADR-022-spec — per-file cut ша
 DEV-033); полный путь здесь абортил бы cross-link gate публикации (тот же приём, что
 scripts/apply-overlay.sh уже использует для той же пары ADR).
 
+`--check` (DEV-464, issue #22): режим «только проверка» — разбирает патч и ищет адресата в
+target-file, ничего не пишет. `scripts/apply-overlay.sh` зовёт его для КАЖДОГО marker-based
+YAML-патча стека ДО первой записи strip_block/append_block_* по любой цели стека (CLAUDE.md →
+.doc-root.yaml → glossary) — иначе поздний малформед-патч оставляет уже записанные ранние цели
+откаченными к шаблону, а откатить их нечем (транзакция парсинга, не запись+откат).
+
 CLI:
-    python3 scripts/_apply_yaml_patch.py <target-file> <patch-file> <mark-start> <mark-end>
+    python3 scripts/_apply_yaml_patch.py [--check] <target-file> <patch-file> <mark-start> <mark-end>
 
 Exit codes:
-    0 — patch applied, target file overwritten in place
+    0 — (обычный режим) patch applied, target file overwritten in place;
+        (--check) patch would apply — target file untouched (both modes never write in --check)
     1 — malformed patch OR addressee list not found in target — target file left untouched
         (ADR-022 Д3: loud refusal, no partial write, not a silent fallback to append-at-EOF)
+    2 — usage error (wrong argument count)
 """
 from __future__ import annotations
 
@@ -61,16 +69,15 @@ def find_addressee_key(patch_text: str) -> str:
     return key
 
 
-def apply_yaml_patch(target_text: str, patch_text: str, mark_start: str, mark_end: str) -> str:
-    """ADR-022-spec §2 pseudocode, verbatim.
+def _locate_insertion_point(target_text: str, patch_text: str) -> tuple[int, int]:
+    """Shared by `apply_yaml_patch` (splices at the result) and `check_yaml_patch` (only cares
+    that this succeeds, DEV-464) — parses the patch and finds its addressee's block-sequence in
+    `target_text`. Returns (start_idx, end_idx): `start_idx` is the line index of the `key:`
+    line itself, `end_idx` the first following line at column 0 (or EOF).
 
-    Insertion point — end of the addressee's block-sequence: the first following line that
-    starts at column 0 (`^\\S`, i.e. the next top-level key or a top-level comment), or EOF if
-    the addressee is the last block in the file. Text outside the insertion point is untouched
-    byte-for-byte (ADR-022 Д2 — no YAML round-trip re-serialize).
-
-    Raises PatchError — target_text is returned to the caller unmodified in that case — if the
-    addressee key is not found in the target (FR-002/Д3: loud refusal, not a silent append).
+    Raises PatchError — no side effect, target_text is never touched here — if the patch is
+    malformed or the addressee key is not found in the target (FR-002/Д3: loud refusal, not a
+    silent append).
     """
     key = find_addressee_key(patch_text)
     lines = target_text.splitlines(keepends=True)
@@ -85,26 +92,64 @@ def apply_yaml_patch(target_text: str, patch_text: str, mark_start: str, mark_en
         (j for j in range(start_idx + 1, len(lines)) if re.match(r"^\S", lines[j])),
         len(lines),
     )
+    return start_idx, end_idx
+
+
+def apply_yaml_patch(target_text: str, patch_text: str, mark_start: str, mark_end: str) -> str:
+    """ADR-022-spec §2 pseudocode, verbatim.
+
+    Insertion point — end of the addressee's block-sequence: the first following line that
+    starts at column 0 (`^\\S`, i.e. the next top-level key or a top-level comment), or EOF if
+    the addressee is the last block in the file. Text outside the insertion point is untouched
+    byte-for-byte (ADR-022 Д2 — no YAML round-trip re-serialize).
+
+    Raises PatchError — target_text is returned to the caller unmodified in that case — if the
+    addressee key is not found in the target (FR-002/Д3: loud refusal, not a silent append).
+    """
+    lines = target_text.splitlines(keepends=True)
+    _start_idx, end_idx = _locate_insertion_point(target_text, patch_text)
     body_lines = patch_text.splitlines(keepends=True)[1:]  # без обёртывающей "key:\n" строки
     insertion = [f"{mark_start}\n"] + body_lines + [f"{mark_end}\n"]
     return "".join(lines[:end_idx] + insertion + lines[end_idx:])
 
 
+def check_yaml_patch(target_text: str, patch_text: str) -> None:
+    """DEV-464/issue #22 — check-only mode: разбор без записи. Валидирует ровно то же самое,
+    что и `apply_yaml_patch` (патч — standalone YAML с одним top-level ключом-списком, ключ
+    найден в `target_text`), но НЕ строит и не возвращает результат сплайса — вызывающий
+    (`scripts/apply-overlay.sh`) вызывает это для каждой YAML-цели стека ДО первой записи
+    strip_block/append_block_* по любой цели, включая другие (не-YAML) цели того же прогона.
+
+    Raises PatchError — идентично `apply_yaml_patch` — если патч malformed или адресат не
+    найден. Ничего не пишет и не читает диск сама (принимает уже прочитанный текст).
+    """
+    _locate_insertion_point(target_text, patch_text)
+
+
 def main() -> int:
-    if len(sys.argv) != 5:
+    argv = sys.argv[1:]
+    check_only = bool(argv) and argv[0] == "--check"
+    if check_only:
+        argv = argv[1:]
+
+    if len(argv) != 4:
         print(
-            "usage: _apply_yaml_patch.py <target-file> <patch-file> <mark-start> <mark-end>",
+            "usage: _apply_yaml_patch.py [--check] <target-file> <patch-file> "
+            "<mark-start> <mark-end>",
             file=sys.stderr,
         )
         return 2
-    target_path = Path(sys.argv[1])
-    patch_path = Path(sys.argv[2])
-    mark_start, mark_end = sys.argv[3], sys.argv[4]
+    target_path = Path(argv[0])
+    patch_path = Path(argv[1])
+    mark_start, mark_end = argv[2], argv[3]
 
     target_text = target_path.read_text(encoding="utf-8")
     patch_text = patch_path.read_text(encoding="utf-8")
 
     try:
+        if check_only:
+            check_yaml_patch(target_text, patch_text)
+            return 0
         result = apply_yaml_patch(target_text, patch_text, mark_start, mark_end)
     except PatchError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

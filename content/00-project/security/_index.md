@@ -7,4 +7,4 @@ order: 2
 
 Артефакты security-ревью перед публичным релизом: secrets sweep, находки и вердикт публикуемости.
 
-- [Аудит — secrets sweep волны link-form (2026-08-13)](audit-2026-08-13-link-form-wave.md)
+- [Security Audit — secrets sweep волны link-form перед публикацией](audit-2026-08-13-link-form-wave.md)

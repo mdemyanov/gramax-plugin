@@ -97,3 +97,93 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 - `content/lessons-learned.md` — append-only журнал.
 - Субагенты сохраняют находки в auto-memory (типы: `reference`, `project`, `feedback`).
 - `/nauta:pm-review` читает lessons + memory и предлагает обновления `CLAUDE.md` / промптов.
+
+<!-- nauta:managed:begin protocol=1 — блок до строки nauta:managed:end целиком перезаписывается командой /nauta:init: правка внутри него не переживает следующий прогон, свой текст держите снаружи блока. -->
+
+## Working language
+
+Think in English: reasoning, planning and working notes stay English whatever the request's
+language. Answer the user in Russian and write every `content/` file in Russian. Quotations,
+paths, commands and identifiers keep their source language.
+
+## Reasoning requirements
+
+1. **Act first.** When information is needed, read it with a tool rather than guess or ask
+   for it; ask the human only what the tree cannot answer. The intent and the perimeter of a
+   request are not in the tree — if they cannot be named from the request, ask.
+2. **Facts, not versions.** Quote tool output, cite files, show the run. If you have not
+   checked it, do not say it.
+3. **One tool per goal.** Do not duplicate searches and do not re-read what is already
+   known. Independent tasks go in parallel calls.
+4. **Verify before you claim.** "Works", "fixed", "done" — only with proof: a test, command
+   output, a grep result.
+5. **Brevity.** A structured answer without filler: problem → solution → result.
+6. **Guides go into memory.** Created an agent, a script or a process — record it in
+   auto-memory (a memory file plus a line in its `MEMORY.md` index) for other agents.
+
+## Order of work
+
+Role work is done by the subagents of the `nauta` plugin; coordination is held by the main
+context (`/nauta:pm`). Canonical order: Researcher (optional) → BA → SA → QA-author → Dev →
+QA-runner → BA acceptance → DevOps (when there is a deploy). The role catalogue and the
+subagent call contract live in `AGENTS.md`.
+
+## The three-homes rule
+
+- Survives the epic's closure as an answer to "why so" → `content/`.
+- A machine-checkable behaviour contract → `openspec/specs/<capability>/spec.md`.
+- Lives only inside an epic (queue, stages, round counters, test-report) → the «стор задач»
+  store, **never** in `content/`.
+
+An article in `content/` and its capability spec declare the pair with the `**Capability:**`
+line. «Язык дельты» ("now it became", "round 3", "reworked after review") is forbidden in a
+permanent document.
+
+## Red lines (universal)
+
+- DO NOT publish secrets: `.env`, tokens, API keys, credentials, private keys. The content
+  of every new file is checked before `git add`; a real value instead of a placeholder is a
+  blocker.
+- DO NOT include PII: real names, contacts, personal data.
+- DO NOT change `content/.doc-root.yaml` and the properties schema without an SA decision
+  and an ADR.
+- DO NOT create articles in `content/` without the mandatory properties.
+- DO NOT take a `/nauta:dev` task without a preceding SA artefact.
+- DO NOT hand tests to QA-runner before QA-author's stubs.
+- Tests and linters (when the project has them) — green before a commit.
+
+## Size
+
+Write densely: tables and lists instead of walls of text; the leading sentence carries the
+main point. The line sum of `CLAUDE.md` + `AGENTS.md` is the subject of the size gate; the
+threshold lives in `.nauta-gates.yaml`, and without that file the check stays silent —
+"Errors: 0" from the validator then means "not checked", not "no violations".
+
+## Self-improvement
+
+- `content/lessons-learned.md` — the team's append-only journal of lessons.
+- Artefacts of this class are compacted periodically; the working sample of the procedure is
+  the header of that very journal.
+- Findings about tools and APIs go to auto-memory, not to `content/`.
+
+## Content layout map
+
+<!-- nauta:layout-map:begin -->
+The declared documentation layout (`content/`) adapted to this tree by
+`/nauta:init` (ADR-128): a pair `content/<home>/ → <address>` maps a declared
+home of the scaffold to its actual address in this tree. `content/` paths in
+shipped prompts name declared homes and resolve through this map. A home
+resolved ambiguously or not found is NOT mapped — `/nauta:init` names it in
+its report as unadapted, and a role that needs it stops the step and names the
+divergence (no silent assumption). The map is regenerated in full on every
+run — re-run `/nauta:init` after moving or renaming homes.
+
+- content/00-project/ → content/00-project
+- content/10-domain/ → content/10-domain
+- content/30-requirements/ → content/30-requirements
+- content/40-architecture/ → content/40-architecture
+- content/60-implementation/ → content/60-implementation
+- content/70-operations/ → content/70-operations
+<!-- nauta:layout-map:end -->
+
+<!-- nauta:managed:end -->

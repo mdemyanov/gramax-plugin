@@ -18,4 +18,5 @@ order: 0
 - [Требования](30-requirements/_index.md) — спеки фич плагина
 - [Архитектура](40-architecture/_index.md) — разрешающие design-документы
 - [Реализация](60-implementation/_index.md) — отчёты прогона и приёмки
-- [Уроки](lessons-learned.md) — журнал находок команды
+- [Эксплуатация](70-operations/_index.md) — runbook'и
+- [Lessons Learned — gramax marketplace](lessons-learned.md) — журнал находок команды

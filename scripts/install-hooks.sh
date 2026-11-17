@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
-# scripts/install-hooks.sh — активирует .githooks/ как hook directory для git.
-# Идемпотентен: повторный запуск не ломает.
+# install-hooks.sh — активирует git hooks из .githooks/.
+#
+# Usage: bash scripts/install-hooks.sh
+#
 # Disable: git config --unset core.hooksPath
-# Bypass на коммит: git commit --no-verify
 
 set -euo pipefail
 
-if [ ! -d .githooks ]; then
-  echo "FAIL: .githooks/ directory not found"
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
+  echo "ERROR: not a git repository" >&2
+  exit 1
+fi
+
+if [[ ! -d .githooks ]]; then
+  echo "ERROR: .githooks/ не найдена. Запусти из корня репо." >&2
   exit 1
 fi
 
 git config core.hooksPath .githooks
-chmod +x .githooks/* 2>/dev/null || true
-
-echo "OK: git hooks activated from .githooks/"
-echo "  to disable: git config --unset core.hooksPath"
-echo "  to bypass once: git commit --no-verify"
+echo "✓ Pre-commit hook активирован (core.hooksPath = .githooks)"
+echo "  Bypass: git commit --no-verify"
+echo "  Disable: git config --unset core.hooksPath"

@@ -1,3 +1,13 @@
+---
+title: "Переход gramax-marketplace на nauta — Implementation Plan"
+order: 2
+properties:
+  - name: Тип контента
+    value: [План]
+  - name: Статус
+    value: [Done]
+---
+
 # Переход gramax-marketplace на nauta — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

@@ -7,10 +7,15 @@
 # ///
 """validate-content.py — валидатор структуры Gramax-каталога.
 
-Проверяет content/ на соответствие правилам Gramax (см. CLAUDE.md / spec).
+Проверяет документарный контур на соответствие правилам Gramax (см. CLAUDE.md / spec).
+Один корень (NA-EPIC-83, окно О7 — flip Ф9): безымянный вызов валидирует `docs/` —
+объявленная раскладка дерева после flip; классические деревья (профиль classic) без
+`docs/` валидируются по `content/` — первый существующий корень из пары, валидация
+одно-корневая (двойной корень окон О1–О6 снят ликвидацией старого дома). Ни одного
+корня нет и отказ не объявлен — S2. Именованный вызов валидирует ровно названные корни.
 Exit codes (ADR-041 Д5 — «предмета нет» отделено от «ошибки вызова»):
   0 — проверка выполнена, нарушений нет (в т.ч. объявленный отказ `documentaryCircuit: absent`);
-  1 — есть errors ИЛИ умолчание `content` отсутствует и отказ не объявлен («не смог проверить»);
+  1 — есть errors ИЛИ корень по умолчанию отсутствует и отказ не объявлен («не смог проверить»);
   2 — pyyaml не установлен ИЛИ путь назван аргументом командной строки и не существует
       (ошибка использования: адрес дал вызывающий). До ADR-041 оба случая давали 2.
 
@@ -29,9 +34,13 @@ check.sh).
 from __future__ import annotations
 
 import argparse
+import fnmatch
+import math
+import os
 import re
 import subprocess
 import sys
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -156,10 +165,16 @@ def check_doc_root_placeholders(content_dir: Path) -> list[Issue]:
     return []
 
 
-def check_index_no_properties(content_dir: Path) -> list[Issue]:
-    """C2: _index.md не должен содержать properties:."""
+def check_index_no_properties(content_dir: Path, strict: bool = False) -> list[Issue]:
+    """C2: _index.md не должен содержать properties:.
+
+    Строгая ветка (`strict=True`, режим `gramaxPublication: live-docs-v1`): сверх запрета
+    properties (любой формы, включая пустую) каждый `_index.md` обязан нести непустую
+    строку title и конечный числовой order — тот же `_metadata_field_issues`, что у
+    статей в строгой C1 (ADR-143 Д3, спутник §6.3); legacy-сигнатура сохранена для
+    прямых вызовов замков (qa064, dev046)."""
     issues = []
-    for index_path in content_dir.rglob("_index.md"):
+    for index_path in sorted(content_dir.rglob("_index.md")):
         try:
             fm = parse_frontmatter(index_path)
         except MalformedYamlError as e:
@@ -171,6 +186,8 @@ def check_index_no_properties(content_dir: Path) -> list[Issue]:
                 path=str(index_path),
                 message="_index.md не должен иметь properties (раздел не имеет своего типа/статуса)",
             ))
+        if strict:
+            issues.extend(_metadata_field_issues(index_path, fm))
     return issues
 
 
@@ -217,16 +234,170 @@ def check_object_notation(content_dir: Path) -> list[Issue]:
     return issues
 
 
-def check_indexes(content_dir: Path) -> list[Issue]:
-    """C1: каждая подпапка с .md или вложенными .md содержит _index.md."""
+# ===== Строгий контур Gramax-публикации (ADR-143 Д1/Д5, спутник §6) ==================
+#
+# Режим объявляется ключом `gramaxPublication: live-docs-v1` в `.nauta-gates.yaml`.
+# Ключа нет — C1/C2 работают в legacy-режиме с прежним README-fallback (временная
+# граница для aida-скаффолда и старых фикстур до листа .14); иное значение — error
+# с именем ключа и значения, не тихий opt-out; режим применим только к корню docs/
+# репозитория, включение для другого корня — ошибка использования. Строгие ветки
+# принадлежат C1/C2 (нового check-id нет, состав S1 не меняется, ADR-041-spec §3а).
+
+GRAMAX_PUBLICATION_KEY = "gramaxPublication"
+GRAMAX_PUBLICATION_MODE = "live-docs-v1"
+# Declared non-live зоны свода корней (спутник §6.2): test fixtures, producer-scaffold
+# и изолированные копии не становятся LIVE-каталогами.
+_NON_LIVE_ZONES = frozenset({".git", ".claude", "tests", "templates"})
+
+
+def _publication_mode(gates: dict) -> tuple[str | None, Issue | None]:
+    """Читает объявление режима публикации. (режим, issue); ключа нет — (None, None):
+    legacy-поведение сохраняется. Единственное признаваемое значение — live-docs-v1,
+    любое другое — error (симметрично documentaryCircuit, ADR-031 Д3: опечатка в ключе
+    не должна молча выключать или обходить строгий контракт)."""
+    value = gates.get(GRAMAX_PUBLICATION_KEY)
+    if value is None:
+        return None, None
+    if value == GRAMAX_PUBLICATION_MODE:
+        return value, None
+    return None, Issue("error", GATES_FILENAME,
+        f"ключ {GRAMAX_PUBLICATION_KEY} несёт значение {value!r} — единственное "
+        f"признаваемое значение {GRAMAX_PUBLICATION_MODE!r} (строгий контракт "
+        f"Gramax-публикации, ADR-143 §6.1); убери ключ (legacy) или поставь "
+        f"`{GRAMAX_PUBLICATION_KEY}: {GRAMAX_PUBLICATION_MODE}`, иное значение — "
+        "ошибка, не тихий opt-out")
+
+
+def _strict_root_census_issues(content_dir: Path) -> list[Issue]:
+    """Свод корней строгого режима (спутник §6.2): ровно один LIVE-маркер —
+    `docs/.doc-root.yaml`. Нет маркера в docs — missing-root; маркер в корне
+    репозитория — forbidden-root (всегда, с маркером docs или без); любой другой
+    маркер вне declared non-live зон — additional-root с каждым путём."""
+    repo_root = content_dir.parent.resolve()
+    # Канонический маркер — repo-относительная форма: вызов с абсолютным путём корня
+    # (qa056) обязан давать тот же свод, что относительный (строгий режим применим
+    # только к корню `docs`, значит маркер всегда "docs/.doc-root.yaml").
+    docs_marker = f"{content_dir.name}/.doc-root.yaml"
+    markers: list[str] = []
+    for directory, dirnames, filenames in os.walk(repo_root):
+        rel = Path(directory).relative_to(repo_root)
+        if rel.parts and rel.parts[0] in _NON_LIVE_ZONES:
+            dirnames[:] = []
+            continue
+        if ".doc-root.yaml" in filenames:
+            markers.append((Path(directory) / ".doc-root.yaml")
+                           .relative_to(repo_root).as_posix())
+    markers.sort()
+    issues: list[Issue] = []
+    if docs_marker not in markers:
+        issues.append(Issue("error", docs_marker,
+            "missing-root: у живого каталога нет маркера корня Gramax — дерево не "
+            "готово к публикации, неявный каталог от корня репозитория не подразумевается "
+            "(ADR-143 §6.2)"))
+    if ".doc-root.yaml" in markers:
+        issues.append(Issue("error", ".doc-root.yaml",
+            "forbidden-root: маркер корня каталога в корне репозитория запрещён — "
+            "единственный LIVE-корень это docs/.doc-root.yaml (ADR-143 Д1)"))
+    for marker in markers:
+        if marker in (docs_marker, ".doc-root.yaml"):
+            continue
+        issues.append(Issue("error", marker,
+            f"additional-root: второй LIVE-корень каталога по пути {marker} — "
+            "допустим ровно один маркер docs/.doc-root.yaml вне declared non-live зон "
+            "(tests/, templates/, .claude/, .git/) (ADR-143 Д1)"))
+    return issues
+
+
+def _finite_numeric_order(value) -> bool:
+    """Конечное число: YAML integer/float; quoted-строка, boolean, null, .nan и ±inf
+    числом не считаются (capability gramax-publication, спутник §4.1)."""
+    return isinstance(value, (int, float)) and not isinstance(value, bool) \
+        and math.isfinite(value)
+
+
+def _nonempty_string_title(value) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _metadata_field_issues(md_path: Path, fm: dict | None) -> list[Issue]:
+    """Общий хелпер строгих C1/C2 (спутник §6.3): у статьи и у `_index.md` обязаны быть
+    непустая строка title и конечный числовой order; сообщение называет путь и поле."""
+    issues: list[Issue] = []
+    if fm is None or not isinstance(fm, dict):
+        fm = {}
+    if not _nonempty_string_title(fm.get("title")):
+        issues.append(Issue("error", str(md_path),
+            f"title: непустая строка title обязательна (получено {fm.get('title')!r}) — "
+            "навигация Gramax читает заголовок раздела/статьи из frontmatter "
+            "(строгий режим, ADR-143 Д3)"))
+    if not _finite_numeric_order(fm.get("order")):
+        issues.append(Issue("error", str(md_path),
+            f"order: конечное числовое значение order обязательно (получено "
+            f"{fm.get('order')!r}; quoted-строка, boolean, null и .nan/.inf числом "
+            "не считаются) — строгий режим, ADR-143 Д3"))
+    return issues
+
+
+def _strict_index_issues(content_dir: Path) -> list[Issue]:
+    """Строгая C1: свод корней + applicable-каталоги (есть .md напрямую или ниже —
+    в т.ч. только _index.md) несут `_index.md`; README индексом не считается
+    (README-only — missing-index, пара — duplicate-section-page); каждая статья несёт
+    валидные title/order (внутренний хелпер, спутник §6.3)."""
+    issues = _strict_root_census_issues(content_dir)
+    for d in [content_dir, *sorted(p for p in content_dir.rglob("*") if p.is_dir())]:
+        if not any(d.rglob("*.md")):
+            continue  # каталог без Markdown нигде ниже — не applicable (§6.2)
+        has_index = (d / "_index.md").exists()
+        if has_index and (d / "README.md").exists():
+            issues.append(Issue(
+                level="error",
+                path=f"{d}/",
+                message="duplicate-section-page: README.md и _index.md сосуществуют — "
+                        "страница раздела должна быть одна, `_index.md`; перенеси жанровый "
+                        "контракт в отдельную статью (строгий режим, ADR-143 Д2)",
+            ))
+        elif not has_index:
+            issues.append(Issue(
+                level="error",
+                path=f"{d}/",
+                message="missing-index: missing _index.md — README.md индексом секции "
+                        "не считается, раздел не готов к публикации (строгий режим, "
+                        "ADR-143 Д2)",
+            ))
+    for md_path in sorted(content_dir.rglob("*.md")):
+        if md_path.name == "_index.md":
+            continue  # индексы — предмет строгой C2
+        try:
+            fm = parse_frontmatter(md_path)
+        except MalformedYamlError as e:
+            issues.append(issue_from_yaml_error(e))
+            continue
+        issues.extend(_metadata_field_issues(md_path, fm))
+    return issues
+
+
+def check_indexes(content_dir: Path, strict: bool = False) -> list[Issue]:
+    """C1: каждая подпапка с .md или вложенными .md содержит _index.md.
+
+    Правка окна О5 NA-EPIC-83 (SA-136 §О5, Ф3): индексом секции может быть и `README.md` —
+    жанровый контракт донора aida (разделы несут README); `_index` витрины 60-implementation
+    стал README подкаталога implementation/ переноса 1:1. Регистрационная механика C17 для
+    такой секции — тем же правилом (см. `_section_index` рядом с check_index_registration).
+
+    Строгая ветка (`strict=True`, режим `gramaxPublication: live-docs-v1`): README больше
+    не fallback; применимость каталога, duplicate-pair, свод корней и метаданные статей —
+    `_strict_index_issues` (ADR-143 Д1/Д2/Д3, спутник §6.3); legacy-сигнатура сохранена
+    для прямых вызовов замков (qa064) — строгую ветку включает только `_content_side_issues`.
+    """
+    if strict:
+        return _strict_index_issues(content_dir)
     issues = []
     for d in [content_dir, *sorted(p for p in content_dir.rglob("*") if p.is_dir())]:
         # Пропускаем подпапки без .md (рекурсивно)
         has_md = any(d.rglob("*.md"))
         if not has_md:
             continue
-        index_path = d / "_index.md"
-        if not index_path.exists():
+        if not (d / "_index.md").exists() and not (d / "README.md").exists():
             issues.append(Issue(
                 level="error",
                 path=f"{d}/",
@@ -269,14 +440,28 @@ def check_bloat(content_dir: Path, threshold: int = 40) -> list[Issue]:
 
 # ===== C9/C10: ссылочная целостность (ADR-014, spec §1-§2) ==========================
 
+# Текст markdown-ссылки может нести ОДИН уровень вложенных `[...]` — класс `[INFO]`,
+# `` `[4/4]` `` (ADR-114 §12, спутник ADR-114-spec §1/§4): живой прецедент — 4 из 28 строк
+# витрины реализации (`docs/90-decisions-log/implementation/README.md`), и это 4 из 5 самых тяжёлых
+# строк файла. Прежний `[^\]\n]*` слеп на такой текст: несбалансированный `]` внутри текста
+# обрывает матч раньше `](`, и строка целиком выпадает из разбора (ADR-114 Д3, DEV-473).
+# Один уровень вложенности — не производная глубина: глубже не нужно ни одному живому
+# случаю (§1 спутника — только `[INFO]`/`[4/4]`), а рекурсивный класс плодит catastrophic
+# backtracking без встречной пользы. Общая для #1/#2 (ниже) и `_BULLET_REGISTRATION_RE`
+# (C17) — одно определение, не два независимо дрейфующих регекса нужного класса.
+_LINK_TEXT_RE = r'(?:[^\[\]\n]|\[[^\[\]\n]*\])*'
+
 # Паттерн-таблица §1 — данные, не управляющая логика (новый Gramax-тег = новая строка).
 # kind: "path" — резолв относительно source.parent; "snippet_id" — резолв в
 # <content_dir>/.gramax/snippets/<raw_target>.md (спец-случай, §2 шаг7).
 _LINK_PATTERNS: list[tuple[str, re.Pattern]] = [
     # #1/#2: markdown link/image. Классы отрицают \n намеренно: без этого на
     # несбалансированной скобке (markdown-таблица, пример кода) матч убегает через
-    # несколько строк и подставляет мусор в сообщение об ошибке.
-    ("path", re.compile(r'!?\[[^\]\n]*\]\(([^)\n]+)\)')),      # #1/#2: markdown link/image
+    # несколько строк и подставляет мусор в сообщение об ошибке. Текст — `_LINK_TEXT_RE`
+    # (один уровень вложенных `[...]`, см. выше); группа захвата — по-прежнему ТОЛЬКО
+    # target (группа 1): `_collect_references` читает `m.group(1)` единообразно для ВСЕХ
+    # паттернов таблицы, текст ссылки здесь намеренно не в отдельной группе.
+    ("path", re.compile(rf'!?\[{_LINK_TEXT_RE}\]\(([^)\n]+)\)')),  # #1/#2: markdown link/image
     ("path", re.compile(r'<mermaid\s+[^>]*?path="([^"]+)"')),   # #3
     ("path", re.compile(r'<image\s+[^>]*?src="([^"]+)"')),      # #4
     ("path", re.compile(r'<openapi\s+[^>]*?src="([^"]+)"')),    # #5
@@ -447,35 +632,66 @@ def _index_link_targets(index_path: Path) -> set[Path]:
 # inline-упоминания внутри чужого пункта (AC-7/AC-12/AC-13): у настоящей записи регистрации
 # ссылка — единственное и первое содержимое bullet-а; у inline-упоминания перед ссылкой
 # стоит текст ("ADR-015: ... перенесено в [ADR-034](...)") — маркер+пробел, затем НЕ "[".
-_BULLET_REGISTRATION_RE = re.compile(r'^\s*[-*]\s+!?\[[^\]\n]*\]\(([^)\n]+)\)')
+# Текст ссылки — отдельная группа (не только target): Д3 ADR-114 сравнивает его дословно с
+# заголовком цели (см. `_target_heading` и второй исход C17 ниже) — `_LINK_TEXT_RE`, тот же
+# класс, что и #1/#2 `_LINK_PATTERNS`.
+_BULLET_REGISTRATION_RE = re.compile(rf'^\s*[-*]\s+!?\[({_LINK_TEXT_RE})\]\(([^)\n]+)\)')
 
 
-def _bullet_registration_entries(index_path: Path) -> list[tuple[Path, str]]:
+def _bullet_registration_entries(index_path: Path) -> list[tuple[Path, str, str]]:
     """Цели ссылок из bullet-записей регистрации одного `_index.md` (маска кода, как в C9/C10).
 
-    Возвращает и резолвнутый путь (для группировки одной цели под разными формами записи
-    не нужно — на живом дереве raw_target идентичен при повторе), и исходный raw_target
-    (для построения отображаемого — нерезолвленного — пути issue, тем же стилем, что
-    articles/registered ниже в check_index_registration).
+    Возвращает резолвнутый путь, исходный raw_target (для отображаемого — нерезолвленного —
+    пути issue, тем же стилем, что articles/registered ниже в check_index_registration) и
+    ДОСЛОВНЫЙ (немаскированный) текст ссылки — третий элемент, для Д3 ADR-114.
+
+    Маска кода (`_mask_code`) нужна только чтобы отличить настоящий bullet от примера
+    синтаксиса во fenced/inline-коде (как в C9/C10) — искать САМ bullet приходится в
+    масксированном тексте. Но текст ссылки, once found, читается из СЫРОЙ (немаскированной)
+    строки по тем же смещениям (`_mask_code` сохраняет длину и число строк дословно) —
+    иначе строка с бэктиками в тексте ссылки (живой прецедент — заголовки витрины несут
+    `` `код` `` через одну) маскировалась бы ДО сравнения с заголовком цели, который
+    читается сырым, и Д3 ложно расходился бы с самим собой на КАЖДОЙ такой строке.
     """
-    text = _mask_code(index_path.read_text(encoding="utf-8"))
-    entries: list[tuple[Path, str]] = []
-    for line in text.split("\n"):
+    raw_text = index_path.read_text(encoding="utf-8")
+    raw_lines = raw_text.split("\n")
+    masked_lines = _mask_code(raw_text).split("\n")
+    entries: list[tuple[Path, str, str]] = []
+    for idx, line in enumerate(masked_lines):
         m = _BULLET_REGISTRATION_RE.match(line)
         if not m:
             continue
-        target = m.group(1).split("#", 1)[0].strip("<>")
+        target = m.group(2).split("#", 1)[0].strip("<>")
         if not target or _EXTERNAL_RE.match(target):
             continue
-        entries.append((_resolve_link_target(index_path.parent, target), target))
+        link_text = raw_lines[idx][m.start(1):m.end(1)]
+        entries.append((_resolve_link_target(index_path.parent, target), target, link_text))
     return entries
+
+
+# Первая строка `# ` (H1, не `##`) статьи/раздела после frontmatter — форма строки
+# регистрации Д3 ADR-114: «дословный `# `-заголовок целевого файла». `(?m)` — построчный
+# поиск, `[ \t]+` отделяет `#` от `##` (у `##` следующий символ `#`, не пробел — не матчит).
+_H1_RE = re.compile(r'(?m)^#[ \t]+(.+?)[ \t]*$')
+
+
+def _target_heading(target: Path) -> str | None:
+    """Дословный `# `-заголовок целевой статьи/раздела (Д3 ADR-114) — для сравнения с
+    текстом ссылки регистрации. Читается СЫРЫМ (без `_mask_code`) — см. довод рядом с
+    `_bullet_registration_entries`. Нет файла или нет `# `-строки — None: сравнивать не с
+    чем, это предмет C1/C9, не второго исхода C17."""
+    if not target.is_file():
+        return None
+    body = _strip_frontmatter(target.read_text(encoding="utf-8"))
+    m = _H1_RE.search(body)
+    return m.group(1) if m else None
 
 
 def check_index_registration(content_dir: Path) -> list[Issue]:
     """C17: каждая статья каталога зарегистрирована ССЫЛКОЙ в его собственном `_index.md`.
 
     Регистрацией считается разрешимая ссылка, а не вхождение имени файла: упоминание
-    «a.md» в прозе индекса навигации не создаёт (урок content/lessons-learned.md от
+    «a.md» в прозе индекса навигации не создаёт (урок docs/60-operations/postmortems/lessons-learned.md от
     2026-08-05 — «считать структуру подсчётом подстроки нельзя»).
 
     Не дубль C10: тот считает входящую степень по ВСЕМУ каталогу и молчит на статье, на
@@ -487,7 +703,7 @@ def check_index_registration(content_dir: Path) -> list[Issue]:
     Два предмета сверх исходного DEV-046 (QA-016, roadmap NA-EPIC-16 п.7-8):
     - **подраздел** — вложенный каталог со своим `_index.md` — тоже обязан быть
       зарегистрирован явной ссылкой НА этот `_index.md` (форма — живой прецедент
-      `content/30-requirements/_index.md`: `[...](2026-08-17-donor-wave-gates/_index.md)`).
+      `docs/20-requirements/_index.md`: `[...](2026-08-17-donor-wave-gates/_index.md)`).
       Голый путь без `_index.md` (`](sub/)`) регистрацией не считается — единственный живой
       прецедент даёт явную форму, обобщать без подтверждения владельца нельзя (AC-3).
     - **дубль записи** — одна цель зарегистрирована двумя независимыми bullet-пунктами в
@@ -495,14 +711,33 @@ def check_index_registration(content_dir: Path) -> list[Issue]:
       код-маска: настоящая запись — ссылка САМА как содержимое bullet-а
       (`_BULLET_REGISTRATION_RE`); inline-упоминание внутри чужого пункта/прозы в счётчик не
       попадает вовсе, потому что не матчит этот anchored-к-началу-строки паттерн.
+
+    **Второй именованный исход (Д3 ADR-114, DEV-473) — «пересказ»:** норма выше не
+    переоткрывается, к ней добавляется исход «регистрация пересказывает статью — текст
+    ссылки не совпадает с заголовком цели». Форма строки регистрации — дословный
+    `# `-заголовок целевого файла и ничего сверх (`_target_heading`); сравнение —
+    РАВЕНСТВО, не вхождение (мутация «заголовок входит в текст» пропустила бы пересказ,
+    внутри которого лежит заголовок, — спутник §4/QA-105 лок 5б). Область — ВЕСЬ каталог
+    (поправка владельца `gate-sa` 2026-09-15, ADR-114 §11 — «развилка решена в пользу всех
+    34 индексов», предыдущее предложение ограничить перечнем `readBudgets` отменено), а не
+    только записи из `readBudgets`: цикл ниже уже проходит по КАЖДОМУ `_index.md` каталога,
+    второй исход не заводит собственного фильтра. ADR-082 Д1 не ломается — строка
+    по-прежнему уезжает в архив волны вместе со статьёй, меняется только её содержимое.
     """
     issues = []
     for index_path in sorted(content_dir.rglob("_index.md")):
         section = index_path.parent
         articles = sorted(p for p in section.glob("*.md") if p.name != "_index.md")
+        # Правка окна О5 NA-EPIC-83 (Ф3): индексом подраздела может быть README.md
+        # (жанровый контракт донора; `_index` витрины implementation/ стал README
+        # переносом 1:1) — регистрация подраздела ведёт на фактический индекс.
+        # На статьи секции правило не влияет: README рядом с _index остаётся статьёй
+        # секции и регистрируется строкой в _index, как прежде.
         subsections = sorted(
-            p / "_index.md" for p in section.iterdir()
-            if p.is_dir() and (p / "_index.md").is_file()
+            (p / "README.md" if (p / "README.md").is_file() and not (p / "_index.md").is_file()
+             else p / "_index.md")
+            for p in section.iterdir()
+            if p.is_dir() and ((p / "_index.md").is_file() or (p / "README.md").is_file())
         )
         targets = articles + subsections
         registered = _index_link_targets(index_path)
@@ -516,8 +751,10 @@ def check_index_registration(content_dir: Path) -> list[Issue]:
                              "регистрацией не является)"),
                 ))
 
+        entries = _bullet_registration_entries(index_path)
+
         by_resolved_target: dict[Path, list[str]] = {}
-        for resolved, raw in _bullet_registration_entries(index_path):
+        for resolved, raw, _text in entries:
             by_resolved_target.setdefault(resolved, []).append(raw)
         for resolved, raws in sorted(by_resolved_target.items()):
             if len(raws) > 1 and resolved.is_file():
@@ -529,10 +766,31 @@ def check_index_registration(content_dir: Path) -> list[Issue]:
                              f"{len(raws)} раза(-ами) отдельными bullet-записями в {index_path}, "
                              "оставьте одну запись"),
                 ))
+
+        # Второй исход C17 (Д3 ADR-114) — регистрация пересказывает статью. Разрешимая
+        # цель обязательна (heading is None молчит — предмет C1/C9); сравнение строгое
+        # РАВЕНСТВО (не containment, QA-105 лок 5б).
+        for resolved, raw, link_text in entries:
+            if not resolved.is_file():
+                continue
+            heading = _target_heading(resolved)
+            if heading is None:
+                continue
+            if link_text.strip() != heading.strip():
+                display = index_path.parent / raw
+                issues.append(Issue(
+                    level="error",
+                    path=str(display),
+                    message=(
+                        "регистрация пересказывает статью — текст ссылки не совпадает с "
+                        f"заголовком цели {resolved} (ожидался дословный «# {heading}»): "
+                        f"«{link_text.strip()}»"
+                    ),
+                ))
     return issues
 
 
-# ===== C11/C12: детектор объём+структура content/ (ADR-018, PT-EPIC-20) ==============
+# ===== C11/C12: детектор объём+структура docs/ (ADR-018, PT-EPIC-20) =================
 
 def _strip_leading_frontmatter(content: str) -> str:
     """Дословная копия check-adr-line-limit.py::_strip_leading_frontmatter (ADR-013 Д3).
@@ -593,8 +851,20 @@ def _repo_relative(md_path: Path, content_dir: Path) -> str:
     ВНИМАНИЕ (edge case для QA, §9): опирается на то, что content_dir называется буквально
     "content" в реальном дереве; тестовая фикстура вольна называть свой content_dir иначе --
     тогда путь в фикстурном sizeBudgetGrandfathered обязан использовать ТОТ ЖЕ leaf-компонент,
-    не литерал "content/..."."""
+    не литерал пути контура."""
     return content_dir.name + "/" + str(md_path.relative_to(content_dir)).replace("\\", "/")
+
+
+def _grandfathered_ceilings(source: Mapping) -> dict:
+    """`sizeBudgetGrandfathered` источника -> {path: ceiling}; битые записи пропускаются.
+    Единственный экземпляр словаря грандфазера (SA-131 К6, ADR-119): четыре бывшие копии
+    свернуты сюда с параметром-источником (C11 -- doc_root; C13/промт-слой/ролевые промты
+    -- gates). Длина файла держится нейтральной: самозамер C13 печатает живое число строк."""
+    return {
+        g["path"]: g["ceiling"]
+        for g in (source.get("sizeBudgetGrandfathered") or [])
+        if isinstance(g, dict) and "path" in g and "ceiling" in g
+    }
 
 
 # Закрытый набор ключей записи sizeBudgets (Д4, ADR-066): новый ключ каталога -- правь
@@ -656,11 +926,7 @@ def check_size_budget(content_dir: Path, doc_root: dict) -> list[Issue]:
             entries[label] = b
     if not entries:
         return issues
-    grandfathered = {
-        g["path"]: g["ceiling"]
-        for g in (doc_root.get("sizeBudgetGrandfathered") or [])
-        if isinstance(g, dict) and "path" in g and "ceiling" in g
-    }
+    grandfathered = _grandfathered_ceilings(doc_root)
     for md_path in content_dir.rglob("*.md"):
         if md_path.name == "_index.md":
             continue
@@ -735,7 +1001,11 @@ def _load_gates(content_dir: Path) -> tuple[dict, list[Issue]]:
 
 # ===== Контур Д: три состояния предмета проверки (ADR-041 Д2/Д3, spec §3) ============
 
-DEFAULT_CONTENT_DIR = "content"
+#: Корни контура по умолчанию (flip Ф9, окно О7 NA-EPIC-83): безымянный вызов валидирует
+#: ПЕРВЫЙ СУЩЕСТВУЮЩИЙ из пары — docs/ (объявленная раскладка после flip), content/
+#: (классика — профиль classic). Валидация одно-корневая; зелёный --fast классического
+#: payload-потребителя не меняется — заперт test_sync_scripts_unit::ac1_sibling_fixture.
+DEFAULT_CONTENT_ROOTS = ("docs", "content")
 DOCUMENTARY_CIRCUIT_KEY = "documentaryCircuit"
 DOCUMENTARY_CIRCUIT_ABSENT = "absent"
 _MISSING = object()
@@ -744,13 +1014,15 @@ _MISSING = object()
 # `gate-failure-semantics` «The error-outcome message names the path and the cause in one
 # record» (ADR-042 Д2): маркер `ERROR:` — ровно в одной строке исхода, строки-продолжения
 # маркера не несут), продолжение — две починки: молчание третьим вариантом не является
-# (ADR-041 Д2).
+# (ADR-041 Д2). Пути обоих корней названы: после flip умолчание — docs/, классика
+# (профиль classic) — content/.
 S2_MESSAGE = (
-    "ERROR: контур Д не заведён — каталога content/ в этом дереве нет, и отказ от него не "
-    "объявлен.\n"
+    "ERROR: контур Д не заведён — каталога docs/ в этом дереве нет (умолчание после flip "
+    "О7;\n"
+    "классика — профиль classic со своим корнем content/), и отказ от него не объявлен.\n"
     "  Почини одним из двух: повтори /nauta:init (запускает bin/init.sh)  — завести контур "
-    "(девять\n"
-    "  файлов, ADR-041 Д1); либо documentaryCircuit: absent в .nauta-gates.yaml — объявить, "
+    "(раскладка\n"
+    "  docs/, ADR-041 Д1); либо documentaryCircuit: absent в .nauta-gates.yaml — объявить, "
     "что\n"
     "  документарного контура у проекта нет (ADR-041 Д3). Молчание третьим вариантом не "
     "является."
@@ -815,9 +1087,9 @@ CAPABILITY_MARKER = "**Capability:**"
 # заметить хуже, чем разобрать.
 CAPABILITY_PATH_RE = re.compile(r"`?([\w./\-]+\.md)`?")
 
-# Форма пути к спеке capability. Проверяется ОТДЕЛЬНО от существования файла: контракт
-# живёт в openspec/, и объявление на существующий файл в content/ или docs/ парой дрейфа
-# не является -- резолвинг "любой .md" пропускал бы его тихо.
+# Форма пути к спеке capability -- эта регулярка обслуживает ветку `malformed` ниже.
+# Существование проверяется отдельно, веткой `dangling` десятью строками ниже: контракт
+# живёт в openspec/, резолвинг "любой .md" пропускал бы его тихо.
 CAPABILITY_SPEC_RE = re.compile(r"openspec/specs/[^/]+/spec\.md")
 
 # Разделители перечисления и допустимые символы пути -- по одному классу без вложенных
@@ -898,7 +1170,7 @@ def _declared_capability_paths(header_lines: list[str]) -> list[str] | None:
     такое, а не «до пустой строки»: проза, упоминающая путь, иначе попадала бы в
     перечисление и давала ложную ошибку на пути, который парой не объявлялся.
 
-    Разбирается именно блок объявления, а не файл целиком: в `content/` есть
+    Разбирается именно блок объявления, а не файл целиком: в `docs/` есть
     иллюстративные упоминания openspec-путей (таблица раскладки OpenSpec с `<домен>`,
     вывод зонда `openspec add` в исследовании). Они пару не объявляют и резолвиться
     не обязаны.
@@ -959,7 +1231,7 @@ def check_capability_link(content_dir: Path) -> list[Issue]:
       * строки `**Capability:**` в шапке нет;
       * строка есть, но пути не называет -- объявление, которое ничего не объявляет;
       * путь назван, но это не спека capability -- ссылка на существующий файл в
-        `content/` или `docs/` парой дрейфа не является: контракт живёт в openspec/;
+        путь документарного контура парой дрейфа не является: контракт живёт в openspec/;
       * путь той самой формы, но файла по нему нет -- «правило есть, механизма нет» в
         чистом виде (дизайн §7); опечатка обязана быть громкой.
 
@@ -1008,7 +1280,7 @@ def check_capability_link(content_dir: Path) -> list[Issue]:
                 f"строка `**Capability:**` указывает не на спеку capability: "
                 f"{', '.join(malformed)} -- ожидается путь вида "
                 "`openspec/specs/<capability>/spec.md` (дизайн трёх домов §5). Контракт "
-                "живёт в openspec/; ссылка на файл в content/ или docs/ парой дрейфа не "
+                "живёт в openspec/; ссылка на файл контура парой дрейфа не "
                 "является, даже если файл существует."))
             continue
         dangling = [p for p in declared if not (repo_root / p).is_file()]
@@ -1025,7 +1297,7 @@ def check_capability_link(content_dir: Path) -> list[Issue]:
 
 def check_orphan_capabilities(content_dir: Path, repo_root: Path) -> list[Issue]:
     """C16: каждая capability-спека в openspec/specs/ объявлена хотя бы одним требованием
-    content/ через строку `**Capability:**` (C15) -- симметрия C10 для второго дома
+    docs/ через строку `**Capability:**` (C15) -- симметрия C10
     (дизайн трёх домов §5: "пара дрейфа" двусторонняя по смыслу, C15 проверяет её только
     с одной стороны -- требование -> capability; эта проверка -- обратное направление).
 
@@ -1043,29 +1315,39 @@ def check_orphan_capabilities(content_dir: Path, repo_root: Path) -> list[Issue]
     all_specs = {
         p.relative_to(repo_root).as_posix() for p in sorted(spec_dir.glob("*/spec.md"))
     }
+    # Корни сбора references (окно О1 → упрощено flip О7, NA-EPIC-83): требование-
+    # потребитель может стоять в любом живом корне пары — спека не сирота, если её
+    # объявил требование ЛЮБОГО существующего корня (правило §5 плана окон; после
+    # ликвидации старого дома живой корень один — docs/, у классики — content/).
+    scan_dirs = [content_dir]
+    for extra in DEFAULT_CONTENT_ROOTS:
+        secondary = repo_root / extra
+        if secondary.is_dir() and secondary.resolve() != content_dir.resolve():
+            scan_dirs.append(secondary)
     referenced: set[str] = set()
-    for md_path in sorted(content_dir.rglob("*.md")):
-        if md_path.name == "_index.md":
-            continue
-        if has_placeholder(md_path):
-            continue
-        try:
-            fm = parse_frontmatter(md_path)
-        except MalformedYamlError:
-            continue  # уже отражено C3 -- не дублируем
-        if _type_content_value(fm) != "Требование":
-            continue
-        body = _strip_leading_frontmatter(md_path.read_text(encoding="utf-8"))
-        if _is_store_bound(body):
-            continue
-        declared = _declared_capability_paths(_header_lines(body.splitlines())) or []
-        referenced.update(p for p in declared if CAPABILITY_SPEC_RE.fullmatch(p))
+    for scan_dir in scan_dirs:
+        for md_path in sorted(scan_dir.rglob("*.md")):
+            if md_path.name == "_index.md":
+                continue
+            if has_placeholder(md_path):
+                continue
+            try:
+                fm = parse_frontmatter(md_path)
+            except MalformedYamlError:
+                continue  # уже отражено C3 -- не дублируем
+            if _type_content_value(fm) != "Требование":
+                continue
+            body = _strip_leading_frontmatter(md_path.read_text(encoding="utf-8"))
+            if _is_store_bound(body):
+                continue
+            declared = _declared_capability_paths(_header_lines(body.splitlines())) or []
+            referenced.update(p for p in declared if CAPABILITY_SPEC_RE.fullmatch(p))
     orphans = sorted(all_specs - referenced)
     return [
         Issue("warning", spec,
             "capability-спека без единого требования, объявляющего на неё пару дрейфа "
             "(строка **Capability:** в шапке) -- проверьте, что путь к ней передаётся "
-            "явно из content/, иначе спека не будет найдена стороной требования "
+            "явно из docs/, иначе спека не будет найдена стороной требования "
             "(симметрия C10, дизайн трёх домов §5)")
         for spec in orphans
     ]
@@ -1156,6 +1438,24 @@ def _is_test_file(rel_posix: str) -> bool:
     return any(p.search(name) for p in _TEST_NAME_RE)
 
 
+def c13_entry_for(gates: dict, rel: str) -> dict | None:
+    """Выборка C13 (ADR-032 Д3, ADR-110 Д3), общая с I3 агрегата обновления (В6 ADR-122,
+    `bin/upgrade.sh`): запись (extension, kind) для rel либо None; exclude-глобы записи
+    снимают файл ДО чтения тела и ДО счёта строк. Последняя валидная запись (extension,
+    kind) выигрывает -- как у стоявшей здесь dict-компрехензии."""
+    ext = "." + rel.rsplit(".", 1)[-1] if "." in rel else ""
+    kind = "test" if _is_test_file(rel) else "prod"
+    for entry in reversed(gates.get("codeSizeBudgets") or []):
+        if not (isinstance(entry, dict) and entry.get("extension") == ext
+                and entry.get("kind") == kind and entry.get("thresholdLines") is not None):
+            continue
+        exclude = entry.get("exclude") or []
+        if exclude and any(fnmatch.fnmatch(rel, pat) for pat in exclude):
+            return None
+        return entry
+    return None
+
+
 def check_code_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
     """C13 (ADR-032, ADR-063): качественный признак -- дизъюнкция двух качественных сигналов
     (S1 "длиннейшая top-level декларация", S2 "число top-level деклараций"), пара BR-004 не
@@ -1165,16 +1465,19 @@ def check_code_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
     `if not threshold`": `declarationCountThreshold: 0` обязан срабатывать). Тот же анкер `decl_re`
     для S1 и S2 -- второй регэксп границ не заводится (ADR-063 Д1). Перечисление файлов --
     `git ls-files` (Д3 ADR-032), не `Path.rglob`. Отсутствие `codeSizeBudgets` в конфигурации --
-    легитимный тихий skip (симметрично C11)."""
-    entries = {
-        (b["extension"], b["kind"]): b
-        for b in (gates.get("codeSizeBudgets") or [])
-        if isinstance(b, dict) and b.get("extension") and b.get("kind")
-           and b.get("thresholdLines") is not None
-    }
-    if not entries:
+    легитимный тихий skip (симметрично C11). `exclude` (ADR-110 Д3, issue #30) -- список
+    глобов ПО ЗАПИСИ `(extension, kind)`, тот же приём git-pathspec-формы, что
+    `breakingChangeScope.exclude` (ADR-071 Д1/Д2); файл, чей `rel` матчит хотя бы один глоб
+    записи, снимается с этой записи ДО чтения тела и ДО счёта строк (не после счёта) -- для
+    него нет ни качественного, ни количественного признака, ни грандфазера, он вне предмета
+    C13 целиком, как если бы записи (extension, kind) не было вовсе (FR-006). Отсутствие ключа
+    -- тихий `exclude: []`, поведение не меняется. Выборка записи -- общая `c13_entry_for`
+    (В6 ADR-122), у I3 агрегата обновления тот же ответ."""
+    extensions = sorted({b.get("extension") for b in gates.get("codeSizeBudgets") or []
+                         if isinstance(b, dict) and b.get("extension") and b.get("kind")
+                         and b.get("thresholdLines") is not None})
+    if not extensions:
         return []
-    extensions = sorted({ext for ext, _ in entries})
     try:
         files = _git_ls_files(repo_root, [f"*{e}" for e in extensions])
     except _GitUnavailable:
@@ -1183,17 +1486,15 @@ def check_code_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
             "(ADR-007 Д1)")]
     if files is None:  # GIT_NO_REPO -- напр. SNAP_DIR publish-public.sh (git archive, без .git)
         return []
-    grandfathered = {
-        g["path"]: g["ceiling"] for g in (gates.get("sizeBudgetGrandfathered") or [])
-        if isinstance(g, dict) and "path" in g and "ceiling" in g
-    }
+    grandfathered = _grandfathered_ceilings(gates)
     issues = []
     for rel in files:
-        ext = "." + rel.rsplit(".", 1)[-1] if "." in rel else ""
-        kind = "test" if _is_test_file(rel) else "prod"
-        budget = entries.get((ext, kind))
+        # Порядок ставит выборку (с её exclude, ADR-110 Д3) ПЕРЕД чтением тела/счётом строк
+        # и ПЕРЕД грандфазером -- иначе висящая запись sizeBudgetGrandfathered на
+        # исключённом пути ошибочно выглядела бы ещё нужной.
+        budget = c13_entry_for(gates, rel)
         if budget is None:
-            continue  # расширение/kind без записи -- не гейтится (FR-006, напр. .sh)
+            continue  # нет записи (FR-006, напр. .sh) либо путь под exclude -- вне предмета
         path = repo_root / rel
         try:
             raw = path.read_text(encoding="utf-8")
@@ -1203,7 +1504,7 @@ def check_code_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
         threshold = budget["thresholdLines"]
         if lines <= threshold:
             continue  # BR-003/BR-004: количественный признак не сработал
-        decl_re = PY_DECL_RE if ext == ".py" else GROOVY_DECL_RE
+        decl_re = PY_DECL_RE if budget["extension"] == ".py" else GROOVY_DECL_RE
         decl_len = _longest_declaration_or_file(raw, decl_re)
         decl_threshold = budget["qualityThreshold"]
         s1_fired = decl_len >= decl_threshold
@@ -1246,7 +1547,8 @@ def check_code_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
         else:
             action = "Разбей декларацию на части"
         issues.append(Issue(level, str(path),
-            f"{rel}: {lines} строк ({kind}) > T={threshold}, {signs_text}. {action}, либо "
+            f"{rel}: {lines} строк ({'test' if _is_test_file(rel) else 'prod'}) "
+            f"> T={threshold}, {signs_text}. {action}, либо "
             f"заведи sizeBudgetGrandfathered-запись (path: \"{rel}\") тем же коммитом "
             f"(ADR-032, ADR-018 Д5, ADR-063 Д1)."))
     return issues
@@ -1262,7 +1564,7 @@ def _files_plural(n: int) -> str:
 
 
 def _types_outside_c11_selection(content_dir: Path, gates: dict) -> dict[str, int]:
-    """§4.2 ADR-057-spec: типы, встреченные в content/, но НЕ проверяемые C11 -- с числом
+    """§4.2 ADR-057-spec: типы, встреченные в docs/, но НЕ проверяемые C11 -- с числом
     файлов на тип. Основание -- урок DEV-021: «зелёный гейт -- доказательство того, что он
     отработал, а не что свойство выполнено»; `configured` отвечает лишь на вопрос «ключ задан».
 
@@ -1377,10 +1679,7 @@ def check_prompt_layer_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
     threshold = budget["thresholdLines"]
     if total <= threshold:
         return []
-    grandfathered = {
-        g["path"]: g["ceiling"] for g in (gates.get("sizeBudgetGrandfathered") or [])
-        if isinstance(g, dict) and "path" in g and "ceiling" in g
-    }
+    grandfathered = _grandfathered_ceilings(gates)
     ceiling = grandfathered.get(PROMPT_LAYER_GRANDFATHER_KEY)
     severity = budget.get("severity", "block")
     level = "error" if severity == "block" else "warning"
@@ -1408,18 +1707,36 @@ ROLE_PROMPT_BUDGET_KEY = "rolePromptSizeBudget"
 ROLE_PROMPT_DEFAULT_GLOB = "agents/**/*.md"
 
 
-def _role_prompt_files(repo_root: Path, budget: dict) -> list[Path]:
-    """Выборка C18: `rglob` под каталогом из `pathGlob` (§2.2 ADR-060-spec). Git не читается
-    (ADR-032 Д8) -- проверка работает на снапшоте `publish-public.sh` без `.git`.
+def _role_prompt_files_for_glob(repo_root: Path, pattern: str) -> list[Path]:
+    """Выборка одного глоба: `rglob` под каталогом из `pathGlob` (§2.2 ADR-060-spec). Git не
+    читается (ADR-032 Д8) -- проверка работает на снапшоте `publish-public.sh` без `.git`.
 
-    `rglob`, а не `glob`: сегодня подкаталогов под `agents/` нет и результат тот же, но промт,
+    `rglob`, а не `glob`: подкаталогов под адресом может не быть и результат тот же, но промт,
     переложенный на уровень ниже, не должен уходить из-под бюджета молча."""
-    pattern = str(budget.get("pathGlob") or ROLE_PROMPT_DEFAULT_GLOB)
     base, sep, tail = pattern.partition("/**/")
     if sep:
         root = repo_root / base
         return sorted(root.rglob(tail)) if root.is_dir() else []
     return sorted(repo_root.glob(pattern))
+
+
+def _role_prompt_files(repo_root: Path, budget: dict) -> list[Path]:
+    """Выборка C18. `pathGlob` -- строка (форма сегодняшнего потребителя, обратная
+    совместимость) ИЛИ список строк (ADR-098 Д2, расширение покрытия на `commands/**/*.md` и
+    `.claude/skills/**/*.md` тем же ключом): каждый элемент разворачивается своим глобом,
+    результат -- объединение (без дублей, отсортировано), а не строковое приведение списка
+    (`str(list)` дало бы мусорный паттерн и тихую пустую выборку -- ADR-098 «Точки интеграции»,
+    масштаб находки AC-1)."""
+    raw = budget.get("pathGlob") or ROLE_PROMPT_DEFAULT_GLOB
+    patterns = raw if isinstance(raw, list) else [raw]
+    seen: set[Path] = set()
+    files: list[Path] = []
+    for pattern in patterns:
+        for f in _role_prompt_files_for_glob(repo_root, str(pattern)):
+            if f not in seen:
+                seen.add(f)
+                files.append(f)
+    return sorted(files)
 
 
 def check_role_prompt_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
@@ -1445,10 +1762,7 @@ def check_role_prompt_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
     threshold = budget["thresholdLines"]
     severity = budget.get("severity", "block")
     level = "error" if severity == "block" else "warning"
-    grandfathered = {
-        g["path"]: g["ceiling"] for g in (gates.get("sizeBudgetGrandfathered") or [])
-        if isinstance(g, dict) and "path" in g and "ceiling" in g
-    }
+    grandfathered = _grandfathered_ceilings(gates)
     issues: list[Issue] = []
     for path in _role_prompt_files(repo_root, budget):
         try:
@@ -1463,6 +1777,17 @@ def check_role_prompt_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
                 f"ролевой промт НЕ засчитывается нулём строк (ADR-060, спутник §6)."))
             continue
         if lines <= threshold:
+            # FR-3 (ADR-115, NA-EPIC-58): файл ушёл под порог, а запись
+            # `sizeBudgetGrandfathered` осталась -- МАСКИРОВАННЫЙ отказ. Прежняя редакция
+            # уходила в `continue` ДО того, как вообще посмотреть в `grandfathered`, и
+            # протухшая запись жила бесконечно, ничем не отчитываясь. Уровень `warning`, не
+            # `error`: сама по себе протухшая запись ничего не ломает, она лжёт о состоянии.
+            stale = grandfathered.get(rel)
+            if stale is not None:
+                issues.append(Issue("warning", rel,
+                    f"грандфазер-запись осталась, хотя файл ушёл под порог: {lines} строк "
+                    f"<= T={threshold}, запись ceiling={stale} больше не нужна. Снимается "
+                    f"ТЕМ ЖЕ коммитом, который привёл файл под порог (FR-3, ADR-032 Д7)."))
             continue
         ceiling = grandfathered.get(rel)
         if ceiling is not None:
@@ -1488,52 +1813,201 @@ def check_role_prompt_size_budget(repo_root: Path, gates: dict) -> list[Issue]:
     return issues
 
 
+# ===== C21: стабильные якоря норм спек + tombstone при переименовании (ADR-125) ========
+
+NORM_ANCHORS_FILENAME = "openspec/specs/norm-anchors.yaml"  # Д2 ADR-125; форма -- §1 спеки
+
+
+def check_spec_norm_anchors(repo_root: Path) -> list[Issue]:
+    """C21 (ADR-125, NA-EPIC-74): по каждой записи anchors[] реестра якорей -- четыре
+    РАЗЛИЧИМЫХ события, а не последствие (Д4): rename без tombstone, удаление, порванная
+    цепочка, якорь в никуду -- четыре однострочника §4 ADR-125-spec (ADR-042). Три
+    состояния приёмки BA-094 ложатся на алгоритм дословно: rename без tombstone -- событие
+    А; + tombstone -- зелёный; - tombstone -- снова А (запись несущая, §3 шаг 4).
+
+    Реп-половина гейта: предмет -- openspec/specs/, не docs/, вызов из main()
+    БЕЗУСЛОВНЫЙ, рядом с C13/C14/C18/C20 -- исполняется во всех трёх состояниях контура Д
+    (Д4 ADR-041); в `_content_side_issues` не входит, S1_CHECK_IDS и его AST-замок
+    (test_dev048) не тронуты (§2 спеки). Каталога openspec/specs/ нет -- тихий skip
+    (прецедент C16). Корень -- только аргумент `repo_root`, тот же якорь, что у C13/C14
+    (ADR-032 §5): замок зовёт проверку на песочнице, живой корпус в исходы не входит (Д7).
+
+    Якорь -- ТОЧНЫЙ текст заголовка `### Requirement:` без нормализации (Д1: нормализация
+    создаёт тихие совпадения -- полосу молчания, ADR-007 Д1); сверка всегда по очищенной
+    форме (.strip() с обеих сторон -- граница named, §3 крайние случаи). Порча формы
+    реестра -- «не смог проверить» (error), не молчание и не трейсбек; дальнейшие события
+    на порченом реестре не вычисляются (§3 шаг 1). Незарегистрированная новая норма НЕ
+    красит -- рост корпуса легален (Д5)."""
+    specs_dir = repo_root / "openspec" / "specs"
+    if not specs_dir.is_dir():
+        return []  # тихий skip, прецедент C16
+    live: dict[str, list[str]] = {}
+    for spec_path in sorted(specs_dir.glob("*/spec.md")):
+        rel = spec_path.relative_to(repo_root).as_posix()
+        live[rel] = [h.strip() for h in re.findall(
+            r"(?m)^### Requirement: (.*)$", spec_path.read_text(encoding="utf-8"))]
+
+    registry = repo_root / NORM_ANCHORS_FILENAME
+    if not registry.is_file():
+        if not live:
+            return []
+        # Ломающее §Consequences ADR-125: спеки есть + реестра нет было зелёным и стало
+        # красным; ремедия напечатана в самом отказе (Mitigations), CHANGELOG -- воля волны.
+        return [Issue("error", str(registry),
+            "реестр якорей norm-anchors.yaml отсутствует, а спеки в openspec/specs/ есть — "
+            "заведи пустой реестр по форме ADR-125-spec §1 (ADR-125)")]
+
+    def _shape(text: str) -> Issue:
+        # §4 «не смог проверить»: три слота причины -- не разбирается: <reason> /
+        # запись <i> без поля <поле> / дубликат якоря «<anchor>» в <spec>. Тексты отказов
+        # -- дословно §4 (ADR-042), тире и стрелки -- как в спеке, не ASCII-замены.
+        return Issue("error", str(registry),
+            f"реестр якорей norm-anchors.yaml {text} — "
+            "не смог проверить переименования норм (ADR-125)")
+
+    try:
+        data = parse_yaml_file(registry)
+    except MalformedYamlError as e:  # reason уже свёрнут в одну строку (_validate_common)
+        return [_shape(f"не разбирается: {e.reason}")]
+    if not isinstance(data, dict):
+        return [_shape("не разбирается: верхний уровень не отображение секций")]
+    raw_anchors = data.get("anchors") or []
+    raw_tombstones = data.get("tombstones") or []
+    for name, value in (("anchors", raw_anchors), ("tombstones", raw_tombstones)):
+        if not isinstance(value, list):
+            return [_shape(f"не разбирается: секция {name} не список")]
+
+    anchors: list[tuple[str, str]] = []          # (spec, anchor) -- очищенные
+    tombstones: list[tuple[str, str, str]] = []  # (spec, former, current) -- очищенные
+    for i, rec in enumerate(raw_anchors):
+        if not isinstance(rec, dict):
+            return [_shape(f"не разбирается: запись {i} секции anchors не отображение")]
+        for field in ("spec", "anchor"):
+            if not isinstance(rec.get(field), str) or not rec[field].strip():
+                return [_shape(f"запись {i} без поля {field}")]
+        anchors.append((rec["spec"].strip(), rec["anchor"].strip()))
+    for i, rec in enumerate(raw_tombstones):
+        if not isinstance(rec, dict):
+            return [_shape(f"не разбирается: запись {i} секции tombstones не отображение")]
+        for field in ("spec", "former", "current", "since"):
+            # `since` -- провенанс, читателем не расходуется (§1): проверяется само
+            # присутствие; тип/пустоту остальных трёх -- тоже, сравнение только со str.
+            if field not in rec or rec[field] is None:
+                return [_shape(f"запись {i} без поля {field}")]
+        for field in ("spec", "former", "current"):
+            if not isinstance(rec[field], str) or not rec[field].strip():
+                return [_shape(f"запись {i} без поля {field}")]
+        tombstones.append((rec["spec"].strip(), rec["former"].strip(), rec["current"].strip()))
+    seen: set[tuple[str, str]] = set()
+    for spec_rel, anchor in anchors:
+        if (spec_rel, anchor) in seen:
+            return [_shape(f"дубликат якоря «{anchor}» в {spec_rel}")]
+        seen.add((spec_rel, anchor))
+
+    issues: list[Issue] = []
+    for spec_rel, anchor in anchors:
+        if not (repo_root / spec_rel).is_file():
+            # Событие В -- СВОЙ текст, не дословный текст C15 «объявленная пара дрейфа
+            # ведёт в никуда» (различение вербатима BA-094 критерий 2, §4).
+            issues.append(Issue("error", str(registry),
+                f"якорь в openspec/specs/norm-anchors.yaml ведёт в никуда: спеки {spec_rel} "
+                "нет — поправь путь в реестре (ADR-125; это не пара **Capability:** и не "
+                "проверка C15)"))
+            continue
+        headings = live.get(spec_rel, [])
+        if anchor in headings:
+            continue  # живой якорь -- ок (§3 шаг 3)
+        tomb = next((t for t in tombstones if t[0] == spec_rel and t[1] == anchor), None)
+        if tomb is not None:
+            if tomb[2] in headings:
+                continue  # легализованное переименование -- ок
+            issues.append(Issue("error", str(registry),
+                f"цепочка переименования порвана: tombstone «{tomb[1]}» → «{tomb[2]}» называет "
+                f"заголовок, которого в {spec_rel} нет — поправь запись или верни заголовок "
+                "(ADR-125)"))
+            continue
+        # Незарегистрированный -- не в anchors и не ни в одном tombstones[].current ЭТОЙ
+        # спеки (§3 шаг 3); парность k пропавших и m незарегистрированных НЕ утверждается,
+        # отказ называет первый по сортировке и число m (§9 крайние случаи).
+        registered = ({a for s, a in anchors if s == spec_rel}
+                      | {c for s, _, c in tombstones if s == spec_rel})
+        unregistered = sorted(h for h in headings if h not in registered)
+        if unregistered:
+            issues.append(Issue("error", str(repo_root / spec_rel),
+                f"норма спеки переименована без tombstone: было «{anchor}», "
+                f"стало «{unregistered[0]}» (незарегистрированных заголовков в спеке: "
+                f"{len(unregistered)}) — добавь tombstone-запись в "
+                "openspec/specs/norm-anchors.yaml (ADR-125)"))
+        else:
+            issues.append(Issue("error", str(repo_root / spec_rel),
+                f"норма спеки удалена: «{anchor}» объявлена в реестре якорей, живого "
+                "заголовка в спеке нет, tombstone-записи нет — переименование оформи "
+                "tombstone-записью (ADR-125)"))
+    return issues
+
+
 def main(argv: list[str]) -> int:
     require_yaml()
-    parser = argparse.ArgumentParser(description="Validate Gramax content/ structure")
-    parser.add_argument("content_dir", nargs="?", default=None,
-                        help=f"Path to content directory (default: {DEFAULT_CONTENT_DIR})")
+    parser = argparse.ArgumentParser(description="Validate Gramax docs/ structure")
+    parser.add_argument("content_dirs", nargs="*", default=None, metavar="ROOT",
+                        help="Path to content directory (default: первый существующий из "
+                             "docs/, content/ — flip О7)")
     args = parser.parse_args(argv)
 
     # Д5 ADR-041: адрес, названный вызывающим, и умолчание — разные исходы. Путь из
     # аргумента, которого нет, — ошибка использования (2); отсутствие умолчания —
     # «не смог проверить» (1). До этого решения оба давали 2, и потребитель не мог
     # отличить свою опечатку в команде от незаведённого контура.
-    named_by_caller = args.content_dir is not None
-    content_dir = Path(args.content_dir if named_by_caller else DEFAULT_CONTENT_DIR)
+    named_by_caller = bool(args.content_dirs)
+    if named_by_caller:
+        roots = [Path(p) for p in args.content_dirs]
+    else:
+        # Flip Ф9 (окно О7): умолчание — первый СУЩЕСТВУЮЩИЙ корень из пары; валидация
+        # одно-корневая (двойной корень окон О1–О6 снят ликвидацией старого дома).
+        # См. комментарий у DEFAULT_CONTENT_ROOTS.
+        roots = [Path(next((r for r in DEFAULT_CONTENT_ROOTS if Path(r).is_dir()),
+                           DEFAULT_CONTENT_ROOTS[0]))]
 
     # Конфигурация читается ДО ветвления по состоянию предмета: её носитель лежит в корне
-    # (`content_dir.parent`), не внутри content/, и репо-половина гейта (C13/C14, провенанс)
+    # (`content_dir.parent`), не внутри контура, и репо-половина гейта (C13/C14, провенанс)
     # обязана исполняться во всех трёх состояниях — Д4 ADR-041. Именно единственный вход в
     # C13/C14 за `content_dir.is_dir()` делал 600-строчный CLAUDE.md невидимым на дереве без
-    # content/ (замер ADR-041-spec §4, воспроизведён DEV-021).
-    gates, issues = _load_gates(content_dir)
+    # контура (замер ADR-041-spec §4, воспроизведён DEV-021). Якорь — родитель первого
+    # корня: для умолчаний это корень репо (`Path("content").parent == Path(".")`).
+    gates, issues = _load_gates(roots[0])
     declared_absent, declaration_issues = documentary_circuit_declaration(gates)
     issues.extend(declaration_issues)
 
-    subject_missing = False
+    subject_missing = 0
     if declared_absent:
-        print(S3_MESSAGE)  # S3: объявление сильнее находки, но громкое (spec §3)
-    elif content_dir.is_dir():
-        issues.extend(_content_side_issues(content_dir, gates))  # S1
-    elif named_by_caller:
-        print(f"ERROR: not a directory: {content_dir}", file=sys.stderr)
-        return 2
+        print(S3_MESSAGE)  # S3: объявление репо-уровневое, печатается один раз на прогон
     else:
-        print(S2_MESSAGE, file=sys.stderr)  # S2
-        subject_missing = True
+        for content_dir in roots:
+            if content_dir.is_dir():
+                issues.extend(_content_side_issues(content_dir, gates))  # S1
+            elif named_by_caller:
+                print(f"ERROR: not a directory: {content_dir}", file=sys.stderr)
+                return 2
+            else:
+                print(S2_MESSAGE, file=sys.stderr)  # S2
+                subject_missing += 1
 
     # repo_root -- уже установленная конвенция _load_gates (ADR-031 Д1), C13/C14
     # переиспользуют тот же якорь, не вводят второй способ найти корень (ADR-032 §5).
     # `Path("content").parent == Path(".")` — якорь верен и там, где каталога нет.
-    repo_root = content_dir.parent
+    repo_root = roots[0].parent
     issues.extend(check_code_size_budget(repo_root, gates))          # C13 (ADR-032)
     issues.extend(check_prompt_layer_size_budget(repo_root, gates))  # C14 (ADR-032)
     issues.extend(check_role_prompt_size_budget(repo_root, gates))   # C18 (ADR-060)
-    # C20 (ADR-072 Д1) — наравне с C13/C14/C18: предмет лежит в корне, не в content/, и
+    # C20 (ADR-072 Д1) — наравне с C13/C14/C18: предмет лежит в корне, не в docs/, и
     # проверка обязана исполняться во всех трёх состояниях контура Д (Д4 ADR-041).
     issues.extend(check_absence_records(repo_root / ABSENCE_RECORDS_FILENAME, repo_root))
     issues.extend(check_lesson_destiny(repo_root / ".nauta-lesson-destiny.yaml", repo_root))
+    # C21 (ADR-125) — наравне с C13/C14/C18/C20: предмет (openspec/specs/) лежит в корне,
+    # не в docs/, и проверка обязана исполняться во всех трёх состояниях контура Д (Д4
+    # ADR-041). Вызов безусловный, в `_content_side_issues` не входит — S1_CHECK_IDS и его
+    # AST-замок (test_dev048) не тронуты (ADR-125-spec §2).
+    issues.extend(check_spec_norm_anchors(repo_root))
 
     # Один битый файл видят несколько независимых rglob-проходов. Схлопываем ДО подсчёта:
     # `Errors: N` считается из списка, а не на печати (ADR-007 Д5).
@@ -1553,16 +2027,18 @@ def main(argv: list[str]) -> int:
     for issue in sorted(issues, key=lambda i: (i.path, i.level)):
         print(f"{issue.path}: {issue.message}  [{issue.level}]")
 
-    if not issues and not subject_missing and content_dir.is_dir() and not declared_absent:
-        md_count = sum(1 for _ in content_dir.rglob("*.md"))
-        print(f"{content_dir}/: OK ({md_count} файлов проверены)")
+    if not issues and not subject_missing and not declared_absent:
+        for content_dir in roots:
+            if content_dir.is_dir():
+                md_count = sum(1 for _ in content_dir.rglob("*.md"))
+                print(f"{content_dir}/: OK ({md_count} файлов проверены)")
 
-    for line in gate_config_provenance_lines(gates, content_dir):
+    for line in gate_config_provenance_lines(gates, roots[0]):
         print(line)
 
     # S2 попадает в счётчик: «Errors: 0» рядом с ненулевым кодом — ровно тот рапорт об
     # отсутствии нарушений через отсутствие данных, который запрещает ADR-007 Д1.
-    error_count = len(errors) + (1 if subject_missing else 0)
+    error_count = len(errors) + subject_missing
     print(f"\nErrors: {error_count} | Warnings: {len(warnings)}")
     return 1 if error_count else 0
 
@@ -1616,13 +2092,28 @@ S3_MESSAGE = (
 def _content_side_issues(content_dir: Path, gates: dict) -> list[Issue]:
     """S1: половина гейта, у которой предмет — сам каталог (C1-C12, C15-C17, см.
     `S1_CHECK_IDS`). Вынесена из `main` целиком, чтобы репо-половина
-    (C13/C14/провенанс) осталась вне ветвления по состоянию предмета — Д4 ADR-041."""
+    (C13/C14/провенанс) осталась вне ветвления по состоянию предмета — Д4 ADR-041.
+
+    Режим `gramaxPublication` (ADR-143 §6.1) читается здесь один раз: `live-docs-v1`
+    включает строгие ветки C1/C2 и свод корней ТОЛЬКО для корня docs/ репозитория —
+    включение для другого корня ошибка использования, не тихий legacy; неверное
+    значение — error (не opt-out); ключа нет — прежнее поведение целиком."""
     issues: list[Issue] = []
-    issues.extend(check_indexes(content_dir))
+    mode, mode_issue = _publication_mode(gates)
+    if mode_issue is not None:
+        issues.append(mode_issue)
+    strict = mode == GRAMAX_PUBLICATION_MODE and mode_issue is None
+    if strict and content_dir.name != "docs":
+        strict = False
+        issues.append(Issue("error", str(content_dir),
+            f"режим {GRAMAX_PUBLICATION_KEY}: {GRAMAX_PUBLICATION_MODE} применим только "
+            f"к корню docs/ репозитория — получен {content_dir.as_posix()}; строгий "
+            "контракт не включается для других корней (ошибка использования, ADR-143 §6.1)"))
+    issues.extend(check_indexes(content_dir, strict=strict))
     issues.extend(check_bloat(content_dir))
     issues.extend(check_broken_links(content_dir))  # C9 (ADR-014)
     issues.extend(check_orphans(content_dir))        # C10 (ADR-014)
-    issues.extend(check_index_no_properties(content_dir))
+    issues.extend(check_index_no_properties(content_dir, strict=strict))
     issues.extend(check_index_registration(content_dir))  # C17 (DEV-046), пара C2
     issues.extend(check_conflict_markers(content_dir))     # C19 (DEV-090)
     issues.extend(check_object_notation(content_dir))

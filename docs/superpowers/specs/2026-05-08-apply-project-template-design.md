@@ -1,3 +1,13 @@
+---
+title: "Применение подхода к разработке из project_template к gramax"
+order: 1
+properties:
+  - name: Тип контента
+    value: [Спека]
+  - name: Статус
+    value: [Accepted]
+---
+
 # Применение подхода к разработке из project_template к gramax
 
 **Дата:** 2026-05-08

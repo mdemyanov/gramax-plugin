@@ -25,10 +25,12 @@
 not_silent`), а не только через `uv run` с зависимостями. Читается ровно один верхнеуровневый
 блок плоских скалярных ключей — на этой форме YAML-парсер и построчный разбор совпадают.
 
-Второй предмет — СТОРОЖ ШВА §4.4 (см. `_guard_branch_names`).
+Второй предмет — СТОРОЖ ШВА §4.4 (см. `_guard_branch_names`), третий — открытые записи эпика
+стора (В7 ADR-122, см. `_guard_open_epic_branches`).
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 import subprocess
@@ -50,6 +52,13 @@ PLATFORM_BRANCH_RE = re.compile(r"^worktree-agent-")
 
 _EXIT_OK = 0
 _EXIT_ERROR = 2
+
+#: Путь носителя, печатаемый в тексте отказов сторожей #20/#23 (ADR-115 §Смягчения: «отказ
+#: сторожа `check-branch-discipline.py` печатает путь носителя, чтобы указатель в промте не
+#: был единственной дорогой к тексту» — ADR-115-carriers-for-the-four-wave-blockers.md).
+# Акт О3 NA-EPIC-83: спутник переехал в docs/30-architecture (единственный дом).
+CARRIER_SPEC_PATH = (
+    "docs/30-architecture/ADR-081-isolation-by-simultaneity-branch-per-role-task-spec.md")
 
 
 def _read_block(text: str, name: str) -> dict[str, str] | None:
@@ -98,13 +107,22 @@ def _worktrees(root: Path) -> list[dict[str, str]]:
     return entries
 
 
-def _guard_branch_names(root: Path, prefix: str) -> tuple[list[str], list[str]]:
+def _guard_branch_names(root: Path, prefix: str, profile: str) -> tuple[list[str], list[str]]:
     """Сторож шва §4.4: «роль переименовала свою ветку» — наблюдаемо, а не на честном слове.
 
     Вердикт владельца 2026-08-31 закрыл развилку §6 в пользу шва: имя ветки копии даёт
     ПЛАТФОРМА (`worktree-agent-<hash>`), и адресом задачи оно становится первым действием
     роли (`git branch -m <номер>`). Шов без сторожа неотличим от его отсутствия, поэтому
     здесь и живёт прибор, умеющий сказать «роль не переименовала ветку».
+
+    `profile` (ADR-110 Д1, issue #18, довершает ADR-081 Д2 первым предложением — форма имени
+    по профилю, а не переоткрывает его) судит ФОРМУ имени: `single` отказывает имени с `/`
+    (форма несёт чужую, командную гарантию непересечения — AC-058-09 в профиле, который её не
+    объявлял); `team` отказывает имени БЕЗ `/` (форма не несёт `<handle>/`, декларация `team`
+    не защищает от коллизии AC-058-09). Судится наличие хотя бы одного `/`, не число сегментов
+    — имя `alice/bob/dev-130` несёт `/` и формой `team` не отказывается, `rsplit("/", 1)[-1]`
+    извлечения номера при этом не меняется (Д2 второй половины — «извлечение — одна форма» —
+    не переоткрывается ни в одной ветке).
 
     Возвращает (отказы, предупреждения):
 
@@ -153,12 +171,215 @@ def _guard_branch_names(root: Path, prefix: str) -> tuple[list[str], list[str]]:
                 f"действие роли в своей копии — `git branch -m <номер>` (ADR-081 §4.4); пока "
                 f"оно не выполнено, имя ветки адресом задачи не является (AC-058-10)."
             )
+            continue
+        has_slash = "/" in name
+        if profile == "single" and has_slash:
+            denials.append(
+                f"{path} — ветка `{name}`: форма несёт разделение пространства имён профиля "
+                f"`team` (`<handle>/<номер>`), а объявлен `single` (ADR-081 Д2, ADR-110 Д1, "
+                f"AC-058-09)."
+            )
+        elif profile == "team" and not has_slash:
+            denials.append(
+                f"{path} — ветка `{name}`: имя не несёт `<handle>/`, декларация профиля "
+                f"`team` не защищает от коллизии AC-058-09 (ADR-081 Д2, ADR-110 Д1)."
+            )
         elif TASK_NUMBER_RE.match(name.rsplit("/", 1)[-1]) is None:
             warnings.append(
                 f"{path} — ветка `{name}`: объявленной формой (последний сегмент после `/`) "
                 f"номер задачи не извлекается."
             )
     return denials, warnings
+
+
+def _guard_stale_copies(root: Path, prefix: str) -> list[str]:
+    """Сторож #20 (ADR-115 Д4, область СУЖЕНА решением координатора 2026-09-24, DEV-478 Н-3):
+    копия отстаёт от HEAD ветки эпика — ПРЕДУПРЕЖДЕНИЕ, не отказ.
+
+    Проверяемое действие дословно из Д4: `git merge-base --is-ancestor <HEAD эпика> HEAD` в
+    каждой копии. HEAD эпика — коммит главной рабочей копии (`_worktrees()[0]`, тот же
+    источник, которым `_guard_branch_names` меряет корень). Копия РОВНО на HEAD эпика или
+    впереди него — тишина (HEAD эпика остаётся её предком); копия на коммите, который HEAD
+    эпика уже обогнал, — предупреждение: зелёный прогон в такой копии не доказывает
+    актуальность, но само отставание — состояние НОРМАЛЬНОЕ и ожидаемое (координатор
+    коммитит в ветку эпика по ходу волны, это ритуал, а не дефект). Отказом остаётся только
+    расхождение ветвлением — см. `_guard_out_of_location_copies` (#23) и границу ниже.
+
+    Границы (симметрично §6 спутника ADR-115): судятся только копии из `git worktree list` —
+    `cp -R` в песочницу в перечне не значится и не судится. Копий ВНЕ корня дерева это не
+    исключает намеренно: расхождение #20 — про отставание от ветки эпика, а не про адрес
+    копии (тот довод принадлежит только #23, узкому по поправке владельца 2026-09-22).
+    """
+    warnings: list[str] = []
+    entries = _worktrees(root)
+    if not entries:
+        return warnings
+    epic_head = entries[0].get("HEAD", "")
+    if not epic_head:
+        return warnings
+    for entry in entries[1:]:
+        path_raw, branch, head = (entry.get("worktree", ""), entry.get("branch", ""),
+                                  entry.get("HEAD", ""))
+        if not path_raw or not branch or not head:
+            continue                       # detached или неполная запись — судить нечем
+        name = branch.replace("refs/heads/", "")
+        if name.startswith(prefix):
+            continue                       # интеграционная ветка эпика — не копия роли
+        proc = _git(root, "merge-base", "--is-ancestor", epic_head, head)
+        if proc.returncode != 0:
+            warnings.append(
+                f"{path_raw} — ветка `{name}`: копия отстаёт от HEAD ветки эпика "
+                f"({epic_head[:12]}); зелёный прогон в ней не доказательство актуальности "
+                f"(ADR-115 Д4, #20, область сужена координатором 2026-09-24). Обнови копию "
+                f"(`git -C {path_raw} rebase {epic_head}` или пересоздай её). "
+                f"Носитель: {CARRIER_SPEC_PATH}."
+            )
+    return warnings
+
+
+def _guard_out_of_location_copies(root: Path, location: str, prefix: str,
+                                  declared: bool) -> tuple[list[str], list[str]]:
+    """Сторож #23 (ADR-115 Д4, СУЖЕННЫЙ поправкой владельца 2026-09-22, вариант (а)).
+
+    Исходная формулировка Д4 («указатель копии разрешается ВНЕ `worktreeLocation`» без
+    оговорки о корне) столкнулась с уже принятым `tests/test_dev130_branch_discipline_gate.py
+    ::test_a_copy_outside_the_root_is_not_judged`, который для копии, зарегистрированной
+    ЦЕЛИКОМ вне корня дерева, требует rc==0 дословным доводом: «копии вне корня — стенды чужих
+    прогонов. Судить их значило бы краснеть на мусоре, который создал не этот репозиторий».
+    Поправка сузила область: судится копия, чей указатель разрешается ВНУТРИ корня дерева, но
+    вне объявленного `worktreeLocation`. Копия, зарегистрированная целиком вне корня, не
+    судится этим сторожем — тот же довод, что уже несёт `_guard_branch_names` (граница 3 её
+    докстроки), и он НЕ переоткрывается здесь.
+    """
+    denials: list[str] = []
+    warnings: list[str] = []
+    entries = _worktrees(root)
+    if not entries:
+        return denials, warnings
+    main = Path(entries[0].get("worktree", str(root))).resolve()
+    location_root = (main / location).resolve()
+    for entry in entries[1:]:
+        path_raw, branch = entry.get("worktree", ""), entry.get("branch", "")
+        if not path_raw or not branch:
+            continue
+        path = Path(path_raw).resolve()
+        try:
+            path.relative_to(main)
+        except ValueError:
+            continue                       # копия вне корня дерева — не судится (поправка)
+        name = branch.replace("refs/heads/", "")
+        if name.startswith(prefix):
+            continue                       # интеграционная ветка эпика — не копия роли
+        try:
+            path.relative_to(location_root)
+        except ValueError:
+            if declared:
+                denials.append(
+                    f"{path_raw} — ветка `{name}`: указатель копии разрешается внутри корня "
+                    f"дерева, но вне ОБЪЯВЛЕННОГО тобой worktreeLocation ({location}) "
+                    f"(ADR-115 Д4, #23, поправка владельца 2026-09-22). `git worktree repair` "
+                    f"здесь не лечит — пересоздай копию внутри {location}. "
+                    f"Носитель: {CARRIER_SPEC_PATH}."
+                )
+            else:
+                warnings.append(
+                    f"{path_raw} — ветка `{name}`: копия лежит вне {location}, но это место "
+                    f"взято УМОЛЧАНИЕМ кода, а не твоим объявлением — отказа нет. Объяви своё "
+                    f"место ключом branchDiscipline.worktreeLocation в .nauta-gates.yaml либо "
+                    f"перенеси копию. Носитель: {CARRIER_SPEC_PATH}."
+                )
+    return denials, warnings
+
+
+def _open_epic_records(root: Path) -> list[dict] | None:
+    """Открытые записи эпика стора, ТОЛЬКО чтение: `bd --readonly` с cwd корня дерева -- bd
+    резолвит базу по cwd (тот же посадочный путь, что `_Transport`, чей read-only-флаг даёт
+    `--readonly`; `bd list --status` одной формой через запятую -- повтор `-s` затирает
+    предыдущий статус, execution_store_reads.py). Набор `open,in_progress,deferred` --
+    «незакрытые», тот же, что у `_unclosed_children` маршрута. None -- стор недоступен
+    (нет binary/базы, ответ не JSON): объявленный пропуск, не «нарушений нет»."""
+
+    try:
+        proc = subprocess.run(
+            ["bd", "--readonly", "list", "--type", "epic",
+             "--status", "open,in_progress,deferred", "--json"],
+            cwd=str(root), capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    try:
+        data = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return None
+    return data if isinstance(data, list) else None
+
+
+def _epic_branch(root: Path, epic: str) -> str | None:
+    """Измерение `branch` записи эпика (`bd state list <id> --json`, форма `states`, как
+    `read_state` адаптера) либо None: ключа нет -- судить нечем (размерность пишет
+    `open_epic`, scripts/execution_store_route.py:102,124-132; гейт-биды её не несут)."""
+    try:
+        proc = subprocess.run(
+            ["bd", "--readonly", "state", "list", epic, "--json"],
+            cwd=str(root), capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    try:
+        states = (json.loads(proc.stdout) or {}).get("states")
+    except json.JSONDecodeError:
+        return None
+    branch = states.get("branch") if isinstance(states, dict) else None
+    return str(branch) if branch else None
+
+
+def _guard_open_epic_branches(root: Path, prefix: str) -> tuple[list[str], list[str]]:
+    """В7 (ADR-122, backlog:1382-1385): открытие эпика подчинено дисциплине ветки. Ветка
+    КАЖДОЙ открытой записи эпика стора сверяется с объявленным `integrationBranchPrefix`;
+    вердикт перестаёт зависеть только от ветки текущей сессии.
+
+    Возвращает (отказы, заметки). Отказ громкий и называет эпик, ветку и префикс носителя
+    (норма capability role-branch-discipline «The epic record names a branch outside the
+    prefix»). Заметки печатаются ВСЕГДА: громкий ноль, когда записи проверены и чисты
+    (ADR-085 Д4), и объявленный пропуск, когда стора нет либо судить нечего, -- закрытая
+    волна не требует живого bd и гейт остаётся зелёным.
+
+    Чего сторож не ловит (названо, а не умолчано): записи без измерения `branch` (гейт-биды
+    типа `epic`, у которых размерности нет по построению) и стор, ставший нечитаемым МЕЖДУ
+    вызовами `bd` одного прогона.
+    """
+    records = _open_epic_records(root)
+    if records is None:
+        return [], ["стор недоступен (bd list) -- открытые записи эпика не судятся "
+                    "(объявленный пропуск, В7 ADR-122)"]
+    if not records:
+        return [], ["открытых записей эпика в сторе нет -- аудит префикса не на чем "
+                    "(объявленный пропуск, В7 ADR-122)"]
+    denials: list[str] = []
+    judged = 0
+    for record in records:
+        epic = str(record.get("id") or "?")
+        branch = _epic_branch(root, epic)
+        if branch is None:
+            continue                    # без измерения branch судить нечем (см. докстроку)
+        judged += 1
+        if branch.startswith(prefix):
+            continue
+        denials.append(
+            f"эпик `{epic}` открыт с ветки `{branch}` -- вне объявленного префикса "
+            f"`{prefix}`. Открытие эпика подчинено дисциплине ветки (В7 ADR-122, "
+            f"backlog:1382-1385); носитель префикса -- branchDiscipline."
+            f"integrationBranchPrefix в .nauta-gates.yaml."
+        )
+    if judged == 0:
+        return denials, ["открытые записи эпика без измерения branch -- судить нечего "
+                         "(объявленный пропуск, В7 ADR-122)"]
+    if not denials:
+        return denials, [f"открытых записей эпика с веткой: {judged}, "
+                         f"все внутри префикса `{prefix}`"]
+    return denials, []
 
 
 def main(argv: list[str]) -> int:
@@ -198,24 +419,59 @@ def main(argv: list[str]) -> int:
         print("       Пока объявления нет, сторож имён веток рабочих копий не судит дерево.")
         return _EXIT_OK
 
-    denials, warnings = _guard_branch_names(root, prefix)
+    # Каждая группа сторожей несёт СВОЙ заголовок и СВОЮ строку «сторож не ловит» (DEV-478
+    # Н-6): общий заголовок под тремя разными сторожами прятал бы, какой из них отказал и
+    # где искать его слепые зоны.
+    name_denials, name_warnings = _guard_branch_names(root, prefix, profile)
+    stale_warnings = _guard_stale_copies(root, prefix)                    # #20 — ПРЕДУПРЕЖДЕНИЕ
+    # #23 — отказ ТОЛЬКО против объявления самого потребителя. Место, взятое умолчанием
+    # кода, даёт предупреждение: денить за раскладку, которой мы никогда не запрещали,
+    # значило бы наказать человека ровно за тот шаг, который ему предлагает онбординг
+    # (замер 2026-09-24 на дереве потребителя mail-plugin: копия в .worktrees/, профиль
+    # не объявлен — сторож молчал; объявление профиля включило бы отказ на живой раскладке).
+    location_declared = isinstance(block, dict) and block.get("worktreeLocation") is not None
+    location_denials, location_warnings = _guard_out_of_location_copies(
+        root, location, prefix, location_declared)
+    epic_denials, epic_notes = _guard_open_epic_branches(root, prefix)
+    warnings = name_warnings + stale_warnings + location_warnings
+    denials = name_denials + location_denials + epic_denials
     # Строка вердикта печатается ПОСЛЕ опроса сторожа: иначе один прогон печатал бы «OK»
     # и «ERROR» разом, и читатель, глядящий на stdout, видел бы зелёное там, где отказ.
     head = "OK" if not denials else "[INFO]"
     print(f"{head}: профиль дисциплины ветвления — {profile}.")
     print(f"  норма branchDiscipline: {source}")
     print(f"  интеграционная ветка: префикс `{prefix}`; место копий: {location}")
+    for line in epic_notes:
+        print(f"  {line}")
     for line in warnings:
         print(f"  WARNING: {line}")
-    if denials:
+    if name_denials:
         print("ERROR: рабочая копия роли не переименовала свою ветку (шов ADR-081 §4.4)",
               file=sys.stderr)
-        for line in denials:
+        for line in name_denials:
             print(f"  {line}", file=sys.stderr)
         print("  Сторож не ловит: окно между созданием копии и первым действием роли, "
               "переименование", file=sys.stderr)
         print("  в чужой номер и копии вне корня дерева — см. докстроку "
               "_guard_branch_names.", file=sys.stderr)
+    if location_denials:
+        print("ERROR: указатель копии переписан вне объявленного worktreeLocation "
+              "(ADR-115 Д4, #23)", file=sys.stderr)
+        for line in location_denials:
+            print(f"  {line}", file=sys.stderr)
+        print("  Сторож не ловит: копии, чей указатель разрешается ЦЕЛИКОМ вне корня дерева "
+              "(DEV-130), и указатель, перезаписанный `git worktree repair` уже ПОСЛЕ этого "
+              "прогона — см. докстроку _guard_out_of_location_copies.", file=sys.stderr)
+    if epic_denials:
+        print("ERROR: открытая запись эпика стора называет ветку вне объявленного префикса "
+              "(В7 ADR-122, backlog:1382-1385)", file=sys.stderr)
+        for line in epic_denials:
+            print(f"  {line}", file=sys.stderr)
+        print("  Сторож не ловит: записи эпика без измерения branch (его пишет open_epic) и "
+              "стор, ставший", file=sys.stderr)
+        print("  нечитаемым между вызовами bd одного прогона — см. докстроку "
+              "_guard_open_epic_branches.", file=sys.stderr)
+    if denials:
         return _EXIT_ERROR
     return _EXIT_OK
 

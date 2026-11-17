@@ -144,6 +144,22 @@ append_block_yaml() {
   uv run scripts/_apply_yaml_patch.py "$file" "$content_file" "$MARK_START_YAML" "$MARK_END_YAML"
 }
 
+# check_yaml_patch — DEV-464 (issue #22): парсит патч и ищет адресата в target БЕЗ записи
+# (`_apply_yaml_patch.py --check`). Зовётся из preflight-прохода стека (см. ниже) ДО того,
+# как какая-либо цель стека получит первую запись strip_block/append_block_* — так поздний
+# малформед-патч не оставляет ранние цели (CLAUDE.md) уже откаченными к шаблону, потому что
+# запись по ним ещё не началась вовсе. rc пробрасывается вызывающему без своего сообщения —
+# `uv run scripts/_apply_yaml_patch.py --check` уже печатает `ERROR: …` в stderr.
+check_yaml_patch() {
+  local file="$1"
+  local content_file="$2"
+  if [[ ! -f "$file" ]] || [[ ! -f "$content_file" ]]; then
+    return 0
+  fi
+  uv run scripts/_apply_yaml_patch.py --check "$file" "$content_file" \
+    "$MARK_START_YAML" "$MARK_END_YAML"
+}
+
 # Process markdown target (CLAUDE.md, agent files, glossary)
 process_md_target() {
   local target="$1"
@@ -404,8 +420,31 @@ if [[ "$PROFILE_MODE" -eq 1 ]]; then
   exit 0
 fi
 
+claude_patch="$OVERLAY_DIR/claude-md-patch.md"
+yaml_patch="$OVERLAY_DIR/doc-root-properties-smp.yaml"
+yaml_target="content/.doc-root.yaml"
+glossary_patch="$OVERLAY_DIR/glossary-skeleton.md"
+glossary_target="content/10-domain/glossary.md"
+
+# === Preflight: разбор ВСЕХ патчей стека ДО первой записи (DEV-464, issue #22) ===========
+# Единственная цель стека, чей патч может отказать НА РАЗБОРЕ — YAML (`_apply_yaml_patch.py`,
+# «malformed overlay patch» / адресат не найден, ADR-022 Д3). CLAUDE.md и glossary — плоский
+# `cat >>`, разбирать нечего. Без этого прохода отказ на YAML-шаге настигал после того, как
+# `process_md_target "CLAUDE.md" …` уже вырезал и переписал блок на диске (issue #22:
+# «упал» не значит «не тронул»). Симметрично `bin/deliver.sh` (sha256-конфликт-детекция до
+# первой записи) и `bin/upgrade.sh` (I1-I4 в тени, ADR-109) — тот же принцип «весь план
+# сначала проверяется целиком, потом исполняется», здесь — для marker-based стека, не для
+# агрегата обновления (тот и этот файл — разные механизмы, оба одни закрывают собственный
+# класс отказа).
+if [[ "$ACTION" == "apply" ]] && [[ "$DRY_RUN" -ne 1 ]]; then
+  check_yaml_patch "$yaml_target" "$yaml_patch" || {
+    echo "ERROR: overlay '$OVERLAY_NAME' aborted at preflight — no target written" >&2
+    exit 1
+  }
+fi
+
 # === CLAUDE.md ===
-[[ -f "$OVERLAY_DIR/claude-md-patch.md" ]] && process_md_target "CLAUDE.md" "$OVERLAY_DIR/claude-md-patch.md"
+[[ -f "$claude_patch" ]] && process_md_target "CLAUDE.md" "$claude_patch"
 
 # === Agent patches ===
 # Шаг 4 PT-EPIC-14: блок удалён. Он патчил `.claude/plugins/<slug>/agents/<role>-agent.md`
@@ -414,13 +453,9 @@ fi
 # Сами патчи (`agent-patches/*-smp-extension.md`) удалены вместе с блоком, живы в `81bc667`.
 
 # === .doc-root.yaml ===
-yaml_patch="$OVERLAY_DIR/doc-root-properties-smp.yaml"
-yaml_target="content/.doc-root.yaml"
 [[ -f "$yaml_patch" ]] && [[ -f "$yaml_target" ]] && process_yaml_target "$yaml_target" "$yaml_patch"
 
 # === glossary.md ===
-glossary_patch="$OVERLAY_DIR/glossary-skeleton.md"
-glossary_target="content/10-domain/glossary.md"
 [[ -f "$glossary_patch" ]] && [[ -f "$glossary_target" ]] && process_md_target "$glossary_target" "$glossary_patch"
 
 echo "✓ Overlay '$OVERLAY_NAME': $ACTION"

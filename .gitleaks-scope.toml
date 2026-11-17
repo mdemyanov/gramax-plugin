@@ -1,0 +1,12 @@
+# .gitleaks-scope.toml — область гейта `secret-scan-tree` nauta (передаётся явным -c из scripts/check.sh).
+# Исключён только игнорируемый локальный файл настроек Claude Code: он вне коммитируемого
+# множества (`git check-ignore -v .claude/settings.local.json` → .gitignore:18) и несёт
+# локальный токен провайдера. Отслеживаемые файлы под `.claude/` остаются в области скана.
+
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''(^|/)\.claude/settings\.local\.json$''',
+]

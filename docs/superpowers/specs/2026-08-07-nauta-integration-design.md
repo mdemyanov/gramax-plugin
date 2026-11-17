@@ -1,8 +1,14 @@
 ---
 title: Переход gramax-marketplace на nauta как ролевую команду
-status: draft
+order: 3
+status: accepted
 date: 2026-08-07
 plugin: marketplace
+properties:
+  - name: Тип контента
+    value: [Спека]
+  - name: Статус
+    value: [Accepted]
 ---
 
 # Переход gramax-marketplace на nauta

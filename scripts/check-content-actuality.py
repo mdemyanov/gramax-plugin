@@ -28,10 +28,12 @@
   3 — «устарел»: хотя бы одна объявленная опора не разрешается (VIOLATION). Суждения здесь
       нет ни грамма — статья сама назвала путь опорой, и пути в `git ls-files` нет.
 
-Область (Д4, спутник §3) — `content/**/*.md` минус `_index.md`, минус замороженная история
-(`waves-archive/`, `backlog-archive/`, `lessons-archive/`, `archive-index.md`), минус
-`60-implementation/`. Перечень — литерал ниже с адресом решения; отдельный ключ конфига этой
-волной не заводится (ADR-031 Д1 не расширяется).
+Область (Д4, спутник §3) — `docs/**/*.md` минус `_index.md`, минус замороженная история
+(`waves-archive/`, `backlog-archive/`), минус датированные отчёты прогонов. Перечень —
+литерал ниже с адресом решения; отдельный ключ конфигура этой волной не заводится
+(ADR-031 Д1 не расширяется). Окно О7 NA-EPIC-83 сняло мёртвые фрагменты: `lessons-archive/`
+умер вместе с жанром (О6 — postmortems), карта замороженного архива ликвидирована (Ф7) —
+прибор не таскает исключения несуществующих домов.
 
 Две развилки, которые спутник §10 оставил «зафиксировать тестом до реализации», и третья,
 которой в Д5 строки нет, — закрыты DEV-118 и заперты `tests/test_dev118_content_actuality_
@@ -57,15 +59,33 @@ _BACKTICK_RE = re.compile(r"`([^`]*)`")
 #: «нет» + необязательное тире любой из трёх форм. Обе формы тире приняты (спутник §10,
 #: прецедент коммита 745c397 «четыре замка приведены к канонической форме, обе формы приняты»).
 _REFUSAL_RE = re.compile(r"^нет\b[\s—–-]*(.*)$", re.IGNORECASE)
-
-#: Д4 / спутник §3. Литерал, а не ключ конфига — по брифу §7 п.3.
-_EXCLUDED_FRAGMENTS = (
-    "/waves-archive/",      # ADR-057 Consequences: «за актуальностью которых никто не следит»
-    "/backlog-archive/",    # ADR-023 Consequences: то же дословно
-    "/lessons-archive/",    # тот же класс замороженной истории
-    "/60-implementation/",  # датированный отчёт о прогоне верен на свою дату по построению
+#: DEV-440 (QA-093, находка 1 сверх контракта ADR-098): начало любой ДРУГОЙ жирной строки
+#: шапки («**Governs:**» и т.п.) — граница, на которой перенос `**Опоры:**` обязан остановиться,
+#: чтобы не поглотить чужое поле.
+_BOLD_FIELD_RE = re.compile(r"^\*\*[^*]+:\*\*")
+#: Синтетический неразбираемый токен для дангл-переноса (строка кончается запятой — список
+#: объявлен незакрытым, — а следующей строки-продолжения в шапке нет: блок, чужое жирное поле
+#: или конец шапки). Обёрнут в бэктики нарочно: попадает в тот же путь `_malformed()`
+#: (пробел внутри пути), что и мусорный путь (Д2 модуля) — код 3 «устарел» с текстом причины
+#: в выводе, а не тихий недосчёт (ADR-007 Д1 «не смог» ≠ «нечего проверять»).
+_DANGLING_CONTINUATION_TOKEN = (
+    "<перенос шапки не завершён: список опор обрывается запятой без продолжения>"
 )
-_EXCLUDED_NAMES = ("_index.md", "archive-index.md")
+
+#: Д4 / спутник §3. Литерал, а не ключ конфига — по брифу §7 п.3. Окно О7 NA-EPIC-83:
+#: фрагменты следуют за реальными домами замороженной истории (волны — 90-decisions-log/
+#: waves с окна О5; отчёты прогонов — 40-testing/reports; записи реализации —
+#: 90-decisions-log/implementation); мёртвые фрагменты жанра lessons (умер в О6) и
+#: карты замороженного архива (ликвидирована Ф7) сняты — прибор не таскает исключения
+#: несуществующих домов.
+_EXCLUDED_FRAGMENTS = (
+    "/90-decisions-log/waves/",   # ADR-057 Consequences: «за актуальностью которых никто не следит»
+    "/backlog-archive/",    # ADR-023 Consequences: то же дословно
+    "/40-testing/reports/",  # датированный отчёт о прогоне верен на свою дату по построению
+    "/90-decisions-log/implementation/",  # датированная запись исполнения — та же цена датированности
+)
+
+_EXCLUDED_NAMES = ("_index.md",)  # навигация — своих утверждений о дереве не несёт
 
 _TRUTH_CAVEAT = (
     "Признак мерит ОПОРУ, а не ИСТИНУ (ADR-076 Д3): «названные статьёй опоры в дереве есть» "
@@ -115,7 +135,8 @@ def _malformed(token: str) -> str | None:
 
 
 def _read_marker_lines(path: Path) -> list[str]:
-    """Строки `**Опоры:**` шапки.
+    """Логические строки `**Опоры:**` шапки — с поглощённым переносом по ширине (DEV-440,
+    QA-093 находка 1).
 
     YAML здесь НЕ парсится вовсе — ни своим парсером, ни чужим. Бриф спутника §7 п.2
     («парсер frontmatter — существующий `_validate_common.parse_frontmatter`, второй не
@@ -127,9 +148,41 @@ def _read_marker_lines(path: Path) -> list[str]:
     §10 при этом удовлетворено строже: не парся YAML, гейт на сломанном YAML не падает по
     построению, а C3 `validate-content.py` продолжает поднимать `MalformedYamlError` сам —
     дублирования нет. Замок: `test_broken_frontmatter_neither_crashes_the_gate_nor_
-    duplicates_c3`."""
-    return [line for line in _header_lines(path.read_text(encoding="utf-8"))
-            if line.startswith(MARKER)]
+    duplicates_c3`.
+
+    Перенос (DEV-440): «висячий» продолжатель без нового `**Опоры:**` на второй строке —
+    стандартный markdown-приём, найденный на живых статьях (SA-110 и другие, 13 файлов).
+    Признак продолжения — НЕ «любая непустая строка после маркера» (это поглотило бы чужую
+    прозу шапки), а дословно тот сигнал, которым автор сам открывает список: строка кончается
+    запятой — «здесь ещё будет». Правило: пока накопленный текст оканчивается запятой, следующая
+    непустая строка шапки, не начинающая СВОЁ жирное поле (`_BOLD_FIELD_RE`), поглощается как
+    продолжение того же объявления. Если после исчерпания шапки текст всё ещё висит на запятой —
+    перенос объявлен, но не закрыт; это не считается частично (молчание запрещено, ADR-007 Д1) —
+    дописывается синтетический неразбираемый токен, который классификатор увидит как мусорный
+    путь (Д2 модуля) и явно назовёт причину в выводе, код 3."""
+    header = _header_lines(path.read_text(encoding="utf-8"))
+    out: list[str] = []
+    i, n = 0, len(header)
+    while i < n:
+        line = header[i]
+        if not line.startswith(MARKER):
+            i += 1
+            continue
+        parts = [line]
+        j = i + 1
+        while parts[-1].rstrip().endswith(",") and j < n:
+            cont = header[j]
+            stripped_cont = cont.strip()
+            if not stripped_cont or _BOLD_FIELD_RE.match(stripped_cont):
+                break
+            parts.append(stripped_cont)
+            j += 1
+        merged = " ".join(parts)
+        if merged.rstrip().endswith(","):
+            merged += f" `{_DANGLING_CONTINUATION_TOKEN}`"
+        out.append(merged)
+        i = j
+    return out
 
 
 def _split_value(value: str) -> tuple[str, object]:
@@ -179,21 +232,35 @@ def classify(rel: str, marker_lines: list[str], tracked: set[str]) -> tuple[str,
                 f"значение одновременно) — считаны опоры"
             )
         unresolved = []
+        nonpaths = []
         for token in anchors:
             reason = _malformed(token)
             if reason is not None:
                 unresolved.append(f"`{token}` (форма: {reason})")
             elif token not in tracked:
-                unresolved.append(f"`{token}`")
+                # ADR-117 §8.1 #9 (DEV-484): бэктик-слово без «/» и без расширения и
+                # hex-sha 7-40 — НЕ пути: имя прибора/функции и коммит-метка легальны как
+                # опоры-указатели, жёсткий «устарел» на них — ложный отказ.
+                if ("/" not in token and "." not in token) or re.fullmatch(
+                        r"[0-9a-fA-F]{7,40}", token):
+                    nonpaths.append(token)
+                else:
+                    unresolved.append(f"`{token}`")
         if unresolved:
             return "outdated", [
                 f"VIOLATION {rel}: устарел — не разрешились в git ls-files: "
                 + ", ".join(unresolved)
             ] + notes
-        return "actual", [
+        lines = [
             f"OK {rel}: актуален — опоры разрешились ({len(anchors)}): "
             + ", ".join(f"`{a}`" for a in anchors)
-        ] + notes
+        ]
+        if nonpaths:
+            lines.append(
+                f"[INFO] {rel}: не-пути вне проверки ({', '.join(f'`{x}`' for x in nonpaths)}) "
+                f"— слово без «/» и расширения и hex-sha 7-40 опорой-путём не являются "
+                f"(ADR-117 §8.1 #9)")
+        return "actual", lines + notes
 
     if refusals:
         return "refusal", [f"INFO {rel}: объявленный отказ — {'; '.join(refusals)}"] + notes
@@ -203,7 +270,7 @@ def classify(rel: str, marker_lines: list[str], tracked: set[str]) -> tuple[str,
 
 
 def _tracked_files(root: Path) -> set[str] | None:
-    """Множество `git ls-files` (`-z`: весь `content/` — кириллица, иначе git отдаёт пути в
+    """Множество `git ls-files` (`-z`: весь `docs/` — кириллица, иначе git отдаёт пути в
     кавычках с escape-последовательностями и сравнение ломалось бы молча — приём id-check.sh).
     None — git недоступен: не репозиторий либо бинаря нет в PATH."""
     try:
@@ -250,10 +317,14 @@ def main(argv: list[str] | None = None) -> int:
     # Умолчание обязательно (тот же довод, что у соседа по ADR-072 Д3): `run_gate_if_declared`
     # передаёт ТОЛЬКО путь скрипта, и обязательный аргумент дал бы usage error с кодом 2 —
     # «не смог проверить» вместо проверки. `check.sh` исполняет гейты из REPO_ROOT.
-    parser.add_argument("--content-dir", default=Path("content"), type=Path)
+    # Flip Ф9 (окно О7): умолчание — первый существующий из пары docs/ (раскладка после
+    # flip), классический корень — запасной (профиль classic); симметрично validate-content.py.
+    parser.add_argument("--content-dir", default=None, type=Path)
     args = parser.parse_args(argv)
 
-    content_dir: Path = args.content_dir
+    content_dir: Path = args.content_dir or next(
+        (Path(p) for p in ("docs", "content") if Path(p).is_dir()), Path("docs")
+    )
     if not content_dir.is_dir():
         print(f"usage error: --content-dir {content_dir} is not a directory", file=sys.stderr)
         return 2

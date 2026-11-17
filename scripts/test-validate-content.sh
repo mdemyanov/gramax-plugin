@@ -2,7 +2,7 @@
 # test-validate-content.sh — самопроверка гейта scripts/validate-content.py.
 #
 # Предмет — процесс: stdout/stderr и код возврата на СИНТЕТИЧЕСКИХ фикстурах (временный
-# каталог со своим content/, своим .doc-root.yaml, своим .nauta-gates.yaml), не на дереве
+# каталог со своим docs/ (до flip О7 — content/), своим .doc-root.yaml, своим .nauta-gates.yaml), не на дереве
 # nauta. Ровно это отличие и есть смысл файла: ишью потребителей #11 (C5 инертна) и #12
 # (потолок C11 не применяется) — один класс, «проверка признана работающей по признаку,
 # снятому с собственного дерева». Зелёное на своём корпусе отвечало на вопрос «краснеет ли
@@ -20,7 +20,7 @@
 #   D. объявленное молчание отличимо от невыполнения (форма `absent`).
 # Остальные проверки покрыты pytest (tests/test_dev122_*.py, tests/test_dev123_*.py,
 # tests/test_content_*_gate.py и соседи) и аудитом фальсифицируемости QA-064
-# (content/60-implementation/2026-08-26-qa-064-check-falsifiability-audit.md). Дубль
+# (docs/90-decisions-log/implementation/2026-08-26-qa-064-check-falsifiability-audit.md). Дубль
 # контракта здесь не нужен и не делается: pytest в дерево потребителя НЕ доставляется
 # (bin/deliver.sh, PAYLOAD_FILES — только scripts/ и .githooks/), поэтому у потребителя эта
 # bash-сьюта — единственный работающий детектор дефекта гейта, и она обязана быть узкой и
@@ -111,7 +111,8 @@ assert_caught() {
 run_gate() {
   local dir="$1"; shift
   set +e
-  OUT="$(cd "$dir" && uv run "$GATE" "${@:-content}" 2>&1)"
+  # Окно О7 (flip Ф9): фикстурыsuite живут в docs/ — умолчание прогона тоже docs
+  OUT="$(cd "$dir" && uv run "$GATE" "${@:-docs}" 2>&1)"
   RC=$?
   set -e
 }
@@ -122,15 +123,15 @@ run_gate() {
 # отдельным прогоном: голая фикстура даёт "OK (2 файлов проверены)" и "Errors: 0 | Warnings: 0".
 mk_tree() {
   local d; d="$(mktemp -d "$TMPROOT/fixture.XXXXXX")"
-  mkdir -p "$d/content"
+  mkdir -p "$d/docs"
   : > "$d/.nauta-gates.yaml"
-  printf '# Fixture\n\n' > "$d/content/_index.md"
+  printf '# Fixture\n\n' > "$d/docs/_index.md"
   echo "$d"
 }
 
 # doc_root <dir> <тип-property> — .doc-root.yaml со строковым values:.
 doc_root() {
-  cat > "$1/content/.doc-root.yaml" <<YAML
+  cat > "$1/docs/.doc-root.yaml" <<YAML
 title: Fixture
 properties:
   - name: Тип контента
@@ -139,8 +140,16 @@ properties:
 YAML
 }
 
-# register <dir> <имя-файла> — ссылка в content/_index.md (снимает C17 и C10).
-register() { printf -- '- [%s](%s)\n' "${2%.md}" "$2" >> "$1/content/_index.md"; }
+# register <dir> <имя-файла> — ссылка в docs/_index.md (снимает C17 и C10).
+# Текст ссылки — ДОСЛОВНЫЙ `# `-заголовок цели, а не имя файла: второй исход C17 (Д3 ADR-114)
+# требует РАВЕНСТВА текста ссылки и заголовка, и стенд, регистрировавший статью именем файла,
+# краснил бы сам себя на четырёх случаях (A1/D1/D2 — exit 1 вместо 0). Заголовка нет — падаем
+# на имя файла: `_target_heading` вернёт None, и второй исход промолчит (предмет C1/C9).
+register() {
+  local h
+  h="$(sed -n 's/^# //p' "$1/docs/$2" 2>/dev/null | head -1)"
+  printf -- '- [%s](%s)\n' "${h:-${2%.md}}" "$2" >> "$1/docs/_index.md"
+}
 
 # article <dir> <имя-файла> <значение "Тип контента"> — статья с frontmatter; тело читается
 # со stdin. Число строк тела равно числу "\n" в теле — ровно тот прибор, которым C11 меряет T
@@ -149,7 +158,7 @@ article() {
   local dir="$1" name="$2" type_value="$3"
   { printf -- '---\nproperties:\n  - name: Тип контента\n    value: [%s]\n---\n' "$type_value"
     cat
-  } > "$dir/content/$name"
+  } > "$dir/docs/$name"
   register "$dir" "$name"
 }
 
@@ -185,10 +194,10 @@ A2="$(mk_tree)"; doc_root "$A2" Enum
 # Намеренно без register: предмет сценария — C17, регистрация статьи в разделе.
 { printf -- '---\nproperties:\n  - name: Тип контента\n    value: [Прочее]\n---\n'
   printf '\n# Сирота\n\nТекст.\n'
-} > "$A2/content/orphan.md"
+} > "$A2/docs/orphan.md"
 run_gate "$A2"
 assert_caught "A2 поймано: код, непустой вывод и текст находки" "$RC" "$OUT" \
-  "content/orphan.md" "не зарегистрирована ссылкой в content/_index.md"
+  "docs/orphan.md" "не зарегистрирована ссылкой в docs/_index.md"
 assert_out "A2 находка попала в счётчик, а не только в строку вывода" "$OUT" "Errors: 1"
 refute_out "A2 не рапортует «проверено, нарушений нет» одновременно с находкой" "$OUT" "OK ("
 
@@ -207,7 +216,7 @@ article "$B1" bad.md Мусор <<'MD'
 MD
 run_gate "$B1"
 assert_caught "B1 значение вне enum названо вместе с файлом и допустимым множеством" \
-  "$RC" "$OUT" "content/bad.md" 'property "Тип контента" имеет значение "Мусор"' \
+  "$RC" "$OUT" "docs/bad.md" 'property "Тип контента" имеет значение "Мусор"' \
   "не входящее в enum ['ADR', 'Прочее']"
 
 echo "--> B2: неканоническое написание типа при непустом values: — громкая ошибка, не тишина"
@@ -220,13 +229,13 @@ article "$B2" ok.md Прочее <<'MD'
 MD
 run_gate "$B2"
 assert_caught "B2 неканонический type назван вместе с носителем и лечением" "$RC" "$OUT" \
-  "content/.doc-root.yaml" "не каноническое" "не применяет ни одна проверка" \
+  "docs/.doc-root.yaml" "не каноническое" "не применяет ни одна проверка" \
   "использовать \`type: Enum\` со строковым массивом \`values:\`"
 refute_out "B2 не выдаёт тишину за чистоту" "$OUT" "OK ("
 
 echo "--> B3: values: списком отображений (- name: X) — TypeError недостижим, выборка живая"
 B3="$(mk_tree)"
-cat > "$B3/content/.doc-root.yaml" <<'YAML'
+cat > "$B3/docs/.doc-root.yaml" <<'YAML'
 title: Fixture
 properties:
   - name: Тип контента
@@ -251,9 +260,9 @@ run_gate "$B3"
 assert "B3 exit 1 (находка), а не 2/аварийный код интерпретатора" "$RC" "1"
 refute_out "B3 форма - name: X не роняет гейт" "$OUT" "Traceback" "TypeError" "unhashable"
 assert_caught "B3 отображение разобрано: нарушитель найден по имени name" "$RC" "$OUT" \
-  "content/bad.md" 'имеет значение "Мусор"' "не входящее в enum ['ADR', 'Прочее']"
+  "docs/bad.md" 'имеет значение "Мусор"' "не входящее в enum ['ADR', 'Прочее']"
 refute_out "B3 законное значение из той же формы не объявлено нарушением" "$OUT" \
-  "content/ok.md: property"
+  "docs/ok.md: property"
 
 # =========================================================================================
 # C. Потолок C11 достижим из ОБЕИХ качественных веток (ишью #12, ADR-078)
@@ -270,7 +279,7 @@ sizeBudgets:
     quality: companion-spec
     severity: block
 sizeBudgetGrandfathered:
-  - path: content/frozen.md
+  - path: docs/frozen.md
     ceiling: $2
 YAML
 }
@@ -286,7 +295,7 @@ sizeBudgets:
     qualityThreshold: 5
     severity: warn
 sizeBudgetGrandfathered:
-  - path: content/frozen.md
+  - path: docs/frozen.md
     ceiling: $2
 YAML
 }
@@ -297,7 +306,7 @@ article "$C1" frozen.md ADR < <(body_lines 20)
 run_gate "$C1"
 assert "C1 exit 0 — потолок не превышен, находка не блокирует" "$RC" "0"
 assert_out "C1 warning называет числа, провенанс (rel) в скобках и решение" "$OUT" \
-  "грандфазер: 20 строк тела <= замороженного потолка 20" "(content/frozen.md, ADR-018 Д5)" \
+  "грандфазер: 20 строк тела <= замороженного потолка 20" "(docs/frozen.md, ADR-018 Д5)" \
   "не блокирует" "[warning]" "Errors: 0 | Warnings: 1"
 
 echo "--> C2: companion-spec, выше потолка (20 > 15) — error"
@@ -305,7 +314,7 @@ C2="$(mk_tree)"; doc_root "$C2" Enum; gates_companion "$C2" 15
 article "$C2" frozen.md ADR < <(body_lines 20)
 run_gate "$C2"
 assert_caught "C2 превышение потолка — error с числами и лечением" "$RC" "$OUT" \
-  "грандфазер-потолок превышен: 20 строк тела > 15 (content/frozen.md)" \
+  "грандфазер-потолок превышен: 20 строк тела > 15 (docs/frozen.md)" \
   "подними ceiling явной правкой sizeBudgetGrandfathered" "[error]"
 
 echo "--> C3: longest_run_without_structure, ровно НА потолке (20 == 20) — warning"
@@ -314,7 +323,7 @@ article "$C3" frozen.md Прочее < <(body_lines 20)
 run_gate "$C3"
 assert "C3 exit 0 — вторая ветка тоже доходит до потолка, а не мимо него" "$RC" "0"
 assert_out "C3 warning несёт провенанс ветки ADR-078, а не ветки companion-spec" "$OUT" \
-  "грандфазер: 20 строк тела <= замороженного потолка 20" "(content/frozen.md, ADR-078)" \
+  "грандфазер: 20 строк тела <= замороженного потолка 20" "(docs/frozen.md, ADR-078)" \
   "не блокирует" "Errors: 0 | Warnings: 1"
 refute_out "C3 не печатает форму первой ветки" "$OUT" "ADR-018 Д5"
 
@@ -323,7 +332,7 @@ C4="$(mk_tree)"; doc_root "$C4" Enum; gates_run "$C4" 15
 article "$C4" frozen.md Прочее < <(body_lines 20)
 run_gate "$C4"
 assert_caught "C4 превышение потолка красит и на мягкой ступени severity" "$RC" "$OUT" \
-  "грандфазер-потолок превышен: 20 строк тела > 15 (content/frozen.md)" \
+  "грандфазер-потолок превышен: 20 строк тела > 15 (docs/frozen.md)" \
   "ADR-078, ADR-064 Д3" "[error]"
 
 # =========================================================================================

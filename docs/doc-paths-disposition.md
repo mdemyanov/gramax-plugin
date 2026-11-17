@@ -1,3 +1,13 @@
+---
+title: "Диспозиция 55 упоминаний `docs/`-путей внутри `content/`"
+order: 2
+properties:
+  - name: Тип контента
+    value: [Прочее]
+  - name: Статус
+    value: [Historical]
+---
+
 # Диспозиция 55 упоминаний `docs/`-путей внутри `content/`
 
 Замер: `grep -rnE 'docs/(adr|qa-reports|acceptance|research|lessons-learned|superpowers/specs)' content/`

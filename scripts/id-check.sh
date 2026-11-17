@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # id-check.sh — коллизии, невозврат отменённого номера, расхождение реестра
-# (ADR-038, схема — content/40-architecture/ADR-038-identifier-namespaces-and-allocation-spec.md
+# (ADR-038, схема — docs/30-architecture/ADR-038-identifier-namespaces-and-allocation-spec.md
 # §4.3, §5). Реестр — .nauta-ids.yaml в корне дерева (§3 того же файла).
 #
 # Логика — Python (PEP 723 inline-заголовок), не bash: bash в этом дереве — 3.2, без
@@ -186,7 +186,7 @@ def _git_candidate_files(exts=_CANDIDATE_EXTS):
     исключено `.gitignore`/`.git/info/exclude`/core.excludesFile. Граница сужения ровно одна
     и объявлена: игнорируемое репозиторием — не корпус репозитория.
 
-    `-z`: пути с пробелами и не-ASCII (в этом дереве весь content/ — кириллица) git иначе
+    `-z`: пути с пробелами и не-ASCII (в этом дереве весь docs/ — кириллица) git иначе
     возвращает в кавычках с escape-последовательностями, и сравнение с путями из glob()
     ломалось бы молча."""
     try:
@@ -394,7 +394,17 @@ def _graveyard_retired(entry: dict):
         if not s.startswith("- ") or "](" in s:
             continue
         rest = s[2:]
-        if not rest.startswith(prefix):
+        # Сверка регистронезависимая (DEV-434, issue потребителя #21): `prefix` объявлен под
+        # форму `filename-prefix` (сверяется с именем файла на диске — там регистр важен,
+        # `_match_filename_prefix` выше по этому же модулю НЕ трогается), а строка кладбища
+        # пишется человеком по конвенции документа и обычно идёт заглавными («- ADR-007 —
+        # отменён…») независимо от регистра объявленного `prefix`. Без нормализации регистра
+        # здесь эта ветка невозврата отменённого номера могла быть выключена молча — «чисто»
+        # вместо «не смог проверить» или ERROR (см. `test-check-id.sh` M11). Ложных
+        # совпадений это не добавляет: алфавит `filename-prefix` — `[a-z0-9-]` (единственная
+        # форма, дающая одно вхождение на файл по построению, §4.1 ADR-038-spec), у цифр и
+        # дефиса регистра нет, а буквы латиницы совпадают по .lower() однозначно.
+        if not rest.lower().startswith(prefix.lower()):
             continue
         m = re.match(r"\d+", rest[len(prefix):])
         if m:
@@ -499,11 +509,11 @@ def main(argv: list[str]) -> int:
             if path in e["_home_set"] or path in all_homes:
                 continue
             # Санкционированный приём ADR-013 Д2: companion "-spec.md" сознательно несёт тот
-            # же номер, что решение (content/40-architecture/ADR-NNN-...-spec.md рядом с
-            # content/00-project/adr/ADR-NNN-....md) — не рогue-дубль. check-adr-line-limit.py
+            # же номер, что решение (docs/30-architecture/ADR-NNN-...-spec.md рядом с
+            # docs/30-architecture/adr/ADR-NNN-....md) — не рогue-дубль. check-adr-line-limit.py
             # исключает -spec.md из ЛИМИТА той же парой файлов; здесь тот же прецедент
             # применён к «вне home»: замерено на живом дереве (id-check.sh без этой строки
-            # даёт ~29 ложных ERROR на companion-файлах content/40-architecture/).
+            # даёт ~29 ложных ERROR на companion-файлах docs/30-architecture/).
             if path.endswith("-spec.md"):
                 continue
             for token, is_numeric, lineno, _role in _match_entry(path, definition, prefix):
@@ -554,7 +564,7 @@ def main(argv: list[str]) -> int:
             # которым проверка не применяется, значило бы завести новый красный там, где
             # предмета нет. Замер цены до этой строки: свежее дерево потомка (`deliver.sh`
             # + `/nauta:init`) краснело «кладбище номеров пространства 'adr' объявлено как
-            # content/00-project/adr/_index.md, но файла в дереве нет» — четыре падения в
+            # docs/30-architecture/adr/_index.md, но файла в дереве нет» — четыре падения в
             # сьюте (`test_dev025_*` ×3, `test_dev030_*`), у записи формы `filename-prefix`.
             if definition == "heading-anchored" and prefix and allocation != "external":
                 # `external` — тот же изъятый случай, что и ниже по циклу (Д2 ADR-069):

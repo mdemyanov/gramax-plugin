@@ -10,13 +10,13 @@ Implements check_drift() function per design-spec §3c and parse_bypass_from_com
 
 Usage (манифест указан напрямую):
     uv run scripts/_drift_check.py --changed-files <file1> <file2> ...
-        --manifest docs/overlays/profiles/<name>/manifest.yaml
+        --manifest templates/overlays/profiles/<name>/manifest.yaml
         [--bypass-reason "<reason>"]
 
 Usage (манифест резолвится из маркера каталога; --manifest и --doc-root взаимоисключимы):
     uv run scripts/_drift_check.py --changed-files <file1> <file2> ...
-        --doc-root content/.doc-root.yaml
-        [--profiles-dir docs/overlays/profiles]
+        --doc-root docs/.doc-root.yaml
+        [--profiles-dir templates/overlays/profiles]
 
 Usage (карта зон репозитория; --zones-manifest взаимоисключим и с --manifest, и с --doc-root —
 ADR-010 Д3, ADR-010-repo-zone-map-spec.md §2):
@@ -76,8 +76,8 @@ def _matches_pattern(file_path: str, pattern: str) -> bool:
 
     Pattern may end with '/' (directory prefix) or contain fnmatch wildcards.
     Examples:
-        'content/30-requirements/' matches 'content/30-requirements/foo.md'
-        'content/*-module-*/' matches 'content/10-module-01-intro/lesson.md'
+        'docs/20-requirements/' matches 'docs/20-requirements/foo.md'
+        'docs/*-module-*/' matches 'docs/10-module-01-intro/lesson.md'
         'src/' matches 'src/auth/login.py'
     """
     # Normalise trailing slash patterns to prefix match
@@ -300,9 +300,9 @@ def _main(argv: list[str]) -> int:
                         help="Path to <catalog>/.doc-root.yaml. Профиль читается из поля "
                              "profile:, манифест резолвится как "
                              "<profiles-dir>/<profile>/manifest.yaml. Взаимоисключим с --manifest")
-    parser.add_argument("--profiles-dir", metavar="PATH", default="docs/overlays/profiles",
+    parser.add_argument("--profiles-dir", metavar="PATH", default="templates/overlays/profiles",
                         help="Корень профилей для резолва --doc-root "
-                             "(default: docs/overlays/profiles)")
+                             "(default: templates/overlays/profiles)")
     parser.add_argument("--zones-manifest", metavar="PATH",
                         help="Путь к docs/zones.yaml. Строит drift_pairs из kind: derived зон "
                              "(кроме тех, у которых gate целиком состоит из 'НЕТ') и передаёт "
@@ -343,11 +343,11 @@ def _main(argv: list[str]) -> int:
     # ничего не удаляя): у этой ветки НЕТ вызывающего в этом дереве, замер 2026-08-18 —
     #   grep -n '_drift_check' commands/pm-review.md
     # `/nauta:pm-review` зовёт этот скрипт единственный раз, ЧЕРЕЗ ДРУГУЮ ветку
-    # (`--doc-root content/.doc-root.yaml --profiles-dir docs/overlays/profiles`, раздел
+    # (`--doc-root docs/.doc-root.yaml --profiles-dir templates/overlays/profiles`, раздел
     # «Drift-check» pm-review.md), не `--zones-manifest`. `docs/zones.yaml` — карта зон
     # архива `project_template` — в этом дереве отсутствует (`find . -name zones.yaml` →
     # пусто); архивные потребители (`publish-public.sh`, `test-examples-sync.sh`) не
-    # перенеслись (content/lessons-learned.md, запись 2026-07-28 PT-EPIC-15). pm-review.md
+    # перенеслись (docs/60-operations/postmortems/lessons-learned.md, запись 2026-07-28 PT-EPIC-15). pm-review.md
     # шаг «Ревизия зон» деградирует явно при отсутствии файла (advisory, merge не блокирует)
     # — код НЕ снят: снятие сломало бы потребителя, у которого docs/zones.yaml когда-нибудь
     # появится (roadmap.md, открытый пункт 5/6). Регрессия записи —

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -330,7 +331,12 @@ _ABSENCE_NEGATIVE = ("нет", "no", "false", "отрицателен", "-")
 # (`_discover_carriers`) считает носителем любой отслеживаемый файл, называющий slug и
 # несущий метку элемента, — упоминание slug тут сделало бы этот модуль ложным носителем.
 _ABSENCE_OUTCOMES = ("record sufficient", "closed")
-_ADR_DIR = Path("content") / "00-project" / "adr"
+# Единственный дом (акт О3 NA-EPIC-83, ТРИЗ-редакция): весь корпус решений — в
+# docs/30-architecture/adr/, старый дом ликвидирован вместе с правилом топологии (ADR-132);
+# читатели валидатора (supersede-поиск, разрешение адресов absence-records) несут один дом.
+# registry-rewrite.py на этом файле ПО-ПРЕЖНЕМУ отказывает громко (фрагменты журнальных
+# домов и backlog — предметы О6/О7, вне карты окна) — правка окна вручную, финальный свеп — О7.
+_ADR_DIRS = (Path("docs") / "30-architecture" / "adr",)
 
 
 def _superseders(repo_root: Path, adr: str) -> list[str]:
@@ -338,7 +344,8 @@ def _superseders(repo_root: Path, adr: str) -> list[str]:
     ADR-027:16, ADR-031:18); статус замещённого при этом не читается — процедура supersede
     запрещает его трогать."""
     out = []
-    for other in sorted((repo_root / _ADR_DIR).glob("ADR-*.md")):
+    for other in sorted(
+            other for d in _ADR_DIRS for other in (repo_root / d).glob("ADR-*.md")):
         if other.name.startswith(adr):
             continue
         try:
@@ -397,7 +404,8 @@ def _absence_record_issues(carrier: str, num: int, rec: dict, repo_root: Path) -
         msgs.append(f"адрес решения `{decision}` не называет ни одного ADR-NNN")
     clause = _ABSENCE_CLAUSE_RE.search(decision)
     for adr in adrs:
-        matches = sorted((repo_root / _ADR_DIR).glob(f"{adr}-*.md"))
+        matches = sorted(
+            m for d in _ADR_DIRS for m in (repo_root / d).glob(f"{adr}-*.md"))
         if not matches:
             msgs.append(f"решение {adr} в дереве не существует — адрес В3 не разрешается")
             continue
@@ -486,7 +494,7 @@ def grandfather_issue(path: str, rel: str, lines: int, ceiling: int,
 
 # BA-060 (NA-EPIC-43, issue #16 потребителя): имя companion-спеки настраивается позаписно.
 # Умолчание воспроизводит сегодняшний литерал побайтово -- запись БЕЗ ключа обязана искать
-# ровно `{stem}-spec.md` рекурсивно по всему content/ (AC-060-01/02). Тело живёт здесь, а не
+# ровно `{stem}-spec.md` рекурсивно по всему docs/ (AC-060-01/02). Тело живёт здесь, а не
 # рядом с вызовом, по тому же доводу, что и grandfather_issue выше: ADR-063 Д5 --
 # `validate-content.py` стоит ровно на своём грандфазер-потолке, и рост снимается разбиением,
 # а не продлением ceiling.
@@ -545,7 +553,7 @@ def companion_spec_issues(md_path: Path, content_dir: Path, budget: dict, rel: s
 
 
 # check_lesson_destiny -- C20-form (ADR-088 Д4): предмет -- корневой реестр
-# `.nauta-lesson-destiny.yaml`, не файл content/. Тело живёт здесь, а не в
+# `.nauta-lesson-destiny.yaml`, не файл docs/. Тело живёт здесь, а не в
 # validate-content.py, по тому же доводу ADR-063 Д5, что и остальные тела C-проверок вокруг --
 # validate-content.py стоит на своём грандфазер-потолке (1658, замерено на 1654 -- запас 4
 # строки). Псевдокод -- ADR-088-spec §5, плюс шестая, безымянная в §3 ветка (находка QA-085,
@@ -573,10 +581,13 @@ def _lesson_row_sha12(line: str) -> str:
 
 def _lesson_backlog_resolves(carrier: str, repo_root: Path) -> bool:
     """И5: `carrier` разрешается, если он дословно встречается в тексте файла-преемника
-    `content/00-project/*-roadmap-candidates-backlog.md` (BA-061: "A backlog candidate names
+    `openspec/inbox/*-roadmap-candidates-backlog.md` (BA-061: "A backlog candidate names
     its source row"). Файл-преемник -- glob по суффиксу имени, не литерал одной даты: имя
-    файла бэклога несёт дату заведения и меняется от волны к волне."""
-    backlog_dir = repo_root / "content" / "00-project"
+    файла бэклога несёт дату заведения и меняется от волны к волне. Дом за файлом (окна
+    О2--О5 NA-EPIC-83): план SA-136 отдавал переезд бэклога О7 вместе с этим glob-фрагментом;
+    окно О5 увело кандидаты раньше (решение О2, QA-139 AC-3) -- читатель едет тем же актом,
+    иначе validate-content краснеет между окнами (инвариант §5 плана)."""
+    backlog_dir = repo_root / "openspec" / "inbox"
     if not carrier or not backlog_dir.is_dir():
         return False
     for p in sorted(backlog_dir.glob("*-roadmap-candidates-backlog.md")):
@@ -585,9 +596,83 @@ def _lesson_backlog_resolves(carrier: str, repo_root: Path) -> bool:
     return False
 
 
+def _lesson_blocked_by_issue(rec: dict, destiny: str, repo_root: Path) -> str | None:
+    """Седьмая ветка (FR-4, ADR-115 Д3), симметричная И5. `blocked-by` -- ключ формы
+    `dev-task`, объявляемый явно (`{ceiling, path}`), а не выводимый грепом по `note` (урок
+    2026-09-03: шапка реестра однажды дала 24 записи вместо 23 -- свободный текст считает
+    объяснение, не факт). Граница §4: строка `dev-task` БЕЗ ключа `blocked-by` -- не нарушение,
+    правило судит форму объявления, а не полноту триажа."""
+    blocked_by = rec.get("blocked-by")
+    if blocked_by is None:
+        return None
+    if destiny != "dev-task":
+        return f"`blocked-by` присутствует при destiny={destiny!r} -- ключ не той судьбы"
+    if not isinstance(blocked_by, dict):
+        return "`blocked-by` задан не отображением меток {ceiling, path}"
+    ceiling = blocked_by.get("ceiling")
+    path = blocked_by.get("path")
+    if not ceiling or not path:
+        return "`blocked-by` объявлен, но `ceiling`/`path` неполны (пустое значение -- отказ)"
+    if not (repo_root / path).is_file():
+        return f"`blocked-by.path` = {path!r} не существует в дереве"
+    return None
+
+
+# Кэш «корень -> отслеживаемые пути» (None -- корень вне git-дерева). Заменяет два
+# lru_cache-помощника: C13 считает top-level декларации, и тело проверки целиком живёт в
+# ОДНОЙ функции ниже -- 24-я декларация модуля, не 27-я (ADR-063 Д1, DEV-484).
+_LS_FILES_CACHE: dict[str, frozenset[str] | None] = {}
+
+
+def _lesson_carrier_unresolved(carrier, repo_root: Path) -> str | None:
+    """ADR-117 §8.1 #7 (DEV-484): судьба `closed` обязана называть РАЗРЕШИМЫЙ носитель --
+    путь/путь:строка/путь::узел/путь §N/список через запятую/ADR-NNN Дn. Заглушка (D1 и
+    подобные) -- маскированный отказ: строка «закрыта», а куда перенесена -- не разрешить.
+
+    Один адрес: путь дерева (с необязательными :строка / ::узел / §N) либо ADR-NNN [Дn]
+    (файл решения ищется по префиксу номера). Путь разрешается `git ls-files` (дословно
+    §8.2); путь корня БЕЗ каталога -- файл корня дерева с расширением (`AGENTS.md`) --
+    законная форма, а не «слово без /». Дерево БЕЗ git (синтетический стенд) разрешение
+    исполнить не может: проверяется только форма адреса, не существование файла."""
+    if not isinstance(carrier, str) or not carrier.strip():
+        return "судьба closed без носителя-адреса (§8.2 ADR-117)"
+    root = str(repo_root)
+    if root not in _LS_FILES_CACHE:
+        try:
+            proc = subprocess.run(["git", "-C", root, "ls-files"],
+                                  capture_output=True, text=True, timeout=30)
+            _LS_FILES_CACHE[root] = (frozenset(proc.stdout.splitlines())
+                                     if proc.returncode == 0 else None)
+        except (OSError, subprocess.SubprocessError):
+            _LS_FILES_CACHE[root] = None
+    tracked = _LS_FILES_CACHE[root]
+    bad: list[str] = []
+    for tok in (t.strip() for t in carrier.split(",")):
+        if not tok:
+            continue
+        m = re.fullmatch(r"(ADR-\d{3})(?:\s*Д\d+)?", tok)
+        if m:
+            # Дом решений — константа _ADR_DIRS (акт О3 NA-EPIC-83: весь корпус в
+            # docs/30-architecture/adr; литеральный стародомовый **/.glob умер вместе со старым
+            # домом — тихий обход был бы замаскированной потерей разрешения адреса).
+            if not any((repo_root / d).glob(f"{m.group(1)}-*.md") for d in _ADR_DIRS):
+                bad.append(tok)
+            continue
+        m = re.match(r"^(\S+?)(?:::\S*|:\d+|\s*§\S+)?$", tok)
+        rel = m.group(1) if m else tok
+        if "/" not in rel and "." not in rel:
+            bad.append(tok)  # не путь и не ADR -- ни одной формой не разрешается
+        elif tracked is not None and rel not in tracked:
+            bad.append(tok)
+    if bad:
+        return (f"перенос закрыт адресом, не разрешающимся ни одной формой §8.2 ADR-117: "
+                f"{bad!r} -- путь дерева либо ADR-NNN [Дn]")
+    return None
+
+
 def check_lesson_destiny(registry_path: Path, repo_root: Path) -> list[Issue]:
     """C20-форма (ADR-088 Д4): сверка `.nauta-lesson-destiny.yaml` с живой таблицей журнала и
-    файлами `content/lessons-archive/*.md`, пять инвариантов §3 ADR-088-spec + шестая ветка
+    файлами `docs/60-operations/postmortems/*.md`, пять инвариантов §3 ADR-088-spec + шестая ветка
     (см. комментарий выше файла). Файла нет -- тихий проход (ADR-031 Д3, ADR-088 Д1): у
     потребителя плагина реестра нет и не будет (`grep -c "nauta-lesson-destiny" bin/deliver.sh`
     -> 0). Битый YAML -- error (MalformedYamlError), не тихий skip (ADR-007 Д1): "не смог
@@ -609,12 +694,18 @@ def check_lesson_destiny(registry_path: Path, repo_root: Path) -> list[Issue]:
         return Issue("error", carrier, f"{carrier}: {msg} -- {row}")
 
     live = {_lesson_row_sha12(l): l for l in _lesson_table_rows(
-        repo_root / "content" / "lessons-learned.md")}
-    archive_dir = repo_root / "content" / "lessons-archive"
+        repo_root / "docs" / "60-operations" / "postmortems" / "lessons-learned.md")}
+    # Окно О6 NA-EPIC-83: журнал и архив тем живут в ОДНОМ каталоге postmortems.
+    # Журнал из перебора архива исключён по имени: его строки -- ЖИВАЯ таблица
+    # (предмет `live` выше), а не корпус замороженных тем; ключ-двойник был бы
+    # семантически ложным, даже не меняя исходов веток ниже.
+    archive_dir = repo_root / "docs" / "60-operations" / "postmortems"
     arch: dict[str, set[str]] = {}
     if archive_dir.is_dir():
         for p in sorted(archive_dir.glob("*.md")):
-            key = f"content/lessons-archive/{p.name}"
+            if p.name == "lessons-learned.md":
+                continue
+            key = f"docs/60-operations/postmortems/{p.name}"
             arch[key] = {_lesson_row_sha12(l) for l in _lesson_table_rows(p)}
 
     issues: list[Issue] = []
@@ -643,12 +734,19 @@ def check_lesson_destiny(registry_path: Path, repo_root: Path) -> list[Issue]:
                     "переходное состояние (§4 ADR-088-spec)", rec))
             if destiny != "closed" or not rec.get("carrier"):  # И4
                 issues.append(issue("перенос строки без разрешённой судьбы", rec))
+            if destiny == "closed":  # ADR-117 §8.1 #7 -- разрешимость носителя
+                carr_msg = _lesson_carrier_unresolved(rec.get("carrier"), repo_root)
+                if carr_msg is not None:
+                    issues.append(issue(carr_msg, rec))
             if row_sha not in arch.get(archived_in, set()):  # И3
                 issues.append(issue(
                     f"строка не найдена в названном файле архива {archived_in!r}", rec))
         if destiny == "backlog-candidate" and not _lesson_backlog_resolves(
                 rec.get("carrier"), repo_root):  # И5
             issues.append(issue("кандидат бэклога без провенанса исходной строки", rec))
+        blocked_by_msg = _lesson_blocked_by_issue(rec, destiny, repo_root)  # седьмая ветка (FR-4)
+        if blocked_by_msg is not None:
+            issues.append(issue(blocked_by_msg, rec))
     for sha in live.keys() - seen:  # И1
         issues.append(issue("живая строка без записи исхода", sha))
     return issues

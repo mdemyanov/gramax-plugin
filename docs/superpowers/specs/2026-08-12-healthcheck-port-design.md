@@ -1,3 +1,13 @@
+---
+title: "Spec: портирование healthcheck-логики Gramax в validate_structure.py"
+order: 2
+properties:
+  - name: Тип контента
+    value: [Спека]
+  - name: Статус
+    value: [Accepted]
+---
+
 # Spec: портирование healthcheck-логики Gramax в validate_structure.py
 
 **Дата:** 2026-08-12

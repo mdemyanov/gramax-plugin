@@ -7,19 +7,19 @@
 # ///
 """validate-profile.py — валидатор manifest'ов профилей.
 
-Проверяет docs/overlays/profiles/*/manifest.yaml на соответствие schema (M1-M10).
+Проверяет templates/overlays/profiles/*/manifest.yaml на соответствие schema (M1-M10).
 
 Exit codes (ADR-041 Д5 — «предмета нет» отделено от «ошибки вызова», долг Д-2 §7
 ADR-043-spec):
   0 — проверка выполнена, нарушений нет (в т.ч. каталог есть и пуст — «профилей нет»);
-  1 — есть errors ЛИБО умолчания `docs/overlays/profiles/` нет («не смог проверить», У-4);
+  1 — есть errors ЛИБО умолчания `templates/overlays/profiles/` нет («не смог проверить», У-4);
   2 — pyyaml не установлен ЛИБО путь НАЗВАН аргументом и каталогом не является (адрес дал
       вызывающий — его опечатка, а не состояние дерева).
 
 До этой правки отсутствие умолчания давало 2, а названный вызывающим несуществующий путь —
 1 (через M1 «manifest.yaml not found»), то есть коды стояли ровно наоборот. Замер DEV-026 до
-правки: `cd $(mktemp -d); uv run scripts/validate-profile.py` → `ERROR: docs/overlays/profiles
-не существует`, EXIT=2. Носитель предмета (`docs/overlays/profiles/.gitkeep`) доставляется
+правки: `cd $(mktemp -d); uv run scripts/validate-profile.py` → `ERROR: templates/overlays/profiles
+не существует`, EXIT=2. Носитель предмета (`templates/overlays/profiles/.gitkeep`) доставляется
 `bin/deliver.sh` 17-й позицией всегда (§4 ADR-043-spec), поэтому его отсутствие у потребителя —
 не «нормальная конфигурация», а порча доставки, и она обязана быть громкой.
 """
@@ -47,14 +47,14 @@ from _validate_common import (  # noqa: E402
 
 SECTION_HEADING_RE = _re.compile(r"^## (.+)$", _re.MULTILINE)
 
-PROFILES_ROOT_DEFAULT = Path("docs/overlays/profiles")
+PROFILES_ROOT_DEFAULT = Path("templates/overlays/profiles")
 
 # У-4 (ADR-043 Д3): предмета нет, отказ не объявлен. Маркер — ровно в одной строке записи
 # (Д3 ADR-042), продолжение несёт починку: молчание третьим вариантом не является.
 SUBJECT_MISSING_MESSAGE = (
     f"ERROR: не смог проверить — каталога {PROFILES_ROOT_DEFAULT}/ в этом дереве нет, а он "
     "доставляется всегда.\n"
-    "  Носитель — docs/overlays/profiles/.gitkeep, 17-я позиция bin/deliver.sh (ADR-043 Д2):\n"
+    "  Носитель — templates/overlays/profiles/.gitkeep, 17-я позиция bin/deliver.sh (ADR-043 Д2):\n"
     "  отсутствие каталога означает порчу доставки, а не «профилей нет» (пустой каталог — это\n"
     "  отдельный исход, exit 0). Почини: повтори /nauta:sync-scripts либо bin/deliver.sh в это\n"
     "  дерево. Проверка профилей сейчас не выполнена ни одна."
@@ -86,7 +86,7 @@ def resolve_plugin_registry_dir(repo_root: Path, relative: str) -> Path | None:
 
     Порядок — дерево плагина первым (`repo_root/relative`), установленный плагин вторым
     (`repo_root/.claude/plugins/<slug>/relative`). Основание: этот валидатор запускается
-    прежде всего внутри дерева самого плагина `nauta` (`docs/overlays/profiles/` — предмет
+    прежде всего внутри дерева самого плагина `nauta` (`templates/overlays/profiles/` — предмет
     ADR-047, доставки в потребителя нет, Д6), где `agents/` и `commands/pipelines/` лежат в
     корне по построению; адрес потребителя — запасной для дерева, где плагин установлен как
     зависимость. Оба адреса недостижимы → `None` = «не смог проверить» (ADR-007 Д1), НЕ
@@ -391,7 +391,7 @@ def check_m9_compatible_stacks(profile_dir: Path, manifest: dict, repo_root: Pat
     if not isinstance(stacks, list):
         return []
     issues = []
-    overlays_root = repo_root / "docs" / "overlays"
+    overlays_root = repo_root / "templates" / "overlays"
     manifest_path = str(profile_dir / "manifest.yaml")
     for s in stacks:
         if s == "*":
@@ -650,7 +650,7 @@ def main(argv: list[str]) -> int:
         "profile_dir",
         nargs="?",
         default=None,
-        help="Path to single profile dir, or omit to validate all in docs/overlays/profiles/",
+        help="Path to single profile dir, or omit to validate all in templates/overlays/profiles/",
     )
     args = parser.parse_args(argv)
 

@@ -7,5 +7,5 @@ order: 1
 
 Проектные артефакты: архитектурные решения и их реестр.
 
-- [Архитектурные решения](adr/_index.md)
+- [Architecture Decision Records](adr/_index.md)
 - [Безопасность](security/_index.md)

@@ -10,6 +10,6 @@ order: 5
 - [Отчёты прогона](test-reports/_index.md)
 - [Приёмка](acceptance/_index.md)
 - [Dev notes: контракт валидации Gramax-каталога (DEV-001)](2026-08-11-validation-contract-dev-notes.md)
-- [Dev notes: ретракция кросс-каталожного code:-рецепта (ADR-0017)](2026-08-13-cross-catalog-retraction-dev-notes.md)
+- [Dev notes: ретракция кросс-каталожного `code:`-рецепта (ADR-0017)](2026-08-13-cross-catalog-retraction-dev-notes.md)
 - [Dev notes: классификация и миграция NAV-код-спанов (ADR-0016)](2026-08-13-link-form-contract-migration-dev-notes.md)
 - [Dev notes: рекурсивное обнаружение `.doc-root.yaml` и типизация полей (ADR-0020)](2026-08-13-doc-root-discovery-dev-notes.md)

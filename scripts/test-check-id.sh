@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # test-check-id.sh — сьюта scripts/id-check.sh (ADR-038, мутационные сценарии M1-M9 §7
-# content/40-architecture/ADR-038-identifier-namespaces-and-allocation-spec.md).
+# docs/30-architecture/ADR-038-identifier-namespaces-and-allocation-spec.md).
 #
 # Предмет — процесс: stdout/stderr и код возврата на СИНТЕТИЧЕСКИХ фикстурах (временный
 # каталог с собственным .nauta-ids.yaml), не на реальном дереве nauta. Полное покрытие
@@ -67,13 +67,13 @@ namespaces:
   - namespace: adr
     prefix: "ADR-"
     width: 3
-    home: ["content/00-project/adr/ADR-*.md"]
+    home: ["docs/30-architecture/adr/ADR-*.md"]
     definition: filename-prefix
     scope: namespace
     allocation: allocated
     populated: true
     highwater: 37
-    graveyard: content/00-project/adr/_index.md
+    graveyard: docs/30-architecture/adr/_index.md
 YAML
 }
 
@@ -81,9 +81,9 @@ YAML
 echo "==> M1: коллизия — два файла определяют ADR-041"
 D1="$(mk_fixture_dir)"
 adr_registry > "$D1/.nauta-ids.yaml"
-mkdir -p "$D1/content/00-project/adr"
-echo "# ADR-041 a" > "$D1/content/00-project/adr/ADR-041-a.md"
-echo "# ADR-041 b" > "$D1/content/00-project/adr/ADR-041-b.md"
+mkdir -p "$D1/docs/30-architecture/adr/"
+echo "# ADR-041 a" > "$D1/docs/30-architecture/adr/ADR-041-a.md"
+echo "# ADR-041 b" > "$D1/docs/30-architecture/adr/ADR-041-b.md"
 run_gate "$D1"
 assert "M1 exit non-zero" "$([[ $RC -ne 0 ]] && echo yes || echo no)" "yes"
 assert_out "M1 называет оба пути" "$OUT" "ADR-041-a.md" "ADR-041-b.md"
@@ -92,9 +92,9 @@ assert_out "M1 называет оба пути" "$OUT" "ADR-041-a.md" "ADR-041-
 echo "==> M2: повторная выдача отменённого номера 011"
 D2="$(mk_fixture_dir)"
 adr_registry > "$D2/.nauta-ids.yaml"
-mkdir -p "$D2/content/00-project/adr"
-echo "# ADR-011" > "$D2/content/00-project/adr/ADR-011-revived.md"
-echo "- ADR-011 — отменён (архив)" > "$D2/content/00-project/adr/_index.md"
+mkdir -p "$D2/docs/30-architecture/adr/"
+echo "# ADR-011" > "$D2/docs/30-architecture/adr/ADR-011-revived.md"
+echo "- ADR-011 — отменён (архив)" > "$D2/docs/30-architecture/adr/_index.md"
 run_gate "$D2"
 assert "M2 exit non-zero" "$([[ $RC -ne 0 ]] && echo yes || echo no)" "yes"
 assert_out "M2 называет номер и обе записи" "$OUT" "011" "ADR-011-revived.md" "_index.md"
@@ -107,17 +107,17 @@ namespaces:
   - namespace: adr
     prefix: "ADR-"
     width: 3
-    home: ["content/00-project/adr/ADR-*.md"]
+    home: ["docs/30-architecture/adr/ADR-*.md"]
     definition: filename-prefix
     scope: namespace
     allocation: allocated
     populated: true
     highwater: 30
-    graveyard: content/00-project/adr/_index.md
+    graveyard: docs/30-architecture/adr/_index.md
 YAML
-mkdir -p "$D3/content/00-project/adr"
-echo "# ADR-037" > "$D3/content/00-project/adr/ADR-037-live.md"
-echo "- [ADR-037](ADR-037-live.md)" > "$D3/content/00-project/adr/_index.md"
+mkdir -p "$D3/docs/30-architecture/adr/"
+echo "# ADR-037" > "$D3/docs/30-architecture/adr/ADR-037-live.md"
+echo "- [ADR-037](ADR-037-live.md)" > "$D3/docs/30-architecture/adr/_index.md"
 run_gate "$D3"
 assert "M3 exit non-zero" "$([[ $RC -ne 0 ]] && echo yes || echo no)" "yes"
 assert_out "M3 называет оба числа" "$OUT" "30" "37"
@@ -126,8 +126,8 @@ assert_out "M3 называет оба числа" "$OUT" "30" "37"
 echo "==> M4: определение вне всех home"
 D4="$(mk_fixture_dir)"
 adr_registry > "$D4/.nauta-ids.yaml"
-mkdir -p "$D4/content/00-project/adr" "$D4/docs"
-echo "# ADR-036" > "$D4/content/00-project/adr/ADR-036-live.md"
+mkdir -p "$D4/docs/30-architecture/adr/" "$D4/docs"
+echo "# ADR-036" > "$D4/docs/30-architecture/adr/ADR-036-live.md"
 echo "# ADR-042" > "$D4/docs/ADR-042-stray.md"
 run_gate "$D4"
 assert "M4 exit non-zero" "$([[ $RC -ne 0 ]] && echo yes || echo no)" "yes"
@@ -137,8 +137,8 @@ assert_out "M4 называет идентификатор и файл" "$OUT" "
 echo "==> M5: ноль определений при populated: true — не смог проверить, не «чисто»"
 D5="$(mk_fixture_dir)"
 adr_registry > "$D5/.nauta-ids.yaml"
-mkdir -p "$D5/content/00-project/adr"
-echo "не .md" > "$D5/content/00-project/adr/README.txt"
+mkdir -p "$D5/docs/30-architecture/adr/"
+echo "не .md" > "$D5/docs/30-architecture/adr/README.txt"
 run_gate "$D5"
 assert "M5 exit non-zero" "$([[ $RC -ne 0 ]] && echo yes || echo no)" "yes"
 if grep -qi "чисто" <<<"$OUT" || grep -qi "no collisions" <<<"$OUT"; then
@@ -152,8 +152,8 @@ fi
 # ===== M6: .nauta-ids.yaml удалён -> не смог проверить, не тихий skip =====================
 echo "==> M6: реестр отсутствует — не смог проверить, не тихий skip"
 D6="$(mk_fixture_dir)"
-mkdir -p "$D6/content/00-project/adr"
-echo "# ADR-036" > "$D6/content/00-project/adr/ADR-036-live.md"
+mkdir -p "$D6/docs/30-architecture/adr/"
+echo "# ADR-036" > "$D6/docs/30-architecture/adr/ADR-036-live.md"
 run_gate "$D6"
 assert "M6 exit non-zero" "$([[ $RC -ne 0 ]] && echo yes || echo no)" "yes"
 assert_out "M6 называет путь реестра" "$OUT" ".nauta-ids.yaml"
@@ -169,8 +169,8 @@ fi
 echo "==> M7: реестр обрезан — не смог проверить"
 D7="$(mk_fixture_dir)"
 printf 'namespaces:\n  - namespace: adr\n    prefix: "ADR-"\n    width: 3\n    graveya' > "$D7/.nauta-ids.yaml"
-mkdir -p "$D7/content/00-project/adr"
-echo "# ADR-036" > "$D7/content/00-project/adr/ADR-036-live.md"
+mkdir -p "$D7/docs/30-architecture/adr/"
+echo "# ADR-036" > "$D7/docs/30-architecture/adr/ADR-036-live.md"
 run_gate "$D7"
 assert "M7 exit non-zero" "$([[ $RC -ne 0 ]] && echo yes || echo no)" "yes"
 assert_out "M7 называет путь реестра" "$OUT" ".nauta-ids.yaml"
@@ -183,15 +183,15 @@ namespaces:
   - namespace: ac
     prefix: "AC-"
     width: 3
-    home: ["content/30-requirements/*.md"]
+    home: ["docs/20-requirements/**/*.md"]
     definition: list-or-row-head
     scope: file
     allocation: closed
     populated: true
 YAML
-mkdir -p "$D8/content/30-requirements"
+mkdir -p "$D8/docs/20-requirements/business"
 for i in 1 2 3 4 5 6; do
-  echo "- [ ] AC-001: собственный критерий" > "$D8/content/30-requirements/req-$i.md"
+  echo "- [ ] AC-001: собственный критерий" > "$D8/docs/20-requirements/business/req-$i.md"
 done
 run_gate "$D8"
 assert "M8 exit 0" "$RC" "0"
@@ -211,16 +211,16 @@ namespaces:
   - namespace: res
     prefix: "RES-"
     width: 3
-    home: ["content/10-domain/research/*.md"]
+    home: ["docs/10-discovery/research/*.md"]
     definition: h1-suffix
     scope: namespace
     allocation: allocated
     populated: true
     highwater: 44
 YAML
-mkdir -p "$D9/content/10-domain/research"
+mkdir -p "$D9/docs/10-discovery/research/"
 printf '# Инвентаризация донора (RES-044)\n\nИсточник запроса: RES-410; ср. TPL-900.\n' \
-  > "$D9/content/10-domain/research/2026-08-17-a.md"
+  > "$D9/docs/10-discovery/research/2026-08-17-a.md"
 run_gate "$D9"
 assert "M9 exit 0" "$RC" "0"
 if grep -qF "RES-410" <<<"$OUT" || grep -qF "TPL-900" <<<"$OUT"; then
@@ -242,14 +242,14 @@ namespaces:
   - namespace: decision-clause
     prefix: "Д"
     width: 1
-    home: ["content/00-project/adr/ADR-*.md"]
+    home: ["docs/30-architecture/adr/ADR-*.md"]
     definition: list-or-row-head
     scope: file
     allocation: derived
     populated: true
 YAML
-mkdir -p "$D10/content/00-project/adr"
-cat > "$D10/content/00-project/adr/ADR-900-fixture.md" <<'MD'
+mkdir -p "$D10/docs/30-architecture/adr/"
+cat > "$D10/docs/30-architecture/adr/ADR-900-fixture.md" <<'MD'
 # ADR-900: фикстура
 
 - **Дата: 2026-08-18** — не идентификатор, просто слово на "Д"
@@ -272,6 +272,36 @@ else
   echo "  ✓ M10 законный токен Д1 не мешает (единственное вхождение — тихо)"
   PASS=$((PASS + 1))
 fi
+
+# ===== M11: кладбище в ДРУГОМ регистре, чем строчный filename-prefix -> невозврат ловится
+# (DEV-434, issue потребителя #21, NA-EPIC-48). Пространство объявляет `prefix: "adr-"`
+# строчным (форма filename-prefix требует совпадения с именем файла `adr-007-revived.md`),
+# а строка кладбища написана человеком по конвенции документа — ВЕРХНИМ регистром
+# (`- ADR-007 — отменён…`). До правки `_graveyard_retired` сравнивала `rest.startswith(prefix)`
+# без нормализации регистра — запись кладбища никогда не совпадала со строчным `prefix`,
+# и повторная выдача отменённого номера проходила МОЛЧА (exit 0, «чисто»), а не «не смог
+# проверить»: гейт СООБЩАЛ, что проверил, хотя ветка невозврата была выключена регистром.
+echo "==> M11: кладбище ВЕРХНИМ регистром при строчном filename-prefix — невозврат ловится"
+D11="$(mk_fixture_dir)"
+cat > "$D11/.nauta-ids.yaml" <<'YAML'
+namespaces:
+  - namespace: adr
+    prefix: "adr-"
+    width: 3
+    home: ["docs/30-architecture/adr/adr-*.md"]
+    definition: filename-prefix
+    scope: namespace
+    allocation: allocated
+    populated: true
+    highwater: 37
+    graveyard: docs/30-architecture/adr/_index.md
+YAML
+mkdir -p "$D11/docs/30-architecture/adr/"
+echo "# ADR-007 revived" > "$D11/docs/30-architecture/adr/adr-007-revived.md"
+echo "- ADR-007 — отменён, номер не переиспользуется" > "$D11/docs/30-architecture/adr/_index.md"
+run_gate "$D11"
+assert "M11 exit non-zero" "$([[ $RC -ne 0 ]] && echo yes || echo no)" "yes"
+assert_out "M11 называет номер и обе записи" "$OUT" "007" "adr-007-revived.md" "_index.md"
 
 echo ""
 echo "PASS=$PASS FAIL=$FAIL"

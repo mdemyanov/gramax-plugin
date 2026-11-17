@@ -3,10 +3,14 @@
 # requires-python = ">=3.11"
 # dependencies = ["pyyaml>=6.0,<7.0"]
 # ///
-"""check-status-drift.py — opt-in: Status застрял в Draft/Review (git-aware).
+"""check-status-drift.py — Status застрял в Draft/Review (git-aware), плюс безусловная
+находка «уже выпущен, не Approved» (ADR-105 Д1). До ADR-105 весь файл был вызываем только
+вручную — сегодня подключён исполняемой строкой в `check.sh --full` (`run_gate_if_declared
+"check-status-drift"`, без смягчающего аргумента: находка Д1 блокирующая).
 
 Для статей с Статус ∈ {Draft, Review}, чей последний git-коммит старше
---stale-days, печатает WARNING-кандидата на дрейф.
+--stale-days, печатает WARNING-кандидата на дрейф (размерность B, advisory — не отменяется
+новой размерностью, ADR-105 §5 границы).
 
 Размерностей проверки две, и они независимы (ADR-008 Д1):
   A. читаемость  — известен ли статус каждой статьи. Git не нужен;
@@ -18,7 +22,7 @@
 во frontmatter нет; свойство есть, список значений пуст (`value: []`); свойство есть, значение
 `null` (`value: null`, `value: [null]` — так пишет Gramax при нерезолвнутом регистре enum,
 issue #9, коммит `745c397`). Третий исход — «нечего проверять», а не «не смог проверить»:
-отсутствие «Статуса» законно по профилю (`content/.doc-root.yaml` обязательным его не
+отсутствие «Статуса» законно по профилю (`docs/.doc-root.yaml` обязательным его не
 объявляет, `validate-content.py` не требует). Поэтому он печатает [INFO], кода возврата не
 меняет и имеет собственный счётчик — сценарий «The refusal is declared explicitly» спеки
 («the field is not declared, IS EMPTY, or no frontmatter is declared»): объявленный отказ
@@ -44,6 +48,26 @@ issue #9, коммит `745c397`). Третий исход — «нечего п
 → `ERROR: not a directory: content`, EXIT=2 — то есть на реальном проекте без документарного
 контура повторялась находка B1, у соседа уже вылеченная.
 
+Четвёртая размерность (ADR-105 Д1, DEV-458) — БЕЗУСЛОВНАЯ, не opt-in и не за флагом: ADR-файл
+(`Тип контента: ADR`), сегодня несущий `Статус` ∈ {Draft, Review}, для которого существует
+коммит `release(...)` — subject, буквально НАЧИНАЮЩИЙСЯ на это (`git log --grep "^release("`;
+якорь обязателен — без него матчится вся оболочка сообщения, subject+body, замер DEV-458 нашёл
+2 лишних попадания на прозаических коммитах, УПОМИНАЮЩИХ конвенцию в теле), являющийся
+ПОТОМКОМ коммита, создавшего файл (`git log --diff-filter=A --follow`, самый ранний). Признак —
+прошлый выпуск, а не возраст правки (Д1: тег `v0.30.0…v0.32.0` физически не существует ровно на
+диапазоне ADR, унесённых непринятыми — носитель ненадёжен). Находка
+печатается отдельной строкой и считается отдельным счётчиком от `Drift candidates`
+(размерность B — независимый вопрос, тот же файл, ADR-105 Consequences); код возврата — 3,
+ранее зарезервированный. Гейт зависит от git (без git — размерность непроверяема, как и B).
+
+`--epic <ID>` (ADR-105 Д3) — второй, независимый от git режим: ADR-файлы, чьё поле
+`**Эпик:**` тела статьи называет `<ID>` (по границе слова — не подстрокой), обязаны нести
+`Статус: Approved`; любое другое значение — блокирующая находка, тот же код 3. Это НЕ дублирует
+размерность 4: третье предусловие `close_route` (`commands/pm.md`) ловит СВЕЖИЙ ADR текущей
+волны БЕЗ условия «уже выпущен», размерность 4 при `--full` — только уже выпущенный чужой ADR
+(таблица §3 ADR-105-spec). Без git, без S2/S3-предусловий контура Д (эпик — не про docs/
+целиком, а про поле конкретных файлов).
+
 Exit: 0 — проверка выполнена: чисто, либо найдены кандидаты (advisory), либо размерность
           «залежалость» объявленно пропущена (каталог не под версионным контролем ЛИБО
           в репозитории ещё нет ни одного коммита), либо от предмета объявленно отказались
@@ -51,15 +75,16 @@ Exit: 0 — проверка выполнена: чисто, либо найде
       1 — не смог проверить: frontmatter хотя бы одной статьи не читается (её статус
           неизвестен), ЛИБО вызов git по конкретной статье завершился ошибкой, ЛИБО
           бинаря git нет в PATH (размерность «залежалость» непроверяема), ЛИБО умолчания
-          `content/` нет и отказ не объявлен (S2), ЛИБО ключ отказа несёт неизвестное
+          `docs/` нет и отказ не объявлен (S2), ЛИБО ключ отказа несёт неизвестное
           значение. Отсутствие git-репозитория сюда НЕ входит — это исход 0 (ADR-008 Д3)
       2 — ошибка использования: путь НАЗВАН вызывающим и каталогом не является, неизвестный
           флаг, PyYAML не установлен. Отсутствие УМОЛЧАНИЯ сюда больше не входит (Д5 ADR-041)
-      3 — ЗАРЕЗЕРВИРОВАН, сегодня не используется: возможный будущий hard-fail на
-          найденных кандидатов. Ввод потребует нового ADR
+      3 — ADR уже выпущен релизом и сегодня не Approved (размерность 4, ADR-105 Д1), ЛИБО
+          (с `--epic`) ADR текущего эпика не Approved (ADR-105 Д3). Коды 0/1/2 существующих
+          размерностей этой правкой не тронуты (ADR-105-spec §7)
 """
 from __future__ import annotations
-import argparse, subprocess, sys, time
+import argparse, re, subprocess, sys, time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -70,7 +95,7 @@ STALE_STATUSES = {"Draft", "Review"}
 # S2 — предмета нет, отказ не объявлен (У-4). Маркер несёт ровно первая строка (Д3 ADR-042),
 # продолжение — те же две починки, что у соседа: третьим вариантом молчание не является.
 S2_MESSAGE = (
-    "ERROR: не смог проверить дрейф статусов — каталога content/ в этом дереве нет, и отказ "
+    "ERROR: не смог проверить дрейф статусов — документарного контура в этом дереве нет, и отказ "
     "от него не объявлен.\n"
     "  Почини одним из двух: повтори /nauta:init (запускает bin/init.sh)  — завести контур\n"
     "  (ADR-041 Д1); либо documentaryCircuit: absent в .nauta-gates.yaml — объявить, что\n"
@@ -182,6 +207,94 @@ def _last_commit_ts(path: Path) -> int | None:
         raise _GitCallFailed(f"git отдал не timestamp, а {out!r}") from e
 
 
+# ===== ADR-105 Д1: «уже выпущен релизом, не Approved» ==================================
+
+def _creation_commit(path: Path) -> str | None:
+    """SHA самого раннего коммита, добавившего файл (`--diff-filter=A --follow`; последняя
+    строка вывода git log — самый старый по времени коммит, git печатает в обратном
+    хронологическом порядке). None — файл никогда не коммитился добавлением (не должно
+    происходить для отслеживаемого файла — трактуется как «выпуска не было», не ошибка)."""
+    try:
+        r = subprocess.run(
+            ["git", "-C", str(path.parent), "log", "--diff-filter=A", "--follow",
+             "--format=%H", "--", path.name],
+            check=True, capture_output=True, text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        detail = " ".join((e.stderr or "").split()) or f"exit {e.returncode}"
+        raise _GitCallFailed(f"вызов git (коммит создания) не удался — {detail}") from e
+    lines = [ln for ln in r.stdout.splitlines() if ln.strip()]
+    return lines[-1] if lines else None
+
+
+def _release_commits(content_dir: Path) -> list[str]:
+    """Все SHA коммитов с subject, буквально НАЧИНАЮЩИМСЯ на `release(` (ADR-105 Д1,
+    кандидат B — надёжнее тега, присутствует на КАЖДОМ из пяти замеренных выпусков).
+    Вызывается один раз на прогон: список release-коммитов от проверяемого файла не зависит.
+
+    Якорь `^` обязателен — без него `--grep` матчит ВСЮ ОБОЛОЧКУ сообщения (subject+body), а
+    не только subject: замер на этом дереве (DEV-458) нашёл два лишних коммита без якоря
+    (`a9097bf`, `5646f11` — прозаические `docs(...)`/`design(...)`, ОБСУЖДАЮЩИЕ конвенцию
+    `release(...)` в теле сообщения, а не являющиеся ею), которые дали бы 34 ложных находки
+    вместо честных. `-F` (фиксированная строка) с якорем `^` несовместим — используется
+    базовый regex git, где `(` вне якоря остаётся литералом без экранирования."""
+    try:
+        r = subprocess.run(
+            ["git", "-C", str(content_dir), "log", "--grep", "^release(", "--format=%H"],
+            check=True, capture_output=True, text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        detail = " ".join((e.stderr or "").split()) or f"exit {e.returncode}"
+        raise _GitCallFailed(f"вызов git (release-коммиты) не удался — {detail}") from e
+    return [ln for ln in r.stdout.splitlines() if ln.strip()]
+
+
+def _already_released(creation_sha: str, release_shas: list[str], repo_dir: Path) -> str | None:
+    """SHA первого release-коммита, чьим предком (или им самим) является `creation_sha`,
+    либо None. `--is-ancestor A A` истинен — ADR, созданный и выпущенный ОДНИМ коммитом
+    (edge case §9 ADR-105-spec), засчитывается, ложного «не выпущен» не даёт."""
+    for rel in release_shas:
+        chk = subprocess.run(
+            ["git", "-C", str(repo_dir), "merge-base", "--is-ancestor", creation_sha, rel],
+            capture_output=True,
+        )
+        if chk.returncode == 0:
+            return rel
+    return None
+
+
+RELEASED_TEMPLATE = (
+    "{path}: уже выпущен релизом ({release}), но Статус остался {status} — hard-fail "
+    "(ADR-105 Д1)  [released]"
+)
+RELEASED_COUNTER_LABEL = "ADR, уже выпущенных релизом и не Approved:"
+
+
+# ===== ADR-105 Д3: предусловие `close_route` — «Эпик = текущая бида» несёт Approved =====
+
+EPIC_FIELD_RE = re.compile(r"\*\*Эпик:\*\*\s*([^\n]*)")
+
+
+def _epic_field_value(text: str) -> str | None:
+    """Значение поля `**Эпик:**` тела статьи (не frontmatter — поле живёт прозой заголовка
+    ADR, ADR-105 Д2). None — поля нет вовсе (старые файлы до конвенции, §9 edge case)."""
+    m = EPIC_FIELD_RE.search(text)
+    return m.group(1) if m else None
+
+
+def _epic_matches(epic: str, field_value: str) -> bool:
+    """Эпик назван по границе слова, не подстрокой: `NA-EPIC-1` не обязан матчить
+    `NA-EPIC-15` (общий случай регулярных \\b, символ после цифры в обоих — словный)."""
+    return re.search(rf"\b{re.escape(epic)}\b", field_value) is not None
+
+
+EPIC_NOT_APPROVED_TEMPLATE = (
+    "{path}: ADR эпика {epic} несёт Статус {status}, а не Approved — предусловие "
+    "close_route (ADR-105 Д3)  [released]"
+)
+EPIC_COUNTER_LABEL = "ADR текущего эпика без Approved:"
+
+
 # Исход «статус не объявлен» размерности A. Форма строки — как у соседних исходов
 # (`<path>: <message>  [<level>]`), уровень INFO и код 0 — по таблице ADR-007 Д1, строка
 # «Осознанный отказ … тишина законна, но объявлена строкой». От `[error]`-исхода отличается
@@ -246,11 +359,19 @@ def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Detect status drift (Draft/Review stale)")
     ap.add_argument("content_dir", nargs="?", default=None)
     ap.add_argument("--stale-days", type=int, default=14)
+    ap.add_argument("--epic", default=None, help=(
+        "ADR-105 Д3: ограничить проверку ADR-файлами, чьё поле **Эпик:** называет этот "
+        "эпик — любой Статус, кроме Approved, блокирующая находка (без условия "
+        "«уже выпущен», в отличие от безусловной размерности 4)"))
     args = ap.parse_args(argv)
 
     # Д5 ADR-041: адрес, названный вызывающим, и умолчание — разные исходы.
+    # Flip Ф9 (окно О7): умолчание — первый существующий из пары docs/ (раскладка
+    # после flip) и классического корня (профиль classic); симметрично validate-content.
     named_by_caller = args.content_dir is not None
-    content_dir = Path(args.content_dir if named_by_caller else "content")
+    content_dir = Path(args.content_dir) if named_by_caller else next(
+        (Path(p) for p in ("docs", "content") if Path(p).is_dir()), Path("docs")
+    )
     if named_by_caller and not content_dir.is_dir():
         print(f"ERROR: not a directory: {content_dir}", file=sys.stderr)
         return 2
@@ -294,6 +415,18 @@ def main(argv: list[str]) -> int:
 
     cutoff = time.time() - args.stale_days * 86400
     warned = unreadable = no_history = no_status = 0
+    released = epic_blocking = 0  # ADR-105 Д1/Д3 (DEV-458) — счётчики отдельны от Drift candidates
+
+    # Размерность 4 (Д1) зависит от git — список release-коммитов один на весь прогон, а не
+    # на файл; отсутствие git гасит размерность так же, как гасит B (git_ok уже вычислен).
+    release_shas: list[str] | None = None
+    if git_ok:
+        try:
+            release_shas = _release_commits(content_dir)
+        except _GitCallFailed as e:
+            print(f"{content_dir}/: {e}  [error]")
+            unreadable += 1
+
     for md in content_dir.rglob("*.md"):
         if md.name == "_index.md":
             continue
@@ -309,12 +442,40 @@ def main(argv: list[str]) -> int:
         # Критерий исхода — есть ли хоть одно ОБЪЯВЛЕННОЕ значение, а не непустой список:
         # `[None]` (`value: null`, `value: [null]`) непуст, но статуса не несёт (DEV-121).
         declared = [v for v in vals if v is not None]
+
+        # ADR-105 Д3 — предусловие close_route, независимо от git и от размерности B/4:
+        # эпик читается из ТЕЛА статьи (`**Эпик:**`), не из frontmatter (Д2); срабатывает
+        # ДАЖЕ на статье без объявленного «Статуса» (неизвестный статус — тоже не Approved).
+        if args.epic and neighbour._type_content_value(fm) == "ADR":
+            epic_field = _epic_field_value(md.read_text(encoding="utf-8"))
+            if epic_field and _epic_matches(args.epic, epic_field):
+                if declared != ["Approved"]:
+                    shown = declared or vals or ["(не объявлен)"]
+                    print(EPIC_NOT_APPROVED_TEMPLATE.format(path=md, epic=args.epic, status=shown))
+                    epic_blocking += 1
+
         if not declared:
             print(NO_STATUS_TEMPLATE.format(path=md, cause=_no_status_cause(fm, vals)))
             no_status += 1
             continue
         if not (set(vals) & STALE_STATUSES):
             continue
+
+        # Размерность 4 (Д1) — безусловная, ADR-only, требует git; работает НЕЗАВИСИМО от
+        # --stale-days/cutoff размерности B ниже, поэтому стоит до её собственного `continue`.
+        if git_ok and release_shas is not None and neighbour._type_content_value(fm) == "ADR":
+            try:
+                creation = _creation_commit(md)
+            except _GitCallFailed as e:
+                print(f"{md}: {e}  [error]")
+                unreadable += 1
+                continue
+            if creation is not None:
+                rel = _already_released(creation, release_shas, content_dir)
+                if rel is not None:
+                    print(RELEASED_TEMPLATE.format(path=md, release=rel[:8], status=declared))
+                    released += 1
+
         if not git_ok:
             continue  # размерность B объявленно пропущена — это отказ, а не провал
         try:
@@ -339,6 +500,14 @@ def main(argv: list[str]) -> int:
         # Без git размерность B не выполнялась — печатать по ней число значило бы
         # утверждать непроверенное.
         print(f"Статей без истории коммитов: {no_history}")
+        # Размерность 4 — тоже за git, тот же принцип: число печатается, только когда
+        # проверка реально выполнялась.
+        print(f"{RELEASED_COUNTER_LABEL} {released}")
+    if args.epic:
+        print(f"{EPIC_COUNTER_LABEL} {epic_blocking}")
+
+    if released or epic_blocking:
+        return 3  # ADR-105 Д1/Д3 — резерв использован, коды 0/1/2 не тронуты
     return 1 if (unreadable or git_missing) else 0
 
 
