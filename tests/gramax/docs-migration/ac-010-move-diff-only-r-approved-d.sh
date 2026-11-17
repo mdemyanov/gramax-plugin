@@ -22,6 +22,11 @@
 # RED on 8b2db0b (дерево до миграции): миграция не исполнена, content/ существует —
 # дифф base..HEAD по content//docs/ пуст, проверка pre-guard'ом честно красная
 # (не зелёно-по-пустоте).
+# Окно заморожено (PM, 2026-11-18, правка AC-010 требования): END = конец Dev-цепочки
+# (ad7f1a4, шаг D4). Пост-цепочечные коммиты (фикс docs/overlays, регистрация отчёта
+# qa-057, ре-ключи ассертов) за окном — их дисциплину несут гейты их собственных
+# коммитов; открытый ..HEAD ронял бы AC-010 на любом легитимном пост-цепочечном
+# коммите, трогающем docs/.
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -39,6 +44,8 @@ fail() {
 }
 
 BASE="8b2db0bdb41643551163d7dcbdbe5c5c5c171c53"
+# Конец окна — конец Dev-цепочки миграции (шаг D4); см. комментарий выше.
+END="ad7f1a4db844f580fff32618ed4ca140c6cadd12"
 
 # 21 одобренный путь удаления: 19 FR-129 + 2 поглощаемых при слиянии (FR-128).
 approved_deletion() {
@@ -78,9 +85,9 @@ if ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
   fail "AC-010: base $BASE не существует в истории — проверка не может быть исполнена честно"
 fi
 
-DIFF_OUT=$(git diff --name-status "${BASE}..HEAD" -- content/ docs/ 2>/dev/null) || true
+DIFF_OUT=$(git diff --name-status "${BASE}..${END}" -- content/ docs/ 2>/dev/null) || true
 if [ -z "$DIFF_OUT" ]; then
-  fail "AC-010: дифф ${BASE}..HEAD по content//docs/ пуст — переезд не отразился в истории (маскировка отказа)"
+  fail "AC-010: дифф ${BASE}..${END} по content//docs/ пуст — переезд не отразился в истории (маскировка отказа)"
 fi
 
 while read -r STATUS REST; do

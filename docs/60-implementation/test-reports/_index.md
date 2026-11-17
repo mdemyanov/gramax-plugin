@@ -15,3 +15,4 @@ order: 1
 - [QA Report — контракт формы ссылки на артефакт (`link-form-contract`, 4.3.0)](2026-08-13-link-form-contract-qa-report.md)
 - [QA Report — линтер рендер-киллеров Gramax (`validate_render.py`, 4.4.0)](2026-08-13-render-killer-linter-qa-report.md)
 - [QA Report — рекурсивное обнаружение `.doc-root.yaml` и типизация полей (FR-120…123, ADR-0020)](2026-08-13-doc-root-discovery-qa-report.md)
+- [QA Report qa-057 — полный прогон после инверсии раскладки content/ → docs/](2026-11-18-qa-057-docs-layout-inversion-full-run.md)
