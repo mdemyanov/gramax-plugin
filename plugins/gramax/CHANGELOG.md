@@ -1,5 +1,99 @@
 # Changelog
 
+## 4.7.0 — 2026-11-18
+
+Волна 2026-11-18 из четырёх принятых потоков: новые навыки `plantuml` (ADR-0023) и `export`
+(ADR-0022), паритет офлайн-валидаторов с модулем приложения «Проверка на ошибки» (ADR-0024)
+и синхронизация `writer` с окном движка `48592b36` (факт-база — аудит расхождений RES-008).
+Каждый поток закрыт BA-acceptance (вердикты accept). Semver — Minor (ADR-0006): изменения
+аддитивны; единственные правки существующих проверок — нестрогое сужение W034 и расширение
+W031/W034 на генуинные дефекты (прецедент ADR-0020 Решение 7: известных потребителей у
+валидатора нет).
+
+Contract: `gramax-tags.json` — schemaVersion 1 → 2 (ADR-0024 Решение 3, NFR-068; прецедент
+маркера — ADR-0012 FR-041): новый ключ `diagramTags` (`drawio`, `mermaid`, `plant-uml`,
+`bpmn`) — единственный источник диаграммных тегов для W031 (новый диаграммный тег — две
+строки JSON, ноль правок кода); `selfClosingTags` +11 (`plant-uml`, `bpmn` — диаграммные
+теги движка; `fragment`, `property`, `inline-property`, `img-h`, `img-v`, `cmd`, `kbd`,
+`alfa`, `beta` — синхронизация writer с движком `48592b36`); `pairedTags` +4
+(`fragment-link`, `cut`, `question`, `questionAnswer`). Новый код находки W035 (иконки);
+все расширенные находки — warning по умолчанию, `--strict` эскалирует (ADR-0024 Решение 2).
+
+### Added
+
+- **Навык `gramax:plantuml`** (`skills/plantuml/`, ADR-0023) — авторство PlantUML-диаграмм,
+  включая Salt-макеты интерфейсов, и BPMN-процессов (Camunda XML): file-based канон по
+  прецеденту mermaid (ADR-0010) — `.puml`/`.bpmn`-файл рядом со статьёй + тег-ссылка
+  `<plant-uml path="…"/>`/`<bpmn path="…"/>` в md; naming convention
+  `<page-slug>-<diagram-slug>` и защита от перезаписи — единые с mermaid; inline-блоки
+  ` ```plant-uml ` распознаются, точечная миграция — только по явному подтверждению.
+  Рендер — серверный движком Gramax (рендер-сервис `DIAGRAM_RENDERER_SERVICE_URL`), без
+  скриптов и конвертаций; рендер `<bpmn>` на проверенном окне движка не подтверждён (тега
+  в движке на пине нет, навык авторит по docs) — навык несёт verify-оговорку до релизного
+  runtime-probe. Справочник — `references/plantuml-syntax.md`. FR-141…FR-148.
+- **Навык `gramax:export`** (`skills/export/`, ADR-0022) — экспорт документации в DOCX/PDF
+  и сборка статического портала: авторство CSS-шаблона PDF (`.page`, `.title-page`,
+  колонтитулы), шаблон DOCX (`.docx`/`.dotx`, авторство в Word), placement шаблонов на
+  портале (`assets/pdf`, `assets/word`), команда `npx gramax-cli export -f docx|pdf`,
+  копируемая CI-стадия (`.gitlab-ci.yml`, переменная `EXPORT_FILE_PATH`), статический
+  портал (`npx gramax-cli build`). Граница исполнения — в самом description: запуск
+  требует Node.js и `gramax-cli` в окружении пользователя или CI-раннера — навык
+  инструктирует и готовит артефакты, но не исполняет. Справочники —
+  `references/templates.md`, `references/recipes.md`. FR-131…FR-139.
+- **W035 — проверка иконок** (`check_icons`, ADR-0024): кастомный код `<icon code="…"/>`
+  проверяется против `.icons/<code>.svg` своего catalog root; `lucide-`-префикс не
+  резолвится (lucide-реестр в поставке отсутствует — Решение 5); периметр — только тела
+  статей, отсутствие `.icons/` само по себе не дефект. Warning, `--strict` эскалирует.
+- **W031 для диаграммных целей `<mermaid>`/`<plant-uml>`/`<bpmn>`** — существование файла
+  диаграммы проверяется в семантике drawio: один код на класс дефекта «файл диаграммы не
+  найден», сообщение дополняется именем тега; список тегов — из `diagramTags` контракта.
+
+### Changed
+
+- **`skills/writer` — синхронизация с окном движка `48592b36` и документацией gram.ax**
+  (22 FR, FR-161…FR-182; каждое новое утверждение несёт источник — `путь:строка` движка
+  или docs): новый справочник `references/quizzes.md` (`<question>`/`<questionAnswer>`,
+  12 типов, `showIf`, ключ `quiz`); фрагменты — канон `<fragment>` + `.gramax/fragments/`
+  и `<fragment-link>`, `<snippet>` — legacy с пометкой; `<view>` по вердикту движка —
+  `defs` как фильтр сокрытия (`none`/`yes`), `orderby`, display `List/Table/Kanban`,
+  `hierarchy` записью внутри `defs`; корневые ключи `.doc-root.yaml` по движку
+  (`filterProperty` — устаревшая `filterProperties` legacy, `logo`/`logo_dark`,
+  `versions`, `relatedLinks`, `lfs`, `hidden`, типы свойств, `docportalVisible`, enum
+  `syntax`, палитра `style`); блоки — XML-формы `<cmd>`/`<kbd>`/`<alfa>`/`<beta>`
+  (скобочные валидны), `<cut>`/`<property>`/`<inline-property>`, якоря `{#имя}`, раздел
+  «Блок кода» (highlight.js), изображения `scale`/`img-h`/`img-v`, видео Dropbox/Mega,
+  ключи `searchPhrases`/`aliases`; guardrails — hard rules `template:`, `.gramax/inbox/`,
+  `.gramax/mr/`, LFS-указатели, `.gramax/views`.
+- `skills/writer/SKILL.md` — одна строка кросс-ссылки на `gramax:export` в ресурсах;
+  description writer не менялся (триггерный контракт не тронут).
+- **`skills/mermaid/SKILL.md`** — fallback-диалог при неявном запросе расширен до четырёх
+  опций: mermaid / plantuml / bpmn / drawio (ADR-0023 Решение 1); дефолт «mermaid» и узкий
+  контракт «Только для диаграмм в синтаксисе Mermaid DSL» не изменились; description
+  получил анти-триггер «Не для: PlantUML/BPMN → gramax:plantuml».
+- **`skills/drawio/SKILL.md`** — BPMN выведен из «подходит»-строки fallback с указателем
+  на `gramax:plantuml`; анти-триггер PlantUML/BPMN в description.
+
+### Fixed
+
+- **W034 — ложные срабатывания на канонические теги и слепота к дефисным именам**
+  (ADR-0024 Решение 4): known-набор вычисляется из обоих контрактов (`gramax-tags.json` ∪
+  `gramax-render-rules.json`) — тег, канонический по контракту плагина, не репортится;
+  матчер видит дефисные имена (`plant-uml`) и голую self-closing-форму (`<br/>`), ранее
+  невидимые. Живые ложные находки на `docs/` этого репозитория устранены — обе живые
+  ложные факта 7 (канонические теги в выводе); суммарно W034 по `docs/` 5 → 3, ноль
+  новых находок.
+- `skills/mermaid/SKILL.md` (description) — убрана продублированная drawio-демаркация
+  («используй gramax:drawio. Для drawio → gramax:drawio»): остался один указатель
+  (косметика release-pass, находка №2 приёмки plantuml).
+
+### Migration notes (с v4.6.0)
+
+Новые предупреждения в логах ожидаемы: W031 на битые цели `<mermaid>`/`<plant-uml>`/
+`<bpmn>`, W035 на кастомные иконки без `.icons/<code>.svg`, W034 на ранее невидимые формы
+(дефисные неизвестные теги, голые self-closing `/>`). Без `--strict` exit code не меняется;
+`--strict`-потребители краснеют на генуинно битых целях. Потребители, читающие
+`gramax-tags.json` напрямую, обязаны ожидать `schemaVersion` 2 (см. `Contract:` выше).
+
 ## 4.6.0 — 2026-11-18
 
 Синхронизация навыка `writer` с окном обновлений движка Gramax jul→sep 2026

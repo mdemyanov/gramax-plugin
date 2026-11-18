@@ -15,7 +15,9 @@ Claude Code plugin для работы с документацией в форм
 - `/gramax:comments-read <path>` — показать комментарии документа
 - `/gramax:comments-write <path>` — добавить/ответить/редактировать/удалить комментарий
 - `/gramax:mermaid` — генерация mermaid-диаграмм: создаёт `.mermaid`-файл рядом со статьёй и вставляет тег-ссылку в md
+- `/gramax:plantuml` — генерация PlantUML/BPMN-диаграмм (включая Salt-макеты интерфейсов): создаёт `.puml`/`.bpmn`-файл рядом со статьёй и вставляет тег-ссылку в md; рендер — движок Gramax
 - `/gramax:drawio` — drawio-диаграммы через внешний плагин `Agents365-ai/drawio-skill` (двухшаговый workflow)
+- `/gramax:export` — экспорт DOCX/PDF (шаблоны, CLI, CI/CD) и сборка статического портала; исполнение — Node.js/`gramax-cli` в окружении пользователя
 
 ### Skill `mermaid`
 
@@ -23,13 +25,19 @@ Claude Code plugin для работы с документацией в форм
 
 Триггеры: «нарисуй mermaid», «сгенерируй mermaid-диаграмму», «визуализируй процесс/архитектуру/цикл», «сделай flowchart/sequence/gantt/class/state/ER/pie/mindmap».
 
-При запросе без явного движка («нарисуй диаграмму») задаёт уточняющий вопрос: mermaid (`.mermaid`-файл + тег-ссылка) или drawio (через внешний плагин, создаёт `.svg`).
+При запросе без явного движка («нарисуй диаграмму») задаёт уточняющий вопрос с четырьмя опциями: mermaid (`.mermaid`-файл + тег-ссылка), plantuml (`.puml`-файл + тег `<plant-uml path/>`), bpmn (`.bpmn`-файл + тег `<bpmn path/>`) или drawio (через внешний плагин, создаёт `.svg`). По умолчанию — mermaid.
 
 **Пример результата:** для статьи `docs/auth/overview.md` с темой «процесс авторизации» skill создаёт `docs/auth/overview-auth-flow.mermaid` и вставляет в md тег `<mermaid path="./overview-auth-flow.mermaid" width="800px" height="450px"/>`.
 
 Поддерживаемые типы: `flowchart`, `sequenceDiagram`, `gantt`, `classDiagram`, `stateDiagram-v2`, `erDiagram`, `pie`, `mindmap`.
 
 Адаптировано из [axtonliu/axton-obsidian-visual-skills](https://github.com/axtonliu/axton-obsidian-visual-skills) (MIT) — см. `skills/mermaid/LICENSE.upstream.md`.
+
+### Skill `plantuml`
+
+Авторство PlantUML-диаграмм (включая Salt-макеты интерфейсов) и BPMN-процессов (Camunda XML): пишет исходник в `.puml`/`.bpmn`-файл рядом со статьёй и вставляет тег-ссылку `<plant-uml path="…"/>`/`<bpmn path="…"/>` в md. File-based канон и naming convention — единые с mermaid; без внешних зависимостей, скриптов и конвертаций. Рендер — серверный движком Gramax (рендер-сервис `DIAGRAM_RENDERER_SERVICE_URL`); рендер `<bpmn>` на проверенном окне движка не подтверждён — тег документирован по docs движка с оговоркой в навыке.
+
+Триггеры: «нарисуй plantuml», «UML-диаграмма», «Salt», «макет интерфейса», «bpmn», «BPMN-процесс», «Camunda».
 
 ### Skill `drawio`
 
@@ -56,6 +64,12 @@ Claude Code plugin для работы с документацией в форм
 - **Python 3** — нужен для `repair_png.py` внутри drawio-skill; должен быть в PATH.
 
 Детали Gramax-тегов для вставки — в справочнике writer-skill (файл `references/drawio.md`).
+
+### Skill `export`
+
+Экспорт документации Gramax в DOCX/PDF и сборка статического портала: авторство CSS-шаблона PDF (классы `.page`, `.title-page`, колонтитулы) и шаблона DOCX (`.docx`/`.dotx`), размещение шаблонов на портале, команда `npx gramax-cli export -f docx|pdf`, копируемая CI-стадия (`.gitlab-ci.yml` с `EXPORT_FILE_PATH`), статический портал через `npx gramax-cli build`. Граница исполнения: запуск требует Node.js и `gramax-cli` в окружении пользователя или CI-раннера — навык инструктирует и готовит артефакты, но не исполняет экспорт сам.
+
+Триггеры: «экспорт», «DOCX», «PDF», «шаблон экспорта», «CI/CD», «статический портал».
 
 ## Валидация каталога
 
@@ -123,4 +137,4 @@ uv run "${CLAUDE_PLUGIN_ROOT}/scripts/migrate_mermaid.py" content --fix --yes
 
 ## Версия
 
-4.5.0 — см. [CHANGELOG.md](./CHANGELOG.md)
+4.7.0 — см. [CHANGELOG.md](./CHANGELOG.md)
