@@ -15,3 +15,4 @@ order: 1
 - [Формы внутренней markdown-ссылки: что резолвит движок Gramax — исполняемый probe](2026-08-13-link-forms-probe.md)
 - [Кросс-каталожные markdown-ссылки: резолвит ли их движок Gramax — исполняемый probe](2026-08-13-cross-catalog-links-probe.md)
 - [RES-006: Окно обновлений движка Gramax jul→sep 2026 (61408ad9…48592b36) — семантика для навыков](2026-11-18-gramax-engine-window-jul-sep.md)
+- [RES-007: Пробелы покрытия навыков плагина gramax против документации gram.ax (enterprise-server view)](2026-11-18-enterprise-server-skill-gap.md)
