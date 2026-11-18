@@ -1,6 +1,6 @@
 ---
 name: mermaid
-description: "Только для диаграмм в синтаксисе Mermaid DSL — НЕ для drawio. Создание mermaid-диаграмм для документации Gramax по текстовому описанию. Записывает DSL в отдельный `.mermaid`-файл рядом со статьёй и вставляет тег-ссылку в md. Используй когда: «нарисуй mermaid», «mermaid-диаграмма», «сгенерируй mermaid flowchart/sequence/gantt/class/state/ER/pie/mindmap», «визуализируй процесс/архитектуру» (без указания движка — уточнит сам). Учитывает синтаксис .doc-root.yaml (XML или Markdown), 8 поддерживаемых типов Gramax, защита от типовых ошибок парсера. Без внешних зависимостей и MCP. Не для: drawio, .drawio-файлов, SVG-схем через drawio — используй gramax:drawio. Для drawio → gramax:drawio."
+description: "Только для диаграмм в синтаксисе Mermaid DSL — НЕ для drawio, НЕ для PlantUML/BPMN. Создание mermaid-диаграмм для документации Gramax по текстовому описанию. Записывает DSL в отдельный `.mermaid`-файл рядом со статьёй и вставляет тег-ссылку в md. Используй когда: «нарисуй mermaid», «mermaid-диаграмма», «сгенерируй mermaid flowchart/sequence/gantt/class/state/ER/pie/mindmap», «визуализируй процесс/архитектуру» (без указания движка — уточнит сам). Учитывает синтаксис .doc-root.yaml (XML или Markdown), 8 поддерживаемых типов Gramax, защита от типовых ошибок парсера. Без внешних зависимостей и MCP. Не для: PlantUML/BPMN (plant-uml, puml, Salt, макет интерфейса, bpmn, Camunda) → gramax:plantuml; drawio, .drawio-файлов, SVG-схем через drawio — используй gramax:drawio. Для drawio → gramax:drawio."
 ---
 
 # Mermaid для Gramax
@@ -19,17 +19,20 @@ Skill переводит текстовое описание в корректн
 
 ## Fallback при ambiguous-request
 
-Если запрос пользователя не содержит явного engine-keyword («mermaid», «drawio», «.drawio»), спроси пользователя:
+Если запрос пользователя не содержит явного engine-keyword («mermaid», «plantuml», «bpmn», «drawio», «.drawio»), спроси пользователя:
 
 > Какой движок использовать для диаграммы?
 >
 > 1. **mermaid** — файл `.mermaid` рядом со статьёй, тег-ссылка в md; рендер Gramax-фронтендом. Подходит для flowchart, sequence, gantt, ER, state, class, pie, mindmap.
-> 2. **drawio** — через внешний плагин `Agents365-ai/drawio-skill`; создаёт `.svg`-файл рядом со страницей. Подходит для сложных схем, BPMN, кастомных стилей.
+> 2. **plantuml** — файл `.puml` рядом со статьёй, тег `<plant-uml path>` в md; UML-семантика (компоненты, развертывание, активности, таймлайны), Salt-макеты интерфейсов → `gramax:plantuml`.
+> 3. **bpmn** — бизнес-процесс в нотации BPMN (Camunda XML), файл + тег `<bpmn path>` → `gramax:plantuml`.
+> 4. **drawio** — через внешний плагин `Agents365-ai/drawio-skill`; создаёт `.svg`-файл рядом со страницей. Подходит для сложных схем, кастомных стилей.
 >
 > По умолчанию — **mermaid**, если не укажешь.
 
 После ответа пользователя:
 - mermaid → выполняй workflow ниже
+- plantuml, bpmn → делегируй в `gramax:plantuml`
 - drawio → делегируй в `gramax:drawio`
 
 ## Quick start

@@ -1,6 +1,6 @@
 ---
 name: drawio
-description: "Только для drawio-диаграмм — НЕ для mermaid. Точка входа для создания drawio-схем в Gramax. Используй когда: «нарисуй drawio», «drawio-схема», «drawio-диаграмма», «схема drawio», «сделай .drawio-файл», «нарисуй диаграмму drawio». Не для: flowchart/sequence/gantt без упоминания drawio — используй gramax:mermaid. Для inline-диаграмм без drawio → gramax:mermaid. Делегирует генерацию на внешний плагин Agents365-ai/drawio-skill; результат вставляется тегом <drawio path=\"...\"/> в md."
+description: "Только для drawio-диаграмм — НЕ для mermaid, НЕ для PlantUML/BPMN. Точка входа для создания drawio-схем в Gramax. Используй когда: «нарисуй drawio», «drawio-схема», «drawio-диаграмма», «схема drawio», «сделай .drawio-файл», «нарисуй диаграмму drawio». Не для: PlantUML/BPMN (UML, Salt, bpmn, Camunda) → gramax:plantuml; flowchart/sequence/gantt без упоминания drawio — используй gramax:mermaid. Для inline-диаграмм без drawio → gramax:mermaid. Делегирует генерацию на внешний плагин Agents365-ai/drawio-skill; результат вставляется тегом <drawio path=\"...\"/> в md."
 ---
 
 # Drawio для Gramax
@@ -62,7 +62,7 @@ Drawio-skill создаст `.drawio` + `.svg` в рабочей директо�
 > Какой движок использовать для диаграммы?
 >
 > 1. **mermaid** — файл `.mermaid` рядом со статьёй, тег-ссылка в md; рендер Gramax-фронтендом. Подходит для flowchart, sequence, gantt, ER, state, class, pie, mindmap.
-> 2. **drawio** — через внешний плагин `Agents365-ai/drawio-skill`; создаёт `.svg`-файл рядом со статьёй, тег `<drawio path="..."/>` в md. Подходит для сложных схем, BPMN, кастомных стилей.
+> 2. **drawio** — через внешний плагин `Agents365-ai/drawio-skill`; создаёт `.svg`-файл рядом со статьёй, тег `<drawio path="..."/>` в md. Подходит для сложных схем, кастомных стилей. Для PlantUML/BPMN → `gramax:plantuml`.
 >
 > По умолчанию — **mermaid**, если не укажешь.
 
