@@ -383,6 +383,7 @@ uv run ${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py <path> --fix --yes   
 - `references/staging.md` — pre-publish checklist
 - `references/doc-root-schema.md` — полный справочник `.doc-root.yaml`
 - `references/authoritative-source.md` — легитимный vs нелегитимный локальный скилл-дубль, grep-конвенция обнаружения
+- `gramax:export` — экспорт DOCX/PDF, шаблоны экспорта, CI/CD, статический портал (guidance)
 
 ## Production-паттерны
 
