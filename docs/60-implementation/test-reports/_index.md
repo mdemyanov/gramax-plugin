@@ -19,3 +19,4 @@ order: 1
 - [QA Report — навык export (экспорт DOCX/PDF: шаблоны, placement, CI/CD, статический портал)](2026-11-18-export-skill-qa-report.md)
 - [QA Report — навык plantuml (PlantUML/Salt/BPMN-авторство: file-based, без конвертационных пайплайнов)](2026-11-18-plantuml-bpmn-qa-report.md) — accept
 - [QA Report — паритет офлайн-валидаторов с модулем «Проверка на ошибки» (W031→mermaid/plant-uml/bpmn, W035 `.icons/`, контракт-паритет W034)](2026-11-18-validators-parity-qa-report.md) — accept
+- [QA Report — синхронизация writer 4.7.0 с движком 48592b36 (AC-073…AC-096: четыре override'а RES-008, диф контракта тегов NFR-072, миграция filterProperty)](2026-11-18-writer-sync-470-qa-report.md) — accept
