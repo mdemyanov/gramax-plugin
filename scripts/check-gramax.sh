@@ -13,7 +13,7 @@
 #              tests/gramax/writer-consumer-rules + tests/gramax/link-form-resolver +
 #              tests/gramax/link-form-migration + tests/gramax/export-skill +
 #              tests/gramax/plantuml-bpmn + tests/gramax/writer-sync-470 +
-#              tests/gramax/render-linter
+#              tests/gramax/writer-tail-480 + tests/gramax/render-linter
 #
 # Exit codes:
 #   0 — all checks passed
@@ -249,7 +249,22 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
-  # --- 16. (--full only) render-linter: киллеры рендера docs/, контракт AC-001…AC-021 ---
+  # --- 16. (--full only) writer-tail-480: хвосты writer 4.8.0 (AC-097…AC-103) ---
+  # Без run.sh по брифу изоляции потока (семь скриптов + README) — агрегация циклом
+  # по glob, как в README suite'а: все скрипты прогоняются, rc — «хоть один красный».
+  echo "==> writer-tail-480"
+  tail480_rc=0
+  for f in tests/gramax/writer-tail-480/ac-*.sh; do
+    bash "$f" || tail480_rc=1
+  done
+  if [ "$tail480_rc" -eq 0 ]; then
+    echo "OK: writer-tail-480 green"
+  else
+    echo "FAIL: writer-tail-480"
+    FAILED=1
+  fi
+
+  # --- 17. (--full only) render-linter: киллеры рендера docs/, контракт AC-001…AC-021 ---
   echo "==> render-linter"
   if bash tests/gramax/render-linter/run.sh; then
     echo "OK: render-linter green"
