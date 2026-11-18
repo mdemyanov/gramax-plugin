@@ -17,3 +17,5 @@ order: 1
 - [QA Report — рекурсивное обнаружение `.doc-root.yaml` и типизация полей (FR-120…123, ADR-0020)](2026-08-13-doc-root-discovery-qa-report.md)
 - [QA Report qa-057 — полный прогон после инверсии раскладки content/ → docs/](2026-11-18-qa-057-docs-layout-inversion-full-run.md)
 - [QA Report — навык export (экспорт DOCX/PDF: шаблоны, placement, CI/CD, статический портал)](2026-11-18-export-skill-qa-report.md)
+- [QA Report — навык plantuml (PlantUML/Salt/BPMN-авторство: file-based, без конвертационных пайплайнов)](2026-11-18-plantuml-bpmn-qa-report.md) — accept
+- [QA Report — паритет офлайн-валидаторов с модулем «Проверка на ошибки» (W031→mermaid/plant-uml/bpmn, W035 `.icons/`, контракт-паритет W034)](2026-11-18-validators-parity-qa-report.md) — accept
