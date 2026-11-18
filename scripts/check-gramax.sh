@@ -119,10 +119,13 @@ if [ "$MODE" = "--full" ]; then
       # check.sh, check-readiness.sh — замер на ad7f1a4+; файлы не редактируются,
       # «payload не трогается», ADR-0021). SC1125 — русский текст после директивы
       # disable (намеренный стиль payload-файлов); SC2001/SC2016/SC2086 — стиль/info
-      # в тех же файлах, shellcheck даёт rc=1 на любую находку. Исключение снимается,
-      # когда релиз nauta починит директивы и стиль payload-скриптов. Проектные .sh
-      # (scripts/check-gramax.sh, tests/gramax/**) под исключениями не находятся —
-      # их находки остаются блокирующими.
+      # в тех же файлах, shellcheck даёт rc=1 на любую находку. Фикс вынесен вверх
+      # по потоку: issue tools-ai/nauta#42 (doc-hub.gitlab.yandexcloud.net) —
+      # «payload-скрипты: битые shellcheck-директивы (SC1125 — disable не работает) +
+      # стиль SC2001/SC2016/SC2086». Исключение снимается тем же коммитом синка
+      # payload после релиза nauta с фиксом: убрать коды из -e ниже и прогнать
+      # --full. Проектные .sh (scripts/check-gramax.sh, tests/gramax/**) под
+      # исключениями не находятся — их находки остаются блокирующими.
       if ! shellcheck -e SC1125 -e SC2001 -e SC2016 -e SC2086 -x -P SCRIPTDIR $SH_FILES; then
         echo "FAIL: shellcheck issues"
         FAILED=1
