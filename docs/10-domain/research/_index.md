@@ -14,3 +14,4 @@ order: 1
 - [RES-005: Формы ссылок на артефакты в корпусе content/ — код-спаны, markdown-ссылки, голые идентификаторы](2026-08-13-link-form-corpus-audit.md)
 - [Формы внутренней markdown-ссылки: что резолвит движок Gramax — исполняемый probe](2026-08-13-link-forms-probe.md)
 - [Кросс-каталожные markdown-ссылки: резолвит ли их движок Gramax — исполняемый probe](2026-08-13-cross-catalog-links-probe.md)
+- [RES-006: Окно обновлений движка Gramax jul→sep 2026 (61408ad9…48592b36) — семантика для навыков](2026-11-18-gramax-engine-window-jul-sep.md)
