@@ -11,7 +11,8 @@
 #              tests/gramax/plugin-contract +
 #              tests/gramax/catalog-validator + tests/gramax/mermaid-adoption +
 #              tests/gramax/writer-consumer-rules + tests/gramax/link-form-resolver +
-#              tests/gramax/link-form-migration + tests/gramax/render-linter
+#              tests/gramax/link-form-migration + tests/gramax/export-skill +
+#              tests/gramax/plantuml-bpmn + tests/gramax/render-linter
 #
 # Exit codes:
 #   0 — all checks passed
@@ -220,7 +221,25 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
-  # --- 13. (--full only) render-linter: киллеры рендера docs/, контракт AC-001…AC-021 ---
+  # --- 13. (--full only) export-skill: контракт навыка export (ADR-0022, AC-041…AC-050) ---
+  echo "==> export-skill"
+  if bash tests/gramax/export-skill/run.sh; then
+    echo "OK: export-skill green"
+  else
+    echo "FAIL: export-skill"
+    FAILED=1
+  fi
+
+  # --- 14. (--full only) plantuml-bpmn: контракт навыка plantuml (ADR-0023, AC-051…AC-062) ---
+  echo "==> plantuml-bpmn"
+  if bash tests/gramax/plantuml-bpmn/run.sh; then
+    echo "OK: plantuml-bpmn green"
+  else
+    echo "FAIL: plantuml-bpmn"
+    FAILED=1
+  fi
+
+  # --- 15. (--full only) render-linter: киллеры рендера docs/, контракт AC-001…AC-021 ---
   echo "==> render-linter"
   if bash tests/gramax/render-linter/run.sh; then
     echo "OK: render-linter green"

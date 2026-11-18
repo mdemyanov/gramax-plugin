@@ -16,3 +16,4 @@ ADR-0021); ниже — design-документы живых suite (at-design).
 - [AT-design: Ретракция нерабочего кросс-каталожного `code:`-рецепта](2026-08-13-cross-catalog-retraction-at-design.md)
 - [AT-design: Резолвер гейта — инференс расширения `.md`/`_index.md` (link-form-contract)](2026-08-13-link-form-contract-resolver-at-design.md)
 - [AT-design: Классификация NAV/SELF/SUBJECT и миграция код-спанов (link-form-contract)](2026-08-13-link-form-contract-migration-at-design.md)
+- [Приёмка (BA-acceptance): Навык export — экспорт DOCX/PDF: шаблоны, placement, CI/CD, статический портал](2026-11-18-export-skill-at-design.md) — accept, 10/10 AC
