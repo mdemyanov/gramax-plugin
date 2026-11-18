@@ -1,6 +1,6 @@
 # Gramax Plugin Marketplace
 
-Claude Code marketplace с плагинами для работы с документацией [Gramax](https://gramax.io/).
+Claude Code marketplace с плагинами для работы с документацией [Gramax](https://gram.ax/resources/docs).
 
 ## Что внутри
 
