@@ -20,3 +20,6 @@ order: 3
 - [Линтер рендер-киллеров Gramax (порт validate-gramax.py)](2026-08-12-render-killer-linter.md) — FR-104…FR-119
 - [Контракт `.doc-root.yaml`: рекурсивное обнаружение и типизация title](2026-08-13-doc-root-discovery-contract.md) — FR-120…FR-123
 - [Инверсия раскладки документации — `content/` → `docs/` с зачисткой исторических артефактов](2026-11-17-docs-layout-inversion.md) — FR-124…FR-130
+- [Навык export — экспорт DOCX/PDF: шаблоны, CI/CD и статический портал](2026-11-18-export-skill-requirement.md) — FR-131…FR-139
+- [Авторство PlantUML/BPMN-диаграмм в Gramax (file-based, без конвертационных пайплайнов)](2026-11-18-plantuml-bpmn-requirement.md) — FR-141…FR-148
+- [Паритет офлайн-валидаторов плагина с модулем проверки ошибок приложения](2026-11-18-validators-error-check-parity-requirement.md) — FR-151…FR-157
