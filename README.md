@@ -4,7 +4,7 @@ Claude Code marketplace с плагинами для работы с докум�
 
 ## Что внутри
 
-- **`gramax`** (`./plugins/gramax/`) — основной плагин: создание и редактирование Gramax-документов, работа с комментариями, диаграммами (mermaid, drawio), координация ревью.
+- **`gramax`** (`./plugins/gramax/`) — основной плагин: создание и редактирование Gramax-документов, работа с комментариями, диаграммами (mermaid, plantuml/bpmn, drawio), экспорт (DOCX/PDF, статический портал), координация ревью.
 
 ## Установка
 
@@ -34,7 +34,9 @@ cd gramax-plugin
 - `/gramax:comments-read <path>` — показать комментарии
 - `/gramax:comments-write <path>` — добавить / ответить / редактировать / удалить
 - `/gramax:mermaid` — генерация mermaid-диаграмм inline (без MCP, адаптировано из axtonliu/axton-obsidian-visual-skills, MIT)
+- `/gramax:plantuml` — генерация PlantUML/BPMN-диаграмм (включая Salt-макеты интерфейсов): создаёт `.puml`/`.bpmn`-файл рядом со статьёй и вставляет тег-ссылку в md; рендер — движок Gramax
 - `/gramax:drawio` — drawio-диаграммы через внешний плагин `Agents365-ai/drawio-skill` (двухшаговый workflow)
+- `/gramax:export` — экспорт DOCX/PDF (шаблоны, CLI, CI/CD) и сборка статического портала; исполнение — Node.js/`gramax-cli` в окружении пользователя
 
 ## Agents (плагин gramax)
 

@@ -9,3 +9,4 @@ order: 1
 
 - [Architecture Decision Records](adr/_index.md)
 - [Безопасность](security/_index.md)
+- [Эпики](epics/_index.md)

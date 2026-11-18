@@ -17,7 +17,7 @@ editors:
 properties:
   - name: Тип контента
     type: Enum
-    values: [ADR, Требование, Research, Тест-отчёт, Урок, Архитектура, Гайд]
+    values: [ADR, Требование, Research, Тест-отчёт, Урок, Архитектура, Гайд, Дерево решений]
   - name: Статус
     type: Enum
     values: [Draft, Active, Accepted, Superseded, Historical, Done]
