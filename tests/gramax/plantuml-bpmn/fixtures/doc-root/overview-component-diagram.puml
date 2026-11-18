@@ -1,0 +1,7 @@
+@startuml
+package "auth" {
+  [Session]
+  [TokenStore]
+}
+[Session] --> [TokenStore] : validate
+@enduml

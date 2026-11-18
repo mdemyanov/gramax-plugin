@@ -1,0 +1,12 @@
+code: plantuml-bpmn-fixture
+title: "Фикстура — авторство PlantUML/BPMN"
+description: >-
+  Scratch-каталог suite'а tests/gramax/plantuml-bpmn (QA-author). Состав фикстур
+  задан дизайном docs/40-architecture/2026-11-18-plantuml-bpmn-design.md,
+  раздел «Контракт с QA-author» (фикстура = scratch-каталог с .doc-root.yaml
+  + статьёй; список: статья- _index-кейс; статья с inline ```plant-uml-блоком
+  с опциями {title, scale, float}; существующий .puml для коллизии).
+  Модель чужого каталога потребителя — гейтами репозитория не валидируется
+  (класс фикстур, прецедент mermaid-adoption/fixtures).
+language: ru
+syntax: XML
