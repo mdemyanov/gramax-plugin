@@ -18,3 +18,4 @@ ADR-0021); ниже — design-документы живых suite (at-design).
 - [AT-design: Классификация NAV/SELF/SUBJECT и миграция код-спанов (link-form-contract)](2026-08-13-link-form-contract-migration-at-design.md)
 - [Приёмка (BA-acceptance): Навык export — экспорт DOCX/PDF: шаблоны, placement, CI/CD, статический портал](2026-11-18-export-skill-at-design.md) — accept, 10/10 AC
 - [Приёмка (BA-acceptance): паритет офлайн-валидаторов с модулем «Проверка на ошибки»](2026-11-18-validators-parity-at-design.md) — accept, 12/12 AC
+- [Приёмка (BA-acceptance): Авторство PlantUML/BPMN-диаграмм — навык plantuml: file-based, без конвертационных пайплайнов](2026-11-18-plantuml-bpmn-at-design.md) — accept, 12/12 AC
