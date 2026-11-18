@@ -1,5 +1,32 @@
 # Changelog
 
+## 4.6.0 — 2026-11-18
+
+Синхронизация навыка `writer` с окном обновлений движка Gramax jul→sep 2026
+(`61408ad9…48592b36`; исследование — `docs/10-domain/research/2026-11-18-gramax-engine-window-jul-sep.md`,
+RES-006). Semver — Minor (ADR-0006): новые правила писателя (прецедент — 4.2.0).
+
+### Added
+
+- `skills/writer/references/blocks.md` (§Формулы) — `${…}` объявлен подстановкой, не формулой:
+  `$…$` не открывается и не закрывается на `${…}` (плейсхолдер секрета, shell-переменная в
+  примере команды); синтаксис плейсхолдеров «ключей и паролей» `${key.field}`
+  (`login|password|token|url`, элемент секретов движка).
+- `skills/writer/SKILL.md` (секция ссылок) — ссылка на бессуффиксный существующий файл
+  (`LICENSE`, `Dockerfile`) рендерится файл-ссылкой на скачивание (gh#675, ветка
+  `_isExistingFile` в `linkCreator`).
+- `skills/writer/SKILL.md` (таблица блоков, «Видео») — хостинги: прямые mp4/webm/ogg,
+  YouTube (watch/youtu.be/shorts/live, таймкод `?t=`, плейлист `list=`), Rutube,
+  Google Drive, Instagram (движок `getYoutubeEmbedUrl`).
+
+### Fixed
+
+- Пост-инверсионные указатели в навыках (хвост миграции ADR-0021): `SKILL.md` — «в этом
+  репозитории» `content` → `docs` (антипаттерн FR-081 и его пример);
+  `references/doc-root-schema.md` — «Известное расхождение» перепривязано на
+  `docs/.doc-root.yaml`; `skills/mermaid/references/jurisdiction-and-validation.md` —
+  ADR-указатели `content/00-project/adr/` → `docs/00-project/adr/`.
+
 ## 4.5.0 — 2026-08-13
 
 Рекурсивное обнаружение `.doc-root.yaml` и типизация обязательных полей (ADR-0020,

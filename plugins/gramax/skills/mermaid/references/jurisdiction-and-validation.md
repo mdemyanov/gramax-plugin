@@ -4,8 +4,8 @@
 по требованию — при работе с потребительским `content/`-валидатором, при аудите каталога на
 устаревший формат, при вопросе «распространяется ли file-based mermaid на этот файл».
 
-ADR: `content/00-project/adr/0013-mermaid-adoption-and-migration.md` (Решения 1, 2, 5).
-Дополняет `content/00-project/adr/0010-mermaid-file-based-workflow.md` (ground-truth формата).
+ADR: `docs/00-project/adr/0013-mermaid-adoption-and-migration.md` (Решения 1, 2, 5).
+Дополняет `docs/00-project/adr/0010-mermaid-file-based-workflow.md` (ground-truth формата).
 
 ## Граница юрисдикции (Решение 1)
 

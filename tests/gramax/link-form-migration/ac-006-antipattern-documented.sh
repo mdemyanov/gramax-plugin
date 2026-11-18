@@ -34,7 +34,7 @@ if [ ! -f "$SKILL_MD" ]; then
 fi
 
 # Assert 1 — буквальный BA-grep (уже PASS сегодня, по несвязанной причине — см. заголовок).
-if ! grep -n 'content/section/doc.md\|doc-root' "$SKILL_MD" | grep -qi 'антипаттерн\|не работает\|не резолв'; then
+if ! grep -n 'section/doc.md\|doc-root' "$SKILL_MD" | grep -qi 'антипаттерн\|не работает\|не резолв'; then
   echo "  FAIL: AC-006 (assert 1, буквальный BA-grep) — неожиданно не проходит; проверьте, не удалена ли строка про 'references/doc-root-schema.md' из SKILL.md" >&2
   FAIL=$((FAIL + 1))
 fi
@@ -42,9 +42,13 @@ fi
 # Assert 2 — семантическое усиление: явный негативный (❌) пример ИМЕННО для повтора имени
 # doc-root-каталога (FR-081), по образцу уже существующего ❌-паттерна для кросс-каталожных
 # ссылок в этом же файле ("❌ `[Документ](other-catalog/path/to/file.md)` — не резолвится").
-# Красный сегодня: "docs/" нигде не упоминается в SKILL.md буквально.
-if ! grep -qE '❌.*content/' "$SKILL_MD"; then
-  echo "  FAIL: AC-006 (assert 2, семантическое усиление) — SKILL.md не содержит явного ❌-примера с префиксом doc-root-каталога ('content/…') — раздел references/doc-root-schema.md#Антипаттерны сегодня посвящён СХЕМЕ properties, не форме ссылки (FR-081)" >&2
+# История: пин писался с литералом 'content/…' (2026-08-13); инверсия раскладки ADR-0021
+# переименовала каталог в docs/ (2026-11-17) — буква протухла при живом зубе, ре-ключ на
+# ДИНАМИЧЕСКОЕ имя doc-root-каталога этого дерева (RES-006-синхронизация, 2026-11-18):
+# имя берётся из фактического положения .doc-root.yaml, не захардкожено.
+DOC_ROOT_DIR="$(dirname "$(find "$ROOT" -maxdepth 2 -name .doc-root.yaml -not -path '*/.git/*' 2>/dev/null | head -1)" | xargs basename 2>/dev/null)"
+if [ -z "$DOC_ROOT_DIR" ] || ! grep -qE "❌.*${DOC_ROOT_DIR}/section/doc\.md" "$SKILL_MD"; then
+  echo "  FAIL: AC-006 (assert 2, семантическое усиление) — SKILL.md не содержит явного ❌-примера с префиксом doc-root-каталога ('${DOC_ROOT_DIR:-<не определён>}/…') — антипаттерн FR-081 обязан быть задокументирован примером с фактическим именем каталога этого дерева" >&2
   FAIL=$((FAIL + 1))
 fi
 
