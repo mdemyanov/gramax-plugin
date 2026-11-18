@@ -268,11 +268,13 @@ def _in_nested_subtree(path: Path, nested: set[Path]) -> bool:
     return any(r == n or n in r.parents for n in nested)
 
 
-def _parse_resources(root: Path, nested: set[Path]):
+def _parse_resources(root: Path, nested: set[Path],
+                     diagram_tags: tuple[str, ...] = ("drawio",)):
     """Ресурсные ссылки (`parse_md_resources`) только из структурной области `root`:
-    источники из поддеревьев вложенных root / исключённых путей отбрасываются (FR-120)."""
+    источники из поддеревьев вложенных root / исключённых путей отбрасываются (FR-120).
+    `diagram_tags` прокидывается в парсер (ADR-0024 Решение 3)."""
     return [
-        r for r in parse_md_resources(root)
+        r for r in parse_md_resources(root, diagram_tags)
         if not _in_nested_subtree(r.source, nested)
         and not _is_excluded_walk_path(root, r.source)
     ]
@@ -629,20 +631,30 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     tags_contract = load_json_contract(plugin_root / "gramax-tags.json", issues)
     rules_contract = load_json_contract(plugin_root / "gramax-catalog-rules.json", issues)
     paired_tags = (tags_contract or {}).get("pairedTags", [])
+    # Диаграммные теги с file-based целью (ADR-0024 Решение 3): контракт — единственный
+    # источник (BR-002); fallback ["drawio"] — деградационный сценарий повреждённого
+    # контракта (error уже выдан load_json_contract), по прецеденту seed known_tags.
+    diagram_tags = tuple((tags_contract or {}).get("diagramTags", ["drawio"]))
     garbage_files = set((rules_contract or {}).get("garbageFiles", []))
     doc_root_required = (rules_contract or {}).get("docRootRequiredFields", [])
     frontmatter_required = (rules_contract or {}).get("frontmatterRequiredFields", [])
 
-    # Демаркация с рендер-линтером (ADR-0019 Решение 3 и 6):
-    #   known = {"drawio"} ∪ killerTags ∪ allowlistedTags — W034 молчит по <th>/<colgroup>/<col>,
-    #   чтобы дефект давал ровно одну находку по гейту (BR-004);
+    # Демаркация с рендер-линтером (ADR-0019 Решение 3 и 6) и контрактом тегов
+    # (ADR-0024 Решение 4, FR-156):
+    #   known = {"drawio"} ∪ diagramTags ∪ selfClosingTags ∪ pairedTags ∪ killerTags ∪
+    #   allowlistedTags — W034 молчит по каноническим тегам ОБОИХ контрактов
+    #   (BR-011: канонический по контракту плагина тег не репортится; новый киллер или
+    #   тег добавляется строкой JSON, демаркация обновляется сама);
     #   check_tags балансит только pairedTags − balanceTags — unbalanced note/tabs/tab/color/
     #   highlight репортит validate_render.py (FR-109), html/comment остаются за check_tags.
-    # Отсутствующий/повреждённый gramax-render-rules.json — error через load_json_contract
-    # (ADR-0012, Consequences); known_tags тогда сводится к {"drawio"}.
+    # Отсутствующий/повреждённый контракт — error через load_json_contract
+    # (ADR-0012, Consequences); known_tags тогда сходится к {"drawio"} ∪ killer ∪ allowlist.
     render_contract = load_json_contract(plugin_root / "gramax-render-rules.json", issues)
     balance_tags = set((render_contract or {}).get("balanceTags", []))
-    known_tags = {"drawio"}
+    known_tags = {"drawio"} | set(diagram_tags)
+    if tags_contract is not None:
+        known_tags |= set(tags_contract.get("selfClosingTags", []))
+        known_tags |= set(tags_contract.get("pairedTags", []))
     if render_contract is not None:
         known_tags |= {
             item.get("tag") for item in render_contract.get("killerTags", [])
@@ -666,14 +678,14 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     for catalog_root in [root, *_discover_nested_doc_roots(root)]:
         _validate_catalog_root(catalog_root, issues, strict, fix, yes, garbage_files,
                                doc_root_required, frontmatter_required,
-                               effective_paired_tags, known_tags)
+                               effective_paired_tags, known_tags, diagram_tags)
     return issues
 
 
 def _validate_catalog_root(root: Path, issues: list[Issue], strict: bool, fix: bool, yes: bool,
                            garbage_files: set[str], doc_root_required: list[str],
                            frontmatter_required: list[str], effective_paired_tags: list[str],
-                           known_tags: set[str]):
+                           known_tags: set[str], diagram_tags: tuple[str, ...]):
     """Полный структурный suite для одного catalog root (FR-120: каждый найденный
     `.doc-root.yaml` валидируется как отдельный root). Ошибка парсинга `.doc-root.yaml`
     прогон не прекращает (FR-122) — все проверки, включая `check_placeholders`, выполняются."""
@@ -694,7 +706,8 @@ def _validate_catalog_root(root: Path, issues: list[Issue], strict: bool, fix: b
     check_orphans(root, issues, strict, nested)
     check_unsupported_markup(root, issues, known_tags, nested)
     check_images(root, issues, nested)
-    check_diagrams(root, issues, nested)
+    check_diagrams(root, issues, nested, diagram_tags)
+    check_icons(root, issues, nested)
 
 
 def check_images(root: Path, issues: list[Issue], nested: set[Path] | None = None):
@@ -716,40 +729,88 @@ def check_images(root: Path, issues: list[Issue], nested: set[Path] | None = Non
             ))
 
 
-def check_diagrams(root: Path, issues: list[Issue], nested: set[Path] | None = None):
-    """Проверяет существование .drawio-файлов, на которые ссылаются статьи.
+def check_diagrams(root: Path, issues: list[Issue], nested: set[Path] | None = None,
+                   diagram_tags: tuple[str, ...] = ("drawio",)):
+    """Проверяет существование файлов-целей диаграммных тегов (ADR-0024 Решение 1/3).
 
-    <drawio path="..."/> → path должен существовать на диске. WARNING-уровень (W031).
+    <tag path="..."/> для тегов из `diagram_tags` (контракт `gramax-tags.json`,
+    ключ `diagramTags`: drawio/mermaid/plant-uml/bpmn) → path должен существовать
+    на диске. WARNING-уровень (W031 — один код на класс дефекта, сообщение несёт
+    имя тега; границы in_scope/ADR-0020 наследованы от drawio-семантики).
     """
     if nested is None:
         nested = _nested_doc_root_dirs(root)
-    for res in _parse_resources(root, nested):
-        if res.target_type != "drawio":
+    diagram_set = set(diagram_tags)
+    for res in _parse_resources(root, nested, diagram_tags):
+        if res.target_type not in diagram_set:
             continue
         if not res.in_scope:
             continue
         if not res.resolved_path.exists():
             issues.append(Issue(
                 "warning", res.source,
-                f'W031: файл диаграммы не найден: "{res.raw_target}" → {res.resolved_path}',
+                f'W031: файл диаграммы не найден (тег <{res.target_type}>): '
+                f'"{res.raw_target}" → {res.resolved_path}',
             ))
+
+
+_ICON_RE = re.compile(r'<icon\s[^>]*code="([^"]+)"[^>]*/>')
+
+
+def check_icons(root: Path, issues: list[Issue], nested: set[Path] | None = None):
+    """Проверяет существование собственных иконок `.icons/<code>.svg` (ADR-0024
+    Решения 1/2/5, FR-153…FR-155).
+
+    `<icon code="X"/>` с кодом без префикса `lucide-` резолвится против `.icons/`
+    СВОЕГО catalog root (ADR-0020: статья вложенного каталога — против `.icons/`
+    своего root). Lucide-код против `.icons/` не резолвится — только форма префикса
+    (BR-013, реестра lucide в поставке нет). WARNING-уровень (W035), одна находка
+    на точку использования (по образцу W030/W031). Пустой сбор кодов → ноль
+    обращений к файловой системе, ноль находок — отсутствие `.icons/` сама по себе
+    не проверяется (FR-155). Периметр — только вхождения в статьях; `properties.icon`
+    не читается (FR-154, открытый вопрос 2 требования — за PM).
+    """
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
+    for md in _collect_md_files(root, nested):
+        text = _mask_code(md.read_text(encoding="utf-8"))
+        for m in _ICON_RE.finditer(text):
+            code = m.group(1)
+            if code.startswith("lucide-"):
+                continue
+            expected = root / ".icons" / f"{code}.svg"
+            if not expected.exists():
+                issues.append(Issue(
+                    "warning", md,
+                    f'W035: файл иконки не найден: код "{code}" → ожидается .icons/{code}.svg',
+                ))
 
 
 # Whitelist тегов, которые Gramax НЕ считает unsupported.
 # <th> (killer) и <colgroup>/<col> (allowlist) владеет validate_render.py — W034 по ним
 # молчит, чтобы дефект давал ровно одну находку по гейту (ADR-0019 Решение 3, BR-004).
-# Набор вычисляется из контракта gramax-render-rules.json в validate() — не литерал:
-# новый киллер добавляется строкой в killerTags, демаркация обновляется сама.
+# Набор вычисляется из ОБОИХ контрактов (gramax-tags.json: selfClosingTags + pairedTags +
+# diagramTags; gramax-render-rules.json: killerTags + allowlistedTags) в validate() —
+# не литерал (ADR-0024 Решение 4, FR-156): новый канонический тег добавляется строкой
+# JSON, демаркация обновляется сама.
 
-_UNSUPPORTED_HTML_RE = re.compile(r"<(?!\/)([a-z][a-z0-9]*)(?:\s[^>]*)?>", re.IGNORECASE)
+# Дефис в имени ([a-z][a-z0-9-]*, FR-157) и опциональный / перед > (голая self-closing
+# форма без атрибутов, вида <br/>) — обе правки обязательны (ADR-0024 Решение 4, проба SA
+# 2026-11-18). Истинные позитивы сохранены: автоссылки <https://…> не матчатся (после имени
+# идёт `:`), закрывающие </tag> отсечены (?!/), camelCase матчится как прежде
+# (re.IGNORECASE), lookup в known-наборе — через .lower().
+_UNSUPPORTED_HTML_RE = re.compile(r"<(?!\/)([a-z][a-z0-9-]*)(?:\s[^>]*)?\/?>", re.IGNORECASE)
 
 
 def check_unsupported_markup(root: Path, issues: list[Issue], known_tags: set[str],
                              nested: set[Path] | None = None):
     """Проверяет наличие HTML-тегов и нестандартной разметки в markdown-статьях.
 
-    Gramax не поддерживает произвольный HTML. Исключение: <drawio path="..."/> и
-    теги из gramax-render-rules.json (killerTags + allowlistedTags).
+    Gramax не поддерживает произвольный HTML. Исключение: диаграммные теги с
+    file-based целью и теги, объявленные в контрактах плагина (gramax-tags.json:
+    selfClosingTags + pairedTags + diagramTags; gramax-render-rules.json:
+    killerTags + allowlistedTags) — паритет с контрактом плагина, не с полным
+    реестром движка (ADR-0024 Решение 4).
     WARNING-уровень (W034) — некоторые HTML-теги могут быть валидны в markdown.
     """
     if nested is None:
@@ -769,11 +830,14 @@ def check_unsupported_markup(root: Path, issues: list[Issue], known_tags: set[st
 
 
 # Таксономия CatalogErrorGroups (Gramax-совместимо)
-# Не все группы применимы к нам (icons, comments отсутствуют)
+# Не все группы применимы к нам (comments отсутствует); иконки классифицируются
+# существующей группой images расширением паттерна (W035|иконк) — новая группа
+# не вводится: каноническое имя апстрим-группы для иконок не подтверждено
+# (ADR-0024 Решение 6).
 _ERROR_GROUPS = {
     "content":       {"title": "incorrects-content",      "pattern": r"^(?:ERROR|WARNING)\s+.*\s+(?:missing|invalid|плейсхолдер|placeholder|фронтматтер|frontmatter)"},
     "links":         {"title": "incorrects-paths",         "pattern": r"битая ссылка|broken link|hash-якорь|W032|W033"},
-    "images":        {"title": "incorrects-paths",         "pattern": r"W030|изображени"},
+    "images":        {"title": "incorrects-paths",         "pattern": r"W030|W035|изображени|иконк"},
     "diagrams":      {"title": "incorrects-paths",         "pattern": r"W031|диаграмм"},
     "unsupported":   {"title": "incorrects-unsupported",   "pattern": r"W034|неподдержива"},
 }

@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "pairedTags": ["note", "tabs", "tab", "html", "comment", "color", "highlight"],
-  "selfClosingTags": ["view", "snippet", "openapi", "mermaid", "video", "icon", "image", "drawio"],
+  "selfClosingTags": ["view", "snippet", "openapi", "mermaid", "video", "icon", "image", "drawio", "plant-uml", "bpmn"],
+  "diagramTags": ["drawio", "mermaid", "plant-uml", "bpmn"],
   "legacy": [
     {
       "tag": "drawio",
