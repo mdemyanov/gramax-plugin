@@ -35,7 +35,12 @@ if [ ! -d "$SCRIPTS_DIR" ]; then
   fail_msg "ac-057: каталог $SCRIPTS_DIR отсутствует — проверять нулевой счётчик не на чем (ADR-007 Д1: «не смог проверить» ≠ «нечего проверять»)"
   exit 1
 fi
-SCRIPT_COUNT="$(ls "$SCRIPTS_DIR" | grep -icE 'plantuml|plant-uml|bpmn')"
+SCRIPT_COUNT=0
+for _f in "$SCRIPTS_DIR"/*; do
+  case "$(basename "$_f")" in
+    *plantuml*|*plant-uml*|*bpmn*) SCRIPT_COUNT=$((SCRIPT_COUNT + 1)) ;;
+  esac
+done
 assert_eq "$SCRIPT_COUNT" "0" \
   "AC-057/NFR-060 (анти-ADR-0008) — в plugins/gramax/scripts/ не должно появиться ни одного plantuml/bpmn-скрипта (BR-008: конвертационный pipeline не строится ни под каким предлогом)"
 
