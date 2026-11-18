@@ -24,3 +24,4 @@ order: 3
 - [Авторство PlantUML/BPMN-диаграмм в Gramax (file-based, без конвертационных пайплайнов)](2026-11-18-plantuml-bpmn-requirement.md) — FR-141…FR-148
 - [Паритет офлайн-валидаторов плагина с модулем проверки ошибок приложения](2026-11-18-validators-error-check-parity-requirement.md) — FR-151…FR-157
 - [writer 4.7.0 — массовая синхронизация скилла с окном движка 48592b36 и документацией gram.ax](2026-11-18-writer-sync-470-requirement.md) — FR-161…FR-182
+- [writer 4.8.0 — хвосты волны 4.7.0 (открытые вопросы writer-sync и исключения RES-007 §3)](2026-11-18-writer-tail-480-requirement.md) — FR-183…FR-186
