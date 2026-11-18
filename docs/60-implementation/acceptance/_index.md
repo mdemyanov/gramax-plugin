@@ -20,3 +20,4 @@ ADR-0021); ниже — design-документы живых suite (at-design).
 - [Приёмка (BA-acceptance): паритет офлайн-валидаторов с модулем «Проверка на ошибки»](2026-11-18-validators-parity-at-design.md) — accept, 12/12 AC
 - [Приёмка (BA-acceptance): Авторство PlantUML/BPMN-диаграмм — навык plantuml: file-based, без конвертационных пайплайнов](2026-11-18-plantuml-bpmn-at-design.md) — accept, 12/12 AC
 - [Приёмка (BA-acceptance): writer 4.7.0 — массовая синхронизация скилла с движком 48592b36 и документацией gram.ax](2026-11-18-writer-sync-470-at-design.md) — accept, 24/24 AC
+- [Приёмка (BA-acceptance): writer 4.8.0 — хвост writer-sync: служебная синтаксика, негативный перечень, HTML-компонент, frontmatter-поля](2026-11-19-writer-tail-480-at-design.md) — accept, 7/7 AC
