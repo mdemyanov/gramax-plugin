@@ -1,0 +1,5 @@
+code: validators-parity-one-finding
+title: "Одна находка на дефект"
+description: "Фикстура AC-069: одна битая цель mermaid — ровно одно упоминание в выводе"
+language: ru
+syntax: XML

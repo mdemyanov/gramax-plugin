@@ -1,0 +1,5 @@
+code: validators-parity-w034-hyphen
+title: "Неизвестный дефисный тег"
+description: "Фикстура AC-068: <fancy-widget-x/> вне контрактов — W034; автоссылка и закрывающий тег невидимы"
+language: ru
+syntax: XML

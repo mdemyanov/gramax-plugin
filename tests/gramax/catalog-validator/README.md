@@ -181,3 +181,36 @@ bash tests/gramax/catalog-validator/run.sh; echo "exit=$?"
 
 Не подключён к `scripts/check.sh --fast` или `--full` — `--full` остаётся зелёным (см.
 критерии приёмки задачи QA-author). Подключение — DEV-002.
+
+## Validators-parity: ac-025 — ac-036 (требование 2026-11-18-validators-error-check-parity)
+
+Тесты волны паритета офлайн-валидаторов с модулем «Проверка на ошибки»: цели диаграммных
+тегов `<mermaid>`/`<plant-uml>`/`<bpmn>` (W031 наследуется), собственные иконки `.icons/`
+(новый код W035), контракт-паритет W034 (`known_tags` из обоих контрактов, дефис и `/?`
+в матчере). Дизайн: `docs/40-architecture/2026-11-18-validators-parity-design.md`
+(раздел «Контракт с QA-author»); ADR-0024. Фикстуры — `fixtures/validators-parity/` по
+паттерну мини-каталога (`.doc-root.yaml` + `_index.md` со входящей ссылкой — гасит шум
+сироты; `article.md` с тегом под тестом; ассеты целей).
+
+Стартовое состояние — red on 99201c0 (2026-11-18), до реализации Dev:
+
+| Скрипт | AC | Цвет при создании | Почему |
+|---|---|---|---|
+| `ac-025-diagram-targets-broken.sh` | AC-061 | 🔴 КРАСНЫЙ | парсер извлекает только `target_type "drawio"` — цели mermaid/plant-uml/bpmn не проверяются, находок по трём отсутствующим файлам ноль |
+| `ac-026-diagram-targets-ok.sh` | AC-062 | 🟢 **ЗЕЛЁНЫЙ — warden** | три новых тега не проверяются вовсе, находок ноль уже сегодня; ассерт защищает от ложных диаграммных находок на СУЩЕСТВУЮЩИХ целях после реализации |
+| `ac-027-drawio-w031-regression-guard.sh` | AC-063 | 🟢 **ЗЕЛЁНЫЙ — warden** | прогон существующего ac-015; drawio-семантика W031 существует и обязана пережить обобщение check_diagrams |
+| `ac-028-icon-custom-missing.sh` | AC-064 | 🔴 КРАСНЫЙ | проверки иконок нет (W035 не существует); W034 на `<icon>` эхолит только имя тега, без кода |
+| `ac-029-icon-custom-present.sh` | AC-065 | 🟢 **ЗЕЛЁНЫЙ — warden** | tmp-копия фикстуры icons-missing + `.icons/my-custom-icon.svg`; защищает от ложных W035 на существующем файле после реализации |
+| `ac-030-icon-lucide-boundary.sh` | AC-066 | 🟢 **ЗЕЛЁНЫЙ — warden** | граница префикса `lucide-` (BR-013, Решение 5 ADR-0024): W035 не имеет права резолвить lucide-коды против `.icons/` |
+| `ac-031-w034-contract-parity.sh` | AC-067 | 🔴 КРАСНЫЙ | `known_tags` строится только из gramax-render-rules.json — `<view>` и `<mermaid>` получают ложные W034 (факт 7) |
+| `ac-032-w034-unknown-hyphen.sh` | AC-068 | 🔴 КРАСНЫЙ | матчер `[a-z][a-z0-9]*` с обязательным whitespace слеп к `<fancy-widget-x/>` по обеим причинам (дефис + голый `/>`); истинный позитив обязан держаться и после реализации; негативами — автоссылка и закрывающий тег (границы матчера) |
+| `ac-033-one-finding-per-defect.sh` | AC-069 | 🔴 КРАСНЫЙ | цель mermaid не проверяется — упоминаний `missing.mmd` ноль (ожидание 1, без дубля от W034) |
+| `ac-034-severity-default-strict.sh` | AC-070 | 🔴 КРАСНЫЙ | ассерты (a) exit 0 без флагов и (b) exit 1 с `--strict` зелёны уже сегодня (эскалация от ложного W034); красный ассерт (c): strict-вывод обязан называть `missing.mmd` — операционализирует «единственный дефект — битая цель» |
+| `ac-035-dogfood-w034-contract-tags.sh` | AC-071 | 🔴 КРАСНЫЙ | живые ложные W034 факта 7 на `docs/`: `<view>` (docs/10-domain/research/2026-08-11-index-md-at-catalog-root.md) и `<mermaid>` (docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md) |
+| `ac-036-composite-check-fast.sh` | AC-072 | 🟡 WARDEN, цвет внешне обусловлен | послепубликационный гейт `check.sh --fast`; на авторской предпроверке — зелёный, к завершению авторской задачи красный по внешней причине (test-report параллельного потока export-skill без регистрации в `_index.md`) — триаж в шапке скрипта |
+
+Итог волны: 7 красных / 5 зелёных-warden при создании. Номера ac-файлов продолжают
+последовательность suite (после ac-024) по контракту дизайна; `run.sh` подхватывает новые
+`ac-*.sh` автоматически (glob), регистрации не требует. Suite по-прежнему не подключён к
+`scripts/check.sh`. Параллельные потоки export-skill / plantuml-bpmn (`tests/gramax/export-skill/`,
+`tests/gramax/plantuml-bpmn/`) не затронуты.

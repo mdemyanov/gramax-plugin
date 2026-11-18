@@ -1,0 +1,5 @@
+code: validators-parity-diagrams-broken
+title: "Битые цели диаграммных тегов"
+description: "Фикстура AC-061: отсутствующие цели mermaid/plant-uml/bpmn"
+language: ru
+syntax: XML

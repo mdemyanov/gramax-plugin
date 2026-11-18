@@ -1,0 +1,5 @@
+code: validators-parity-icons-missing
+title: "Кастомная иконка без файла"
+description: "Фикстура AC-064: статья с кастомной иконкой, файл в .icons не создан"
+language: ru
+syntax: XML
