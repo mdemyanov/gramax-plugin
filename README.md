@@ -33,7 +33,7 @@ cd gramax-plugin
 - `/gramax:writer` — создание и редактирование Gramax-документов
 - `/gramax:comments-read <path>` — показать комментарии
 - `/gramax:comments-write <path>` — добавить / ответить / редактировать / удалить
-- `/gramax:mermaid` — генерация mermaid-диаграмм inline (без MCP, адаптировано из axtonliu/axton-obsidian-visual-skills, MIT)
+- `/gramax:mermaid` — генерация mermaid-диаграмм: создаёт `.mermaid`-файл рядом со статьёй и вставляет тег-ссылку в md (без MCP, адаптировано из axtonliu/axton-obsidian-visual-skills, MIT)
 - `/gramax:plantuml` — генерация PlantUML/BPMN-диаграмм (включая Salt-макеты интерфейсов): создаёт `.puml`/`.bpmn`-файл рядом со статьёй и вставляет тег-ссылку в md; рендер — движок Gramax
 - `/gramax:drawio` — drawio-диаграммы через внешний плагин `Agents365-ai/drawio-skill` (двухшаговый workflow)
 - `/gramax:export` — экспорт DOCX/PDF (шаблоны, CLI, CI/CD) и сборка статического портала; исполнение — Node.js/`gramax-cli` в окружении пользователя
