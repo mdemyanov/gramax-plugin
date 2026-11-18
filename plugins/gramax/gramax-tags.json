@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "pairedTags": ["note", "tabs", "tab", "html", "comment", "color", "highlight"],
-  "selfClosingTags": ["view", "snippet", "openapi", "mermaid", "video", "icon", "image", "drawio", "plant-uml", "bpmn"],
+  "pairedTags": ["note", "tabs", "tab", "html", "comment", "color", "highlight", "fragment-link", "cut", "question", "questionAnswer"],
+  "selfClosingTags": ["view", "snippet", "openapi", "mermaid", "video", "icon", "image", "drawio", "plant-uml", "bpmn", "fragment", "property", "inline-property", "img-h", "img-v", "cmd", "kbd", "alfa", "beta"],
   "diagramTags": ["drawio", "mermaid", "plant-uml", "bpmn"],
   "legacy": [
     {

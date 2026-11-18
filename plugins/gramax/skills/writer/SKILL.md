@@ -34,7 +34,7 @@ description: Создание и редактирование документа
 ### При первой операции
 
 1. Найди `.doc-root.yaml` в корне каталога
-2. Прочитай `syntax` (XML или Markdown) и `language`
+2. Прочитай `syntax` (XML, Legacy или GitHub Flavored Markdown) и `language`
 3. Применяй соответствующее форматирование во всех последующих операциях
 
 ### При создании/редактировании
@@ -120,16 +120,26 @@ catalog/
 order: 1
 title: "Заголовок статьи"
 properties:
-  - name: <Имя property из .doc-root.yaml>
+  - id: <id property из .doc-root.yaml>   # без id у property — name
     value: [<значение из enum>]
-  - name: <следующий property>
-    value: [<значение>]
 ---
 ```
 
 - `order` — числовой порядок в навигации (целые или десятичные для вставки)
 - `title` — заголовок на языке страницы; в кавычках если содержит `:` или начинается с цифры
-- `properties` — **опционально**, список объектов `{name, value: [...]}`. **Object-нотация — единственно поддерживаемая для нового контента.** Имя должно совпадать с `name:` property в `.doc-root.yaml`. `value:` всегда массив (поддерживает мульти-select).
+- `properties` — **опционально**, список объектов `{id, value: [...]}`. Привязка —
+  по `id` property (канон сериализации редактора); name-нотация (`- name: <X>`)
+  читается движком фолбэком — существующие каталоги продолжают работать.
+  `value:` всегда массив (поддерживает мульти-select).
+
+### Дополнительные ключи frontmatter статьи
+
+| Ключ | Назначение |
+|------|------------|
+| `searchPhrases` | Список поисковых фраз: подъём статьи в поиске по тексту; регистр не важен, срабатывание по части слова (RES-007 §2) |
+| `aliases` | Список старых путей (без `.md`, от корня контента) после переноса/переименования статьи; UI-перенос записывает его сам, ручной — агент добавляет сам (см. `references/structure.md`) |
+| `quiz` | Режим (тест/опрос) и поведение вопроса-блока статьи → `references/quizzes.md` |
+| `template` | `<id>` шаблона: тело статьи хранится в `.gramax/templates/<id>.md`, файл статьи тела не содержит — см. Guardrails |
 
 ### `_index.md` (любая папка, включая корень — Gramax его там не отображает, см. выше)
 
@@ -163,20 +173,25 @@ language: ru
 syntax: XML
 
 properties:
-  - name: Тип контента
+  - id: content-type
+    name: Тип контента
     type: Enum
     style: green
     icon: file-text
     values: [Требование, ADR, Архитектура]
 
-filterProperties: [Тип контента]
+filterProperty: content-type
 ```
 
 **Ключевое:**
-- `properties` — список **объектов** с `name/type/style/icon/values`. То же `name:` используется в frontmatter статей.
-- `style:` — цвет бейджа property (`green`, `blue`, `purple`, etc.). Палитра из 11 значений.
-- `icon:` — любая иконка из Lucide (`https://lucide.dev/icons`).
-- `filterProperties` — имена property, отображаемых в боковой панели фильтров.
+- `properties` — список **объектов** с `id/name/type/style/icon/values`. Привязка во
+  frontmatter статей — по `id` (без него по `name`).
+- `style:` — цвет бейджа property. Палитра — 20 значений enum движка (включая
+  двухцветные; 6 цветов writer 4.6.0 вне enum — см. `references/doc-root-schema.md`).
+- `icon:` — любая иконка из Lucide (`https://lucide.dev/icons`) или собственный код из `.icons/`.
+- `filterProperty` — один property (его `id`, а без него `name`) для боковой панели
+  фильтров. Форма `filterProperties` (список), которую учил writer 4.6.0, движком
+  не читается — миграция: заменить на `filterProperty`.
 
 Полный справочник (все ключи, палитра, антипаттерны) → `references/doc-root-schema.md`.
 
@@ -210,7 +225,13 @@ uv run ${CLAUDE_PLUGIN_ROOT}/scripts/slugify.py --filename "Что нового?
 - Внутренние (без `.md`): `[Название](./другой-документ)` или `[Название](./../app/_index)`
 - На раздел: `[Название](./features/_index)`
 - На вложения (с расширением): `./diagram.png`, `./file.pdf`
+- Якоря заголовков: `## Установка {#ustanovka}`, ссылка из текста — `[Установка](#ustanovka)` (подробнее → `references/blocks.md` → «Якоря заголовков»)
 - Кросс-каталожные: `` `other-catalog/path/to/file.md` `` — inline code, не markdown-ссылка
+
+**Оговорка о форме с `.md` (RES-008 вердикт 2):** обе формы резолвятся движком и
+офлайн-валидатором. Канон для новых ссылок — форма без .md (родная форма сериализации
+редактора для XML/Legacy-каталогов); форма с .md — валидный, но не канонический вид.
+Миграция существующих .md-ссылок не обязательна.
 
 **Cross-каталожные ссылки:** только inline code, не markdown-ссылка. Обычная ссылка без
 `../`-префикса не покидает каталог статьи-источника — резолвится только то, что физически лежит
@@ -250,6 +271,12 @@ XML (с кадрированием/аннотациями — НЕ редакт�
 <image src="./image.png" crop="..." objects="..." width="800" height="450" float="center"/>
 ```
 
+Семантика размеров (вердикт 5 RES-008): `width`/`height` — реальный размер файла в
+px (резерв места до загрузки, ограничение шириной колонки); ширина на странице —
+отдельный атрибут `scale` XML-формы (`scale="400px"` — абсолютная, `scale="50"` —
+проценты ширины колонки; в markdown-аннотации `{…}` `scale` не применяется).
+Парные картинки рядом/столбиком — `<img-h>`/`<img-v>`. Подробнее → `references/blocks.md` → «Изображения».
+
 Вложения хранятся в той же папке, что и страница.
 
 ## Diagrams (Draw.io)
@@ -282,12 +309,14 @@ XML (с кадрированием/аннотациями — НЕ редакт�
 |------|-----------|------------|
 | Заметка | `<note type="tip">...</note>` | Callout (tip/info/warning/danger/...) |
 | Табы | `<tabs><tab name="A">...</tab></tabs>` | Переключаемые вкладки |
-| `<view>` | См. ниже | Динамический список с фильтрами по property |
-| Сниппет | `<snippet id="name"/>` | Вставка из `.gramax/snippets/` |
+| `<view>` | См. ниже | Динамический список: сокрытие, сортировка, колонки |
+| Фрагмент | `<fragment id="name"/>` | Вставка из `.gramax/fragments/`; ссылка — `<fragment-link id>текст</fragment-link>` (legacy-алиас — `<snippet/>`) |
+| Вопрос | `<question type="one">...` | Вопрос-блок и тесты статьи (`quiz`) → `references/quizzes.md` |
+| Скрытый фрагмент | `<cut text="Подробнее">...</cut>` | Инлайн-спойлер |
 | OpenAPI | `<openapi src="./api.yaml"/>` | Спецификация API |
 | Mermaid | `<mermaid path="./diagram.mermaid" width="800px" height="450px"/>` | Диаграмма Mermaid |
-| Видео | `<video path="URL"/>` | Встроенное видео: mp4/webm/ogg, YouTube (watch/youtu.be/shorts/live, таймкод `?t=`, плейлист `list=`), Rutube, Google Drive, Instagram |
-| Иконка | `<icon code="lucide-name"/>` | Lucide-иконка |
+| Видео | `<video path="URL"/>` | Встроенное видео: mp4/webm/ogg, YouTube (watch/youtu.be/shorts/live, таймкод `?t=`, плейлист `list=`), Rutube, Google Drive, Instagram, Dropbox, mega.nz; атрибуты `title`, `scale`; URL с подстрокой `embed` — iframe как есть |
+| Иконка | `<icon code="lucide-name"/>` | Lucide-иконка или собственный код из `.icons/` |
 | HTML | `<html>...</html>` | Сырой HTML |
 
 ### Дашборды через `<view>`
@@ -295,18 +324,24 @@ XML (с кадрированием/аннотациями — НЕ редакт�
 Используется в `_index.md` для списков статей с фильтрацией и группировкой:
 
 ```markdown
-<view defs="Тип контента=ADR&Архитектура&none" groupby="Статус" display="List"/>
+<view defs="Статус=Historical&Superseded, hierarchy=child-to-current" orderby="Статус" display="Table"/>
 ```
 
-- `defs="<property>=<v1>&<v2>&none"` — фильтр по property; `none` означает «и статьи без значения». Несколько фильтров через `,`.
-- `groupby="<property>"` — группировка результата.
-- `display="List"` — представление.
+- `defs` — фильтр сокрытия: перечисленные значения исключают статьи из выборки
+  (статьи с ними скрыты); `none` — остаются только статьи, у которых свойство
+  есть; `yes` — только статьи без свойства; иерархическая выборка — записью
+  `hierarchy=child-to-current` внутри `defs` (не атрибутом тега).
+- `orderby` — сортировка (`свойство=v1&v2` или голое имя); `select` — показываемые
+  колонки свойств; `groupby` — группировка (опц.).
+- `display` — `List`, `Table` или `Kanban`; дефолт `List`.
 
 **Когда использовать:** в корневом `_index.md` каталога (дашборд всех статей) или в крупных разделах (>20 статей). Малые разделы (<10 статей) — избыточно.
 
 Подробности и примеры → `references/blocks.md`.
 
-**UI-токены:** `[cmd:Label]`, `[kbd:Ctrl+S]`, `[alfa]`, `[beta]`
+**UI-токены:** XML-формы `<cmd text="…" icon="…" color="…"/>`, `<kbd text="…"/>`,
+`<alfa/>`, `<beta/>` (канон для `syntax: XML`) и скобочные `[cmd:Label]`,
+`[kbd:Ctrl+S]`, `[alfa]`, `[beta]` — обе формы валидны → `references/blocks.md`.
 
 Полный справочник блоков (все типы note, markdown-admonitions `:::info`, таблицы в 3 синтаксисах, стилизация `<color>`/`<highlight>`, формулы, блочные комментарии) → `references/blocks.md`.
 
@@ -354,9 +389,10 @@ Pre-commit-хук плагина уже прогоняет оба валидат
 Перед подготовкой к загрузке в Gramax:
 
 1. Удалить служебные файлы: `.DS_Store`, `Thumbs.db`, `CLAUDE.md`
-2. **НЕ удалять** `.gramax/` (содержит сниппеты) и `.doc-root.yaml`
-3. Конвертировать все `.drawio` → `.svg`
-4. Проверить frontmatter у всех страниц, отсутствие плейсхолдеров `{{ИМЯ}}`, статей-сирот и битых markdown-ссылок
+2. **НЕ удалять** `.gramax/` (содержит фрагменты/сниппеты, представления, шаблоны) и `.doc-root.yaml`
+3. **НЕ трогать** служебные папки `.gramax/inbox/` (личные заметки) и `.gramax/mr/` (состояние ревью) — см. Guardrails
+4. Конвертировать все `.drawio` → `.svg`
+5. Проверить frontmatter у всех страниц, отсутствие плейсхолдеров `{{ИМЯ}}`, статей-сирот и битых markdown-ссылок
 
 Автоматическая проверка:
 ```bash
@@ -368,8 +404,19 @@ uv run ${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py <path> --fix --yes   
 
 ## Guardrails
 
-- Не удаляй/переименовывай `.gramax/`
-- При переименовании страниц — обнови все ссылки
+- Не удаляй/переименовывай `.gramax/` (фрагменты/сниппеты, представления, шаблоны)
+- **Шаблоны:** никогда не правь тело статьи, во frontmatter которой есть `template: <id>` —
+  текст такой статьи хранится в `.gramax/templates/<id>.md`, файл статьи собственного
+  текста не содержит. Правка статьи-потребителя допустима только во frontmatter-блоке
+  `properties` (и именованных полях `fields`, которые пишет редактор). Файл шаблона
+  `.gramax/templates/<id>.md` правится только как отдельная явно запрошенная операция —
+  он меняет всех статьи-потребители разом; тело статьи-потребителя пусто by design —
+  не «восстанавливай» его копированием текста шаблона
+- **Служебные папки:** не создавай, не редактируй и не удаляй `.gramax/inbox/`
+  (личные заметки пользователей) и `.gramax/mr/` (состояние ревью и согласований)
+- **Git LFS:** не трогай `.gitattributes` и файлы-указатели LFS (см. ключ `lfs` в
+  `references/doc-root-schema.md`)
+- При переименовании страниц — обнови все ссылки и добавь старый путь в `aliases`
 - Валидируй парные теги (`<note>`, `<tabs>`, `<tab>`, `<html>`, `<comment>`, `<color>`, `<highlight>`)
 - Сохраняй пустые строки внутри `<note>`, `<tabs>`
 - Не редактируй числовые параметры `crop`/`objects` в XML-изображениях вручную
@@ -378,6 +425,7 @@ uv run ${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py <path> --fix --yes   
 ## Ресурсы
 
 - `references/blocks.md` — полный справочник XML-блоков и токенов
+- `references/quizzes.md` — вопрос-блоки `<question>`/`<questionAnswer>` и frontmatter `quiz`
 - `references/drawio.md` — конвертация `.drawio` → SVG, алгоритм, отладка
 - `references/structure.md` — операции со структурой (добавить/переместить/превратить страницу в раздел)
 - `references/staging.md` — pre-publish checklist
@@ -387,4 +435,4 @@ uv run ${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py <path> --fix --yes   
 
 ## Production-паттерны
 
-Рекомендуемая структура каталога: object-нотация frontmatter (`properties: [- name/value: [...]]`), `style:` + `icon:` на каждом property, `<view>`-дашборды в `_index.md`. Подробности: `references/doc-root-schema.md` и `references/structure.md`.
+Рекомендуемая структура каталога: id-нотация frontmatter (`properties: [- id/value: [...]]`), `style:` + `icon:` на каждом property, `<view>`-дашборды в `_index.md`. Подробности: `references/doc-root-schema.md` и `references/structure.md`.

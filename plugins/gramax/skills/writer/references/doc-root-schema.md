@@ -4,29 +4,65 @@
 `_index.md` — он разрешён, но Gramax его не отображает (ADR-0015; см.
 `references/structure.md` → «Правила `_index.md`»).
 
+Файл грузится движком как YAML напрямую в тип `CatalogProps` без переименования
+ключей — ключ вне типа молча игнорируется (`FileStructure.ts:708-711`). Поэтому
+состав ключей ниже — engine-верифицирован пробом на пине `48592b36` (Q1 дизайна
+writer 4.7.0): каждое значение несёт пометку источника — «engine» (`путь:строка`)
+или «docs».
+
 ## Корневые ключи
 
-| Ключ | Тип | Обязательное | Назначение |
-|------|-----|--------------|------------|
-| `title` | string | да | Заголовок каталога в Gramax UI |
-| `description` | string | да | Описание для каталог-листа |
-| `language` | string | да | Основной язык (`ru` / `en`) |
-| `syntax` | enum | да | `XML` (активирует `<note>`, `<tabs>`, `<view>`) или `Markdown` |
-| `code` | string | нет | Короткое отображаемое имя каталога в UI (≤4 символа по форме настроек; резолвером ссылок не используется) |
-| `style` | string | нет | Цвет заголовка каталога. Палитра — та же, что для property-level `style:` (см. ниже). |
-| `supportedLanguages` | array | нет | Список поддерживаемых языков; `[]` = без ограничений |
-| `properties` | array | нет | Определения property для frontmatter (см. ниже) |
-| `filterProperties` | array | нет | Имена property для боковой панели фильтров: `[Тип контента, Фаза]` |
-| `editors` | array | нет | Email'ы с правами публикации |
+| Ключ | Тип | Обязательное | Назначение | Источник |
+|------|-----|--------------|------------|----------|
+| `title` | string | да | Заголовок каталога в Gramax UI | — |
+| `description` | string | да | Описание для каталог-листа | — |
+| `language` | string | да | Основной язык (`ru` / `en`) | — |
+| `syntax` | enum | да | `XML`, `Legacy` или `GitHub Flavored Markdown` (см. ниже) | engine (`Syntax.ts:1-6`) |
+| `code` | string | нет | Короткое отображаемое имя каталога в UI (≤4 символа по форме настроек; резолвером ссылок не используется) | — |
+| `style` | string | нет | Цвет заголовка каталога. Палитра — та же, что для property-level `style:` (см. ниже). | — |
+| `logo` | string | нет | Логотип: `icon:<код>` (код Lucide, опциональный второй сегмент цвета `icon:<код>:<цвет>`) или `emoji:<символ>` | engine (`CatalogProps.ts:38-39`, `catalogLogoIcon.ts:4-24`) |
+| `logo_dark` | string | нет | Логотип тёмной темы, те же формы | engine (`CatalogProps.ts:38-39`) |
+| `supportedLanguages` | array | нет | Список поддерживаемых языков; `[]` = без ограничений | — |
+| `versions` | string[] | нет | Шаблоны веток/тегов версионирования каталога | engine (`CatalogProps.ts:16`) |
+| `relatedLinks` | array | нет | Кнопки действия каталога; запись `{url, title, icon?, target?}` | engine (`CatalogProps.ts:23`, `NavigationLinks.ts:63-71`) |
+| `lfs` | object | нет | `{auto: boolean, exclude: string[]}` — авто-перевод бинарных вложений в Git LFS и исключения | engine (`CatalogProps.ts:21`, `autoLfsAttachments.ts:21-24`) |
+| `hidden` | boolean | нет | Скрыть каталог | engine (`CatalogProps.ts:25`) |
+| `properties` | array | нет | Определения property для frontmatter (см. ниже) | — |
+| `filterProperty` | string | нет | Один property для боковой панели фильтров; значение — идентификатор свойства (`id`, а без него `name`) | engine (`CatalogProps.ts:17`, матчинг `ScopedCatalogsResolver.ts:49`) |
+| `editors` | array | нет | Email'ы с правами публикации | — |
+
+**`filterProperties` — legacy-форма writer 4.6.0 (список имён):** движком на пине
+не читается — ключа `filterProperties` в модели `CatalogProps` нет. Миграция —
+заменить на `filterProperty` (одиночный идентификатор). Каталог со старой формой
+продолжает работать: ключ молча игнорируется, но фильтр боковой панели не
+действует (NFR-071).
+
+### Ключ `syntax` — enum из трёх значений движка
+
+Ровно три значения читает движок (`Syntax.ts:1-6`; селектор настроек предлагает
+те же — `useFormSelectValues.ts:29-35`):
+
+- `XML` — XML-теги (`<note>`, `<tabs>`, `<view>`);
+- `Legacy` — markdown-расширения прежнего редактора (`:::`-admonitions, `{%…%}`);
+- `GitHub Flavored Markdown` — GFM.
+
+**Пометка расхождения (NFR-071):** значение `Markdown`, которое перечислял writer
+4.6.0, в движке не существует — неизвестное значение молча падает в
+Legacy-форматтер (`getFormatterType.ts:41`), т.е. каталог с `syntax: Markdown`
+фактически работает как `Legacy`. Существующие каталоги продолжают работать;
+в новом контенте — одно из трёх значений движка.
 
 ## Property-определение
 
 ```yaml
 properties:
-  - name: <имя property>
-    type: <Enum | String>
-    style: <цвет бейджа>
-    icon: <Lucide-иконка>
+  - id: content-type          # опционален; без него идентификатор — name
+    name: Тип контента
+    type: Enum
+    style: green
+    icon: file-text
+    options:
+      docportalVisible: true
     values:
       - <значение 1>
       - <значение 2>
@@ -34,32 +70,89 @@ properties:
 
 | Поле | Обязательное | Назначение |
 |------|--------------|------------|
-| `name` | да | Имя property; используется в frontmatter статей в `- name: <X>` |
-| `type` | да | `Enum` для select из `values:`; `String` для свободного текста |
-| `style` | нет | Цвет бейджа в frontmatter и sidebar |
+| `id` | нет | Технический идентификатор; без него идентификатором работает `name` (правило свёртки `id ?? name` — engine: `catalogProperty.ts:13,54-57`) |
+| `name` | да | Имя property; используется во frontmatter при отсутствии `id` |
+| `type` | да | Одно из шести имён движка: `Flag`, `Enum`, `Many`, `Text`, `Numeric`, `Date` (engine: `models/index.ts:43-53`) |
+| `style` | нет | Цвет бейджа в frontmatter и sidebar (палитра — см. ниже) |
 | `icon` | нет | Lucide-иконка рядом с бейджем |
+| `options.docportalVisible` | нет | `true` — свойство показывается на doc-портале (engine: `models/index.ts:9-11`) |
 | `values` | для `Enum` | Массив строк — допустимые значения |
+
+**Нотация значений во frontmatter статей.** Канон сериализации редактора —
+объект по `id`: `- id: <id>` + `value: [...]` (engine: `changeProperty.ts:26-30`).
+Name-нотация (`- name: <X>`) читается фолбэком по правилу `id ?? name` —
+существующие каталоги продолжают работать (NFR-071); в новом контенте — по `id`.
+
+- `Flag` — значение во frontmatter только `id` (без `value`).
+- `Date` — значение в формате ISO 8601 (docs-пометка).
+
+**Пометка расхождения (NFR-071, факт 18):** прежняя строка справочника писала
+`type: <Enum | String>` — типа `String` в движке нет (engine-вердикт Q1в);
+справочник переписан по шести именам движка, не молча. Служебный тип `BlockMd`
+для статей не подходит (`isPropertySuitableForArticle`, `models/index.ts:55-62`).
+
+**Ограничение (docs-пометка):** свойство нельзя переименовать — после переименования
+связка со значениями статей теряется; в прочитанном коде движка запрет не
+искали, противоречия docs нет.
 
 ## Палитра `style:`
 
 Применяется к двум уровням: к корневому ключу `style:` (цвет заголовка каталога) и к property-level `style:` (цвет бейджа property). Список валидных значений общий.
 
-Подтверждённые валидные значения:
+**Каноническая палитра — 20 значений enum движка** (engine: `Style.ts:1-22`;
+пикер настроек предлагает все — `ColorTilePicker.tsx:7-28`):
 
-`gray`, `green`, `light-green`, `blue`, `light-blue`, `blue-green`, `purple`, `light-purple`, `orange`, `dark-orange`, `light-pink`
+`red`, `blue`, `black`, `green`, `purple`, `teal`, `blue-pink`, `red-green`,
+`pink-blue`, `orange-red`, `red-orange`, `blue-green`, `blue-purple`,
+`purple-blue`, `dark-orange`, `pink-purple`, `orange-green`, `green-orange`,
+`bright-orange`, `purple-orange`
 
-**Рекомендуемая семантика:**
+**Legacy-строка — 11 значений writer 4.6.0** (NFR-071): `gray`, `green`,
+`light-green`, `blue`, `light-blue`, `blue-green`, `purple`, `light-purple`,
+`orange`, `dark-orange`, `light-pink`. Пересечение с enum движка — 5 (`green`,
+`blue`, `blue-green`, `purple`, `dark-orange`); остальные 6 (`gray`,
+`light-green`, `light-blue`, `light-purple`, `orange`, `light-pink`) вне enum
+движка — не использовать в новом контенте: движок значение не валидирует и не
+падает, но CSS-переменная не найдётся и бейдж рендерится без цвета.
 
-- **categorical** (что это) — `green`, `light-blue`, `purple`
-- **lifecycle** (где в цикле) — `light-green`, `dark-orange`
-- **priority / attention** — `orange`, `dark-orange`, `light-pink`
-- **metadata** (id, технические поля) — `gray`
+**Рекомендуемая семантика (по enum движка):**
+
+- **categorical** (что это) — `green`, `blue`, `purple`
+- **lifecycle** (где в цикле) — `teal`, `dark-orange`
+- **priority / attention** — `red`, `orange-red`
+- **metadata** (id, технические поля) — `black`
 
 ## Иконки
 
 Любая иконка из набора Lucide (`https://lucide.dev/icons`). Часто используемые:
 
 `hash`, `layers`, `package`, `box`, `folder`, `user`, `users`, `zap`, `briefcase`, `link`, `repeat`, `play`, `target`, `circle-check`, `alert-triangle`, `git-branch`, `file-text`, `check-circle`, `user-check`
+
+Собственные SVG-иконки — папка `.icons/` (см. «Служебные папки и файловые следы»
+и `blocks.md` → «Иконки»).
+
+## Мультиязычность
+
+Правила мультиязычного каталога (`language` / `supportedLanguages`; источник —
+docs, RES-007 §2):
+
+1. Структура папки языка повторяет основную один-в-один.
+2. `order` и `properties` файла перевода совпадают с оригиналом.
+3. Файл перевода без `title` считается непереведённым.
+4. Разделы (папки структуры) нельзя называть кодами языков.
+
+## Служебные папки и файловые следы
+
+| Путь | Назначение | Действие агента |
+|------|------------|-----------------|
+| `<каталог>/.gramax/views` | Хранилище представлений каталога: именованные фильтры, переменные, группировка навигации (engine: `CatalogViewProvider.ts:26`) | Не изобретать собственное место хранения, не удалять папку |
+| `<каталог>/.gramax/fragments/`, `<каталог>/.gramax/snippets/` | Фрагменты (канон) и legacy-сниппеты — см. `blocks.md` → «Фрагменты» | Не удалять; миграция сниппетов — на движке |
+| `<каталог>/.gramax/templates/` | Файлы шаблонов `<id>.md` — см. `SKILL.md` → Guardrails | Правка — только по явному запросу |
+| `<каталог>/.icons/` | Собственные SVG-иконки: файл на код — `.icons/<код>.svg`; коды `<icon code="…"/>` без префикса `lucide-` резолвятся против неё (источник RES-007 §2) | Документация механизма; офлайн-проверка файлов — зона валидатора |
+| `.gitattributes` (рядом с `.doc-root.yaml`) | Паттерны Git LFS — какие файлы хранятся через LFS | Не трогать; см. ключ `lfs` в «Корневых ключах» |
+
+Указатели Git LFS (файлы-заглушки вместо бинарников) — в перечне «что агенту не
+трогать» (`SKILL.md` → Guardrails).
 
 ## `code` — декоративное имя каталога, не идентификатор для ссылок
 
@@ -134,19 +227,34 @@ description: Documentation catalog
 language: ru
 syntax: XML
 style: blue
-supportedLanguages: []
+logo: icon:book-open
+logo_dark: icon:book-open:white
+supportedLanguages: [ru, en]
+
+relatedLinks:
+  - url: https://example.com/feedback
+    title: Обратная связь
+    icon: message-circle
+
+lfs:
+  auto: true
+  exclude: ["*.psd"]
 
 properties:
-  - name: Тип контента
+  - id: content-type
+    name: Тип контента
     type: Enum
     style: green
     icon: file-text
+    options:
+      docportalVisible: true
     values:
       - Требование
       - Архитектура
       - ADR
 
-  - name: Статус
+  - id: status
+    name: Статус
     type: Enum
     style: dark-orange
     icon: check-circle
@@ -155,7 +263,7 @@ properties:
       - Approved
       - Superseded
 
-filterProperties: [Тип контента]
+filterProperty: content-type
 editors:
   - user@example.com
 ```

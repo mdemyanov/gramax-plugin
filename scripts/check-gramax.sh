@@ -12,7 +12,8 @@
 #              tests/gramax/catalog-validator + tests/gramax/mermaid-adoption +
 #              tests/gramax/writer-consumer-rules + tests/gramax/link-form-resolver +
 #              tests/gramax/link-form-migration + tests/gramax/export-skill +
-#              tests/gramax/plantuml-bpmn + tests/gramax/render-linter
+#              tests/gramax/plantuml-bpmn + tests/gramax/writer-sync-470 +
+#              tests/gramax/render-linter
 #
 # Exit codes:
 #   0 — all checks passed
@@ -239,7 +240,16 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
-  # --- 15. (--full only) render-linter: киллеры рендера docs/, контракт AC-001…AC-021 ---
+  # --- 15. (--full only) writer-sync-470: контракт writer 4.7.0 (AC-073…AC-096) ---
+  echo "==> writer-sync-470"
+  if bash tests/gramax/writer-sync-470/run.sh; then
+    echo "OK: writer-sync-470 green"
+  else
+    echo "FAIL: writer-sync-470"
+    FAILED=1
+  fi
+
+  # --- 16. (--full only) render-linter: киллеры рендера docs/, контракт AC-001…AC-021 ---
   echo "==> render-linter"
   if bash tests/gramax/render-linter/run.sh; then
     echo "OK: render-linter green"
