@@ -37,6 +37,8 @@ order: 1
 | [0020](0020-doc-root-recursive-discovery.md) | Рекурсивное обнаружение .doc-root.yaml и типизация обязательных полей в validate_structure.py | Accepted | 2026-08-13 | gramax / marketplace |
 | [0021](0021-docs-layout-inversion.md) | Инверсия раскладки документации — переезд `content/` → `docs/`, слияние doc-roots, зачистка исторических артефактов | Accepted | 2026-11-17 | gramax / marketplace |
 | [0022](0022-export-skill-placement.md) | Навык export — шестой публичный скилл плагина gramax: плейсмент, релизная поверхность, контракт границы | Accepted | 2026-11-18 | gramax / marketplace |
+| [0023](0023-plantuml-bpmn-skill.md) | Навык plantuml — PlantUML/BPMN-авторство как новый публичный скилл: плейсмент, релизная поверхность, граница рендера | Accepted | 2026-11-18 | gramax / marketplace |
+| [0024](0024-validators-error-check-parity.md) | Паритет офлайн-валидаторов с модулем «Проверка на ошибки» — коды находок, строгость, контракт-паритет W034 | Accepted | 2026-11-18 | gramax / marketplace |
 
 ## Связи между ADR
 
