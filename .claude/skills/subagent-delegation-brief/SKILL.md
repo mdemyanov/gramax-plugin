@@ -8,6 +8,11 @@ description: Use when dispatching subagents (Task/Agent tool) in this repo — h
 Quality comes not from a higher model tier but from the loop "brief → execution → review with
 reproduction".
 
+The review leg runs as a named instrument, not a composed brief: artefact reviews — the
+specification delta, the BA/SA plan, the wave diff — dispatch via `scripts/author-free-review.sh`
+with the fixed prompt `scripts/author-free-review-prompt.md` (capability
+`review-without-author`); the reviewer's input is the artefacts plus the acceptance criteria.
+
 ### Brief rules — mandatory in every subagent call
 
 Write every subagent brief in English regardless of the conversation's language — a short

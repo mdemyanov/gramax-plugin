@@ -2,9 +2,9 @@
 # редактируйте руками значения; секцию `skip:` — можно (ADR-030-spec §5/§6).
 # Доставленные файлы — MIT, Copyright (c) 2026 mdemyanov (tools-ai/nauta).
 # Полный текст лицензии: LICENSE в корне репозитория плагина.
-nauta_version: "2.24.0"
-nauta_ref_sha: "249da62c82ceb1025b16183a00cd2ddc6f6153a2"
-synced_at: "2026-11-19T11:49:52Z"
+nauta_version: "2.26.0"
+nauta_ref_sha: "d1fc7a0ac8386d94c5817ef5e6191d6d09b7ef96"
+synced_at: "2026-11-21T07:56:54Z"
 delivery_complete: true
 files_count: 25
 files:
@@ -13,13 +13,13 @@ files:
   scripts/_validate_common.py: "sha256:bc895ec06671038db7311a81c510b0e74f1f4c4ca4496f14947fc31b62b8e8bd"
   scripts/assemble-gate-evidence.sh: "sha256:6d11e14761dae1b66e050b10e1854c93f6458ada1b3ad77efbe1228c72160044"
   scripts/check-branch-discipline.py: "sha256:fa53bb7e08df460a7a9132571a884bc6d406fbb407a26a9ae20a3f467cf32e59"
-  scripts/check-content-actuality.py: "sha256:3a91da3ef1e5aced6808872f77d20b1ba9a0f50ef83afd59bb75f7b637c3ebfc"
+  scripts/check-content-actuality.py: "sha256:053c30f0bcd8b870354f793f5415fd6075e561077ad037dfe9d51c0390cf5f11"
   scripts/check-ratchet.py: "sha256:a13c988bdb192d48480398fc0a7a172c86ea3e8834b1138754518dc2e786c666"
   scripts/check-hooks-path.sh: "sha256:ba9e0a5f1d9bfc03f34cec078fdcfb6f11106256aba70ac403f4d614dac50be1"
   scripts/check-readiness.sh: "sha256:46d56a8a21434eaa17c3fb69639fb120c64dc809118e5b7490410390ee47e60b"
   scripts/check-status-drift.py: "sha256:9c5f2d4612983c621139e93ddc1bc5059f35bf66e84c9d0fcc915cf16032bc6d"
   scripts/check-subprocess-encoding.py: "sha256:324a5332fb0a79e5d2f51d73834da64c8e18dbdcd9c79e231da494dcbe1dfb58"
-  scripts/check.sh: "sha256:af4a685f237a38c576a4b9188fbfd111f52cde772a3843d43f0fc5aa6ebd3a68"
+  scripts/check.sh: "sha256:fba94fe832182e255f8059c45704a155a19067062be6f656ee70b7eca7f6ae00"
   scripts/decide.py: "sha256:554934e1261cf7eef1c937522be3b83b4f5bda20de5f99fd19ca34d005e4d6ca"
   scripts/id-check.sh: "sha256:590179e3f757711f558445ace7c3701d05ede126e8afd7ad295cc2a060cc980e"
   scripts/install-hooks.sh: "sha256:b0ff9b521bc09e1f7d0b2980158a20dc0d1b7739381927526a9c1ce31018f4c1"
@@ -32,7 +32,7 @@ files:
   scripts/validate-content.py: "sha256:8b47cc826c1e9ac4add7d40a6dc4e4f0ad1f9aeea74a5eb0eeeec74d365d8daa"
   scripts/validate-profile.py: "sha256:5bb4a8c9faaf30300ffa74fa3b678ffb40c875f35e9dd36de0dd7d1fa8bbe7ca"
   .githooks/pre-commit: "sha256:e36e19650fa6d1d891dbe42b88eafd58b610c2b9472eb96acf96df9089c4fd1c"
-  .claude/skills/subagent-delegation-brief/SKILL.md: "sha256:4961a60d9ca7199edd2b15995607daf527ef885d84279f6452371b6f65137938"
+  .claude/skills/subagent-delegation-brief/SKILL.md: "sha256:57f12fc2c213709caf2762702c64e7281730c49f318d00f46d6b1edcdba15d5d"
 skip_count: 0
 skip:
 conflicts_count: 0

@@ -312,6 +312,25 @@ def _declare_silence(content_dir: Path) -> int:
     return 0
 
 
+def _declare_no_subject_silence() -> int:
+    """Объявленное молчание на пустой по построению популяции: пары каталогов docs//content/
+    нет ОБЕ — проверять нечего вовсе (ADR-161 Д3, NA-EPIC-158; замер qa201: четвертая красная
+    ступень формы доставки — прежний usage error rc 2 «--content-dir docs is not a directory»
+    был «не смог» там, где предмета нет). Форма и основание — та же пара «объявленное
+    молчание + класс нечего-проверять» (ADR-007 Д1), что у ветки «нет истории git» выше.
+    Явный --content-dir мимо каталога ветку НЕ получает: явно названный несуществующий
+    корень — malformed-вход, usage error честен."""
+    print(
+        "[INFO] check-content-actuality не выполняется: в дереве нет ни docs/, ни content/ —\n"
+        "       проверяемой популяции не существует по построению (форма доставки не производит\n"
+        "       документарный контур, ADR-161 Д3; замер qa201 на git archive origin/delivery).\n"
+        "       Это «нечего проверять», не «не смог проверить» (ADR-007 Д1), exit-код не\n"
+        "       меняется. Чтобы признак заработал: заведи документарный контур (/nauta:init —\n"
+        "       раскладка docs/, ADR-041 Д1) или назови корень явно (--content-dir)."
+    )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Актуальность статьи по объявленным опорам (ADR-076)")
     # Умолчание обязательно (тот же довод, что у соседа по ADR-072 Д3): `run_gate_if_declared`
@@ -326,6 +345,13 @@ def main(argv: list[str] | None = None) -> int:
         (Path(p) for p in ("docs", "content") if Path(p).is_dir()), Path("docs")
     )
     if not content_dir.is_dir():
+        # Пустая по построению популяция (ADR-161 Д3): корень не назван явно и ни один из
+        # пары docs//content/ не существует — объявленное молчание «нечего проверять»
+        # (замер qa201: rc 2 usage error на форме доставки был четвёртой структурной
+        # красной ступенью). Явно названный несуществующий корень — прежний usage error:
+        # malformed-вход не перекрашивается в молчание.
+        if args.content_dir is None:
+            return _declare_no_subject_silence()
         print(f"usage error: --content-dir {content_dir} is not a directory", file=sys.stderr)
         return 2
 
