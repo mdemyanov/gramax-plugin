@@ -1487,7 +1487,7 @@ def _git_ls_files(repo_root: Path, patterns: list[str]) -> list[str] | None:
         raise _GitUnavailable()
     r = subprocess.run(
         ["git", "-C", str(repo_root), "ls-files", "--"] + patterns,
-        capture_output=True, text=True, check=True,
+        capture_output=True, text=True, encoding="utf-8", errors="replace", check=True,
     )
     return [ln for ln in r.stdout.splitlines() if ln]
 

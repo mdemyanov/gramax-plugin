@@ -139,7 +139,7 @@ def _list_items(text: str, name: str, key: str) -> list[str]:
 
 def _git(root: Path, *args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", "-C", str(root), *args],
-                          capture_output=True, text=True, timeout=120)
+                          capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
 
 
 def _worktrees(root: Path) -> list[dict[str, str]]:
@@ -357,7 +357,7 @@ def _open_epic_records(root: Path) -> list[dict] | None:
         proc = subprocess.run(
             ["bd", "--readonly", "list", "--type", "epic",
              "--status", "open,in_progress,deferred", "--json"],
-            cwd=str(root), capture_output=True, text=True, timeout=120)
+            cwd=str(root), capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
     except (OSError, subprocess.SubprocessError):
         return None
     if proc.returncode != 0:
@@ -376,7 +376,7 @@ def _epic_branch(root: Path, epic: str) -> str | None:
     try:
         proc = subprocess.run(
             ["bd", "--readonly", "state", "list", epic, "--json"],
-            cwd=str(root), capture_output=True, text=True, timeout=120)
+            cwd=str(root), capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
     except (OSError, subprocess.SubprocessError):
         return None
     if proc.returncode != 0:

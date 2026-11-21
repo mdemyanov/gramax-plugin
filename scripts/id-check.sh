@@ -192,7 +192,7 @@ def _git_candidate_files(exts=_CANDIDATE_EXTS):
     try:
         proc = subprocess.run(
             ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
-            capture_output=True, text=True, timeout=120,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
         )
     except (OSError, subprocess.SubprocessError):
         return None
@@ -263,7 +263,7 @@ def _history_subjects():
     try:
         proc = subprocess.run(
             ["git", "log", "--format=%s", "HEAD"],
-            capture_output=True, text=True, timeout=120,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
         )
         if proc.returncode == 0:
             subjects = proc.stdout.splitlines()
@@ -277,7 +277,7 @@ def _history_is_shallow() -> bool:
     try:
         proc = subprocess.run(
             ["git", "rev-parse", "--is-shallow-repository"],
-            capture_output=True, text=True, timeout=60,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60,
         )
     except (OSError, subprocess.SubprocessError):
         return False

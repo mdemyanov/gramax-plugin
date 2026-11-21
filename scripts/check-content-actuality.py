@@ -276,7 +276,7 @@ def _tracked_files(root: Path) -> set[str] | None:
     try:
         proc = subprocess.run(
             ["git", "-C", str(root), "ls-files", "-z"],
-            capture_output=True, text=True, timeout=120,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
         )
     except (OSError, subprocess.SubprocessError):
         return None
@@ -289,7 +289,7 @@ def _repo_root(content_dir: Path) -> Path | None:
     try:
         proc = subprocess.run(
             ["git", "-C", str(content_dir), "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, timeout=120,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
         )
     except (OSError, subprocess.SubprocessError):
         return None

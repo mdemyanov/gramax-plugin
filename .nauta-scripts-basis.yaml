@@ -2,25 +2,26 @@
 # редактируйте руками значения; секцию `skip:` — можно (ADR-030-spec §5/§6).
 # Доставленные файлы — MIT, Copyright (c) 2026 mdemyanov (tools-ai/nauta).
 # Полный текст лицензии: LICENSE в корне репозитория плагина.
-nauta_version: "2.23.0"
-nauta_ref_sha: "d776618b74ea3f1af8fd98a6ca1840f64b2b3096"
-synced_at: "2026-11-17T21:30:16Z"
+nauta_version: "2.24.0"
+nauta_ref_sha: "249da62c82ceb1025b16183a00cd2ddc6f6153a2"
+synced_at: "2026-11-19T11:49:52Z"
 delivery_complete: true
-files_count: 24
+files_count: 25
 files:
   scripts/_conflict_markers.py: "sha256:aca4969cc2205a95ce56be39c2ca6b8205864ab7f9c6b11add4214fd9a17ce6c"
-  scripts/_drift_check.py: "sha256:11df574687a9d683d629dbdf61c94bfb22b12af36759d32b8c72621a5ee39554"
-  scripts/_validate_common.py: "sha256:9048de385ecce0a4d38ce4887a033bca500ce510fa40da9a0714c57273b6e027"
+  scripts/_drift_check.py: "sha256:5bdb538087c8f6b39c35e8d84834a25c5872e41e4859722da6826ed6f8717521"
+  scripts/_validate_common.py: "sha256:bc895ec06671038db7311a81c510b0e74f1f4c4ca4496f14947fc31b62b8e8bd"
   scripts/assemble-gate-evidence.sh: "sha256:6d11e14761dae1b66e050b10e1854c93f6458ada1b3ad77efbe1228c72160044"
-  scripts/check-branch-discipline.py: "sha256:7d6f2ab399b7f8c7b48473195ec2efd36b49f4f99c6471a1f3e0c99de9bd260b"
-  scripts/check-content-actuality.py: "sha256:7363e9efdfcd20f0ff787024482945d675567c3805c819a2f7538cfd2b2ee5e4"
-  scripts/check-ratchet.py: "sha256:3a8ab30a7eb78909a30953c13be7599fdbb5d8abcf39a93a14851c35b420dc0a"
+  scripts/check-branch-discipline.py: "sha256:fa53bb7e08df460a7a9132571a884bc6d406fbb407a26a9ae20a3f467cf32e59"
+  scripts/check-content-actuality.py: "sha256:3a91da3ef1e5aced6808872f77d20b1ba9a0f50ef83afd59bb75f7b637c3ebfc"
+  scripts/check-ratchet.py: "sha256:a13c988bdb192d48480398fc0a7a172c86ea3e8834b1138754518dc2e786c666"
   scripts/check-hooks-path.sh: "sha256:ba9e0a5f1d9bfc03f34cec078fdcfb6f11106256aba70ac403f4d614dac50be1"
   scripts/check-readiness.sh: "sha256:46d56a8a21434eaa17c3fb69639fb120c64dc809118e5b7490410390ee47e60b"
-  scripts/check-status-drift.py: "sha256:8fa9ed3e0358131bee5a663c90df8b7d1ba2560cf40efc1e3ad343b5a835a6da"
-  scripts/check.sh: "sha256:6c94d818c7919b28e3c93355263921eaa5511cb52ec4fab71b654aea8f05ff14"
+  scripts/check-status-drift.py: "sha256:9c5f2d4612983c621139e93ddc1bc5059f35bf66e84c9d0fcc915cf16032bc6d"
+  scripts/check-subprocess-encoding.py: "sha256:324a5332fb0a79e5d2f51d73834da64c8e18dbdcd9c79e231da494dcbe1dfb58"
+  scripts/check.sh: "sha256:af4a685f237a38c576a4b9188fbfd111f52cde772a3843d43f0fc5aa6ebd3a68"
   scripts/decide.py: "sha256:554934e1261cf7eef1c937522be3b83b4f5bda20de5f99fd19ca34d005e4d6ca"
-  scripts/id-check.sh: "sha256:62c0efd23c4458906612ff5924836cf26b13c78d25dc598566a455a8ab13b65c"
+  scripts/id-check.sh: "sha256:590179e3f757711f558445ace7c3701d05ede126e8afd7ad295cc2a060cc980e"
   scripts/install-hooks.sh: "sha256:b0ff9b521bc09e1f7d0b2980158a20dc0d1b7739381927526a9c1ce31018f4c1"
   scripts/measure-session-cost.py: "sha256:668e51f8ac0b30e3879193db0741aaa1d6069fe8ed5b62cacc3b1d0b96bdefd1"
   scripts/role-postflight.sh: "sha256:5f2a7e225c8ff3220bcc65bfcda378ebcebd1eca23fbd2d1b17c81f53a377c71"
@@ -28,7 +29,7 @@ files:
   scripts/run-quiet.sh: "sha256:051a959a5fd3fa7b675ce109aa6c2125c318f822a0b5fd1d080de9f67939b8f2"
   scripts/test-check-id.sh: "sha256:111cf6e4902175bf70a6ff8bb7453c839ddff1ce7053ad67f6f031a2c85101c4"
   scripts/test-validate-content.sh: "sha256:684187ac8ba08148a3a77a25e0a862cc27c57baea9a1ff08fc4223ac100ba7ac"
-  scripts/validate-content.py: "sha256:50679345f440ed162175b3c70d81cbddbe4f9a88e30f0d07dd053ca758c59052"
+  scripts/validate-content.py: "sha256:8b47cc826c1e9ac4add7d40a6dc4e4f0ad1f9aeea74a5eb0eeeec74d365d8daa"
   scripts/validate-profile.py: "sha256:5bb4a8c9faaf30300ffa74fa3b678ffb40c875f35e9dd36de0dd7d1fa8bbe7ca"
   .githooks/pre-commit: "sha256:e36e19650fa6d1d891dbe42b88eafd58b610c2b9472eb96acf96df9089c4fd1c"
   .claude/skills/subagent-delegation-brief/SKILL.md: "sha256:4961a60d9ca7199edd2b15995607daf527ef885d84279f6452371b6f65137938"

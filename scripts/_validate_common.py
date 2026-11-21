@@ -640,7 +640,7 @@ def _lesson_carrier_unresolved(carrier, repo_root: Path) -> str | None:
     if root not in _LS_FILES_CACHE:
         try:
             proc = subprocess.run(["git", "-C", root, "ls-files"],
-                                  capture_output=True, text=True, timeout=30)
+                                  capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
             _LS_FILES_CACHE[root] = (frozenset(proc.stdout.splitlines())
                                      if proc.returncode == 0 else None)
         except (OSError, subprocess.SubprocessError):

@@ -189,7 +189,7 @@ def _last_commit_ts(path: Path) -> int | None:
     """
     try:
         r = subprocess.run(["git", "-C", str(path.parent), "log", "-1", "--format=%ct", "--", path.name],
-                           check=True, capture_output=True, text=True)
+                           check=True, capture_output=True, text=True, encoding="utf-8", errors="replace")
     except subprocess.CalledProcessError as e:
         detail = " ".join((e.stderr or "").split()) or f"exit {e.returncode}"
         raise _GitCallFailed(f"вызов git не удался — {detail}") from e
@@ -218,7 +218,7 @@ def _creation_commit(path: Path) -> str | None:
         r = subprocess.run(
             ["git", "-C", str(path.parent), "log", "--diff-filter=A", "--follow",
              "--format=%H", "--", path.name],
-            check=True, capture_output=True, text=True,
+            check=True, capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
     except subprocess.CalledProcessError as e:
         detail = " ".join((e.stderr or "").split()) or f"exit {e.returncode}"
@@ -241,7 +241,7 @@ def _release_commits(content_dir: Path) -> list[str]:
     try:
         r = subprocess.run(
             ["git", "-C", str(content_dir), "log", "--grep", "^release(", "--format=%H"],
-            check=True, capture_output=True, text=True,
+            check=True, capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
     except subprocess.CalledProcessError as e:
         detail = " ".join((e.stderr or "").split()) or f"exit {e.returncode}"

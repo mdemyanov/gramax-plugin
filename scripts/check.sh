@@ -5,9 +5,12 @@
 #   bash scripts/check.sh [--fast | --full | --secret-scan-only | --delivery-composition-only]
 #
 # --fast (default): validate-content.py + validate-profile.py + check-adr-line-limit.py
-#         (ADR-013) + check-test-subject-governs.py (ADR-070; код 1 объявлен мягким —
-#         ADR-072 Д3/Д4) + check-content-actuality.py (ADR-076 Д7; код 1 объявлен мягким по
-#         той же причине — цена ступени +0,14 с, замер спутника ADR-076 §6).
+#         (ADR-013) + check-test-subject-governs.py (ADR-070; код 1 мягкий — ADR-072 Д3/Д4)
+#         + check-content-actuality.py (ADR-076 Д7; код 1 мягкий, замер спутника §6) +
+#         check-subprocess-encoding.py (BA-118, NA-EPIC-150: born-red запрет text=True без
+#         encoding=, AC-002c спеки subprocess-utf8-determinism — быстрый ярус) +
+#         check-network-roster.py (BA-119, NA-EPIC-151: свип сетевого класса, ADR-159 Д2).
+#         Quick gate.
 # --full: + check-backlog-closure.py (ADR-012 Д4) + id-check.sh (ADR-038, решение владельца
 #         Р22; перевод ступени в --fast по ADR-072 Д7 ОСТАНОВЛЕН DEV-111 — см. отчёт задачи:
 #         он расходится с ADR-030 Д6(2), требующим зелёный --fast у потребителя сразу после
@@ -49,7 +52,8 @@ Usage: $0 [--fast | --full | --secret-scan-only | --delivery-composition-only]
 
 Modes:
   --fast (default)  Run validators (validate-content.py + validate-profile.py +
-                    check-adr-line-limit.py). Quick gate. Suitable for pre-commit hook.
+                    check-adr-line-limit.py + check-subprocess-encoding.py). Quick gate.
+                    Suitable for pre-commit hook.
   --full            Run --fast checks + check-backlog-closure.py (ADR-012 Д4 — lives in
                     --full, not --fast) + id-check.sh (ADR-038 identifier registry audit;
                     --full by owner ruling Р22) + self-test harness (test-check-adr-line-
@@ -581,10 +585,49 @@ _finish() {
 # Освобождаются ТОЛЬКО перечисленные коды — амнистия не сплошная (замок:
 # tests/test_dev111_warden_detectors_on_the_path.py::test_run_check_soft_list_is_not_a_
 # blanket_amnesty). Вызов без третьего аргумента ведёт себя ровно как прежде.
+# uv_named_refusal — обёртка именованного отказа uv-драйверов (ADR-159 Д3, SA-162 §4.5;
+# NA-EPIC-151 волна 1, DEV-560). stderr вызова фильтруется по СУЖЕННОЙ сигнатуре
+# офлайн-промаха кэша — общее ядро ОБЕИХ замеренных форм uv 0.12.5: стадия download
+# (замер SA 2026-11-19: «Network connectivity is disabled, but the requested data wasn't
+# found in the cache») и стадия resolve (замер qa198 того же дня: «…was not found in the
+# cache» + «hint: Packages were unavailable because the network was disabled») — ядро:
+# «found in the cache» И «disabled». При совпадении к выводу добавляется строка, называющая
+# рычаг и ADR-159; rc — насквозь (Д3: мягкий rc 3 прибора стоимости не переписывается,
+# прецедент NA-EPIC-131:48). Сигнатура не совпала (дрейф текста uv, чужой отказ) — вывод и
+# rc нетронуты: fail-open по имени, немедленность сохраняет сам uv (~0.1 с); пропажу имени
+# ловит замок qa198 ac4a — это и есть ловец дрейфа сигнатуры. Вызова рычага здесь НЕТ
+# (норма 2 спеки: рычаг невидим из нормы) — имя в диагностике, не вызов (замок ac2a судит
+# строку вызова, не вхождение имени).
+uv_named_refusal() {
+  local rc=0 _errf
+  _errf="$(mktemp "${TMPDIR:-/tmp}/uv-named-refusal.XXXXXX")" || { "$@"; return $?; }
+  "$@" 2>"$_errf" || rc=$?
+  if [[ "$rc" -ne 0 ]] \
+     && grep -q 'found in the cache' "$_errf" 2>/dev/null \
+     && grep -q 'disabled' "$_errf" 2>/dev/null; then
+    # Форма сообщения: рычаг назван путём, без глагола-раннера — строка-сообщение не есть
+    # вызов (ac2a судит строку вызова), а сторона ростера-объявлений не должна увидеть
+    # фантомное имя вызова (стороб roster-declaration читает исполняемые строки).
+    echo "  [offline UV_OFFLINE=1] промах локального кэша uv: прогрей кэш явным рычагом" >&2
+    echo "  «scripts/fixtures-update.sh» — единственный сетевой рычаг сьюты; вызов руками," >&2
+    echo "  форма в блоке «Test run.» AGENTS.md (ADR-159 Д2/Д3; сигнатура uv 0.12.5," >&2
+    echo "  замер 2026-11-19); отказ немедленный, rc передан насквозь." >&2
+  fi
+  cat "$_errf" >&2 2>/dev/null
+  rm -f "$_errf"
+  return "$rc"
+}
+
 run_check() {
   local name="$1" cmd="$2" soft="${3:-}" rc=0
   echo "▶ $name"
-  eval "$cmd" || rc=$?
+  # uv-вызовы идут через обёртку именованного отказа (ADR-159 Д3, SA-162 §4.5): имя рычага
+  # добавляется к офлайн-промаху кэша, rc насквозь; вердиктные литералы ниже не меняются.
+  if [[ "$cmd" == *"uv run"* ]]; then
+    eval "${cmd/"uv run"/uv_named_refusal uv run}" || rc=$?
+  else
+    eval "$cmd" || rc=$?
+  fi
   if [[ "$rc" -eq 0 ]]; then
     echo "  ✓ $name"
   elif [[ -n "$soft" && " $soft " == *" $rc "* ]]; then
@@ -694,7 +737,7 @@ _run_if_declared() {
     elif _in_newline_list "$rel" "$SKIPPED_FILES"; then
       echo "[INFO] $rel назван в skip: базиса — доставка сюда отключена, файл писала не nauta; исполнение санкционировано, провенанс назван (ADR-080 Д4)."
     fi
-    # Окно collect (ADR-123-spec §2, Д1/Д2): в --fast присутствующий гейт шести хвостовых
+    # Окно collect (ADR-123-spec §2, Д1/Д2): в --fast присутствующий гейт хвостовых
     # вызовов собирается в PY_BATCH парой `имя:мягкие` и исполняется run_py_batch ОДНИМ
     # стартом интерпретатора; журнальную строку ступени тогда пишет драйвер батча (исход
     # ok/soft/fail по rc и мягкому списку данного вызова) — здесь строка не пишется, иначе
@@ -824,7 +867,7 @@ run_gate_sh_if_declared() {
 }
 
 # ---------------------------------------------------------------------------
-# run_py_batch (ADR-123 Д1–Д3, NA-EPIC-72) — ОДИН старт интерпретатора на шесть хвостовых
+# run_py_batch (ADR-123 Д1–Д3, NA-EPIC-72) — ОДИН старт интерпретатора на хвостовую группу
 # py-гейтов --fast. Форма — heredoc-драйвер `uv run -` В ТЕЛЕ check.sh (прецедент —
 # infra-identifiers/link-integrity: ступени, обязанные работать у потребителя и на стенде
 # QA-081 из одного check.sh, не выносятся в файл — ADR-083/issue #24, ADR-103: поставка
@@ -853,7 +896,7 @@ run_py_batch() {
     if [[ "$_batch_soft" == "$_batch_arg" ]]; then _batch_soft=""; fi
     set -- "$@" "$_batch_name" "$_batch_soft"
   done <<< "$PY_BATCH"
-  BATCH_DRIVER_OUT="$(PYTHONUNBUFFERED=1 uv run - "$REPO_ROOT" "$CHECK_JOURNAL" "$@" <<'PYEOF'
+  BATCH_DRIVER_OUT="$(uv_named_refusal env PYTHONUNBUFFERED=1 uv run - "$REPO_ROOT" "$CHECK_JOURNAL" "$@" <<'PYEOF'
 # /// script
 # dependencies = ["pyyaml"]
 # ///
@@ -1173,7 +1216,7 @@ run_infra_identifiers_gate() {
   grep -qE '^infraIdentifiers:[ \t]*(#.*)?$' "$gates" || { _journal "infra-identifiers" skip 0 "$(( SECONDS - _ii_t0 ))" s; return 0; }
 
   local rc=0
-  PYTHONUNBUFFERED=1 uv run - "$REPO_ROOT" "$gates" <<'PYEOF' || rc=$?
+  uv_named_refusal env PYTHONUNBUFFERED=1 uv run - "$REPO_ROOT" "$gates" <<'PYEOF' || rc=$?
 # /// script
 # dependencies = ["pyyaml"]
 # ///
@@ -1270,7 +1313,7 @@ if not enabled:
 
 probe = subprocess.run(
     ["git", "-C", str(REPO_ROOT), "rev-parse", "--is-inside-work-tree"],
-    capture_output=True, text=True,
+    capture_output=True, text=True, encoding="utf-8", errors="replace",
 )
 if probe.returncode != 0:
     print(f"  OK: не git-репозиторий — предмета проверки нет (структурно, симметрично "
@@ -1326,7 +1369,7 @@ def _ip_hits(line: str):
 
 def _git_ls(*args: str) -> list[str]:
     r = subprocess.run(
-        ["git", "-C", str(REPO_ROOT), "ls-files", *args], capture_output=True, text=True,
+        ["git", "-C", str(REPO_ROOT), "ls-files", *args], capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
     return [ln for ln in r.stdout.split("\n") if ln]
 
@@ -1722,7 +1765,7 @@ run_link_integrity_delivery_gate() {
   # ERROR (stderr, небуферизован) обгоняют заголовок "▶ …" (stdout) в объединённом выводе —
   # секция читается тестами по ПЕРВОЙ строке с литералом, порядок должен быть детерминирован.
   local rc=0
-  PYTHONUNBUFFERED=1 uv run - "$REPO_ROOT" "$DELIVERY_CARRIER_NAME" "$LINK_INTEGRITY_SECTION" <<'PYEOF' || rc=$?
+  uv_named_refusal env PYTHONUNBUFFERED=1 uv run - "$REPO_ROOT" "$DELIVERY_CARRIER_NAME" "$LINK_INTEGRITY_SECTION" <<'PYEOF' || rc=$?
 # /// script
 # dependencies = ["pyyaml"]
 # ///
@@ -1794,7 +1837,7 @@ _EXTERNAL_RE = re.compile(r'^(?:[a-z][a-z0-9+.\-]*:|//)', re.IGNORECASE)
 
 def ls_files(repo_root: Path) -> list[str]:
     proc = subprocess.run(["git", "-C", str(repo_root), "ls-files"],
-                           capture_output=True, text=True, timeout=60)
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
     if proc.returncode != 0:
         return []
     return [l for l in proc.stdout.splitlines() if l]
@@ -1896,7 +1939,7 @@ def main() -> int:
     # (ADR-007 Д1), форма — как у delivery-composition (сравнение через realpath, не строки:
     # macOS расходится на /var против /private/var).
     git_top_proc = subprocess.run(["git", "-C", str(REPO_ROOT), "rev-parse", "--show-toplevel"],
-                                   capture_output=True, text=True, timeout=30)
+                                   capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
     git_top = git_top_proc.stdout.strip()
     same_tree = False
     if git_top:
@@ -2282,7 +2325,7 @@ run_payload_callers_gate
 _journal_okfail "payload-callers" "$_pc_t0" "$_pc_f0" 0
 
 # Окно collect (ADR-123-spec §2): открыт здесь и только в --fast, закрыт flush'ем ниже.
-# Внутри окна _run_if_declared собирает присутствующие гейты шести хвостовых вызовов в
+# Внутри окна _run_if_declared собирает присутствующие гейты хвостовых вызовов в
 # PY_BATCH вместо немедленного исполнения; ранее окна (check-branch-discipline) и в --full
 # гейты идут немедленно, как прежде (Д7). Пустому батчу окна не мешают: дерево-потребитель
 # получает свои исходы ADR-037 немедленно, PY_BATCH остаётся пустым, run_py_batch выходит
@@ -2389,9 +2432,41 @@ run_gate_if_declared "check-content-actuality" "1"
 # NOT-DELIVERED: check-prompt-layer-cyrillic — предмет — репозиторий nauta
 run_gate_if_declared "check-prompt-layer-cyrillic"
 
-# --- ADR-123 Д1/Д2 (NA-EPIC-72) — батч шести хвостовых py-гейтов и его flush -------------
-# Вызов сразу за последним из шести (spec §2, якорь ADR-123-spec: check.sh:2000 на дате
-# решения). Конверт `step py-batch starts 1 wall_ms <Σ>` и погейтные строки журнала пишет
+# check-subprocess-encoding (BA-118, NA-EPIC-150 срез 1, gitsd issue #1). Предмет — места
+# вызова subprocess в текстовом режиме (`text=True`) без явного `encoding=` в scripts/ и
+# hooks/ ЭТОГО дерева: без encoding= вывод ребёнка декодируется ANSI-страницей платформы
+# (cp1251 на Windows), кириллический UTF-8 байт роняет reader-thread, stdout становится
+# None — класс невидим на POSIX, поэтому запрет — гейт, не ревью. Гранулярность — место
+# вызова (AST): многострочный вызов с encoding= на соседней строке и упоминание литерала
+# в комментарии — не находки (FR-3); маркеры-подавители и реестры исключений находку не
+# глушат, hooks/ под тем же правилом (FR-4). Находка — строка `file:line`; чистый прогон
+# печатает именованный нулевой счётчик (норма спеки «reported count»).
+# Ступень --fast — норма спеки AC-002c (перенос в --full-only — нарушение нормы); входит
+# в окно collect ADR-123 седьмым хвостовым вызовом, батч держит пин стартов --fast == 3.
+# Доставляется потребителю (класс A ADR-085 Д1: предмет — его же scripts/ и hooks/;
+# «детектор обязан работать на потребительском дереве» — BA-118), объявления невхождения
+# норма не допускает.
+run_gate_if_declared "check-subprocess-encoding"
+
+# check-network-roster (ADR-159 Д2, SA-162 §4.4, NA-EPIC-151 волна 1, DEV-560). Предмет —
+# сетевой класс сьюты: каждый хит детекторов (исполняемые спавны uv/uvx/pip, инсталляции
+# пакетов, живые fetch-вызовы, транзитные спавны scripts/check.sh) в tests/ и на верхнем
+# уровне scripts/ разрешается строкой tests/_suite-network-roster.yaml или приложением
+# beyond_suite; origin-конструкция команды прогона сьюты (`uv run … tests/`) без
+# «UV_OFFLINE=1 » — именованный дефект нормы прогона (AC-001c); неразрешённый хит —
+# именованная находка (AC-003b), молчаливое поглощение запрещено. Текстовый свип дёшев
+# (чистый stdlib, один AST-проход по файлу) — ступень --fast, окно collect ADR-123
+# (восьмой хвостовой вызов, конверт py-batch starts 1 и пин стартов не двигает). Семантика
+# отсутствующего ростера — именованный skip (ADR-007 Д1: «нечего проверять» ≠ «не смог»):
+# деревья-потребители и пробные раскладки qa197/qa198 реестра не несут, их --fast остаётся
+# зелёным с INFO-строкой (at-design BA-119, «Допущения верхних ролей» №2). Ростер живёт
+# только в репозитории nauta — у потребителя предмета нет.
+# NOT-DELIVERED: check-network-roster — предмет — репозиторий nauta
+run_gate_if_declared "check-network-roster"
+
+# --- ADR-123 Д1/Д2 (NA-EPIC-72) — батч хвостовых py-гейтов и его flush -------------------
+# Вызов сразу за последним из хвостовых (spec §2, якорь ADR-123-spec: check.sh:2000 на дате
+# решения; состав хвостовых — семь с BA-118, см. check-subprocess-encoding выше). Конверт `step py-batch starts 1 wall_ms <Σ>` и погейтные строки журнала пишет
 # сам драйвер; вердикты по каждому собранному гейту печатает bash ниже — по паре (имя, rc)
 # из машинных строк драйвера и мягкому списку ДАННОГО вызова, литералы равны литералам
 # run_check (дрейф-замок). Машинные строки BATCH_RSLT в stdout прогона не попадают:
@@ -3077,7 +3152,7 @@ fi
 # NOT-DELIVERED: full-run-record — предмет — репозиторий nauta
 if [[ "$MODE" == "--full" && "$failed" -eq 0 ]]; then
   if [[ -f scripts/full-run-record.py ]]; then
-    uv run scripts/full-run-record.py --record || true
+    uv_named_refusal uv run scripts/full-run-record.py --record || true
   else
     echo "[INFO] full-run-record: $(_not_delivered_label full-run-record) — запись зелёного --full не выполнена"
   fi

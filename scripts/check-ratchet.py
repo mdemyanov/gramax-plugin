@@ -103,7 +103,7 @@ class Report:
 
 def _git(cwd: Path, *args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", *args], cwd=str(cwd), capture_output=True,
-                          text=True, timeout=120)
+                          text=True, encoding="utf-8", errors="replace", timeout=120)
 
 
 def git_root(cwd: Path) -> Path | None:
@@ -435,7 +435,7 @@ def check_open_wave(doc: dict, blocks: list[dict], closing: str | None, rep: Rep
         return
     try:
         out = subprocess.run(["bd", "list", "--status", "open"], capture_output=True,
-                             text=True, timeout=120)
+                             text=True, encoding="utf-8", errors="replace", timeout=120)
     except (OSError, subprocess.SubprocessError):
         rep.fail(RC_CANNOT, "  ✗ bd не ответил — состояние контура И НЕ прочитано")
         return
@@ -577,7 +577,7 @@ def check_changelog_upgrade_cost_section(changelog: Path, release: str | None,
     fleet_census = Path(__file__).resolve().parent / "fleet-census.sh"
     try:
         proc = subprocess.run(["bash", str(fleet_census), census_root],
-                               capture_output=True, text=True, timeout=120)
+                               capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
     except OSError as exc:
         print(f"ОШИБКА: не смог запустить {fleet_census}: {exc}", file=sys.stderr)
         return RC_USAGE

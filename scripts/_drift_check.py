@@ -253,7 +253,7 @@ def parse_bypass_from_commits(repo_path: str = ".", base_ref: str = "public") ->
             ["git", "log", f"{base_ref}..HEAD", "--format=%B", "--"],
             cwd=repo_path,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8", errors="replace",
             timeout=30,
         )
         if result.returncode != 0:
