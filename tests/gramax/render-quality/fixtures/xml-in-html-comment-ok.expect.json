@@ -1,0 +1,10 @@
+{
+  "tableRow": "ERROR-7",
+  "twinOf": "xml-in-html-comment",
+  "abRole": "after",
+  "expect": {
+    "tier0": "ok",
+    "tier1": "any",
+    "asserts": []
+  }
+}

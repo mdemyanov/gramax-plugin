@@ -1,0 +1,10 @@
+{
+  "tableRow": "ERROR-6",
+  "twinOf": "colgroup-multiline",
+  "abRole": "after",
+  "expect": {
+    "tier0": "ok",
+    "tier1": "any",
+    "asserts": []
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "tableRow": "ERROR-3",
+  "twinOf": "invalid-utf8",
+  "abRole": "after",
+  "expect": {
+    "tier0": "ok",
+    "tier1": "any",
+    "asserts": []
+  }
+}

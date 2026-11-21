@@ -1,0 +1,10 @@
+{
+  "tableRow": "ERROR-8",
+  "twinOf": "tag-fragment-tail",
+  "abRole": "after",
+  "expect": {
+    "tier0": "ok",
+    "tier1": "any",
+    "asserts": []
+  }
+}
