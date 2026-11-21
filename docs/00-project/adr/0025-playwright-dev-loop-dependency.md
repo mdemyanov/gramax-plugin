@@ -1,21 +1,23 @@
 ---
 title: "ADR-0025: Playwright в dev-контуре — питон-биндинг через uv без npm-поверхности, браузер вне репо, сетевой шаг в --full"
 order: 25
-status: draft
+status: accepted
 date: 2026-11-21
 plugin: gramax
 properties:
   - name: Тип контента
     value: [ADR]
   - name: Статус
-    value: [Draft]
+    value: [Accepted]
   - name: Плагин
     value: [gramax]
 ---
 
 # ADR-0025: Playwright в dev-контуре — питон-биндинг через uv без npm-поверхности, браузер вне репо, сетевой шаг в --full
 
-**Status:** Draft (SA-авторство 2026-11-21; ратификация PM — на ревью эпика)
+**Status:** Accepted — ратифицировано владельцем 2026-11-21 в сессии ведения эпика (решение
+подтверждено реализацией: каркас `36b9863`, `--full` зелёный end-to-end, лестница отказов
+проверена вживую; валидация — [запись приёмки](../../60-implementation/acceptance/2026-11-21-playwright-render-quality-at-acceptance.md))
 **Date:** 2026-11-21
 **Plugin:** gramax
 

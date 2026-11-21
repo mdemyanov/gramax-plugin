@@ -39,7 +39,7 @@ order: 1
 | [0022](0022-export-skill-placement.md) | Навык export — шестой публичный скилл плагина gramax: плейсмент, релизная поверхность, контракт границы | Accepted | 2026-11-18 | gramax / marketplace |
 | [0023](0023-plantuml-bpmn-skill.md) | Навык plantuml — PlantUML/BPMN-авторство как новый публичный скилл: плейсмент, релизная поверхность, граница рендера | Accepted | 2026-11-18 | gramax / marketplace |
 | [0024](0024-validators-error-check-parity.md) | Паритет офлайн-валидаторов с модулем «Проверка на ошибки» — коды находок, строгость, контракт-паритет W034 | Accepted | 2026-11-18 | gramax / marketplace |
-| [0025](0025-playwright-dev-loop-dependency.md) | Playwright в dev-контуре — питон-биндинг через uv без npm-поверхности, браузер вне репо, первый сетевой шаг `--full` | Proposed (ратификация — pm-review эпика) | 2026-11-21 | gramax / marketplace |
+| [0025](0025-playwright-dev-loop-dependency.md) | Playwright в dev-контуре — питон-биндинг через uv без npm-поверхности, браузер вне репо, первый сетевой шаг `--full` | Accepted | 2026-11-21 | gramax / marketplace |
 
 ## Связи между ADR
 
