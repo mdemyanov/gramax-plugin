@@ -3,9 +3,10 @@
 validate_render.py — линтер рендер-киллеров Gramax.
 
 Обнаруживает конструкции markdown, которые роняют рендерер GES (HTTP 500) или ломают
-вёрстку: `<th>`, инлайновый `<note>…</note>`, `<note>` внутри `<td>`/`<th>`, `<note>`
-вложенный в `<note>`, несколько `![](…)` в одной строке, несбалансированные парные
-теги. Стиль/YAML-проблемы (H1 в теле, frontmatter `title:` без кавычек) — WARN.
+вёрстку: `<th>`, инлайновый `<note>…</note>`, многострочный `<colgroup>`, несколько
+`![](…)` в одной строке, несбалансированные парные теги. Стиль/YAML-проблемы (H1 в
+теле, frontmatter `title:` без кавычек, `<note>` внутри `<td>`/`<th>`, `<note>`
+вложенный в `<note>`) — WARN.
 
 Порт правил `validate-gramax.py` плагина `gramax-skills` — © Всеволод Шадрин, MIT.
 Полный текст MIT-лицензии, provenance и список изменений относительно upstream —
@@ -93,7 +94,9 @@ def check(path: Path, rules: dict) -> tuple[list, list]:
         for tag in balance_tags
     }
 
-    # --- контекстный проход: note-in-cell, note-in-note, инлайновый note (FR-105..107) ---
+    # --- контекстный проход: инлайновый note → ERROR (FR-105/107); note-in-cell и
+    # note-in-note → WARN с 2026-11-21 (калибровка по факту рендера, FR-196:
+    # docs/60-implementation/acceptance/2026-11-21-render-calibration-validate-render.md) ---
     stack: list[str] = []  # 'note' | 'td'
     for i, line in enumerate(masked_lines, 1):
         s = line.strip()
@@ -103,11 +106,11 @@ def check(path: Path, rules: dict) -> tuple[list, list]:
                  "(<note …> ⏎ пустая ⏎ текст ⏎ пустая ⏎ </note>)")
         if re.match(r"^<note\b[^>]*>$", s):
             if "td" in stack:
-                E(i, "<note> внутри ячейки <td>/<th> → сбой рендера. "
-                     "Вынесите в инлайн: **Заголовок.** текст")
+                W(i, "<note> внутри ячейки <td>/<th> — ширины колонок плывут, читается "
+                     "плохо. Вынесите в инлайн: **Заголовок.** текст")
             if "note" in stack:
-                E(i, "<note> вложен в другой <note> → сбой рендера. "
-                     "Разверните во внешнюю заметку (**Заголовок:** + содержимое)")
+                W(i, "<note> вложен в <note> — вложенные заметки схлопываются. "
+                     "Разверните во внешнюю заметку")
             stack.append("note")
         elif s == "</note>":
             for k in range(len(stack) - 1, -1, -1):
@@ -122,10 +125,18 @@ def check(path: Path, rules: dict) -> tuple[list, list]:
                     del stack[k]
                     break
 
-    # --- построчные проверки (FR-104, FR-108, FR-111) ---
+    # --- построчные проверки (FR-104, FR-108, FR-111; многострочный colgroup —
+    # калибровка 2026-11-21, FR-196, см. запись замера по пути из шапки контекстного
+    # прохода) ---
     th_killer_fired = False
     for i, line in enumerate(masked_lines, 1):
         s = line.strip()
+        # многострочный <colgroup>: открывающий тег занимает строку целиком —
+        # подтверждённый киллер («500 до правки, 200 после», калибровка FR-196;
+        # механика апстрима validate-gramax.py:154-156). Однострочная форма легальна —
+        # allowlist colgroup/col в gramax-render-rules.json не меняется.
+        if re.match(r"^<colgroup>$", s):
+            E(i, "Многострочный <colgroup> → HTTP 500. Схлопните в одну строку")
         # <th> — киллер (FR-104); поглощает баланс th в этом файле (ADR-0019 Решение 3)
         if re.search(r"</?th\b", s):
             th_killer_fired = True

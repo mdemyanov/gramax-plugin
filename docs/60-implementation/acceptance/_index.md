@@ -23,3 +23,4 @@ ADR-0021); ниже — design-документы живых suite (at-design).
 - [Приёмка (BA-acceptance): writer 4.8.0 — хвост writer-sync: служебная синтаксика, негативный перечень, HTML-компонент, frontmatter-поля](2026-11-19-writer-tail-480-at-design.md) — accept, 7/7 AC
 - [AT-design: Прибор рендер-проб Playwright и калибровка validate_render — красные стабы сюиты render-quality](2026-11-21-playwright-render-quality-at-design.md)
 - [Приёмка (BA-acceptance): прибор рендер-проб Playwright и калибровка validate_render — accept-with-pending (AC-115/116 ждут замер на реальной цели)](2026-11-21-playwright-render-quality-at-acceptance.md)
+- [Запись замера калибровки validate_render против факта рендера (FR-196) — эпик Playwright render probes](2026-11-21-render-calibration-validate-render.md)
