@@ -24,3 +24,4 @@ ADR-0021); ниже — design-документы живых suite (at-design).
 - [AT-design: Прибор рендер-проб Playwright и калибровка validate_render — красные стабы сюиты render-quality](2026-11-21-playwright-render-quality-at-design.md)
 - [Приёмка (BA-acceptance): прибор рендер-проб Playwright и калибровка validate_render — accept (14 PASS / 0 FAIL; pending-набор закрыт записью замера)](2026-11-21-playwright-render-quality-at-acceptance.md)
 - [Запись замера калибровки validate_render против факта рендера (FR-196) — эпик Playwright render probes](2026-11-21-render-calibration-validate-render.md)
+- [AT-design: Волна-2 калибровки render-quality — боевой режим на живой цели: стабы сюиты render-quality (AC-120…AC-128)](2026-11-21-render-quality-wave2-at-design.md)

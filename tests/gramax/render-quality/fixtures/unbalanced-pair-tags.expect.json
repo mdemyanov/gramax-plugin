@@ -2,7 +2,9 @@
   "tableRow": "ERROR-5",
   "expect": {
     "tier0": "kill",
-    "tier1": "any",
-    "asserts": []
+    "tier1": "pass",
+    "asserts": [
+      {"name": "tail-paragraph", "selector": "text=Абзац после конструкции", "count": 1}
+    ]
   }
 }

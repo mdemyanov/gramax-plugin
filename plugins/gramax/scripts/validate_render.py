@@ -8,6 +8,11 @@ validate_render.py — линтер рендер-киллеров Gramax.
 теле, frontmatter `title:` без кавычек, `<note>` внутри `<td>`/`<th>`, `<note>`
 вложенный в `<note>`) — WARN.
 
+Запись killerTags контракта может нести необязательный атрибут `"severity": "warn"`
+(дизайн волны-2, Решение 4): такой киллер даёт WARN вместо ERROR и не подавляет
+проверку баланса своего тега; отсутствие атрибута — дефолт «error», поведение
+неизменное. Судьба вердикта меняется только замером против факта рендера (BR-021).
+
 Порт правил `validate-gramax.py` плагина `gramax-skills` — © Всеволод Шадрин, MIT.
 Полный текст MIT-лицензии, provenance и список изменений относительно upstream —
 `LICENSE.upstream.md` рядом со скриптом (ADR-0019, Решение 7, NFR-006).
@@ -85,6 +90,16 @@ def check(path: Path, rules: dict) -> tuple[list, list]:
         for item in rules.get("killerTags", [])
         if isinstance(item, dict) and item.get("tag")
     }
+    # Селективная severity киллера (дизайн волны-2, Решение 4): необязательный атрибут
+    # "severity": "warn" у записи killerTags переводит этот киллер в W(); отсутствие
+    # атрибута — дефолт "error", поведение байт-в-байт прежнее. Поглощение th-баланса
+    # сохраняется только за ERROR-киллером — warn баланс th не подавляет (NFR-083).
+    killer_severity: dict[str, str] = {
+        item.get("tag"): str(item.get("severity") or "error")
+        for item in rules.get("killerTags", [])
+        if isinstance(item, dict) and item.get("tag")
+    }
+    th_severity = killer_severity.get("th", "error")
     balance_tags: list[str] = rules.get("balanceTags", []) or []
     balance_res = {
         tag: (
@@ -128,7 +143,7 @@ def check(path: Path, rules: dict) -> tuple[list, list]:
     # --- построчные проверки (FR-104, FR-108, FR-111; многострочный colgroup —
     # калибровка 2026-11-21, FR-196, см. запись замера по пути из шапки контекстного
     # прохода) ---
-    th_killer_fired = False
+    th_error_killer_fired = False
     for i, line in enumerate(masked_lines, 1):
         s = line.strip()
         # многострочный <colgroup>: открывающий тег занимает строку целиком —
@@ -137,14 +152,25 @@ def check(path: Path, rules: dict) -> tuple[list, list]:
         # allowlist colgroup/col в gramax-render-rules.json не меняется.
         if re.match(r"^<colgroup>$", s):
             E(i, "Многострочный <colgroup> → HTTP 500. Схлопните в одну строку")
-        # <th> — киллер (FR-104); поглощает баланс th в этом файле (ADR-0019 Решение 3)
+        # <th> — киллер (FR-104); ERROR-киллер поглощает баланс th в этом файле
+        # (ADR-0019 Решение 3); warn-киллер (severity="warn" в контракте) баланс
+        # th не подавляет (дизайн волны-2, Решение 4; NFR-083)
         if re.search(r"</?th\b", s):
-            th_killer_fired = True
             hint = killer_hint.get("th", "")
-            msg = "Тег <th> не поддерживается Gramax → HTTP 500."
-            if hint:
-                msg += f" {hint}"
-            E(i, msg)
+            if th_severity == "warn":
+                # WARN-семантика (рекомендация, не констатация сбоя рендера): текст
+                # несёт сообщение записи контракта (подсказка замены живёт там же),
+                # фолбэк — на случай записи без message (дизайн волны-2, Решение 4;
+                # точную формулировку фиксирует цикл понижения)
+                msg = hint or ("Тег <th> — потенциальный киллер апстрима, "
+                               "не подтверждённый на этой цели.")
+                W(i, msg)
+            else:
+                th_error_killer_fired = True
+                msg = "Тег <th> не поддерживается Gramax → HTTP 500."
+                if hint:
+                    msg += f" {hint}"
+                E(i, msg)
         # несколько картинок в одной строке (FR-108)
         if s.count("![](") > 1:
             E(i, "Несколько ![](…) в одной строке не рендерятся. "
@@ -154,9 +180,9 @@ def check(path: Path, rules: dict) -> tuple[list, list]:
             W(i, "H1 (# …) в теле: заголовок страницы берётся из frontmatter title. "
                 "Используйте ## и ниже")
 
-    # --- баланс парных тегов (FR-109); th-баланс подавляется, если киллер уже зафлагован ---
+    # --- баланс парных тегов (FR-109); th-баланс подавляется только ERROR-киллером ---
     for tag, (open_re, close_re) in balance_res.items():
-        if tag == "th" and th_killer_fired:
+        if tag == "th" and th_error_killer_fired:
             continue
         opens = closes = 0
         first_bad = 0
