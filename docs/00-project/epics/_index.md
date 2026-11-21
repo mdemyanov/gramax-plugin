@@ -11,3 +11,4 @@ date: 2026-11-18
 (норма epic-genesis-interview плагина nauta).
 
 - [Дерево решений генезиса: хвосты 4.7.0 → 4.8.0](2026-11-18-tails-480-genesis-tree.md)
+- [Дерево решений генезиса: Playwright в пайплайне разработки — пробы рендера и калибровка validate_render](2026-11-21-playwright-render-quality-genesis-tree.md)
