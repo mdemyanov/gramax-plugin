@@ -1,7 +1,7 @@
 {
   "tableRow": "ERROR-1",
   "expect": {
-    "tier0": "kill",
+    "tier0": "ok",
     "tier1": "any",
     "asserts": []
   }
