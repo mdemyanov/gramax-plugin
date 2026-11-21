@@ -17,3 +17,4 @@ order: 4
 - [writer 4.7.0 — массовая синхронизация с движком 48592b36: решения Q1–Q6, план правок по кластерам, контракт тегов](2026-11-18-writer-sync-design.md) — FR-161…FR-182
 - [writer 4.8.0 — хвост writer-sync: служебная синтаксика, негативный перечень, HTML-компонент, frontmatter-поля](2026-11-18-writer-tail-480-design.md) — FR-183…FR-186, BR-019/BR-020
 - [Прибор рендер-проб Playwright и калибровка validate_render — конфиг цели, именованные отказы, harness tier-0/1/2, интеграция --full, протокол замера](2026-11-21-playwright-render-quality-design.md) — FR-187…FR-198, ADR-0025
+- [Волна-2 калибровки render-quality: боевой режим на живой цели — живая форма pageUrlTemplate, жизненный цикл пробных страниц, tier-1 на живой цели, механика судьбы th-вердикта](2026-11-21-render-quality-wave2-design.md) — FR-199…FR-207

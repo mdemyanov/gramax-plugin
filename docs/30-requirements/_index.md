@@ -26,3 +26,4 @@ order: 3
 - [writer 4.7.0 — массовая синхронизация скилла с окном движка 48592b36 и документацией gram.ax](2026-11-18-writer-sync-470-requirement.md) — FR-161…FR-182
 - [writer 4.8.0 — хвосты волны 4.7.0 (открытые вопросы writer-sync и исключения RES-007 §3)](2026-11-18-writer-tail-480-requirement.md) — FR-183…FR-186
 - [Прибор рендер-проб Playwright и калибровка validate_render](2026-11-21-playwright-render-quality-requirement.md) — FR-187…FR-198
+- [Волна-2 калибровки render-quality: боевой режим прибора на живой цели](2026-11-21-render-quality-wave2-requirements.md) — FR-199…FR-207
