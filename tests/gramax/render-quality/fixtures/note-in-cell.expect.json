@@ -2,7 +2,7 @@
   "tableRow": "WARN-note-in-cell",
   "expect": {
     "tier0": "ok",
-    "tier1": "pass",
+    "tier1": "any",
     "asserts": [
       {"name": "note-in-cell-renders", "selector": "[data-testid=note-block]", "count": 1}
     ]

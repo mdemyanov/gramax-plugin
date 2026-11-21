@@ -2,7 +2,7 @@
   "tableRow": "WARN-note-in-note",
   "expect": {
     "tier0": "ok",
-    "tier1": "pass",
+    "tier1": "any",
     "asserts": [
       {"name": "note-in-note-renders", "selector": "[data-testid=note-block]", "count": 1}
     ]

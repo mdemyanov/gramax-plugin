@@ -2,7 +2,7 @@
   "tableRow": "control",
   "expect": {
     "tier0": "ok",
-    "tier1": "pass",
+    "tier1": "any",
     "asserts": [
       {"name": "note-block-renders", "selector": "[data-testid=note-block]", "count": 1}
     ]

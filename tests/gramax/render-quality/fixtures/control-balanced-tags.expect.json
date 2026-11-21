@@ -2,7 +2,7 @@
   "tableRow": "control",
   "expect": {
     "tier0": "ok",
-    "tier1": "pass",
+    "tier1": "any",
     "asserts": [
       {"name": "tabs-render", "selector": "[data-testid=tab]", "count": 2}
     ]

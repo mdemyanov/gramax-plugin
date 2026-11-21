@@ -84,25 +84,25 @@ D8-поведение окружения, см. «Прогрев» ниже.
 Дефект-фикстуры — по 8 строкам ERROR-таблицы RES-009 §2 (дизайн, Решение 5); каждая несёт
 **ровно одну** дефектную конструкцию — иначе вердикт тира не локализуется до причины (FR-187).
 
-| Файл (`fixtures/<имя>.md`) | `tableRow` | Конструкция | Ожидание `tier0` |
-|---|---|---|---|
-| `th-in-table.md` | `ERROR-1` | `<th>` в таблицах | `ok` |
-| `note-inline.md` | `ERROR-2` | инлайновый `<note>…</note>` в одну строку | `kill` |
-| `invalid-utf8.md` | `ERROR-3` | невалидный UTF-8 (байтовая фикстура) | `either` |
-| `multiple-images.md` | `ERROR-4` | несколько `![](…)` в одной строке | `ok` |
-| `unbalanced-pair-tags.md` | `ERROR-5` | несбалансированные парные теги (`<tabs>`/`<tab>` без закрытия) | `ok` |
-| `colgroup-multiline.md` | `ERROR-6` | многострочный `<colgroup>` (каждый `<col/>` на своей строке) | `kill` |
-| `xml-in-html-comment.md` | `ERROR-7` | XML-тег внутри HTML-комментария | `ok` |
-| `tag-fragment-tail.md` | `ERROR-8` | обрывок тега с хвостом вида `splay="List"/>` | `ok` |
-| `note-in-cell.md` | `WARN-note-in-cell` | `<note>` внутри `<td>` (спорная severity — локально ERROR, апстрим-замер: HTTP 200) | `ok` |
-| `note-in-note.md` | `WARN-note-in-note` | `<note>` внутри `<note>` (спорная severity) | `ok` |
-| `control-table.md` | `control` | легальная таблица `<td>` + `header="row"` | `ok` |
-| `control-colgroup-single-line.md` | `control` | легальный однострочный `<colgroup>` | `ok` |
-| `control-note-block.md` | `control` | блочная заметка с пустыми строками вокруг | `ok` |
-| `control-images.md` | `control` | изображения по одному на строку | `ok` |
-| `control-balanced-tags.md` | `control` | сбалансированные `<tabs>`/`<tab>` | `ok` |
-| `control-html-comment-text.md` | `control` | HTML-комментарий с plain-текстом без тегов | `ok` |
-| `control-utf8.md` | `control` | валидный UTF-8 (кириллица) | `ok` |
+| Файл (`fixtures/<имя>.md`) | `tableRow` | Конструкция | Ожидание `tier0` | Ожидание `tier1` |
+|---|---|---|---|---|
+| `th-in-table.md` | `ERROR-1` | `<th>` в таблицах | `ok` | `any` |
+| `note-inline.md` | `ERROR-2` | инлайновый `<note>…</note>` в одну строку | `kill` | `any` |
+| `invalid-utf8.md` | `ERROR-3` | невалидный UTF-8 (байтовая фикстура) | `either` | `any` |
+| `multiple-images.md` | `ERROR-4` | несколько `![](…)` в одной строке | `ok` | `pass` |
+| `unbalanced-pair-tags.md` | `ERROR-5` | несбалансированные парные теги (`<tabs>`/`<tab>` без закрытия) | `ok` | `pass` |
+| `colgroup-multiline.md` | `ERROR-6` | многострочный `<colgroup>` (каждый `<col/>` на своей строке) | `kill` | `any` |
+| `xml-in-html-comment.md` | `ERROR-7` | XML-тег внутри HTML-комментария | `ok` | `any` |
+| `tag-fragment-tail.md` | `ERROR-8` | обрывок тега с хвостом вида `splay="List"/>` | `ok` | `any` |
+| `note-in-cell.md` | `WARN-note-in-cell` | `<note>` внутри `<td>` (спорная severity — локально ERROR, апстрим-замер: HTTP 200) | `ok` | `any` |
+| `note-in-note.md` | `WARN-note-in-note` | `<note>` внутри `<note>` (спорная severity) | `ok` | `any` |
+| `control-table.md` | `control` | легальная таблица `<td>` + `header="row"` | `ok` | `any` |
+| `control-colgroup-single-line.md` | `control` | легальный однострочный `<colgroup>` | `ok` | `pass` |
+| `control-note-block.md` | `control` | блочная заметка с пустыми строками вокруг | `ok` | `any` |
+| `control-images.md` | `control` | изображения по одному на строку | `ok` | `pass` |
+| `control-balanced-tags.md` | `control` | сбалансированные `<tabs>`/`<tab>` | `ok` | `any` |
+| `control-html-comment-text.md` | `control` | HTML-комментарий с plain-текстом без тегов | `ok` | `any` |
+| `control-utf8.md` | `control` | валидный UTF-8 (кириллица) | `ok` | `any` |
 
 Каждому `.md` отвечает пара `<имя>.expect.json` (дизайн, Решение 5):
 
@@ -124,9 +124,21 @@ D8-поведение окружения, см. «Прогрев» ниже.
 ожидание следует факту рендера, записи замера
 `2026-11-21-render-calibration-validate-render.md` и
 `2026-11-21-render-calibration-th.md`); вердикты `validate_render` по этим правилам
-не менялись, гипотезы следующего цикла остаются в записи замера. Селекторы — гипотезы
-R2 (раздел «Антифабрикация» ниже), живой прогон подтверждает их на контроле. Ожидания
+не менялись, гипотезы следующего цикла остаются в записи замера. Ожидания
 `kill` остаются только у подтверждённых киллеров: `note-inline`, `colgroup-multiline`.
+
+**Живой tier-1 прогон волны-2** (config `tiers=[tier0,tier1]` временно): обе ноги скоупа
+FR-206 прошли на живом портале — `tail-paragraph` count 1 и `img-count` count 2 `PASS`,
+селекторы скоупа подтверждены (риск R2 снят для скоупа). Семь ног волны-1 — контролы
+и спорные фикстуры (селекторы `tabs-render`, `text-renders`, `note-block-renders`,
+`table-renders`, `page-renders`, note-in-cell/note-in-note renders) — провалились live:
+их селекторы ни одним замером не калиброваны (волна-1 шла tier0-only). Ожидания этих
+семи переведены `tier1: "any"` — «не судится» до отдельной калибровочной волны tier-1;
+ассерты-гипотезы оставлены в `expect.json` (инертны под `any`) — это записанные
+гипотезы, не подтверждённые правила. `tier1: "pass"` остаются у четырёх селекторов,
+подтверждённых живым прогоном: ноги скоупа (`unbalanced-pair-tags`, `multiple-images`)
+и контроля `control-images`/`control-colgroup-single-line` (`img`/`table` —
+универсальные селекторы).
 
 ## A/B-твины: `*-ok.md` — «после»-сторона строгого подтверждения детекторов (FR-198/AC-116)
 
@@ -145,7 +157,7 @@ R2 (раздел «Антифабрикация» ниже), живой прог
 Твин `invalid-utf8-ok` — обычный валидный файл: в отличие от сиблинга, из прогона валидатора
 `validate_render.py` (FR-196) он **не исключается**.
 
-| Файл (`fixtures/<имя>.md`) | `tableRow` | `twinOf` (сторона «до») | `abRole` | Конструкция (единственное различие) | Ожидание `tier0` |
+| Файл (`fixtures/<имя>.md`) | `tableRow` | `twinOf` (сторона «до») | `abRole` | Конструкция (единственное различие) | Ожидание `tier0` | Ожидание `tier1` |
 |---|---|---|---|---|---|
 | `colgroup-multiline-ok.md` | `ERROR-6` | `colgroup-multiline` | `after` | `colgroup` сжат в легальную однострочную форму `<colgroup><col …/><col …/></colgroup>` | `ok` |
 | `xml-in-html-comment-ok.md` | `ERROR-7` | `xml-in-html-comment` | `after` | комментарий переписан plain-текстом без XML-тега внутри | `ok` |

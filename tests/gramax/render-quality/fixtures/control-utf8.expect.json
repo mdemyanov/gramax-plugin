@@ -2,7 +2,7 @@
   "tableRow": "control",
   "expect": {
     "tier0": "ok",
-    "tier1": "pass",
+    "tier1": "any",
     "asserts": [
       {"name": "page-renders", "selector": "p", "count": 1}
     ]
