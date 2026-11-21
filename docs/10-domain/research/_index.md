@@ -17,3 +17,4 @@ order: 1
 - [RES-006: Окно обновлений движка Gramax jul→sep 2026 (61408ad9…48592b36) — семантика для навыков](2026-11-18-gramax-engine-window-jul-sep.md)
 - [RES-007: Пробелы покрытия навыков плагина gramax против документации gram.ax (enterprise-server view)](2026-11-18-enterprise-server-skill-gap.md)
 - [RES-008: Аудит расхождений writer ↔ docs по синтаксису — вердикты по исходнику движка (48592b36)](2026-11-18-writer-docs-divergence-audit.md)
+- [RES-009: Факты апстрима для калибровки validate_render — таблицы «Валидации», оракул, протокол, окно переиндексации](2026-11-21-upstream-render-calibration-facts.md)
