@@ -174,4 +174,8 @@ else
 fi
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-104: $FAIL assertion(s) failed"; exit 1; fi
-pass_msg "ac-104: каталог фикстур полон (17 .md + 17 expect.json), tableRow по карте, дефект-фикстура = одна конструкция"
+# Счёт пар — из каталога, не литералом: ядро 17 + твины A/B растут вместе с фикстурами
+md_count=0; json_count=0
+for f in "$FIXTURES"/*.md; do [ -f "$f" ] && md_count=$((md_count + 1)); done
+for f in "$FIXTURES"/*.expect.json; do [ -f "$f" ] && json_count=$((json_count + 1)); done
+pass_msg "ac-104: каталог фикстур полон ($md_count .md + $json_count expect.json), tableRow по карте, дефект-фикстура = одна конструкция"
