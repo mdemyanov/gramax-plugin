@@ -15,16 +15,14 @@ properties:
 
 # Волна-2 калибровки render-quality: боевой режим на живой цели — живая форма pageUrlTemplate, жизненный цикл пробных страниц, tier-1 на живой цели, механика судьбы th-вердикта
 
-**Опоры:** `docs/40-architecture/2026-11-21-playwright-render-quality-design.md`,
+**Опоры:** `docs/30-requirements/2026-11-21-render-quality-wave2-requirements.md`,
+`docs/00-project/epics/2026-11-21-render-quality-wave2-genesis-tree.md` (входы волны-2, коммит b649cfb — несёт и этот артефакт),
+`docs/40-architecture/2026-11-21-playwright-render-quality-design.md`,
 `docs/70-operations/2026-11-21-render-quality-runbook.md`,
 `docs/60-implementation/acceptance/2026-11-21-render-calibration-validate-render.md`,
 `scripts/render-quality/config.py`, `scripts/render-quality/probe.py`,
 `scripts/render-quality/tier1_dom.py`, `scripts/render-quality/render-target.example.json`,
-`plugins/gramax/gramax-render-rules.json`, `plugins/gramax/scripts/validate_render.py`.
-Требование и дерево решений волны-2 (авторитетные входы, на момент письма вне индекса git —
-строку `**Опоры:**` дополняет PM их коммитом):
-[Волна-2 калибровки render-quality](../30-requirements/2026-11-21-render-quality-wave2-requirements.md),
-[дерево решений волны-2](../00-project/epics/2026-11-21-render-quality-wave2-genesis-tree.md)
+`plugins/gramax/gramax-render-rules.json`, `plugins/gramax/scripts/validate_render.py`
 
 ## Контекст
 
