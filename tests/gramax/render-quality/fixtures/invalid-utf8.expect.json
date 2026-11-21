@@ -1,0 +1,8 @@
+{
+  "tableRow": "ERROR-3",
+  "expect": {
+    "tier0": "either",
+    "tier1": "any",
+    "asserts": []
+  }
+}

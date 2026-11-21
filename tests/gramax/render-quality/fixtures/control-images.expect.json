@@ -1,0 +1,10 @@
+{
+  "tableRow": "control",
+  "expect": {
+    "tier0": "ok",
+    "tier1": "pass",
+    "asserts": [
+      {"name": "images-render", "selector": "img", "count": 2}
+    ]
+  }
+}
