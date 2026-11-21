@@ -25,3 +25,7 @@ venv/
 # Logs / tmp
 *.log
 tmp/
+
+# Render probes (Playwright): цель рендера и результаты — локальные, не распространяются (FR-195, ADR-0014)
+scripts/render-quality/render-target.local.json
+tests/gramax/render-quality/results/

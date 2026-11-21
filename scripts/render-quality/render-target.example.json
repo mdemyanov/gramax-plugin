@@ -1,0 +1,9 @@
+{
+  "baseUrl": "https://render-target.example.invalid",
+  "catalog": "render-probes",
+  "apiArticleUrlTemplate": "{base}/api/catalogs/{catalog}/articles/{slug}/html",
+  "pageUrlTemplate": "{base}/page/{catalog}/{slug}",
+  "token": null,
+  "tiers": ["tier0", "tier1", "tier2"],
+  "viewport": { "width": 1280, "height": 720 }
+}

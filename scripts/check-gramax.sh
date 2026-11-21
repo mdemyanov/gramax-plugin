@@ -272,6 +272,15 @@ if [ "$MODE" = "--full" ]; then
     echo "FAIL: render-linter suite"
     FAILED=1
   fi
+
+  # --- 18. (--full only) render-quality: рендер-пробы Playwright (FR-194, AC-113) ---
+  echo "==> render-quality"
+  if bash tests/gramax/render-quality/run.sh; then
+    echo "OK: render-quality green"
+  else
+    echo "FAIL: render-quality suite"
+    FAILED=1
+  fi
 fi
 
 if [ "$FAILED" -ne 0 ]; then
