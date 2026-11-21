@@ -1,7 +1,7 @@
 {
   "tableRow": "ERROR-4",
   "expect": {
-    "tier0": "kill",
+    "tier0": "ok",
     "tier1": "pass",
     "asserts": [
       {"name": "img-count", "selector": "img", "count": 2}

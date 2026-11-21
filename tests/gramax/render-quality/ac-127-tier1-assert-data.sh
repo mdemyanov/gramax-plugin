@@ -6,12 +6,14 @@
 #   волны-1, которых tier-0 не видит; ассерты заводятся в expect.json как данные —
 #   код прибора не меняется; ожидания tier0 симптом-фикстур остаются kill).
 # Проверка (контракт данных, офлайн-парсинг expect.json):
-#   - unbalanced-pair-tags.expect.json: tier0="kill" (апстрим-гипотеза не меняется),
+#   - unbalanced-pair-tags.expect.json: tier0="ok" (ВЫРОВНЕНО follow-up коммитом после
+#     цикла-2 волны-2 по BR-021: 200 дважды — записи замера волны-1 и волны-2; прежний
+#     варден tier0="kill" охранял апстрим-гипотезу ДО замера и утратил силу),
 #     tier1="pass", ассерты = [{"name": "tail-paragraph",
 #     "selector": "text=Абзац после конструкции", "count": 1}] (волна-1: хвостовой абзац
 #     присутствует в HTML — symptom грубой пробой не пойман, судит только tier-1);
-#   - multiple-images.expect.json: tier0="kill", tier1="pass", ассерты =
-#     [{"name": "img-count", "selector": "img", "count": 2}] (волна-1: 2/2 img
+#   - multiple-images.expect.json: tier0="ok" (та же выравнивающая правка), tier1="pass",
+#     ассерты = [{"name": "img-count", "selector": "img", "count": 2}] (волна-1: 2/2 img
 #     отрендерились);
 #   - контролы control-balanced-tags / control-images хранят свои pass-ассерты
 #     (роль контролов — подтверждение селекторов на легальной форме, R2).
@@ -23,7 +25,10 @@
 #   селектора (= правка этого стаба без записи) запрещена.
 # Цвет при создании: КРАСНЫЙ — tier1-ноги данных пусты (tier1="any", asserts=[] в обеих
 #   симптом-фикстурах); закрывает Dev как данные тем же циклом (файлы ожиданий меняются,
-#   код прибора — нет).
+#   код прибора — нет). Адаптация tier0-ног (kill -> ok) — follow-up после цикла-2
+#   волны-2 по решению владельца (BR-021: ожидание следует дважды измеренному факту —
+#   записи замера 2026-11-21-render-calibration-validate-render.md и
+#   2026-11-21-render-calibration-th.md; вердикты validate_render не менялись).
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -64,11 +69,11 @@ report("ctrl-images", load("control-images"), EXP_CTRL_IMAGES)
 PYEOF
 )"
 
-# --- симптом-фикстуры: tier1-нога данных заведена, tier0 остаётся kill ---
-assert_eq "$(printf '%s\n' "$PY_OUT" | grep -c '^unbalanced\.TIER0=kill' || true)" "1" "AC-127: unbalanced-pair-tags — ожидание tier0 остаётся kill (апстрим-гипотеза не меняется, BR-021)"
+# --- симптом-фикстуры: tier1-нога данных заведена, tier0 выровнен по дважды измеренному факту ---
+assert_eq "$(printf '%s\n' "$PY_OUT" | grep -c '^unbalanced\.TIER0=ok' || true)" "1" "AC-127: unbalanced-pair-tags — ожидание tier0 ok (выровнено по дважды измеренному 200, BR-021; прежний kill — гипотеза до замера)"
 assert_eq "$(printf '%s\n' "$PY_OUT" | grep -c '^unbalanced\.TIER1=pass' || true)" "1" "AC-127: unbalanced-pair-tags — tier1 ожидает pass (симптом судится ассертом, не тиром-0)"
 assert_eq "$(printf '%s\n' "$PY_OUT" | grep -c '^unbalanced\.ASSERTS_MATCH=true' || true)" "1" "AC-127: unbalanced-pair-tags — ассерт tail-paragraph («text=Абзац после конструкции», count 1) по таблице Решения 3"
-assert_eq "$(printf '%s\n' "$PY_OUT" | grep -c '^images\.TIER0=kill' || true)" "1" "AC-127: multiple-images — ожидание tier0 остаётся kill"
+assert_eq "$(printf '%s\n' "$PY_OUT" | grep -c '^images\.TIER0=ok' || true)" "1" "AC-127: multiple-images — ожидание tier0 ok (выровнено по дважды измеренному 200, BR-021)"
 assert_eq "$(printf '%s\n' "$PY_OUT" | grep -c '^images\.TIER1=pass' || true)" "1" "AC-127: multiple-images — tier1 ожидает pass"
 assert_eq "$(printf '%s\n' "$PY_OUT" | grep -c '^images\.ASSERTS_MATCH=true' || true)" "1" "AC-127: multiple-images — ассерт img-count (img, count 2) по таблице Решения 3"
 
@@ -84,4 +89,4 @@ if [ "$FAIL" -gt 0 ]; then
   fail_msg "ac-127: $FAIL assertion(s) failed"
   exit 1
 fi
-pass_msg "ac-127: tier1-ассерты данных заведены (tail-paragraph count 1; img-count count 2), tier0 симптом-фикстур остался kill, контролы на месте"
+pass_msg "ac-127: tier1-ассерты данных заведены (tail-paragraph count 1; img-count count 2), tier0 симптом-фикстур выровнен по факту (ok), контролы на месте"
