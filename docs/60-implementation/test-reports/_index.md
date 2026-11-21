@@ -22,3 +22,4 @@ order: 1
 - [QA Report — синхронизация writer 4.7.0 с движком 48592b36 (AC-073…AC-096: четыре override'а RES-008, диф контракта тегов NFR-072, миграция filterProperty)](2026-11-18-writer-sync-470-qa-report.md) — accept
 - [QA Report — writer 4.8.0 хвосты волны 4.7.0 (AC-097…AC-103: служебная синтаксика, негативный перечень, HTML-компонент, frontmatter-поля)](2026-11-18-writer-tail-480-qa-report.md) — accept
 - [Отчёт ночной сессии вычитки и ревью проекта (2026-11-19)](2026-11-19-night-review-report.md) — 2 фикса на месте, 5 классов предметов владельцу, гейты зелёные до/после
+- [QA Report — прибор рендер-проб Playwright: первый --full после подключения сюиты render-quality (шаг 18); shellcheck SC2034×2 + SC2059×3, класс NEW, вердикт fix-first](2026-11-21-playwright-render-quality-qa-report.md)
