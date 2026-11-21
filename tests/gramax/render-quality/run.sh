@@ -63,13 +63,13 @@ live_rc=0
 if [ -f "$ROOT/scripts/render-quality/probe.sh" ]; then
   bash "$ROOT/scripts/render-quality/probe.sh" || live_rc=$?
   if [ "$live_rc" -eq 0 ]; then
-    printf "${GREEN}OK: live probe green${NC}\n"
+    printf '%b\n' "${GREEN}OK: live probe green${NC}"
   else
-    printf "${RED}FAIL: live probe rc=${live_rc} (rc=1 — расхождения, rc=2 — именованный отказ окружения; D8)${NC}\n"
+    printf '%b\n' "${RED}FAIL: live probe rc=${live_rc} (rc=1 — расхождения, rc=2 — именованный отказ окружения; D8)${NC}"
   fi
 else
   live_rc=2
-  printf "${RED}FAIL: live probe — вход scripts/render-quality/probe.sh отсутствует (каркас прибора не реализован; дизайн, Решение 5)${NC}\n"
+  printf '%b\n' "${RED}FAIL: live probe — вход scripts/render-quality/probe.sh отсутствует (каркас прибора не реализован; дизайн, Решение 5)${NC}"
 fi
 
 if [ "$fail" -gt 0 ] || [ "$live_rc" -ne 0 ]; then

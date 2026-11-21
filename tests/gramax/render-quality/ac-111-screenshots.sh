@@ -80,8 +80,8 @@ JSON
 
 # Каталог результатов = каталог отчёта (дом-раскладка дизайна: results/report.md + results/screenshots/)
 mkdir -p "$TMP/results"
-OUT="$(bash "$PROBE" --config "$TMP/config.json" --fixtures "$TMP/fixtures" \
-  --report "$TMP/results/report.md" 2>&1)"
+bash "$PROBE" --config "$TMP/config.json" --fixtures "$TMP/fixtures" \
+  --report "$TMP/results/report.md" >/dev/null 2>&1
 RC=$?
 
 # stub-shot-gone: NOT_FOUND — расхождение всегда -> rc=1 (скриншот тут не вердикт)

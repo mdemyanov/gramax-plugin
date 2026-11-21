@@ -79,7 +79,7 @@ cat > "$TMP/config.json" <<JSON
 }
 JSON
 
-OUT="$(bash "$PROBE" --config "$TMP/config.json" --fixtures "$TMP/fixtures" --report "$TMP/report.md" 2>&1)"
+bash "$PROBE" --config "$TMP/config.json" --fixtures "$TMP/fixtures" --report "$TMP/report.md" >/dev/null 2>&1
 RC=$?
 
 # stub-gone: NOT_FOUND — расхождение всегда (страницу нечего судить) -> rc=1
