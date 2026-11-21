@@ -15,6 +15,8 @@ properties:
 
 # Запись замера: судьба th-правила validate_render по повторному факту рендера (волна-2, FR-199/FR-200)
 
+**Опоры:** `docs/30-requirements/2026-11-21-render-quality-wave2-requirements.md`, `docs/40-architecture/2026-11-21-render-quality-wave2-design.md`, `docs/60-implementation/acceptance/2026-11-21-render-calibration-validate-render.md`, `plugins/gramax/gramax-render-rules.json`, `plugins/gramax/scripts/validate_render.py`, `docs/70-operations/2026-11-21-render-quality-runbook.md`
+
 **Дата:** 2026-11-21. **Цель рендера:** живая цель волны-2 — хост, слаг каталога и
 `pageUrlTemplate` живут только в gitignore-конфиге `render-target.local.json`, литералы
 не публикуются (ADR-0014, FR-204; в отличие от записи волны-1, волна-2 собственных
@@ -101,5 +103,3 @@ multiple-images и unbalanced-pair-tags измеренный факт 200 зап
   вердикты вне th не менялись.
 - Гейт `--fast` и render-linter зелёные после адаптации; `run.sh` render-quality вне
   гейтов (NFR-078, ac-118).
-
-**Опоры:** `docs/30-requirements/2026-11-21-render-quality-wave2-requirements.md`, `docs/40-architecture/2026-11-21-render-quality-wave2-design.md`, `docs/60-implementation/acceptance/2026-11-21-render-calibration-validate-render.md`, `plugins/gramax/gramax-render-rules.json`, `plugins/gramax/scripts/validate_render.py`, `docs/70-operations/2026-11-21-render-quality-runbook.md`

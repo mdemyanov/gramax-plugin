@@ -23,3 +23,4 @@ order: 1
 - [QA Report — writer 4.8.0 хвосты волны 4.7.0 (AC-097…AC-103: служебная синтаксика, негативный перечень, HTML-компонент, frontmatter-поля)](2026-11-18-writer-tail-480-qa-report.md) — accept
 - [Отчёт ночной сессии вычитки и ревью проекта (2026-11-19)](2026-11-19-night-review-report.md) — 2 фикса на месте, 5 классов предметов владельцу, гейты зелёные до/после
 - [QA Report — прибор рендер-проб Playwright: первый --full после подключения сюиты render-quality (шаг 18); shellcheck SC2034×2 + SC2059×3, класс NEW, вердикт fix-first](2026-11-21-playwright-render-quality-qa-report.md)
+- [QA Report qa-057 — волна-2 render-quality: полный гейт --full на f8af038; единственный красный — ac-128 нога (д), артефакт закрытия волны ещё не написан; вердикт — закрытие без возврата в Dev](2026-11-21-qa-057-render-quality-wave2-full-gate.md)

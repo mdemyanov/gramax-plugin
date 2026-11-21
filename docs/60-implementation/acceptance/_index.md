@@ -26,3 +26,4 @@ ADR-0021); ниже — design-документы живых suite (at-design).
 - [Запись замера калибровки validate_render против факта рендера (FR-196) — эпик Playwright render probes](2026-11-21-render-calibration-validate-render.md)
 - [AT-design: Волна-2 калибровки render-quality — боевой режим на живой цели: стабы сюиты render-quality (AC-120…AC-128)](2026-11-21-render-quality-wave2-at-design.md)
 - [Запись замера: судьба th-правила validate_render по повторному факту рендера (волна-2, FR-199/FR-200)](2026-11-21-render-calibration-th.md)
+- [Приёмка (BA-acceptance): волна-2 render-quality — боевой режим прибора на живой цели — accept (8 PASS / 1 N/A / 0 FAIL; нога (д) ac-128 закрывается настоящим документом)](2026-11-21-render-quality-wave2-at-acceptance.md) — accept, 9/9 AC
