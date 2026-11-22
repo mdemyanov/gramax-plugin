@@ -14,15 +14,18 @@
   собственном каталоге. Порт использует общий примитив `lib/md_code_mask.py`
   (`_mask_code`, извлечён из `validate_structure.py`, ADR-0019 Решение 5).
 - **Severity-модель ERROR/WARN** (FR-113, ADR-0019 Решение 8; калибровка 2026-11-21 —
-  запись замера `docs/60-implementation/acceptance/2026-11-21-render-calibration-validate-render.md`):
+  записи замеров `docs/60-implementation/acceptance/2026-11-21-render-calibration-validate-render.md`
+  и `…render-calibration-th.md`):
   500-киллеры по факту цели рендера — ERROR (инлайновый `<note>`; многострочный
   `<colgroup>` — детектор добавлен замером «500 до / 200 после»); контекстные
   note-in-cell/note-in-note понижены в WARN замером (200 на цели; прецедент апстрима
-  04.09.2026); стиль/YAML (FR-111, FR-112) — WARN.
+  04.09.2026); `<th>` понижен ERROR→WARN повторным замером волны-2 (200 дважды —
+  атрибут `"severity": "warn"` в реестре киллеров); стиль/YAML (FR-111, FR-112) — WARN.
 - **Exit-контракт 0/1/2** (NFR-001): 0 — ERROR нет (WARN допустимы), 1 — есть ERROR,
   2 — некорректное использование (нет валидного целевого файла/каталога).
 - **Демаркация с W034** (`validate_structure.py`, ADR-0019 Решение 3): `<th>` владеет
-  рендер-линтер как ERROR; структурный валидатор не дублирует его («одна находка на
+  рендер-линтер (с 2026-11-21 — WARN по замеру волны-2; несбалансированный `<th>`
+  остаётся ERROR баланса); структурный валидатор не дублирует его («одна находка на
   дефект», BR-004). `_KNOWN_TAGS` вычисляется из `gramax-render-rules.json`
   (drawio ∪ killerTags ∪ allowlistedTags).
 - **Allowlist «не ошибки»** (FR-115…FR-118): `<colgroup>`/`<col>` **однострочные**,
