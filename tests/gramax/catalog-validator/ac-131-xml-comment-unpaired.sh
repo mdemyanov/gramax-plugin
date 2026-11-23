@@ -31,7 +31,7 @@ if printf '%s\n' "$OUT" | grep -qF 'unpaired <comment>'; then
 fi
 
 if printf '%s\n' "$OUT" | grep -qF 'unpaired [comment:id]'; then
-  echo "  FAIL: AC-131 — «unpaired [comment:id]» на скобочной legacy-форме: скобочная форма обязана считаться, как прежде (8 открывающих в products-legacy)" >&2
+  echo "  FAIL: AC-131 — «unpaired [comment:id]» на скобочной legacy-форме: скобочная форма обязана считаться, как прежде (8 открывающих в корпусе сравнения)" >&2
   FAIL=$((FAIL + 1))
 fi
 

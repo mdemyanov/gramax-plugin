@@ -62,7 +62,7 @@ fi
 assert_exit_zero "$RC_LEGACY" "AC-130 контроль: parse_comments на скобочной legacy-форме — rc=0"
 
 if printf '%s\n' "$OUT_LEGACY" | grep -qF 'anchor_not_found'; then
-  echo "  FAIL: AC-130 контроль — скобочная legacy-форма перестала читаться (8 открывающих в products-legacy обязаны остаться читаемыми)" >&2
+  echo "  FAIL: AC-130 контроль — скобочная legacy-форма перестала читаться (8 открывающих в корпусе сравнения обязаны остаться читаемыми)" >&2
   FAIL=$((FAIL + 1))
 fi
 
