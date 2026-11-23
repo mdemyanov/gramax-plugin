@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-033-one-finding-per-defect.sh
-# Требование: docs/30-requirements/2026-11-18-validators-error-check-parity-requirement.md — AC-069 (FR-152, NFR-067)
+# Требование: docs/30-requirements/2026-11-18-validators-error-check-parity-requirement.md — AC-160 (FR-152, NFR-067)
 # Дизайн: docs/40-architecture/2026-11-18-validators-parity-design.md (демаркация структурная:
 # диаграммные теги входят в known_tags → W034 молчит, одна находка W031 на дефект; ADR-0024 Решения 1/4)
 # Проверка: одна битая <mermaid path="./missing.mmd"/> → ровно одно упоминание 'missing.mmd'
@@ -18,12 +18,12 @@ FIXTURE="$SCRIPT_DIR/fixtures/validators-parity/one-finding"
 OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$FIXTURE" 2>&1) || true
 
 COUNT=$(echo "$OUT" | grep -cF 'missing.mmd' || true)
-assert_eq "$COUNT" "1" "AC-069 — одна находка на дефект: упоминаний 'missing.mmd' в выводе должно быть ровно 1 (FR-152, без дубля от W034)"
+assert_eq "$COUNT" "1" "AC-160 — одна находка на дефект: упоминаний 'missing.mmd' в выводе должно быть ровно 1 (FR-152, без дубля от W034)"
 
 if [ "$FAIL" -gt 0 ]; then
   echo "  --- вывод валидатора ---" >&2
   echo "$OUT" >&2
-  fail_msg "ac-033: AC-069 — $FAIL assertion(s) failed"
+  fail_msg "ac-033: AC-160 — $FAIL assertion(s) failed"
   exit 1
 fi
-pass_msg "ac-033: AC-069 — битая цель даёт ровно одну находку"
+pass_msg "ac-033: AC-160 — битая цель даёт ровно одну находку"

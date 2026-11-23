@@ -38,8 +38,8 @@ properties:
    фильтрация по `source` на стороне валидатора).
 2. **FR-121** — `check_doc_root` проверяет тип: значение обязательного поля (`title`/`language`/
    `syntax`) обязано быть непустой строкой. `dict`/`list`/`bool`/`int`/`float`/`date`/`null`/
-   пустая строка → error `invalid type for field "...": expected non-empty string, got <тип>
-   (строка N: <raw>)`. Номер строки значения — из `yaml.compose` (не из `safe_load`), raw-текст —
+   пустая строка → error `invalid type for field "...": expected non-empty string, got <тип>`
+   (строка N: `<raw>`). Номер строки значения — из `yaml.compose` (не из `safe_load`), raw-текст —
    из исходника. `missing field: ...` сохранён для отсутствующего ключа.
 3. **FR-122** — ранний `return` при `yaml.YAMLError` убран для существующего файла: прогон
    продолжается (минимум `check_placeholders` обязателен — работает по raw-тексту, не по AST).

@@ -42,10 +42,9 @@ if printf '%s\n' "$OUT" | grep -F "$FIXTURE/_index.md" | grep -qE 'ERROR|WARNING
   echo "  FAIL: AC-151 — корневой _index.md обязан остаться вне проверок V3–V5 (инертен для движка, ADR-0015): находок по нему быть не должно" >&2
   FAIL=$((FAIL + 1))
 fi
-if printf '%s\n' "$OUT" | grep -qF 'properties'; then
-  echo "  FAIL: AC-151 — словосочетание properties не должно звучать ни в одной находке (V2 снят, WARN не вводится)" >&2
-  FAIL=$((FAIL + 1))
-fi
+# Слово «properties» само по себе в находках легитимно: V3–V5 применены к индексам
+# подпапок, и их сообщения не меняются (дизайн §2.5: «Сообщения V3–V5 не меняются» —
+# V3 несёт «плоская нотация properties»). Запрещена только V2-формулировка запрета (нога f).
 
 # --- (b): объявленное enum-свойство у индекса подпапки — чисто ---
 if printf '%s\n' "$OUT" | grep -F "sub/_index.md" | grep -qE 'ERROR|WARNING'; then

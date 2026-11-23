@@ -68,9 +68,16 @@ def load_json_contract(path: Path, issues: list[Issue]) -> dict | None:
     return data
 
 
-def check_doc_root(root: Path, issues: list[Issue], required_fields: list[str]) -> set[str]:
+def check_doc_root(root: Path, issues: list[Issue], required_fields: list[str],
+                   optional_fields: list[str] | None = None) -> set[str]:
     """Проверяет `.doc-root.yaml` каталога: наличие, парсинг, типы обязательных полей
     (FR-121…FR-123, ADR-0020).
+
+    `optional_fields` (ADR-0026 Решение 1, ключ контракта `docRootOptionalFields`) — поля,
+    отсутствие которых допустимо; присутствующее поле проверяется на непустую строку тем же
+    правилом FR-121, что и обязательное (без ключа контракта присутствующее поле выпадало бы
+    из проверки типов вовсе). Отсутствие ключа в контракте — пустой список, поведение как
+    прежде.
 
     Возвращает множество токенов-плейсхолдеров `{{...}}`, чьи placeholder-находки поглощены
     parse-error-находкой с подсказкой FR-123 (BR-004: одна находка на дефект).
@@ -97,21 +104,28 @@ def check_doc_root(root: Path, issues: list[Issue], required_fields: list[str]) 
         if field not in data:
             issues.append(Issue("error", yaml_file, f"missing field: {field}"))
             continue
-        value = data[field]
-        if isinstance(value, str) and value.strip():
-            continue
-        # FR-121: непустая строка — единственный валидный тип значения обязательного поля;
-        # сообщение несёт фактический тип и исходную строку (номер строки + raw-текст).
-        loc = ""
-        line_no = value_lines.get(field)
-        if line_no is not None and line_no - 1 < len(lines):
-            loc = f" (строка {line_no}: {lines[line_no - 1].strip()})"
-        issues.append(Issue(
-            "error", yaml_file,
-            f'invalid type for field "{field}": expected non-empty string, '
-            f"got {_value_type_name(value)}{loc}",
-        ))
+        _check_doc_root_field_type(yaml_file, issues, field, data[field], value_lines, lines)
+    for field in optional_fields or []:
+        if field in data:
+            _check_doc_root_field_type(yaml_file, issues, field, data[field], value_lines, lines)
     return set()
+
+
+def _check_doc_root_field_type(yaml_file: Path, issues: list[Issue], field: str, value,
+                               value_lines: dict[str, int], lines: list[str]):
+    """FR-121: непустая строка — единственный валидный тип значения поля `.doc-root.yaml`;
+    сообщение несёт фактический тип и исходную строку (номер строки + raw-текст)."""
+    if isinstance(value, str) and value.strip():
+        return
+    loc = ""
+    line_no = value_lines.get(field)
+    if line_no is not None and line_no - 1 < len(lines):
+        loc = f" (строка {line_no}: {lines[line_no - 1].strip()})"
+    issues.append(Issue(
+        "error", yaml_file,
+        f'invalid type for field "{field}": expected non-empty string, '
+        f"got {_value_type_name(value)}{loc}",
+    ))
 
 
 def _value_line_map(raw: str) -> dict[str, int]:
@@ -280,14 +294,45 @@ def _parse_resources(root: Path, nested: set[Path],
     ]
 
 
-def check_subfolders_have_index(root: Path, issues: list[Issue], nested: set[Path] | None = None):
+# Дословно (дизайн волны-3 §2.4, FR-217/AC-138): префикс сохранён — на него опираются
+# существующие ассерты; формулировка называет эффект факта движка (FileStructure.ts:528-531
+# на пине 48592b36): без флага папка не становится разделом — статьи поднимаются выше.
+_MISSING_INDEX_MSG = ("missing _index.md (раздела в дереве нет, статьи подняты выше; "
+                      "без optionalCategoryIndex: true в .doc-root.yaml файл обязателен)")
+
+
+def _doc_root_flag_true(root: Path, flag: str) -> bool:
+    """Строго булево `true` флага `flag` в `.doc-root.yaml` ЭТОГО catalog root
+    (ADR-0026 Решение 4): строка `"true"`, `false` и отсутствие ключа — False.
+    Битый/нечитаемый YAML — False (правило остаётся безусловным, parse-error
+    отдельно сигналит check_doc_root)."""
+    try:
+        data = yaml.safe_load((root / ".doc-root.yaml").read_text(encoding="utf-8"))
+    except (yaml.YAMLError, OSError):
+        return False
+    if not isinstance(data, dict):
+        return False
+    return data.get(flag) is True
+
+
+def check_subfolders_have_index(root: Path, issues: list[Issue], nested: set[Path] | None = None,
+                                optional_flag: str | None = None):
     """Каждая подпапка с .md или вложенными папками обязана иметь _index.md
     (`indexPolicy.subfolder: required`, gramax-catalog-rules.json). Корень каталога в этот
     обход не входит (`subdir == root` исключён) — там `_index.md` `optional`
     (ADR-0012 Решение 1, ADR-0015).
 
+    ADR-0026 Решение 4 (FR-217): имя снимающего флага живёт в контракте
+    (`indexPolicy.subfolderOptionalFlag`); `optional_flag` — его значение из контракта,
+    `None` (ключа нет) — правило безусловно, как прежде. Флаг читается из `.doc-root.yaml`
+    своего catalog root на каждый root отдельно (рекурсивное обнаружение, ADR-0020);
+    строго булево `true` снимает проверку для подпапок этого root — движок строит раздел
+    со списком детей сам (`FileStructure.ts:226-235`).
+
     Поддеревья вложенных `.doc-root.yaml` и исключённые пути обхода (FR-120) пропускаются:
     их политика индекса — зона вложенного root, валидируется там, не дублем от ancestor."""
+    if optional_flag is not None and _doc_root_flag_true(root, optional_flag):
+        return
     if nested is None:
         nested = _nested_doc_root_dirs(root)
     for subdir in root.rglob("*"):
@@ -310,7 +355,7 @@ def check_subfolders_have_index(root: Path, issues: list[Issue], nested: set[Pat
         if not has_content:
             continue
         if not (subdir / "_index.md").exists():
-            issues.append(Issue("error", subdir, "missing _index.md (Gramax не покажет раздел в навигации)"))
+            issues.append(Issue("error", subdir, _MISSING_INDEX_MSG))
 
 
 def extract_frontmatter(text: str) -> dict | None:
@@ -325,7 +370,8 @@ def extract_frontmatter(text: str) -> dict | None:
         return None
 
 
-def check_frontmatter(md_file: Path, issues: list[Issue], schema: dict | None, required_fields: list[str]):
+def check_frontmatter(md_file: Path, issues: list[Issue], schema: dict | None,
+                      required_fields: list[str], root: Path):
     text = md_file.read_text(encoding="utf-8")
     fm = extract_frontmatter(text)
     if fm is None:
@@ -334,11 +380,18 @@ def check_frontmatter(md_file: Path, issues: list[Issue], schema: dict | None, r
     for field in required_fields:
         if field not in fm:
             issues.append(Issue("error", md_file, f"frontmatter missing field: {field}"))
-    if md_file.name == "_index.md" and fm.get("properties"):
-        issues.append(Issue("error", md_file, "_index.md не должен содержать properties:"))
+
+    # ADR-0026 Решение 5 (вердикт gramax-4jf.2, FR-209/AC-151): запрет «_index.md не должен
+    # содержать properties» снят — ключ штатный и видимый (Category наследует Article,
+    # Category.ts:24-29; фильтр судит раздел по его собственным свойствам,
+    # CategoryItemFilter.ts:7-36). V3–V5 применяются к _index.md ПОДПАПОК наравне со
+    # статьями (необъявленные свойства движок отбрасывает и у раздела,
+    # FSPropertyEvents.ts:33-35); индекс корня catalog root остаётся вне проверок —
+    # движок его не читает (FileStructure.ts:469-478, ADR-0015).
+    is_root_index = md_file == root / "_index.md"
 
     # V3: плоская нотация — предупреждение
-    if md_file.name != "_index.md" and "properties" in fm:
+    if not is_root_index and "properties" in fm:
         props = fm["properties"]
         if isinstance(props, list):
             for entry in props:
@@ -350,7 +403,7 @@ def check_frontmatter(md_file: Path, issues: list[Issue], schema: dict | None, r
                     break
 
     # V4, V5: properties соответствуют schema
-    if md_file.name != "_index.md" and schema is not None and "properties" in fm:
+    if not is_root_index and schema is not None and "properties" in fm:
         props = fm["properties"]
         if isinstance(props, list):
             for entry in props:
@@ -388,8 +441,17 @@ def check_tags(md_file: Path, issues: list[Issue], paired_tags: list[str]):
     # регуляркой, которая знала только про ``` fences).
     cleaned = _mask_code(text)
     for tag in paired_tags:
-        opens = len(re.findall(rf"<{tag}(\s[^>]*)?(?<!/)>", cleaned))
-        closes = len(re.findall(rf"</{tag}>", cleaned))
+        if tag == "comment":
+            # FR-211 (AC-131): блочный комментарий редактор пишет самозакрывающимся
+            # открывающим тегом `<comment id="ID"/>` + закрывающий `</comment>` —
+            # самозакрытый открывающий считается открывающим только для тега comment
+            # (прочие теги — ветка ниже, `(?<!/)`). Скобочная legacy-форма `[comment:ID]`
+            # считается отдельным блоком ниже, как прежде.
+            opens = len(re.findall(r"<comment(?:\s[^>]*)?/?>", cleaned))
+            closes = len(re.findall(r"</comment>", cleaned))
+        else:
+            opens = len(re.findall(rf"<{tag}(\s[^>]*)?(?<!/)>", cleaned))
+            closes = len(re.findall(rf"</{tag}>", cleaned))
         if opens != closes:
             issues.append(Issue("error", md_file, f"unpaired <{tag}>: {opens} open, {closes} close"))
     # Block comment [comment:id]...[/comment]
@@ -637,7 +699,13 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     diagram_tags = tuple((tags_contract or {}).get("diagramTags", ["drawio"]))
     garbage_files = set((rules_contract or {}).get("garbageFiles", []))
     doc_root_required = (rules_contract or {}).get("docRootRequiredFields", [])
+    # ADR-0026 Решение 1: необязательные поля `.doc-root.yaml` — отсутствие допустимо,
+    # присутствующее поле проверяется на тип (check_doc_root).
+    doc_root_optional = (rules_contract or {}).get("docRootOptionalFields", [])
     frontmatter_required = (rules_contract or {}).get("frontmatterRequiredFields", [])
+    # ADR-0026 Решение 4: имя снимающего флага живёт в контракте (indexPolicy.subfolderOptionalFlag);
+    # ключа нет — правило «подпапка без _index.md» безусловно.
+    subfolder_optional_flag = (rules_contract or {}).get("indexPolicy", {}).get("subfolderOptionalFlag")
 
     # Демаркация с рендер-линтером (ADR-0019 Решение 3 и 6) и контрактом тегов
     # (ADR-0024 Решение 4, FR-156):
@@ -646,7 +714,9 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     #   (BR-011: канонический по контракту плагина тег не репортится; новый киллер или
     #   тег добавляется строкой JSON, демаркация обновляется сама);
     #   check_tags балансит только pairedTags − balanceTags — unbalanced note/tabs/tab/color/
-    #   highlight репортит validate_render.py (FR-109), html/comment остаются за check_tags.
+    #   highlight, как и table/tr/td (ADR-0026 Решение 2, BR-027: баланс тегов таблицы ведёт
+    #   один валидатор — validate_render.py), репортит validate_render.py (FR-109),
+    #   html/comment остаются за check_tags.
     # Отсутствующий/повреждённый контракт — error через load_json_contract
     # (ADR-0012, Consequences); known_tags тогда сходится к {"drawio"} ∪ killer ∪ allowlist.
     render_contract = load_json_contract(plugin_root / "gramax-render-rules.json", issues)
@@ -677,27 +747,30 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     # root — всегда первым, вложенные — в отсортированном порядке (NFR-002).
     for catalog_root in [root, *_discover_nested_doc_roots(root)]:
         _validate_catalog_root(catalog_root, issues, strict, fix, yes, garbage_files,
-                               doc_root_required, frontmatter_required,
-                               effective_paired_tags, known_tags, diagram_tags)
+                               doc_root_required, doc_root_optional, frontmatter_required,
+                               effective_paired_tags, known_tags, diagram_tags,
+                               subfolder_optional_flag)
     return issues
 
 
 def _validate_catalog_root(root: Path, issues: list[Issue], strict: bool, fix: bool, yes: bool,
                            garbage_files: set[str], doc_root_required: list[str],
-                           frontmatter_required: list[str], effective_paired_tags: list[str],
-                           known_tags: set[str], diagram_tags: tuple[str, ...]):
+                           doc_root_optional: list[str], frontmatter_required: list[str],
+                           effective_paired_tags: list[str],
+                           known_tags: set[str], diagram_tags: tuple[str, ...],
+                           subfolder_optional_flag: str | None = None):
     """Полный структурный suite для одного catalog root (FR-120: каждый найденный
     `.doc-root.yaml` валидируется как отдельный root). Ошибка парсинга `.doc-root.yaml`
     прогон не прекращает (FR-122) — все проверки, включая `check_placeholders`, выполняются."""
     nested = _nested_doc_root_dirs(root)
-    suppressed = check_doc_root(root, issues, doc_root_required)
-    check_subfolders_have_index(root, issues, nested)
+    suppressed = check_doc_root(root, issues, doc_root_required, doc_root_optional)
+    check_subfolders_have_index(root, issues, nested, subfolder_optional_flag)
     schema = load_property_schema(root)
     if schema is None:
         issues.append(Issue("warning", root / ".doc-root.yaml",
                             "schema использует экспериментальный формат values; V4/V5 пропущены"))
     for md in _collect_md_files(root, nested):
-        check_frontmatter(md, issues, schema, frontmatter_required)
+        check_frontmatter(md, issues, schema, frontmatter_required, root)
         check_tags(md, issues, effective_paired_tags)
     check_garbage(root, issues, strict, fix, yes, garbage_files, nested)
     check_no_drawio(root, issues, strict, nested)

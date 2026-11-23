@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-025-diagram-targets-broken.sh
-# Требование: docs/30-requirements/2026-11-18-validators-error-check-parity-requirement.md — AC-061 (FR-151)
+# Требование: docs/30-requirements/2026-11-18-validators-error-check-parity-requirement.md — AC-152 (FR-151)
 # Дизайн: docs/40-architecture/2026-11-18-validators-parity-design.md (W031 наследуется, ADR-0024 Решения 1/3)
 # Проверка: битые цели <mermaid>/<plant-uml>/<bpmn> → вывод валидатора называет каждую из трёх целей
 # Red on 99201c0 (2026-11-18): parse_md_resources извлекает только target_type "drawio"
@@ -19,7 +19,7 @@ OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$FIXTUR
 
 for target in missing.mmd missing.puml missing.bpmn; do
   if ! echo "$OUT" | grep -qF "$target"; then
-    echo "  FAIL: AC-061 — вывод должен упоминать отсутствующую цель '$target' (проверка существования цели диаграммного тега, FR-151)" >&2
+    echo "  FAIL: AC-152 — вывод должен упоминать отсутствующую цель '$target' (проверка существования цели диаграммного тега, FR-151)" >&2
     FAIL=$((FAIL + 1))
   fi
 done
@@ -27,7 +27,7 @@ done
 if [ "$FAIL" -gt 0 ]; then
   echo "  --- вывод валидатора ---" >&2
   echo "$OUT" >&2
-  fail_msg "ac-025: AC-061 — $FAIL assertion(s) failed"
+  fail_msg "ac-025: AC-152 — $FAIL assertion(s) failed"
   exit 1
 fi
-pass_msg "ac-025: AC-061 — битые цели mermaid/plant-uml/bpmn называются в выводе (W031)"
+pass_msg "ac-025: AC-152 — битые цели mermaid/plant-uml/bpmn называются в выводе (W031)"

@@ -1,10 +1,12 @@
 {
-  "schemaVersion": 1,
-  "docRootRequiredFields": ["title", "language", "syntax"],
+  "schemaVersion": 2,
+  "docRootRequiredFields": ["title", "syntax"],
+  "docRootOptionalFields": ["language"],
   "frontmatterRequiredFields": ["order", "title"],
   "indexPolicy": {
     "root": "optional",
-    "subfolder": "required"
+    "subfolder": "required",
+    "subfolderOptionalFlag": "optionalCategoryIndex"
   },
   "garbageFiles": [".DS_Store", "Thumbs.db", "CLAUDE.md"],
   "nonMdContentFiles": [

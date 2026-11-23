@@ -1,5 +1,5 @@
 code: validators-parity-w034-parity
 title: "Канонические теги контракта"
-description: "Фикстура AC-067: <view/> и <mermaid path/> (цель существует) без W034"
+description: "Фикстура AC-158: <view/> и <mermaid path/> (цель существует) без W034"
 language: ru
 syntax: XML

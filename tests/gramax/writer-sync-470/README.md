@@ -42,7 +42,7 @@ AC-073…AC-096). Покрывает все 24 AC: AC-073…AC-095 — integrati
 | `ac-083-openapi-showschemas-showinfo.sh` | AC-083 | 🔴 КРАСНЫЙ | showSchemas/showInfo в blocks.md нет |
 | `ac-084-code-block-section.sh` | AC-084 | 🔴 КРАСНЫЙ | раздела «Блок кода» и highlight.js нет |
 | `ac-085-heading-anchors.sh` | AC-085 | 🔴 КРАСНЫЙ | `{#` в blocks.md нет; + SKILL.md-указатель из таблицы FR → файл |
-| `ac-086-fragment-canonical-legacy.sh` | AC-086 | 🔴 КРАСНЫЙ | переигрывание 1 RES-008 не исполнено: `<fragment id=`/`fragment-link` нет, «фрагмент» в SKILL.md нет; NFR-072: fragment/fragment-link нет в контракте. Под-ассерты-регрессии зелёные: 'legacy' в blocks.md (legacy-раздел формул), snippet в selfClosingTags (NFR-071), schemaVersion=2 |
+| `ac-086-fragment-canonical-legacy.sh` | AC-086 | 🔴 КРАСНЫЙ | переигрывание 1 RES-008 не исполнено: `<fragment id=`/`fragment-link` нет, «фрагмент» в SKILL.md нет; NFR-072: fragment/fragment-link нет в контракте. Под-ассерты-регрессии зелёные: 'legacy' в blocks.md (legacy-раздел формул), snippet в selfClosingTags (NFR-071), schemaVersion=3 (пин «= 2» переведён волной-3 — ADR-0026 Р2: pairedTags += table/tr/td; NFR-084 — перевод, не удаление) |
 | `ac-087-link-md-caveat-rule-preserved.sh` | AC-087 | 🔴 КРАСНЫЙ | оговорки нет; **ловушка**: текущее «без `.md`» формулу `grep 'без .md'` НЕ матчится (бэктик между словами) — Dev обязан дать форму без бэктиков. Регрессия BR-017 зелёная (правило переживает вставку оговорки) |
 | `ac-088-doc-root-new-keys.sh` | AC-088 | 🔴 КРАСНЫЙ | logo_dark/relatedLinks/versions/hidden/filterProperty/emoji: в doc-root-schema.md нет; из filter-ключей есть только непрочитываемая filterProperties |
 | `ac-089-syntax-enum-style-palette.sh` | AC-089 | 🔴 КРАСНЫЙ | переигрывание (Q1а/Q1г): syntax=XML/Markdown и палитра 11 значений без двухцветных; GitHub Flavored Markdown/Legacy/blue-pink нет |
@@ -88,7 +88,7 @@ snippet в контракте, schemaVersion=2, правило «без `.md`» 
 | `ac-077` | selfClosingTags ⊇ {property, inline-property}; pairedTags ⊇ {cut} |
 | `ac-080` | selfClosingTags ⊇ {cmd, kbd, alfa, beta} |
 | `ac-081` | selfClosingTags ⊇ {img-h, img-v} |
-| `ac-086` | selfClosingTags ⊇ {fragment}; pairedTags ⊇ {fragment-link}; **snippet остаётся** (NFR-071); **schemaVersion = 2** |
+| `ac-086` | selfClosingTags ⊇ {fragment}; pairedTags ⊇ {fragment-link}; **snippet остаётся** (NFR-071); **schemaVersion = 3** (ADR-0026 Р2) |
 
 Все проверки — SUBSET (контракт вправе быть шире), по уроку «неубиваемого
 теста» catalog-validator/ac-011: равенство со списками не проверяется никогда,

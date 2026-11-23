@@ -1,5 +1,5 @@
 code: validators-parity-severity-default
 title: "Единственный дефект — битая цель"
-description: "Фикстура AC-070: единственный дефект — битая цель диаграммы; warning по умолчанию, --strict эскалирует"
+description: "Фикстура AC-161: единственный дефект — битая цель диаграммы; warning по умолчанию, --strict эскалирует"
 language: ru
 syntax: XML

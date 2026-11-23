@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/gramax/catalog-validator/ac-035-dogfood-w034-contract-tags.sh
-# Требование: docs/30-requirements/2026-11-18-validators-error-check-parity-requirement.md — AC-071 (FR-156, догфудинг)
+# Требование: docs/30-requirements/2026-11-18-validators-error-check-parity-requirement.md — AC-162 (FR-156, догфудинг)
 # Дизайн: docs/40-architecture/2026-11-18-validators-parity-design.md (живые ложные W034 факта 7
 # на docs/ репозитория устраняются сужением W034; симуляция SA: ноль новых находок)
 # Проверка: прогон на живом docs/ — ложных W034 на канонические теги контракта нет
@@ -19,13 +19,13 @@ OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py docs 2>&
 
 FALSE_W034=$(echo "$OUT" | grep -E 'W034: .*<(view|mermaid|snippet|openapi|video|icon)>' || true)
 if [ -n "$FALSE_W034" ]; then
-  echo "  FAIL: AC-071 — живые ложные W034 на канонические теги контракта на docs/ (FR-156):" >&2
+  echo "  FAIL: AC-162 — живые ложные W034 на канонические теги контракта на docs/ (FR-156):" >&2
   echo "$FALSE_W034" | sed 's/^/    /' >&2
   FAIL=$((FAIL + 1))
 fi
 
 if [ "$FAIL" -gt 0 ]; then
-  fail_msg "ac-035: AC-071 — $FAIL assertion(s) failed"
+  fail_msg "ac-035: AC-162 — $FAIL assertion(s) failed"
   exit 1
 fi
-pass_msg "ac-035: AC-071 — догфудинг docs/: ложных W034 на теги контракта нет"
+pass_msg "ac-035: AC-162 — догфудинг docs/: ложных W034 на теги контракта нет"

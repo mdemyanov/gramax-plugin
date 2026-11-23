@@ -50,7 +50,7 @@ fi
 assert_eq "$RC" "0" "AC-135: каталог с таблицами без прочих дефектов — чист по ERROR (rc=0)"
 
 # --- (d): контракт тегов ---
-assert_eq "$(python3 -c 'import json;print(json.load(open(sys.argv[1],encoding="utf-8")).get("schemaVersion"))' "$TAGS_JSON" 2>/dev/null)" "3" \
+assert_eq "$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1],encoding="utf-8")).get("schemaVersion"))' "$TAGS_JSON" 2>/dev/null)" "3" \
   "AC-135: schemaVersion gramax-tags.json = 3 (ADR-0026 Решение 2; замер 2026-11-23: 2)"
 
 PAIRED=$(python3 -c 'import json,sys;print(",".join(json.load(open(sys.argv[1],encoding="utf-8")).get("pairedTags",[])))' "$TAGS_JSON" 2>/dev/null)

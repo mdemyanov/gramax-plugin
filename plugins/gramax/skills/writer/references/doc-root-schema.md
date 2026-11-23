@@ -16,7 +16,7 @@ writer 4.7.0): каждое значение несёт пометку исто�
 |------|-----|--------------|------------|----------|
 | `title` | string | да | Заголовок каталога в Gramax UI | — |
 | `description` | string | да | Описание для каталог-листа | — |
-| `language` | string | да | Основной язык (`ru` / `en`) | — |
+| `language` | string | нет | Основной язык (`ru` / `en`); поле необязательно — каталог работает и без него | engine (`FSLocalizationEvents.ts:19-22`, `createFormSchema.ts:61`) |
 | `syntax` | enum | да | `XML`, `Legacy` или `GitHub Flavored Markdown` (см. ниже) | engine (`Syntax.ts:1-6`) |
 | `code` | string | нет | Короткое отображаемое имя каталога в UI (≤4 символа по форме настроек; резолвером ссылок не используется) | — |
 | `style` | string | нет | Цвет заголовка каталога. Палитра — та же, что для property-level `style:` (см. ниже). | — |
@@ -29,6 +29,7 @@ writer 4.7.0): каждое значение несёт пометку исто�
 | `hidden` | boolean | нет | Скрыть каталог | engine (`CatalogProps.ts:25`) |
 | `properties` | array | нет | Определения property для frontmatter (см. ниже) | — |
 | `filterProperty` | string | нет | Один property для боковой панели фильтров; значение — идентификатор свойства (`id`, а без него `name`) | engine (`CatalogProps.ts:17`, матчинг `ScopedCatalogsResolver.ts:49`) |
+| `optionalCategoryIndex` | boolean | нет | `true` — подпапка без `_index.md` становится разделом: движок строит её список детей сам. Без флага (или со значением не строго `true`) папка разделом не становится — статьи поднимаются на уровень выше | engine (`CatalogProps.ts:36`, `FileStructure.ts:528-531`, `:719-725`) |
 | `editors` | array | нет | Email'ы с правами публикации | — |
 
 **`filterProperties` — legacy-форма writer 4.6.0 (список имён):** движком на пине

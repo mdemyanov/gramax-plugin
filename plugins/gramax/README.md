@@ -142,4 +142,4 @@ uv run "${CLAUDE_PLUGIN_ROOT}/scripts/migrate_mermaid.py" content --fix --yes
 
 ## Версия
 
-4.8.0 — см. [CHANGELOG.md](./CHANGELOG.md)
+4.9.0 — см. [CHANGELOG.md](./CHANGELOG.md)

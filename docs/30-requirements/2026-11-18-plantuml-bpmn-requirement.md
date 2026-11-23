@@ -187,8 +187,9 @@ drawio-pipeline — навыки `diagram-on-demand` и `diagrams`, `drawio_conv
 
 - [ ] **AC-051:** после запроса PlantUML-диаграммы для статьи создан `.puml` рядом со статьёй:
   `test -f <dir>/<page-slug>-<diagram-slug>.puml && echo PASS`
-- [ ] **AC-052:** `.puml` — чистый PlantUML без Gramax-разметки:
-  `head -1 <file>.puml | grep -q '^@start' && ! grep -qE '<plant-uml|\`\`\`plant-uml' <file>.puml && echo PASS`
+- [ ] **AC-052:** `.puml` — чистый PlantUML без Gramax-разметки (тег `<plant-uml>` и
+  inline-форма с тройными бэктиками перед `plant-uml` не допускаются):
+  `head -1 <file>.puml | grep -q '^@start' && ! grep -q 'plant-uml' <file>.puml && echo PASS`
 - [ ] **AC-053:** статья содержит тег-ссылку: `grep -q '<plant-uml path="./' <page>.md && echo PASS`
 - [ ] **AC-054:** Salt-макет авторится тем же контуром: `grep -q '@startsalt' <file>.puml && echo PASS`
 - [ ] **AC-055:** `.bpmn` — XML BPMN-нотации:

@@ -60,7 +60,7 @@ for variant in int-language null-language empty-language; do
 done
 
 # --- (c): контракт — schemaVersion 2, language ушёл из обязательных, в опциональных ---
-assert_eq "$(python3 -c 'import json;print(json.load(open(sys.argv[1],encoding="utf-8")).get("schemaVersion"))' "$RULES_JSON" 2>/dev/null)" "2" \
+assert_eq "$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1],encoding="utf-8")).get("schemaVersion"))' "$RULES_JSON" 2>/dev/null)" "2" \
   "AC-134: schemaVersion gramax-catalog-rules.json = 2 (ADR-0026, подъём по прецеденту)"
 
 REQ=$(python3 -c 'import json,sys;d=json.load(open(sys.argv[1],encoding="utf-8"));print(",".join(d.get("docRootRequiredFields",[])))' "$RULES_JSON" 2>/dev/null)
