@@ -154,9 +154,10 @@ syntax: XML) и HEAD 43435c7.
   подключение к `--full` (шаг в check-gramax.sh и строка заголовка) либо перенос в
   tests/gramax/archive/ с записью; (б) validate_structure.py и validate_comments.py входят в
   `--full` с порогом 0 ERROR на docs/ (после правок группы B); оставшиеся предупреждения закрыты
-  или приняты с записью; (в) мёртвый overlay-тулинг — apply-overlay.sh и три хелпера со ссылками
-  на docs/overlays/ и несуществующий scripts/init.sh — удалён с записью в sunset-registry либо
-  переключён на templates/overlays/ со смоком.
+  или приняты с записью; (в) мёртвый overlay-тулинг — apply-overlay.sh и четыре хелпера
+  (`_init_helpers.py`, `_resolve_agents.py`, `_apply_profile.py`, `_apply_yaml_patch.py`)
+  со ссылками на docs/overlays/ и несуществующий scripts/init.sh — удалён с записью в
+  sunset-registry либо переключен на templates/overlays/ со смоком.
 - **FR-221 (тексты, записи, реестр идентификаторов):** (а) README плагина называет актуальную
   версию, докстринг validate_render согласован с `gramax-render-rules.json` (th — WARN с 4.9.0),
   проверка версии в сюите краснеет при расхождении; (б) CLAUDE.md и корневой README соответствуют
@@ -242,9 +243,10 @@ syntax: XML) и HEAD 43435c7.
   к `--full` (шаг и строка заголовка) либо лежат в archive/ с записью; `--full` зелёный.
 - [ ] **AC-144 (FR-220):** validate_structure.py и validate_comments.py вызываются из `--full`
   с порогом 0 ERROR; на docs/ 0 ERROR; оставшиеся предупреждения закрыты или приняты с записью.
-- [ ] **AC-145 (FR-220):** apply-overlay.sh и три хелпера удалены (sunset-registry записан,
-  orphan-references зелёный) либо переключены на templates/overlays/ и покрыты смоком; запись
-  ночного отчёта исправлена или помечена.
+- [ ] **AC-145 (FR-220):** apply-overlay.sh и четыре хелпера (`_init_helpers.py`,
+  `_resolve_agents.py`, `_apply_profile.py`, `_apply_yaml_patch.py`) удалены (sunset-registry
+  записан, orphan-references зелёный) либо переключены на templates/overlays/ и покрыты смоком;
+  запись ночного отчёта исправлена или помечена.
 - [ ] **AC-146 (FR-221):** CLAUDE.md и корневой README соответствуют дереву: состав навыков
   (7 навыков и агент), ref nauta, описание `--full` по фактическому числу шагов, блок предусловий
   ADR-0008/RES-001; порог C14 не нарушен; `bash scripts/check.sh --fast` PASS.

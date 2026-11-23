@@ -40,6 +40,8 @@ order: 1
 | [0023](0023-plantuml-bpmn-skill.md) | Навык plantuml — PlantUML/BPMN-авторство как новый публичный скилл: плейсмент, релизная поверхность, граница рендера | Accepted | 2026-11-18 | gramax / marketplace |
 | [0024](0024-validators-error-check-parity.md) | Паритет офлайн-валидаторов с модулем «Проверка на ошибки» — коды находок, строгость, контракт-паритет W034 | Accepted | 2026-11-18 | gramax / marketplace |
 | [0025](0025-playwright-dev-loop-dependency.md) | Playwright в dev-контуре — питон-биндинг через uv без npm-поверхности, браузер вне репо, первый сетевой шаг `--full` | Accepted | 2026-11-21 | gramax / marketplace |
+| [0026](0026-validator-contracts-engine-pin.md) | Калибровка контрактов валидаторов по движку 48592b36 — language, теги таблицы, реестр иконок, optionalCategoryIndex, properties в _index.md, битый UTF-8 | Proposed | 2026-11-23 | gramax / marketplace |
+| [0027](0027-full-gate-composition.md) | Полный гейт `--full` релиза 4.10.0 — живая нога вне гейта, именованные отказы, догфудинг валидаторов, статус сюит и удаление overlay-тулинга | Proposed | 2026-11-23 | gramax / marketplace |
 
 ## Связи между ADR
 

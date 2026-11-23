@@ -18,3 +18,4 @@ order: 4
 - [writer 4.8.0 — хвост writer-sync: служебная синтаксика, негативный перечень, HTML-компонент, frontmatter-поля](2026-11-18-writer-tail-480-design.md) — FR-183…FR-186, BR-019/BR-020
 - [Прибор рендер-проб Playwright и калибровка validate_render — конфиг цели, именованные отказы, harness tier-0/1/2, интеграция --full, протокол замера](2026-11-21-playwright-render-quality-design.md) — FR-187…FR-198, ADR-0025
 - [Волна-2 калибровки render-quality: боевой режим на живой цели — живая форма pageUrlTemplate, жизненный цикл пробных страниц, tier-1 на живой цели, механика судьбы th-вердикта](2026-11-21-render-quality-wave2-design.md) — FR-199…FR-207
+- [Калибровка контрактов валидаторов по движку 48592b36 — целевые значения, факты движка, AC/NFR-мэппинг, контракт с QA-author, бриф Dev и рецепт реестра иконок](2026-11-23-wave3-validator-contracts-design.md) — FR-208…FR-218, AC-129…AC-140, AC-151, ADR-0026
