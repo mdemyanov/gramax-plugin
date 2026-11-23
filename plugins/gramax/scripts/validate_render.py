@@ -21,12 +21,18 @@ frontmatter `title:` без кавычек, `<note>` внутри `<td>`, `<note
 Полный текст MIT-лицензии, provenance и список изменений относительно upstream —
 `LICENSE.upstream.md` рядом со скриптом (ADR-0019, Решение 7, NFR-006).
 
+Файл, не являющийся валидным UTF-8, не обрывает прогон traceback'ом: `check()`
+возвращает одну ошибку на строке 0 (`ERROR L0: Файл не является валидным UTF-8 (…)`
+— форма апстрим-линтера), остальные файлы каталога проверяются, rc=1
+(ADR-0026 Решение 6, FR-212; чтение — общий примитив `lib/read_page.py`).
+
 Контракт киллеров/баланса/allowlist — `gramax-render-rules.json` (корень плагина),
 машиночитаемый реестр эмпирических инцидентов (ADR-0019, Решение 2, BR-002/BR-003).
 Повреждённый/отсутствующий контракт — явный error, не молчаливый fallback
-(ADR-0012, Consequences). Маскирование кода (fenced + inline) — общий примитив
-`lib/md_code_mask.py` (ADR-0019, Решение 5): примеры синтаксиса в прозе не считаются
-разметкой (FR-110, устраняет 11 ложных ERROR исходника на нашем же каталоге).
+(ADR-0012, Consequences). Маскирование кода (fenced + inline) и тела блоков сырого
+HTML `<html>…</html>` — общий примитив `lib/md_code_mask.py` (ADR-0019, Решение 5;
+FR-216): примеры синтаксиса в прозе и легальные HTML-теги внутри html-блока не
+считаются разметкой страницы.
 
 Использование:
     uv run plugins/gramax/scripts/validate_render.py <файл.md | каталог> [...]
@@ -42,7 +48,8 @@ import re
 import sys
 from pathlib import Path
 
-from lib.md_code_mask import _mask_code
+from lib.md_code_mask import _mask_code, _mask_html_blocks
+from lib.read_page import read_page
 
 DOC_URL = "https://github.com/mdemyanov/gramax-plugin"
 EPILOG = (
@@ -73,15 +80,23 @@ def load_render_rules() -> dict:
 def check(path: Path, rules: dict) -> tuple[list, list]:
     """Возвращает (errors, warns) как списки (lineno, message).
 
-    Все проверки работают по замаскированному тексту (fenced + inline-код заменён
-    пробелами той же длины) — кроме frontmatter-титла, который кодом не бывает.
+    Все проверки работают по замаскированному тексту (fenced + inline-код и тело
+    блоков `<html>…</html>` заменены пробелами той же длины) — кроме
+    frontmatter-титла, который кодом не бывает.
+
+    Файл с битым UTF-8 (ADR-0026 Решение 6, FR-212) даёт ровно одну ошибку на
+    строке 0 с путём-агностным сообщением — форма апстрим-линтера дословно;
+    файл не читается дальше, обход вызывающим кодом продолжается.
     """
-    text = path.read_text(encoding="utf-8")
-    raw_lines = text.split("\n")
-    masked = _mask_code(text)
-    masked_lines = masked.split("\n")
+    text, read_err = read_page(path)
     errors: list[tuple[int, str]] = []
     warns: list[tuple[int, str]] = []
+    if read_err is not None:
+        return [(0, f"Файл не является валидным UTF-8 "
+                    f"(байт 0x{read_err.byte_hex} на позиции {read_err.start} из {read_err.size})")], warns
+    raw_lines = text.split("\n")
+    masked = _mask_html_blocks(_mask_code(text))
+    masked_lines = masked.split("\n")
 
     def E(ln: int, msg: str) -> None:
         errors.append((ln, msg))

@@ -57,7 +57,7 @@ README); новые стабы и фикстуры в `tests/gramax/catalog-vali
 | `catalog-validator/ac-131-xml-comment-unpaired.sh` | AC-131 (FR-211) | integration | 🔴 `check_tags` (`validate_structure.py:391`) не считает самозакрытый тег открывающим — «unpaired `<comment>`: 0 open, 1 close» на фикстуре; нога скобочной формы зелёная |
 | `render-linter/ac-132-broken-utf8-render.sh` | AC-132 (FR-212) | integration | 🔴 `read_text` в `check()` (`validate_render.py:75`) роняет UnicodeDecodeError traceback'ом, обход обрывается; ожидание: `FAIL <путь>` + дословная «ERROR L0: …» с байтом 0xd0 и позицией/размером, вычисленными по байтам фикстуры; ERROR bait-файла и OK чистого присутствуют, rc=1 |
 | `comments/ac-132-comments-utf8-skip.sh` | AC-133 в части комментариев (FR-212 — «проверяется то же») | integration | 🔴 traceback на битый `.md`; ожидание: E036 по одной на битый `.md` и битый `.comments.yaml` (BR-004), путь и байт названы; parse_comments — предупреждение на stderr с путём, rc=0, отчёт по здоровому файлу полон |
-| `catalog-validator/ac-133-broken-utf8-traversal.sh` | AC-133 (FR-212) | integration | 🔴 UnicodeDecodeError на первом же чтении; ожидание: rc=1, traceback нет, ровно одна E036 («байт 0xd0 на позиции P из S», P/S из фикстуры), находка bait-файла «unpaired `<note>`» доказывает обход до конца |
+| `catalog-validator/ac-133-broken-utf8-traversal.sh` | AC-133 (FR-212) | integration | 🔴 UnicodeDecodeError на первом же чтении; ожидание: rc=1, traceback нет, ровно одна E036 («байт 0xd0 на позиции P из S», P/S из фикстуры), находка bait-файла «unpaired `<html>`» доказывает обход до конца (bait исправлен, см. «Ремонты стабов») |
 | `catalog-validator/ac-134-language-optional.sh` | AC-134 (FR-213) | integration | 🔴 «missing field: language» на каталоге без language (rc=1); ожидание: rc=0, типо-проверка присутствующего остаётся (123/null/пустая строка — «invalid type», ноги зелёные сегодня), контракт: schemaVersion 2, `docRootOptionalFields` с language |
 | `catalog-validator/ac-135-table-tags-contract.sh` | AC-135 (FR-214) | integration | 🔴 W034 на table/tr/td каждой XML-таблицы (3 находки на фикстуре); schemaVersion 2, тегов в `pairedTags` нет; ноги-контроли зелёные: баланс не дублируется структурным валидатором (BR-027), genuinely неизвестный `<mywidget>` — W034 остаётся, th вне `pairedTags` |
 | `render-linter/ac-135-table-balance-single-finding.sh` | AC-135 — рендер-сторона (FR-214, BR-027) | integration | 🟢 ЗЕЛЁНЫЙ С РОЖДЕНИЯ — **warden**: одна баланс-находка от validate_render уже сегодня, дубля от validate_structure нет; сторожит, чтобы расширение `pairedTags` (Решение 2) не задвоило находку и не убило баланс; обоснование — как у warden-ног ac-026/ac-029: проверяемое поведение обязано пережить правку контракта |
@@ -204,3 +204,14 @@ superseded-часть на стороне suite.
   затронуты.
 - Размеры: стабы 40–120 строк, модульная форма, один `FAIL`-счётчик на файл; байтовые
   фикстуры — по одному неверному байту 0xd0, позиция и размер вычисляются прогоном.
+
+## Ремонты стабов после цикла Dev (согласовано с PM, 2026-11-23)
+
+Контракт ни одного стаба не ослаблен; ниже — исправления дефектов самих заглушек.
+
+| Стаб | Дефект заглушки | Ремонт |
+|---|---|---|
+| `catalog-validator/ac-134`, `ac-135`, `ac-136` | однострочники `python3 -c` использовали `sys.argv` без `import sys` — `NameError`, пустой вывод, ассерт версии схемы красный при любом дереве | добавлен `import sys`; ассерты не менялись |
+| `catalog-validator/ac-151`, нога (f) | «голый» `grep -qF 'properties'` по всему выводу противоречил ноге (d): канонический текст V3 содержит слово «properties» | нога (f) судит отсутствие формулировки V2 «не должен содержать properties» |
+| `comments/ac-132-comments-utf8-skip` | фикстура требовала строку «Текст здорового комментария», которой не было ни в одном файле; единственная здоровая пара намеренно без `content` | добавлена вторая здоровая пара `healthy-content.*` (id `ccccc`); ассерты не менялись |
+| `catalog-validator/ac-133`, нога (e) | bait-файл нёс непарный `<note>` — тег, который балансирует только validate_render (BR-027); находка от validate_structure недостижима | bait — непарный `<html>` (`bait-unpaired-html.md`), ассерт ждёт «unpaired `<html>`»; смысл ноги (обход доведён до конца) тот же |

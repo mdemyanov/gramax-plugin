@@ -86,11 +86,11 @@ fi
 # --- (g): реестр как контракт ---
 assert_file_exists "$REGISTRY" "AC-136 — gramax-lucide-icons.json обязан существовать (ADR-0026 Решение 3; красный на 7553da1 — файла нет)"
 if [ -f "$REGISTRY" ]; then
-  assert_eq "$(python3 -c 'import json;print(json.load(open(sys.argv[1],encoding="utf-8")).get("schemaVersion"))' "$REGISTRY" 2>/dev/null)" "1" \
+  assert_eq "$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1],encoding="utf-8")).get("schemaVersion"))' "$REGISTRY" 2>/dev/null)" "1" \
     "AC-136 — schemaVersion реестра = 1"
-  assert_eq "$(python3 -c 'import json;print(json.load(open(sys.argv[1],encoding="utf-8")).get("source",{}).get("lucideReact"))' "$REGISTRY" 2>/dev/null)" "0.525.0" \
+  assert_eq "$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1],encoding="utf-8")).get("source",{}).get("lucideReact"))' "$REGISTRY" 2>/dev/null)" "0.525.0" \
     "AC-136 — source.lucideReact = 0.525.0 (bun.lock:3155 движка)"
-  assert_eq "$(python3 -c 'import json;print(json.load(open(sys.argv[1],encoding="utf-8")).get("source",{}).get("enginePin"))' "$REGISTRY" 2>/dev/null)" "48592b36" \
+  assert_eq "$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1],encoding="utf-8")).get("source",{}).get("enginePin"))' "$REGISTRY" 2>/dev/null)" "48592b36" \
     "AC-136 — source.enginePin = 48592b36"
 fi
 

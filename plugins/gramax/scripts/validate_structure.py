@@ -5,10 +5,14 @@
 # ///
 """Валидация структуры каталога Gramax (pre-publish staging-check).
 
-Контракт тегов и правил каталога — не хардкод здесь, а два JSON-файла рядом со скриптом
-(`plugins/gramax/gramax-tags.json`, `plugins/gramax/gramax-catalog-rules.json`), единственный
-источник правды (ADR-0012 «Контракт валидации Gramax-каталога», Решение 3, BR-002). Повреждённый
-или отсутствующий контракт — error, не молчаливый fallback (ADR-0012, Consequences).
+Контракт тегов и правил каталога — не хардкод здесь, а JSON-файлы рядом со скриптом
+(`plugins/gramax/gramax-tags.json`, `plugins/gramax/gramax-catalog-rules.json`,
+`plugins/gramax/gramax-render-rules.json`, `plugins/gramax/gramax-lucide-icons.json`),
+единственный источник правды (ADR-0012 «Контракт валидации Gramax-каталога», Решение 3,
+BR-002; реестр иконок — ADR-0026 Решение 3). Повреждённый или отсутствующий контракт —
+error, не молчаливый fallback (ADR-0012, Consequences). Файл, не являющийся валидным
+UTF-8, даёт именованную находку `E036` и не обрывает обход (ADR-0026 Решение 6; чтение —
+общий примитив `lib/read_page.py`).
 """
 
 import argparse
@@ -21,8 +25,9 @@ from pathlib import Path
 
 import yaml
 
-from lib.md_code_mask import _mask_code
-from lib.md_link_parser import parse_md_resources
+from lib.md_code_mask import _mask_code, _mask_html_blocks
+from lib.md_link_parser import _MD_LINK_RE, _EXTERNAL_RE, MdResource, _diagram_tag_re
+from lib.read_page import read_page, utf8_message
 from lib.link_resolver import resolve_no_ext, check_hash_anchor
 
 DOC_URL = "https://github.com/mdemyanov/gramax-plugin"
@@ -42,6 +47,41 @@ class Issue:
 
     def __str__(self):
         return f"{self.level.upper()}  {self.path}  {self.message}"
+
+
+def _read_page_or_report(path: Path, issues: list[Issue]) -> str | None:
+    """Чтение файла каталога через общий примитив `read_page` (ADR-0026 Решение 6, FR-212).
+
+    Файл, не являющийся валидным UTF-8, даёт именованную находку `E036` (нумерация 03x
+    общая с W030–W035, буква — уровень) и `None` — вызывающая проверка пропускает текстовые
+    проверки этого файла, обход продолжается, traceback'а нет. Повторные чтения того же
+    файла разными проверками дают дубликаты находки — их поглощает `_dedupe_utf8_findings`
+    в `validate()` (BR-004: одна находка на файл, сколько бы проверок его ни читали).
+    """
+    text, read_err = read_page(path)
+    if read_err is not None:
+        issues.append(Issue("error", path, f"E036: {utf8_message(read_err)}"))
+        return None
+    return text
+
+
+def _dedupe_utf8_findings(issues: list[Issue]) -> list[Issue]:
+    """BR-004 (ADR-0026 Решение 6): файл с битым UTF-8 — ровно одна находка E036.
+
+    Поглощает ТОЛЬКО дубликаты E036 одного файла от разных читателей; прочие находки
+    не трогает — в том числе одинаковые W035 разных точек использования одного кода
+    («одна находка на точку использования», ADR-0024) и одинаковые сообщения разных
+    файлов (пути разные)."""
+    seen: set[tuple[str, str, str]] = set()
+    out: list[Issue] = []
+    for issue in issues:
+        if issue.message.startswith("E036:"):
+            key = (issue.level, str(issue.path), issue.message)
+            if key in seen:
+                continue
+            seen.add(key)
+        out.append(issue)
+    return out
 
 
 # ===== Машиночитаемый контракт (ADR-0012, Решение 3) =================================
@@ -90,7 +130,9 @@ def check_doc_root(root: Path, issues: list[Issue], required_fields: list[str],
     if not yaml_file.exists():
         issues.append(Issue("error", root, ".doc-root.yaml not found"))
         return set()
-    raw = yaml_file.read_text(encoding="utf-8")
+    raw = _read_page_or_report(yaml_file, issues)
+    if raw is None:
+        return set()  # битый UTF-8: находка E036 выдана, parse/type-проверки файла пропущены
     try:
         data = yaml.safe_load(raw)
     except yaml.YAMLError as e:
@@ -204,11 +246,15 @@ def _report_doc_root_yaml_error(yaml_file: Path, issues: list[Issue], raw: str, 
 def load_property_schema(root: Path) -> dict[str, dict] | None:
     """Возвращает {property_name: {type, values}} из .doc-root.yaml.
 
-    None — если schema нечитабельна или содержит экспериментальный type: select.
+    None — если schema нечитабельна (в том числе битый UTF-8: находка E036 о файле
+    уже выдана `check_doc_root`, здесь молча) или содержит экспериментальный type: select.
     """
     yaml_file = root / ".doc-root.yaml"
+    raw, read_err = read_page(yaml_file)
+    if read_err is not None:
+        return None
     try:
-        data = yaml.safe_load(yaml_file.read_text(encoding="utf-8"))
+        data = yaml.safe_load(raw)
     except yaml.YAMLError:
         return None
     if not isinstance(data, dict):
@@ -284,14 +330,45 @@ def _in_nested_subtree(path: Path, nested: set[Path]) -> bool:
 
 def _parse_resources(root: Path, nested: set[Path],
                      diagram_tags: tuple[str, ...] = ("drawio",)):
-    """Ресурсные ссылки (`parse_md_resources`) только из структурной области `root`:
-    источники из поддеревьев вложенных root / исключённых путей отбрасываются (FR-120).
-    `diagram_tags` прокидывается в парсер (ADR-0024 Решение 3)."""
-    return [
-        r for r in parse_md_resources(root, diagram_tags)
-        if not _in_nested_subtree(r.source, nested)
-        and not _is_excluded_walk_path(root, r.source)
-    ]
+    """Ресурсные ссылки (ссылки/изображения/диаграммные теги) только из структурной
+    области `root`: источники из поддеревьев вложенных root / исключённых путей
+    отбрасываются (FR-120). `diagram_tags` прокидывается в матчер (ADR-0024 Решение 3).
+
+    Чтение файла — через `read_page` (ADR-0026 Решение 6, FR-212): файл с битым UTF-8
+    исключается из ресурсного скана (находка E036 о нём уже выдана текстовыми
+    читателями), скан продолжается ПОФАЙЛОВО — ресурсы здоровых соседних файлов не
+    теряются. Поэтому здесь не `parse_md_resources` целиком: он читает файлы сам
+    (`lib/md_link_parser.py` — вне правок этого цикла) и на битом UTF-8 обрывал бы
+    весь скан каталога traceback'ом. Логика разбора не дублируется: регэкспы ссылок
+    и строитель матчера диаграммных тегов импортируются из того же модуля."""
+    diagram_re = _diagram_tag_re(tuple(diagram_tags))
+    root_resolved = root.resolve()
+    resources: list[MdResource] = []
+    for md in _collect_md_files(root, nested):
+        if _in_nested_subtree(md, nested) or _is_excluded_walk_path(root, md):
+            continue
+        text, read_err = read_page(md)
+        if read_err is not None or text is None:
+            continue  # E036 уже выдана текстовыми читателями (BR-004: одна находка на файл)
+        text = _mask_code(text)
+        for m in _MD_LINK_RE.finditer(text):
+            full_match = m.group(0)
+            raw = m.group(1)
+            target = raw.split("#", 1)[0].strip().strip("<>")
+            if not target:
+                continue  # якорь на текущую страницу — не файловая ссылка
+            if _EXTERNAL_RE.match(target):
+                continue  # http/https/mailto/tel/protocol-relative — офлайн-инструмент их не резолвит
+            resolved = (md.parent / target).resolve()
+            in_scope = resolved == root_resolved or root_resolved in resolved.parents
+            ttype = "image" if full_match.startswith("!") else "link"
+            resources.append(MdResource(md, raw, resolved, ttype, in_scope))
+        for m in diagram_re.finditer(text):
+            raw = m.group(2)
+            resolved = (md.parent / raw).resolve()
+            in_scope = resolved == root_resolved or root_resolved in resolved.parents
+            resources.append(MdResource(md, raw, resolved, m.group(1), in_scope))
+    return resources
 
 
 # Дословно (дизайн волны-3 §2.4, FR-217/AC-138): префикс сохранён — на него опираются
@@ -304,11 +381,15 @@ _MISSING_INDEX_MSG = ("missing _index.md (раздела в дереве нет,
 def _doc_root_flag_true(root: Path, flag: str) -> bool:
     """Строго булево `true` флага `flag` в `.doc-root.yaml` ЭТОГО catalog root
     (ADR-0026 Решение 4): строка `"true"`, `false` и отсутствие ключа — False.
-    Битый/нечитаемый YAML — False (правило остаётся безусловным, parse-error
-    отдельно сигналит check_doc_root)."""
+    Битый/нечитаемый YAML (в том числе битый UTF-8 — находка E036 о файле уже выдана
+    `check_doc_root`) — False: правило остаётся безусловным, parse-error отдельно
+    сигналит check_doc_root."""
+    text, read_err = read_page(root / ".doc-root.yaml")
+    if read_err is not None:
+        return False
     try:
-        data = yaml.safe_load((root / ".doc-root.yaml").read_text(encoding="utf-8"))
-    except (yaml.YAMLError, OSError):
+        data = yaml.safe_load(text)
+    except yaml.YAMLError:
         return False
     if not isinstance(data, dict):
         return False
@@ -372,7 +453,9 @@ def extract_frontmatter(text: str) -> dict | None:
 
 def check_frontmatter(md_file: Path, issues: list[Issue], schema: dict | None,
                       required_fields: list[str], root: Path):
-    text = md_file.read_text(encoding="utf-8")
+    text = _read_page_or_report(md_file, issues)
+    if text is None:
+        return  # битый UTF-8: находка E036 выдана, текстовые проверки файла пропущены
     fm = extract_frontmatter(text)
     if fm is None:
         issues.append(Issue("error", md_file, "missing or invalid frontmatter"))
@@ -433,13 +516,18 @@ def check_frontmatter(md_file: Path, issues: list[Issue], schema: dict | None,
 
 
 def check_tags(md_file: Path, issues: list[Issue], paired_tags: list[str]):
-    text = md_file.read_text(encoding="utf-8")
+    text = _read_page_or_report(md_file, issues)
+    if text is None:
+        return  # битый UTF-8: находка E036 выдана, текстовые проверки файла пропущены
     # Маскируем код (fenced-блоки И inline `код`) через _mask_code — статья, упоминающая
     # Gramax-тег словами в прозе (например, `` `<note>` `` как имя тега, не как разметку),
     # не должна давать ложный unpaired (найдено догфудингом на ADR-0012 и требовании
     # 2026-08-11-writer-consumer-rules.md — inline-код там не вырезался прежней ad-hoc
     # регуляркой, которая знала только про ``` fences).
-    cleaned = _mask_code(text)
+    # Поверх — тело блоков сырого HTML `<html>…</html>` (_mask_html_blocks, FR-216):
+    # теги внутри блока легальны и баланс внешних пар сбивать не должны; сами теги
+    # внешней пары остаются на месте — непарный `<html>` балансируется как прежде.
+    cleaned = _mask_html_blocks(_mask_code(text))
     for tag in paired_tags:
         if tag == "comment":
             # FR-211 (AC-131): блочный комментарий редактор пишет самозакрывающимся
@@ -534,9 +622,13 @@ def _resolve_link_target(source_dir: Path, target: str) -> Path:
     return literal
 
 
-def _collect_links(root: Path, nested: set[Path] | None = None) -> list[LinkRef]:
+def _collect_links(root: Path, issues: list[Issue], nested: set[Path] | None = None) -> list[LinkRef]:
     """Собирает markdown-ссылки/изображения (`[текст](цель)`, `![alt](цель)`) из всех .md
     каталога.
+
+    Чтение файла — через `read_page` (ADR-0026 Решение 6): файл с битым UTF-8 даёт
+    находку E036 (дубликаты поглощает `_dedupe_utf8_findings`) и в сбор ссылок не
+    входит.
 
     Границы (FR-047, разделяемые orphan- и broken-link-проверками):
     - внешние (http/https/mailto/tel/protocol-relative) и якорные (`#foo`) цели не
@@ -553,7 +645,10 @@ def _collect_links(root: Path, nested: set[Path] | None = None) -> list[LinkRef]
     root_resolved = root.resolve()
     refs: list[LinkRef] = []
     for md in _collect_md_files(root, nested):
-        text = _mask_code(md.read_text(encoding="utf-8"))
+        text = _read_page_or_report(md, issues)
+        if text is None:
+            continue
+        text = _mask_code(text)
         for m in _MD_LINK_RE.finditer(text):
             raw = m.group(1)
             target = raw.split("#", 1)[0].strip()
@@ -583,13 +678,18 @@ def check_placeholders(root: Path, issues: list[Issue], suppressed_tokens: set[s
         nested = _nested_doc_root_dirs(root)
     yaml_file = root / ".doc-root.yaml"
     if yaml_file.exists():
-        for m in _PLACEHOLDER_RE.finditer(yaml_file.read_text(encoding="utf-8")):
-            if m.group(0) in suppressed:
-                continue
-            issues.append(Issue("error", yaml_file,
-                                 f"плейсхолдер шаблона {m.group(0)} не заменён (placeholder)"))
+        yaml_text = _read_page_or_report(yaml_file, issues)
+        if yaml_text is not None:
+            for m in _PLACEHOLDER_RE.finditer(yaml_text):
+                if m.group(0) in suppressed:
+                    continue
+                issues.append(Issue("error", yaml_file,
+                                    f"плейсхолдер шаблона {m.group(0)} не заменён (placeholder)"))
     for md in _collect_md_files(root, nested):
-        masked = _mask_code(md.read_text(encoding="utf-8"))
+        text = _read_page_or_report(md, issues)
+        if text is None:
+            continue
+        masked = _mask_code(text)
         for m in _PLACEHOLDER_RE.finditer(masked):
             issues.append(Issue("error", md,
                                  f"плейсхолдер шаблона {m.group(0)} не заменён (placeholder)"))
@@ -633,7 +733,14 @@ def check_broken_links(root: Path, issues: list[Issue], nested: set[Path] | None
 
         # Проверяем hash-якорь только если файл найден
         if fragment and resolved.suffix == ".md":
-            if not check_hash_anchor(resolved, fragment):
+            try:
+                anchor_ok = check_hash_anchor(resolved, fragment)
+            except UnicodeDecodeError:
+                # Цель нечитаема (битый UTF-8, ADR-0026 Решение 6): находка E036 о самой
+                # цели уже выдана текстовыми читателями — якорную находку не дублируем
+                # (BR-004), обход продолжается.
+                continue
+            if not anchor_ok:
                 issues.append(Issue(
                     "warning", res.source,
                     f'W033: hash-якорь "#{fragment}" не найден в {resolved.relative_to(root.resolve())} '
@@ -670,7 +777,7 @@ def check_orphans(root: Path, issues: list[Issue], strict: bool, nested: set[Pat
         incoming[key] = 0
         display[key] = md
 
-    for ref in _collect_links(root, nested):
+    for ref in _collect_links(root, issues, nested):
         if not ref.in_scope:
             continue
         if ref.resolved == ref.source.resolve():
@@ -692,6 +799,19 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     plugin_root = Path(__file__).resolve().parent.parent
     tags_contract = load_json_contract(plugin_root / "gramax-tags.json", issues)
     rules_contract = load_json_contract(plugin_root / "gramax-catalog-rules.json", issues)
+    # ADR-0026 Решение 3 (FR-215): реестр кодов иконок — контракт поставки; отсутствие
+    # или повреждение — error через load_json_contract, не молчаливый fallback.
+    # Деградация повреждённого контракта — по прецеденту tags-контракта: W035 срабатывает
+    # на все коды без файла (error уже выдан выше).
+    icons_contract = load_json_contract(plugin_root / "gramax-lucide-icons.json", issues)
+    icons_source = (icons_contract or {}).get("source")
+    registry_version = str(icons_source.get("lucideReact", "unknown")) if isinstance(icons_source, dict) else "unknown"
+    registry_codes = {
+        code.lower()
+        for key in ("lucide", "engineCustom")
+        for code in (icons_contract or {}).get(key, [])
+        if isinstance(code, str)
+    }
     paired_tags = (tags_contract or {}).get("pairedTags", [])
     # Диаграммные теги с file-based целью (ADR-0024 Решение 3): контракт — единственный
     # источник (BR-002); fallback ["drawio"] — деградационный сценарий повреждённого
@@ -749,8 +869,10 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
         _validate_catalog_root(catalog_root, issues, strict, fix, yes, garbage_files,
                                doc_root_required, doc_root_optional, frontmatter_required,
                                effective_paired_tags, known_tags, diagram_tags,
-                               subfolder_optional_flag)
-    return issues
+                               subfolder_optional_flag, registry_codes, registry_version)
+    # BR-004 (ADR-0026 Решение 6): файл с битым UTF-8 читают несколько проверок —
+    # ровно одна находка E036 на файл.
+    return _dedupe_utf8_findings(issues)
 
 
 def _validate_catalog_root(root: Path, issues: list[Issue], strict: bool, fix: bool, yes: bool,
@@ -758,7 +880,9 @@ def _validate_catalog_root(root: Path, issues: list[Issue], strict: bool, fix: b
                            doc_root_optional: list[str], frontmatter_required: list[str],
                            effective_paired_tags: list[str],
                            known_tags: set[str], diagram_tags: tuple[str, ...],
-                           subfolder_optional_flag: str | None = None):
+                           subfolder_optional_flag: str | None = None,
+                           registry_codes: set[str] | None = None,
+                           registry_version: str = "unknown"):
     """Полный структурный suite для одного catalog root (FR-120: каждый найденный
     `.doc-root.yaml` валидируется как отдельный root). Ошибка парсинга `.doc-root.yaml`
     прогон не прекращает (FR-122) — все проверки, включая `check_placeholders`, выполняются."""
@@ -780,7 +904,7 @@ def _validate_catalog_root(root: Path, issues: list[Issue], strict: bool, fix: b
     check_unsupported_markup(root, issues, known_tags, nested)
     check_images(root, issues, nested)
     check_diagrams(root, issues, nested, diagram_tags)
-    check_icons(root, issues, nested)
+    check_icons(root, issues, nested, registry_codes or set(), registry_version)
 
 
 def check_images(root: Path, issues: list[Issue], nested: set[Path] | None = None):
@@ -830,14 +954,22 @@ def check_diagrams(root: Path, issues: list[Issue], nested: set[Path] | None = N
 _ICON_RE = re.compile(r'<icon\s[^>]*code="([^"]+)"[^>]*/>')
 
 
-def check_icons(root: Path, issues: list[Issue], nested: set[Path] | None = None):
-    """Проверяет существование собственных иконок `.icons/<code>.svg` (ADR-0024
-    Решения 1/2/5, FR-153…FR-155).
+def check_icons(root: Path, issues: list[Issue], nested: set[Path] | None,
+                registry_codes: set[str], registry_version: str):
+    """Проверяет иконки против `.icons/<code>.svg` и реестра встроенных кодов
+    (ADR-0024 Решения 1/2/5, FR-153…FR-155; реестр — ADR-0026 Решение 3, FR-215).
 
-    `<icon code="X"/>` с кодом без префикса `lucide-` резолвится против `.icons/`
-    СВОЕГО catalog root (ADR-0020: статья вложенного каталога — против `.icons/`
-    своего root). Lucide-код против `.icons/` не резолвится — только форма префикса
-    (BR-013, реестра lucide в поставке нет). WARNING-уровень (W035), одна находка
+    W035 срабатывает, только когда нет файла `.icons/<код>.svg` И кода нет в реестре
+    (`gramax-lucide-icons.json`: ключи `dynamicIconImports` пакета lucide-react плюс
+    ключи `customIcons` движка) — паритет с проверкой иконок движка
+    (`Healthcheck.ts:258-263` на пине 48592b36). Файл приоритетнее: движок при рендере
+    берёт svg из `.icons/`, если файл есть (`IconProvider.ts:23-41`), — существующий
+    файл гасит находку даже для кода вне реестра. Членство — по коду в нижнем регистре
+    (движок резолвит библиотечный код без приведения — `LucideIcon.ts:13-17`), файл
+    ищется по коду дословно. Формы с префиксом `lucide-` движок не знает
+    (`LucideIcon.ts:36-42`): такой код без файла даёт W035 с подсказкой убрать
+    префикс, если код без префикса есть в реестре (ADR-0024 Решение 5 и BR-013 —
+    superseded в части формы префикса). WARNING-уровень (W035), одна находка
     на точку использования (по образцу W030/W031). Пустой сбор кодов → ноль
     обращений к файловой системе, ноль находок — отсутствие `.icons/` сама по себе
     не проверяется (FR-155). Периметр — только вхождения в статьях; `properties.icon`
@@ -846,17 +978,31 @@ def check_icons(root: Path, issues: list[Issue], nested: set[Path] | None = None
     if nested is None:
         nested = _nested_doc_root_dirs(root)
     for md in _collect_md_files(root, nested):
-        text = _mask_code(md.read_text(encoding="utf-8"))
-        for m in _ICON_RE.finditer(text):
+        text = _read_page_or_report(md, issues)
+        if text is None:
+            continue  # битый UTF-8: находка E036 выдана, текстовые проверки файла пропущены
+        cleaned = _mask_html_blocks(_mask_code(text))
+        for m in _ICON_RE.finditer(cleaned):
             code = m.group(1)
-            if code.startswith("lucide-"):
-                continue
             expected = root / ".icons" / f"{code}.svg"
-            if not expected.exists():
-                issues.append(Issue(
-                    "warning", md,
-                    f'W035: файл иконки не найден: код "{code}" → ожидается .icons/{code}.svg',
-                ))
+            if expected.exists():
+                continue  # файл приоритетнее: движок рендерит по нему, реестр не спрашивается
+            if code.lower() in registry_codes:
+                continue  # встроенный код Lucide/движка (реестр, ADR-0026 Решение 3)
+            if code.startswith("lucide-"):
+                stem = code[len("lucide-"):]
+                if stem and stem.lower() in registry_codes:
+                    issues.append(Issue(
+                        "warning", md,
+                        f'W035: код "{code}" не является встроенным: префикс lucide- движок '
+                        f'не читает — уберите префикс: "{stem}"',
+                    ))
+                    continue
+            issues.append(Issue(
+                "warning", md,
+                f'W035: файл иконки не найден: код "{code}" → ожидается .icons/{code}.svg '
+                f"(кода нет в реестре встроенных иконок lucide-react {registry_version})",
+            ))
 
 
 # Whitelist тегов, которые Gramax НЕ считает unsupported.
@@ -889,7 +1035,13 @@ def check_unsupported_markup(root: Path, issues: list[Issue], known_tags: set[st
     if nested is None:
         nested = _nested_doc_root_dirs(root)
     for md in _collect_md_files(root, nested):
-        text = _mask_code(md.read_text(encoding="utf-8"))
+        text = _read_page_or_report(md, issues)
+        if text is None:
+            continue  # битый UTF-8: находка E036 выдана, текстовые проверки файла пропущены
+        # Поверх маски кода — тело блоков сырого HTML `<html>…</html>` (FR-216): движок
+        # пропускает содержимое как есть, произвольные HTML-теги внутри легальны —
+        # W034 судит только разметку страницы вне блока.
+        text = _mask_html_blocks(_mask_code(text))
         seen_tags: set[str] = set()
         for m in _UNSUPPORTED_HTML_RE.finditer(text):
             tag = m.group(1).lower()
@@ -908,7 +1060,7 @@ def check_unsupported_markup(root: Path, issues: list[Issue], known_tags: set[st
 # не вводится: каноническое имя апстрим-группы для иконок не подтверждено
 # (ADR-0024 Решение 6).
 _ERROR_GROUPS = {
-    "content":       {"title": "incorrects-content",      "pattern": r"^(?:ERROR|WARNING)\s+.*\s+(?:missing|invalid|плейсхолдер|placeholder|фронтматтер|frontmatter)"},
+    "content":       {"title": "incorrects-content",      "pattern": r"^(?:ERROR|WARNING)\s+.*\s+(?:missing|invalid|плейсхолдер|placeholder|фронтматтер|frontmatter|UTF-8)"},
     "links":         {"title": "incorrects-paths",         "pattern": r"битая ссылка|broken link|hash-якорь|W032|W033"},
     "images":        {"title": "incorrects-paths",         "pattern": r"W030|W035|изображени|иконк"},
     "diagrams":      {"title": "incorrects-paths",         "pattern": r"W031|диаграмм"},

@@ -4,8 +4,9 @@
 # Дизайн: docs/40-architecture/2026-11-23-wave3-validator-contracts-design.md, §2.4 (E036
 # дословно), §2.5 (чтение через общий примитив; ровно одна находка на файл; альтернатива
 # UTF-8 в паттерне группы content), ADR-0026 Решение 6.
-# Проверка: каталог с broken.md (оборванный байт 0xd0) и bait-unpaired-note.md
-#   (здоровый файл с настоящим дефектом unpaired <note>) →
+# Проверка: каталог с broken.md (оборванный байт 0xd0) и bait-unpaired-html.md
+#   (здоровый файл с настоящим дефектом unpaired <html> — тег, который балансирует
+#   сам validate_structure; баланс <note> по BR-027 ведёт validate_render) →
 #   (a) rc=1; (b) traceback нет; (c) ровно одна E036-строка; (d) E036 называет путь битого
 #   файла, байт 0xd0 и позицию/размер, вычисленные по фикстуре; (e) находка bait-файла
 #   присутствует — обход доведён до конца.
@@ -59,8 +60,8 @@ if ! grep "E036" "$OUT_FILE" | grep -qF "на позиции $EXP_START из $EX
   FAIL=$((FAIL + 1))
 fi
 
-if ! grep -qF "unpaired <note>" "$OUT_FILE"; then
-  echo "  FAIL: AC-133 — находка здорового bait-файла (unpaired <note>) обязана появиться: обход доведён до конца, не оборван битым файлом" >&2
+if ! grep -qF "unpaired <html>" "$OUT_FILE"; then
+  echo "  FAIL: AC-133 — находка здорового bait-файла (unpaired <html>) обязана появиться: обход доведён до конца, не оборван битым файлом" >&2
   FAIL=$((FAIL + 1))
 fi
 rm -f "$OUT_FILE"

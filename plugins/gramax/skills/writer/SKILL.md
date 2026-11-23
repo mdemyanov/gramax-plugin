@@ -337,7 +337,7 @@ px (резерв места до загрузки, ограничение шир
 | OpenAPI | `<openapi src="./api.yaml"/>` | Спецификация API |
 | Mermaid | `<mermaid path="./diagram.mermaid" width="800px" height="450px"/>` | Диаграмма Mermaid |
 | Видео | `<video path="URL"/>` | Встроенное видео: mp4/webm/ogg, YouTube (watch/youtu.be/shorts/live, таймкод `?t=`, плейлист `list=`), Rutube, Google Drive, Instagram, Dropbox, mega.nz; атрибуты `title`, `scale`; URL с подстрокой `embed` — iframe как есть |
-| Иконка | `<icon code="lucide-name"/>` | Lucide-иконка или собственный код из `.icons/` |
+| Иконка | `<icon code="name"/>` | Lucide-иконка (голый kebab-case, например `check`) или собственный код из `.icons/`; префикса `lucide-` движок не знает |
 | HTML | `<html>...</html>` | Сырой HTML |
 
 ### Дашборды через `<view>`
