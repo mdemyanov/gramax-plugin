@@ -140,7 +140,10 @@ def run_probes(target, args) -> int:
     # как «измерено и разошлось». Частичная недоступность и NOT_FOUND остаются rc=1
     # с нотами постранично.
     if facts and all(f.state == tier0_http.STATE_NETWORK_ERR for f in facts.values()):
-        refuse("RENDER_TARGET_UNREACHABLE", HINT_UNREACHABLE)
+        # Цель из конфига названа в баннере (FR-188 «Гигиена хоста»: цель не хардкодится
+        # и видна в выводе — стаб ac-105).
+        refuse("RENDER_TARGET_UNREACHABLE",
+               "%s (цель из конфига: %s)" % (HINT_UNREACHABLE, target.base_url))
 
     needs_browser = ("tier1" in target.tiers or "tier2" in target.tiers)
     driver = browser = context = None

@@ -6,8 +6,9 @@
 # Проверка (контракт): (a) в python-модулях прибора scripts/render-quality/*.py нет ни одного
 # литерала http:// или https:// — цель рендера не хардкодится, единственный коммитимый
 # литерал живёт в render-target.example.json (JSON, не .py); (b) прогон прибора с --config
-# на хосте-заполнителе .invalid (RFC 2606) называет цель из конфига в выводе — отчёт
-# называет цель целиком.
+# на хосте-заполнителе .invalid (RFC 2606) называет цель из конфига в выводе — баннер
+# именованного отказа называет цель целиком (перевод NFR-084 от 2026-11-23: с ADR-0027
+# Решение 2 полная недоступность цели — rc=2 без отчёта, а не rc=1 с отчётом).
 # Цвет при создании: КРАСНЫЙ — каркас scripts/render-quality/ не реализован
 # (вход scripts/render-quality/probe.sh отсутствует); закрывает Dev (Решение 5).
 
@@ -65,9 +66,10 @@ EOF
 OUT="$(bash "$PROBE" --config "$TMP/config.json" --fixtures "$TMP/fixtures" --report "$TMP/report.md" 2>&1)"
 RC=$?
 
-# Отказ окружения (rc=2) здесь не ожидается: цель валидна по схеме, проверка цели проходит
-# до любых обращений к playwright (дизайн, Решение 1).
-assert_eq "$RC" "1" "AC-105: недостижимая цель .invalid — расхождение NETWORK_ERR, rc=1 (отчёт написан)"
+# Цель валидна по схеме, но недостижима: все факты tier-0 = NETWORK_ERR → именованный отказ
+# rc=2, отчёт не пишется (ADR-0027 Решение 2). Сила ноги та же: цель из конфига названа в выводе.
+assert_eq "$RC" "2" "AC-105: недостижимая цель .invalid — именованный отказ RENDER_TARGET_UNREACHABLE, rc=2, отчёт не пишется"
+assert_file_not_exists "$TMP/report.md" "AC-105: при именованном отказе отчёт не пишется (ADR-0027 Решение 2)"
 if ! printf '%s\n' "$OUT" | grep -qF "render-target.example.invalid"; then
   echo "  FAIL: AC-105 — вывод/отчёт обязан называть цель из конфига (render-target.example.invalid)" >&2
   echo "  --- вывод ---" >&2
@@ -80,4 +82,4 @@ if [ -f "$TMP/report.md" ] && ! grep -qF "render-target.example.invalid" "$TMP/r
 fi
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-105: $FAIL assertion(s) failed"; exit 1; fi
-pass_msg "ac-105: код прибора без литералов http(s)://, прогон с --config называет цель в выводе и отчёте"
+pass_msg "ac-105: код прибора без литералов http(s)://, прогон с --config называет цель из конфига в баннере именованного отказа (rc=2, ADR-0027)"

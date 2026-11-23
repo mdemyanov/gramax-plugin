@@ -30,8 +30,10 @@ run_variant() {
   cp -R "$FIXTURE/" "$tmp/"
   rm -f "$tmp"/*.doc-root.yaml
   cp "$FIXTURE/$variant.doc-root.yaml" "$tmp/.doc-root.yaml"
-  (cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$tmp" 2>&1)
+  local rc=0
+  (cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$tmp" 2>&1) || rc=$?
   rm -rf "$tmp"
+  return "$rc"
 }
 
 # --- (a): language отсутствует → ошибки нет ---
