@@ -28,3 +28,4 @@ ADR-0021); ниже — design-документы живых suite (at-design).
 - [Запись замера: судьба th-правила validate_render по повторному факту рендера (волна-2, FR-199/FR-200)](2026-11-21-render-calibration-th.md)
 - [Приёмка (BA-acceptance): волна-2 render-quality — боевой режим прибора на живой цели — accept (8 PASS / 1 N/A / 0 FAIL; нога (д) ac-128 закрывается настоящим документом)](2026-11-21-render-quality-wave2-at-acceptance.md) — accept, 9/9 AC
 - [AT-design: Волна-3 — контракты валидаторов и навыков комментариев: стабы comments, catalog-validator, render-linter, plugin-contract и переводы ассертов (AC-129…AC-140, AC-148, AC-151)](2026-11-23-wave3-plugin-at-design.md)
+- [AT-design: Волна-3 — релиз 4.10.0 — гейт --full, именованные отказы живой ноги и хвосты гигиены (AC-141…AC-147, AC-149, AC-150)](2026-11-23-wave3-gates-at-design.md)
