@@ -27,7 +27,9 @@ SEARCH_PATHS=(plugins scripts tests CLAUDE.md AGENTS.md README.md)
 # Архив исключён по принципу, а не по списку имён: tests/gramax/archive/ — замороженные
 # свидетельства приёмки прошлых релизов, они обязаны называть удалённые артефакты как
 # предмет своих ассертов (ADR-0011, Решение 1). CHANGELOG, ADR и отчёты — то же основание.
-EXCLUDE_RE='(^|/)CHANGELOG\.md$|^docs/00-project/adr/|^docs/60-implementation/|^docs/|^tests/gramax/orphan-references/|^tests/gramax/archive/'
+# tests/gramax/gate-composition/ — варден реестра закатов (ac-145) цитирует шаблоны
+# sunset-registry дословно: цитирующий реестр — не остаточная ссылка (ADR-0027).
+EXCLUDE_RE='(^|/)CHANGELOG\.md$|^docs/00-project/adr/|^docs/60-implementation/|^docs/|^tests/gramax/orphan-references/|^tests/gramax/archive/|^tests/gramax/gate-composition/'
 
 TOTAL=0
 while IFS= read -r pattern; do

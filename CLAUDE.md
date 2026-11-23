@@ -16,17 +16,17 @@
 | `/nauta:tech-writer` | Tech-writer | subagent (Sonnet) | README, CHANGELOG, marketplace descriptions |
 | `/nauta:devsecops` | DevSecOps (opt-in) | subagent (Sonnet) | Secrets sweep перед публичным релизом |
 
-Роли приходят из плагина `nauta` — marketplace закреплён в `~/.claude/settings.json`
-(`ref: v0.3.1`), а включение локальное: через `.claude/settings.local.json`, который
-не входит в репозиторий. Собственных агентов репозиторий не держит. Полная матрица
-и контракт вызова — в **AGENTS.md**. Как поднять это на чистой машине —
-`docs/onboarding-nauta.md`.
+Роли приходят из плагина `nauta` — marketplace закреплён в `~/.claude/settings.json`,
+установленная редакция — nauta 2.27.0 (2026-11-23); включение локальное: через
+`.claude/settings.local.json`, который не входит в репозиторий. Собственных агентов
+репозиторий не держит. Полная матрица и контракт вызова — в **AGENTS.md**. Как поднять
+это на чистой машине — `docs/onboarding-nauta.md`.
 
 ## Контекст проекта
 
 Публичный Claude Code marketplace (`mdemyanov/gramax-plugin`), один плагин:
 
-- **`plugins/gramax/`** — writer, comments-read, comments-write, mermaid, drawio, review-agent. Версионируется отдельно (см. `plugins/gramax/CHANGELOG.md`). Drawio — заглушка-делегатор к внешнему плагину `Agents365-ai/drawio-skill`.
+- **`plugins/gramax/`** — skills: writer, comments-read, comments-write, mermaid, plantuml, drawio, export; agent: review-agent. Версионируется отдельно (см. `plugins/gramax/CHANGELOG.md`). Drawio — заглушка-делегатор к внешнему плагину `Agents365-ai/drawio-skill`.
 
 Marketplace объявлен в корневом `.claude-plugin/marketplace.json` под именем `gramax-marketplace` (для публичного distribution).
 
@@ -41,9 +41,11 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 ## Команды сборки и проверки
 
 - `bash scripts/check.sh --fast` — pre-commit gate (whitespace, JSON, валидация `docs/`).
-- `bash scripts/check.sh --full` — то же плюс shellcheck, submodule status и suite'ы
-  `tests/gramax/orphan-references` + `tests/gramax/nauta-integration` (полный прогон, не для
-  pre-commit — вызывается вручную или в CI).
+- `bash scripts/check.sh --full` — то же плюс lint `.sh`-файлов (shellcheck), submodule
+  status, догфудинг собственных валидаторов плагина — `validate_structure.py` и
+  `validate_comments.py` по `docs/` (порог 0 ERROR, ADR-0027) — и 17 suite'ов
+  `tests/gramax/` (полный прогон, не для pre-commit — вызывается вручную или в CI;
+  сетевых шагов в `--full` нет — NFR-085).
 - `uv run scripts/validate-content.py` — только валидация Gramax-каталога.
 - `bash scripts/install-hooks.sh` — активировать `.githooks/pre-commit` (опционально).
 - `bash tests/gramax/orphan-references/run.sh` — гейт остаточных ссылок на удалённое (тот же suite,

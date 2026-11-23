@@ -5,18 +5,17 @@ Failing-stub suite (QA-author) по требованию
 FR-141…FR-148) и дизайну `docs/40-architecture/2026-11-18-plantuml-bpmn-design.md`
 (раздел «Контракт с QA-author»), размещение — ADR-0023.
 
-**Статус:** красный по замыслу — реализация (Dev) ещё не создана
-(`plugins/gramax/skills/plantuml/` отсутствует на 9355b69). Детали — `at-design.md`.
+**Статус:** реализация существует с 4.7.0 (`plugins/gramax/skills/plantuml/`, волна
+2026-11-18); suite зелёный, подключён к `--full` (шаг `plantuml-bpmn`). Детали — `at-design.md`.
 
 ## Запуск
 
 ```bash
-bash tests/gramax/plantuml-bpmn/run.sh          # агрегатор (ожидаемо rc=1 до реализации)
+bash tests/gramax/plantuml-bpmn/run.sh          # агрегатор (шаг --full `plantuml-bpmn`)
 bash tests/gramax/plantuml-bpmn/ac-051-*.sh     # каждый stub — standalone из корня репо
 ```
 
-Suite **standalone**: в `scripts/check-gramax.sh` не зарегистрирован; регистрация
-`--full` — центрально (PM), по прецеденту остальных suite.
+Suite подключён к `--full` шагом `plantuml-bpmn` в `scripts/check-gramax.sh`.
 
 ## Проверки
 

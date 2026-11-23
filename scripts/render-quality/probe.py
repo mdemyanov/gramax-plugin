@@ -36,6 +36,11 @@ HINT_NO_BROWSER = (
     "прогрей браузер: bash scripts/render-quality/warm.sh "
     "(исполняет playwright install chromium)"
 )
+HINT_UNREACHABLE = (
+    "цель не достигнута ни по одной странице (все факты tier-0 = NETWORK_ERR): "
+    "проверь сеть, VPN и baseUrl конфига цели, затем повтори "
+    "bash scripts/render-quality/live.sh"
+)
 
 
 def refuse(code: str, hint: str) -> None:
@@ -129,6 +134,13 @@ def run_probes(target, args) -> int:
     entries = load_fixtures(fixtures_dir)
     slugs = [slug for slug, _expect in entries]
     facts = tier0_http.probe_all(target, slugs, args.retry, args.retry_wait, args.jobs)
+
+    # ADR-0027 Решение 2: полная недоступность цели (каждый факт tier-0 = NETWORK_ERR) —
+    # именованный отказ до тиров 1-2, rc=2, отчёт не пишется: «не измерено» не подаётся
+    # как «измерено и разошлось». Частичная недоступность и NOT_FOUND остаются rc=1
+    # с нотами постранично.
+    if facts and all(f.state == tier0_http.STATE_NETWORK_ERR for f in facts.values()):
+        refuse("RENDER_TARGET_UNREACHABLE", HINT_UNREACHABLE)
 
     needs_browser = ("tier1" in target.tiers or "tier2" in target.tiers)
     driver = browser = context = None

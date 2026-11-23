@@ -26,5 +26,5 @@ ADR: `docs/00-project/adr/0026-validator-contracts-engine-pin.md` (Решени�
     bash tests/gramax/comments/ac-130-xml-block-form.sh        # одиночный тест
 
 Фикстуры — `fixtures/ac-*/` (page.md + page.comments.yaml парами; `ac-132-utf8` содержит
-байты с оборванным 0xd0 — бинарная фикстура). Suite НЕ подключён к `scripts/check-gramax.sh` —
-подключение делает шаг гейта волны (AC-144), не QA-author.
+байты с оборванным 0xd0 — бинарная фикстура). Suite подключён к `scripts/check-gramax.sh`
+шагом `comments` внутри `--full` (ADR-0027 Решение 5).

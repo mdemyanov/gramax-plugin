@@ -52,6 +52,7 @@ properties:
 
 - **П2 (GES-gated engine probe)** — ждёт, легитимно: раздел «Отложено (П2)» в `plugins/gramax/CHANGELOG.md:3-16`, оговорка runtime в `plugins/gramax/README.md:42`. Ночных действий не требует.
 - **apply-overlay dangling refs** — закрыт как не-дефект: `scripts/apply-overlay.sh` ре-ключен на `docs/` корректно (строки 64, 183, 425–427); упоминания `content/` живут только в историческом тексте ADR-0021 (неизменяем) и комментариях конфигов. `docs/overlays/` отсутствует легитимно — runtime-каталог, создаётся первым применением overlay.
+  **Пометка 2026-11-23 (ADR-0027 Решение 6, AC-145):** вывод этой строки перекрыт более поздним замером — `scripts/init.sh` не существовал вовсе, профилей overlay нет, живой файл пятёрку не зовёт; `scripts/apply-overlay.sh` и четыре хелпера (`_init_helpers.py`, `_resolve_agents.py`, `_apply_profile.py`, `_apply_yaml_patch.py`) удалены 2026-11-23, записи — в `tests/gramax/orphan-references/sunset-registry.txt`.
 - **gramax.ru в корпусе** — не ссылка: единственное вхождение (`docs/10-domain/research/2026-11-18-gramax-engine-window-jul-sep.md:15`) описывает смерть домена как метод исследования.
 
 ## 4. Гейты (до и после)

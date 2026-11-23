@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
 # tests/gramax/render-quality/run.sh
-# Агрегатор сюиты render-quality — дом-паттерн tests/gramax/render-linter/run.sh; состав
-# фиксирован дизайном docs/40-architecture/2026-11-21-playwright-render-quality-design.md,
-# Решение 7 («Состав run.sh — контракт раннера»):
-#   1) офлайн-стабы ac-*.sh (цикл по glob, свод, rc «хоть один красный»);
-#   2) живой прогон прибора bash scripts/render-quality/probe.sh с дефолтными путями
-#      (конфиг цели scripts/render-quality/render-target.local.json, фикстуры сюиты,
-#      отчёт в results/); rc прибора — вход агрегата. На непрогретой машине живой прогон
-#      даёт именованный отказ -> сюита красная -> --full красный (D8: отказ, а не
-#      «зелёный без прогона»).
-# Подключается к scripts/check-gramax.sh шагом 18 (--full only) ТОЛЬКО после позеленения
-# по TDD-цепочке qa-author -> dev -> qa-runner (FR-194, AC-113). В --fast сюиты нет (NFR-078).
+# Агрегатор сюиты render-quality — дом-паттерн tests/gramax/render-linter/run.sh. Состав —
+# ADR-0027 (docs/00-project/adr/0027-full-gate-composition.md, Решения 1-2; поправляет
+# Решение 7 дизайна docs/40-architecture/2026-11-21-playwright-render-quality-design.md
+# в части живой ноги — superseded-цепочка в ADR-0027 Решение 1):
+#   по умолчанию исполняются ТОЛЬКО офлайн-стабы ac-*.sh (цикл по glob, свод, rc
+#   «хоть один красный»); им экспортируется UV_OFFLINE=1 — сеть не запрашивается
+#   (стаб-портал слушает только 127.0.0.1, пин playwright решается тёплым кэшем uv;
+#   промах кэша ловит сигнатура обёртки probe.sh — ADR-159). Живой прогон прибора —
+#   именованный шаг scripts/render-quality/live.sh релизного ритуала; агрегатор и гейт
+#   не вызывают его ни в каком режиме (NFR-085: в --full нет сети, проб и токена;
+#   автоматического офлайн-фолбэка нет — ADR-0027 Решение 2).
+# Шаг --full-блока scripts/check-gramax.sh (==> render-quality). В --fast сюиты нет
+# (NFR-078, варден ac-118).
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 cd "$SCRIPT_DIR" || exit 1
+
+# Офлайн по построению: стабы сети не требуют; UV_OFFLINE=1 запрещает uv обращаться
+# к pypi (ADR-0027 Решение 2 — сеть в пути гейта не запрашивается).
+export UV_OFFLINE=1
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -35,7 +40,7 @@ if [ ${#tests[@]} -eq 0 ]; then
   exit 2
 fi
 
-printf "${YELLOW}Running %d AC stubs from %s${NC}\n\n" "${#tests[@]}" "$SCRIPT_DIR"
+printf "${YELLOW}Running %d AC stubs from %s (offline: UV_OFFLINE=1)%b\n\n" "${#tests[@]}" "$SCRIPT_DIR" "$NC"
 
 for t in "${tests[@]}"; do
   if bash "$t"; then
@@ -55,26 +60,8 @@ if [ "$fail" -gt 0 ]; then
   for t in "${failed_tests[@]}"; do
     printf "  - %s\n" "$t"
   done
-fi
-
-# --- Живой прогон прибора (дизайн, Решение 7, пункт 2) ---
-printf "\n%b==> live probe: bash scripts/render-quality/probe.sh (default paths)%b\n" "$YELLOW" "$NC"
-live_rc=0
-if [ -f "$ROOT/scripts/render-quality/probe.sh" ]; then
-  bash "$ROOT/scripts/render-quality/probe.sh" || live_rc=$?
-  if [ "$live_rc" -eq 0 ]; then
-    printf '%b\n' "${GREEN}OK: live probe green${NC}"
-  else
-    printf '%b\n' "${RED}FAIL: live probe rc=${live_rc} (rc=1 — расхождения, rc=2 — именованный отказ окружения; D8)${NC}"
-  fi
-else
-  live_rc=2
-  printf '%b\n' "${RED}FAIL: live probe — вход scripts/render-quality/probe.sh отсутствует (каркас прибора не реализован; дизайн, Решение 5)${NC}"
-fi
-
-if [ "$fail" -gt 0 ] || [ "$live_rc" -ne 0 ]; then
   exit 1
 fi
 
-printf "\n${GREEN}All %d AC stubs passed; live probe green.${NC}\n" "$pass"
+printf "\n${GREEN}All %d AC stubs passed; живой замер — именованный шаг релизного ритуала (ADR-0027 Решение 1), гейтом не исполняется.${NC}\n" "$pass"
 exit 0

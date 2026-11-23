@@ -42,6 +42,24 @@ cd gramax-plugin
 
 - `review-agent` — координация ревью комментариев в каталоге (запуск через Task tool)
 
+## Предусловия skill'а drawio (внешний плагин)
+
+`/gramax:drawio` — делегатор: исполнение живёт во внешнем плагине `drawio-skill` из
+marketplace `Agents365-ai/365-skills` (установка: `/plugin marketplace add Agents365-ai/365-skills`,
+затем `/plugin install drawio@...`). Предусловия по [ADR-0008](docs/00-project/adr/0008-drop-internal-drawio-skills.md)
+и [RES-001](docs/10-domain/research/2026-05-11-drawio-skill-external.md):
+
+- **draw.io desktop (CLI)** — обязателен, версия не фиксирована: macOS — `brew install --cask drawio`;
+  Windows — инсталлятор с GitHub Releases; Linux — `.deb`/`.rpm`, **не snap** (AppArmor-sandbox
+  блокирует keyring); на headless-сервере дополнительно `sudo apt install xvfb` + `xvfb-run -a`.
+- **Python 3** — нужен для `repair_png.py` (починка PNG после экспорта с `-e`); на Windows
+  системно не ставится — установи с python.org, иначе шаг экспорта PNG падает.
+
+> **Warning:** не устанавливай `mermaid` из 365-skills параллельно с `gramax:mermaid` — конфликт триггеров:
+> оба skill'а описывают «диаграммы/flowchart» семантическим триггером, и выбор между ними
+> недетерминирован (ADR-0008 Решение 6). Для drawio ставь только `drawio` из 365-skills;
+> mermaid-диаграммы остаются за `gramax:mermaid` и `gramax:plantuml`.
+
 ## Третьи стороны
 
 - **axton-obsidian-visual-skills** by [Axton Liu](https://github.com/axtonliu) — лицензия MIT, адаптирован в `gramax:mermaid` skill. Upstream: https://github.com/axtonliu/axton-obsidian-visual-skills

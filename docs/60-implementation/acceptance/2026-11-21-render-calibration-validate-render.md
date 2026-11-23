@@ -15,6 +15,8 @@ properties:
 
 # Запись замера калибровки validate_render против факта рендера (FR-196) — эпик Playwright render probes
 
+**Опоры:** `docs/30-requirements/2026-11-21-playwright-render-quality-requirement.md`, `docs/40-architecture/2026-11-21-playwright-render-quality-design.md`, `docs/10-domain/research/2026-11-21-upstream-render-calibration-facts.md`, `plugins/gramax/scripts/validate_render.py`, `plugins/gramax/gramax-render-rules.json`, `tests/gramax/render-quality/README.md`
+
 **Дата:** 2026-11-21. **Цель рендера:** внутренний портал (хост — данные цели,
 `render-target.local.json` вне git; литерал не публикуется — ADR-0014), каталог
 `gramax-user-docs` — временный приём по санкции владельца: 21 страница запушена коммитом
@@ -86,5 +88,3 @@ RES-009 §5).
 - Код и запись — один коммит; правки вне двух классов D7 отсутствуют.
 - Гигиена: литерал хоста цели в записи отсутствует (AC-114); токен в записях и логах
   отсутствует (NFR-081).
-
-**Опоры:** `docs/30-requirements/2026-11-21-playwright-render-quality-requirement.md`, `docs/40-architecture/2026-11-21-playwright-render-quality-design.md`, `docs/10-domain/research/2026-11-21-upstream-render-calibration-facts.md`, `plugins/gramax/scripts/validate_render.py`, `plugins/gramax/gramax-render-rules.json`, `tests/gramax/render-quality/README.md`

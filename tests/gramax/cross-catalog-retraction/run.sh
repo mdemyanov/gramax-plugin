@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # tests/gramax/cross-catalog-retraction/run.sh
 # Aggregator: runs all ac-*.sh, prints summary, returns non-zero if any failed.
-# Изначальный красный старт (см. README.md → таблица «Стартовое состояние») ожидаем: 5 из 9 AC
-# красные до правок Dev/Tech-writer, 4 — pre-passing regression guard'ы. НЕ подключён к
-# scripts/check.sh ни в --fast, ни в --full на момент создания (см. README.md → «Подключение к
-# check.sh» — решение и обоснование); по прецеденту tests/gramax/writer-consumer-rules/run.sh
-# подключение — задача Dev/PM после того, как все живые AC станут зелёными.
+# Статус (2026-11-23): suite подключена к scripts/check-gramax.sh шагом --full
+# (==> cross-catalog-retraction; ADR-0027 Решение 3 — условие «все живые AC зелёные»
+# исполнено, замер 9/9, офлайн). Изначальный красный старт (см. README.md → таблица
+# «Стартовое состояние») позеленен правками Dev/Tech-writer волны 4.2.1; в --fast
+# сюиты нет. Подключение — по прецеденту tests/gramax/writer-consumer-rules/run.sh.
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

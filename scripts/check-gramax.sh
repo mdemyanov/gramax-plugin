@@ -6,14 +6,21 @@
 # Modes:
 #   --fast   : whitespace + JSON validity + validate-content.py + validate_render.py
 #              (uv обязателен; для pre-commit hook)
-#   --full   : --fast + shellcheck (если установлен) + проверка submodule status +
+#   --full   : --fast + догфудинг своих валидаторов docs/ (validate_structure.py и
+#              validate_comments.py, порог 0 ERROR — ADR-0027 Решение 4) +
+#              lint .sh (если установлен) + проверка submodule status +
 #              tests/gramax/orphan-references + tests/gramax/nauta-integration +
 #              tests/gramax/plugin-contract +
-#              tests/gramax/catalog-validator + tests/gramax/mermaid-adoption +
+#              tests/gramax/catalog-validator + tests/gramax/comments +
+#              tests/gramax/mermaid-adoption +
 #              tests/gramax/writer-consumer-rules + tests/gramax/link-form-resolver +
 #              tests/gramax/link-form-migration + tests/gramax/export-skill +
 #              tests/gramax/plantuml-bpmn + tests/gramax/writer-sync-470 +
-#              tests/gramax/writer-tail-480 + tests/gramax/render-linter
+#              tests/gramax/writer-tail-480 + tests/gramax/render-linter +
+#              tests/gramax/render-quality (только офлайн-стабы, ADR-0027 Решение 1) +
+#              tests/gramax/cross-catalog-retraction + tests/gramax/gate-composition
+#              (17 сюит; состав — ADR-0027 «Целевой состав --full» с поправкой PM:
+#              gate-composition — последним шагом)
 #
 # Exit codes:
 #   0 — all checks passed
@@ -95,6 +102,37 @@ fi
 
 # --- 3. (--full only) Shellcheck on tracked .sh files, if installed ---
 if [ "$MODE" = "--full" ]; then
+  # --- 3.0 (--full only) Догфудинг своих валидаторов на docs/ (FR-220б, ADR-0027
+  # Решение 4): два шага первыми внутри --full-блока, подряд с быстрыми валидаторами
+  # docs/ (шаги 2.5-2.6, остаются в --fast). Порог 0 ERROR — rc-контракт валидатора
+  # без --strict: rc≠0 даёт FAIL; предупреждения печатаются полностью и гейт не красят
+  # (флаги подавления не вводятся). В --fast не переносится (ADR-0027 Решение 4).
+  echo "==> validate-structure"
+  if command -v uv > /dev/null 2>&1; then
+    if ! uv run plugins/gramax/scripts/validate_structure.py docs; then
+      echo "FAIL: validate-structure — ERROR на docs/ (порог 0 ERROR, FR-220б)"
+      FAILED=1
+    else
+      echo "OK: validate-structure: 0 ERROR (WARNING печатаются и не красят)"
+    fi
+  else
+    echo "FAIL: uv not installed — validate-structure not performed (install: https://docs.astral.sh/uv/)"
+    FAILED=1
+  fi
+
+  echo "==> validate-comments"
+  if command -v uv > /dev/null 2>&1; then
+    if ! uv run plugins/gramax/scripts/validate_comments.py docs; then
+      echo "FAIL: validate-comments — ERROR на docs/ (порог 0 ERROR, FR-220б)"
+      FAILED=1
+    else
+      echo "OK: validate-comments: 0 ERROR (WARNING печатаются и не красят)"
+    fi
+  else
+    echo "FAIL: uv not installed — validate-comments not performed (install: https://docs.astral.sh/uv/)"
+    FAILED=1
+  fi
+
   echo "==> shellcheck"
   if command -v shellcheck > /dev/null 2>&1; then
     # tests/gramax/archive/ — замороженные свидетельства приёмки прошлых релизов
@@ -186,6 +224,16 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
+  # --- 8.5. (--full only) comments: контракт скриптов комментариев (ADR-0027 Решение 5;
+  # validate_comments.py/parse_comments.py/gen_comment_id.py/slugify.py) ---
+  echo "==> comments"
+  if bash tests/gramax/comments/run.sh; then
+    echo "OK: comments green"
+  else
+    echo "FAIL: comments"
+    FAILED=1
+  fi
+
   # --- 9. (--full only) mermaid-adoption: юрисдикция + обнаружение/миграция legacy mermaid ---
   echo "==> mermaid-adoption"
   if bash tests/gramax/mermaid-adoption/run.sh; then
@@ -273,12 +321,34 @@ if [ "$MODE" = "--full" ]; then
     FAILED=1
   fi
 
-  # --- 18. (--full only) render-quality: рендер-пробы Playwright (FR-194, AC-113) ---
+  # --- 18. (--full only) render-quality: офлайн-стабы сюиты (FR-194, AC-113; ADR-0027
+  # Решение 1 — живой прогон прибора вне гейта: именованный шаг
+  # scripts/render-quality/live.sh релизного ритуала) ---
   echo "==> render-quality"
   if bash tests/gramax/render-quality/run.sh; then
-    echo "OK: render-quality green"
+    echo "OK: render-quality green (офлайн-стабы)"
   else
     echo "FAIL: render-quality suite"
+    FAILED=1
+  fi
+
+  # --- 19. (--full only) cross-catalog-retraction: ретракция code:-рецепта 4.2.1,
+  # статический контракт (ADR-0027 Решение 3: подключена к --full, офлайн, ~16 с) ---
+  echo "==> cross-catalog-retraction"
+  if bash tests/gramax/cross-catalog-retraction/run.sh; then
+    echo "OK: cross-catalog-retraction green"
+  else
+    echo "FAIL: cross-catalog-retraction"
+    FAILED=1
+  fi
+
+  # --- 20. (--full only) gate-composition: сторож состава гейта и текстов репозитория
+  # (поправка PM к списку ADR-0027 — последним шагом, 17-я сюита) ---
+  echo "==> gate-composition"
+  if bash tests/gramax/gate-composition/run.sh; then
+    echo "OK: gate-composition green"
+  else
+    echo "FAIL: gate-composition"
     FAILED=1
   fi
 fi

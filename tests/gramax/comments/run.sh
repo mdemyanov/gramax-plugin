@@ -4,8 +4,8 @@
 # Красный результат сейчас — ожидаемое стартовое состояние волны-3 (TDD-цепочка
 # qa-author → dev → qa-runner, BR-025): стабы рождаются красными на 7553da1,
 # позеленение — цикл Dev по ADR-0026 (см. README.md → таблица).
-# Suite НЕ подключён к scripts/check-gramax.sh — подключение делает шаг гейта
-# волны (AC-144, ADR-0027), не QA-author.
+# Suite подключён к scripts/check-gramax.sh шагом `comments` (--full, ADR-0027 Решение 5);
+# заглушки рождались красными на 7553da1 (QA-author), позеленели в цикле Dev.
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -22,3 +22,13 @@ plugins/claude-mermaid([^a-zA-Z0-9-]|$)
 # `diagram-on-demand` ловит имена переехавших документов в ассертах nauta-integration.
 skills/diagrams([^a-zA-Z0-9-]|$)|gramax:diagrams([^a-zA-Z0-9-]|$)
 skills/diagram-on-demand([^a-zA-Z0-9-]|$)|gramax:diagram-on-demand([^a-zA-Z0-9-]|$)
+#
+# 2026-11-23, ADR-0027 Решение 6 — удаление мёртвого overlay-тулинга (FR-220в, AC-145):
+# apply-overlay.sh ссылался на несуществующие docs/overlays/ и scripts/init.sh; четыре
+# хелпера — его единственная обслуга. Паттерны — по форме ADR-0011 Решение 3 (путь или
+# вызов, не голое слово: голое имя задевает комментарии payload в scripts/check.sh).
+scripts/apply-overlay\.sh
+scripts/_init_helpers\.py|(from|import) _init_helpers([^a-zA-Z0-9_]|$)
+scripts/_resolve_agents\.py|(from|import) _resolve_agents([^a-zA-Z0-9_]|$)
+scripts/_apply_profile\.py|(from|import) _apply_profile([^a-zA-Z0-9_]|$)
+scripts/_apply_yaml_patch\.py|(from|import) _apply_yaml_patch([^a-zA-Z0-9_]|$)
