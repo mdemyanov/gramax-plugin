@@ -3,7 +3,7 @@
 Этот каталог держит test suite, которые больше не запускаются. Каждый — не действующий
 контракт, а зафиксированное на момент своего релиза свидетельство того, что было верно
 именно тогда. Обоснование и критерий отнесения suite сюда — ADR:
-`content/00-project/adr/0011-test-harness-taxonomy.md` (Решение 1).
+`docs/00-project/adr/0011-test-harness-taxonomy.md` (Решение 1).
 
 ## Правило archive/: не редактировать, не запускать, не считать в отчётах
 
@@ -134,10 +134,11 @@ find ~/.claude/plugins/cache -name plugin.json -path '*.claude-plugin*' | wc -l 
 
 ## Связанные артефакты
 
-- `content/00-project/adr/0011-test-harness-taxonomy.md` — ADR, формализующий и таксономию
+- `docs/00-project/adr/0011-test-harness-taxonomy.md` — ADR, формализующий и таксономию
   архива (Решение 1), и процедуру ретировки AC (Решение 2).
-- `content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md` — требование,
+- `docs/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md` — требование,
   из которого выведен состав архива (FR-001…FR-005, FR-012).
-- `content/60-implementation/acceptance/2026-05-08-diagram-on-demand-acceptance.md` — факт
-  приёмки удалённого (не архивированного) `diagram-on-demand/`: покрываемая им функциональность
-  снята ADR-0008 без остатка, поэтому этот suite не переехал сюда, а был удалён `git rm -r`.
+- Приёмка удалённого (не архивированного) `diagram-on-demand/` — её запись удалена при инверсии
+  раскладки (ADR-0021), текст доступен в истории git по пути
+  `content/60-implementation/acceptance/2026-05-08-diagram-on-demand-acceptance.md`: покрываемая
+  функциональность снята ADR-0008 без остатка, поэтому suite не переехал сюда, а был удалён `git rm -r`.
