@@ -21,6 +21,7 @@ Suite проверяет текущее (не историческое) сост
 | `ac-005-mermaid-file-based-contract.sh` | FR-010 | статическая половина `archive/mermaid-file-based` (ac-005b, ac-006, ac-008, ac-011) | regression guard — зелёный на момент создания |
 | `ac-006-manifest-coherence.sh` | FR-011 | поглощает шесть версионных пинов трёх архивных suite (remove ac-011/012, routing ac-012/013, mermaid ac-012) | regression guard — зелёный на момент создания |
 | `ac-007-retired-skills-field.sh` | FR-012 | сторож ретировки `archive/routing-mermaid-drawio/ac-014` | сторож ретировки — зелёный на момент создания |
+| `ac-140-readme-version-docstring.sh` | AC-140 волны-3 (FR-221a) | версия README == `plugin.json`; докстринг `validate_render.py` согласован с `gramax-render-rules.json` (th — WARN: не в перечислении «роняют рендерер GES (HTTP 500)», рядом — WARN-семантика); запасной ERROR-текст не подаётся как действующий. Дизайн волны-3 §6 AC-140; beads gramax-4jf.12 | **живой контракт — КРАСНЫЙ на момент создания** (red on 7553da1: README 4.8.0 против plugin.json 4.9.0; докстринг перечисляет th среди 500-киллеров) |
 
 ## Два дефекта, на которых suite создавался красным
 

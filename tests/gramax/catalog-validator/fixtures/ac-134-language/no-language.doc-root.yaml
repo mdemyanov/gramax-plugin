@@ -1,0 +1,4 @@
+code: ac-134-language
+title: "Каталог без language"
+description: "AC-134: language не обязателен"
+syntax: XML

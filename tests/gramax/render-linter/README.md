@@ -41,6 +41,9 @@ AC-004 и AC-014 ниже ассертируют калиброванную пр
 | ac-019-precommit-gate.sh | AC-019 (FR-119) | `validate_render.py` подключён к `check-gramax.sh` — гейт исполняет шаг, не ручной разовый прогон |
 | ac-020-fast-green.sh | AC-020 (NFR-004) | `scripts/check.sh --fast` зелёный с рендер-линтером |
 | ac-021-existing-suites.sh | AC-021 (NFR-003) | orphan-references и nauta-integration остаются зелёными |
+| ac-132-broken-utf8-render.sh | AC-132 волны-3 (FR-212) | битый UTF-8: `FAIL <путь>` + дословная `ERROR L0: Файл не является валидным UTF-8 (байт 0xd0 на позиции P из S)`; без traceback; ERROR bait-файла и OK чистого присутствуют; rc=1. Дизайн волны-3 §2.4/ADR-0026 Р6 | 🔴 КРАСНЫЙ — red on 7553da1 (UnicodeDecodeError) |
+| ac-135-table-balance-single-finding.sh | AC-135 волны-3 (FR-214, BR-027) | баланс table/tr/td несёт только validate_render: незакрытый `<td>` — ровно одна баланс-находка; validate_structure не дублирует; валидная таблица чиста | 🟢 **ЗЕЛЁНЫЙ С РОЖДЕНИЯ — warden BR-027**: поведение уже в дереве (замер 2026-11-23); сторожит от задвоения при расширении pairedTags и от исчезновения баланса |
+| ac-137-html-block-render.sh | AC-137 волны-3 (FR-216) | содержимое `<html>…</html>` вне построчных проверок и баланса (инлайновый `<note>`, незакрытый `<td>` внутри блока — rc=0); `<html>` в inline-коде и fenced-блоке маску не переключает — настоящий `<th>` после упоминаний ловится (варден) | 🔴 КРАСНЫЙ (маски html-блока нет; red on 7553da1), нога вардена зелёная |
 
 ## Запуск
 

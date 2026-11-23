@@ -1,6 +1,8 @@
 ---
 order: 1
-title: "Lucide-иконка"
+title: "Lucide-иконки"
 ---
+
+<icon code="zap"/>
 
 <icon code="lucide-zap"/>

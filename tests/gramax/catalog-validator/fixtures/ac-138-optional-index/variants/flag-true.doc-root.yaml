@@ -1,0 +1,6 @@
+code: ac-138-optional-index
+title: "Флаг true"
+description: "AC-138"
+syntax: XML
+language: ru
+optionalCategoryIndex: true

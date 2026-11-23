@@ -1,0 +1,5 @@
+code: ac-135-table
+title: "XML-таблицы"
+description: "AC-135: table/tr/td известны, баланс — у validate_render"
+syntax: XML
+language: ru

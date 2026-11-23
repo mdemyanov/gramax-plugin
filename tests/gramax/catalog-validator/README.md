@@ -214,3 +214,32 @@ bash tests/gramax/catalog-validator/run.sh; echo "exit=$?"
 `ac-*.sh` автоматически (glob), регистрации не требует. Suite по-прежнему не подключён к
 `scripts/check.sh`. Параллельные потоки export-skill / plantuml-bpmn (`tests/gramax/export-skill/`,
 `tests/gramax/plantuml-bpmn/`) не затронуты.
+
+## Волна-3: ac-131…ac-151 (требование 2026-11-23-wave3-validators-contracts-gates, ADR-0026)
+
+Стабы волны-3 — контракты валидаторов по движку 48592b36. Имена файлов несут AC-номер
+требования волны-3 (`ac-<NNN>-<slug>.sh`), не продолжая последовательность suite, —
+отображение «AC → стаб по ID» ведёт at-design
+`docs/60-implementation/acceptance/2026-11-23-wave3-plugin-at-design.md`.
+Стартовое состояние — red on 7553da1 (2026-11-23); дизайн —
+`docs/40-architecture/2026-11-23-wave3-validator-contracts-design.md` (§2 — дословные
+значения, §6 — границы).
+
+| Тест | AC | Ассерт | Цвет при создании |
+|---|---|---|---|
+| ac-131-xml-comment-unpaired.sh | AC-131 (FR-211) | XML-блочная форма `<comment id="ID"/>` … `</comment>` — «unpaired <comment>» нет; скобочная legacy парна как прежде (контроль) | 🔴 КРАСНЫЙ (regex opens не считает самозакрытый тег открывающим) |
+| ac-133-broken-utf8-traversal.sh | AC-133 (FR-212) | битый UTF-8: rc=1, без traceback, ровно одна E036 с путём, байтом и позицией из фикстуры; находка bait-файла присутствует — обход полный | 🔴 КРАСНЫЙ (UnicodeDecodeError, обрыв обхода) |
+| ac-134-language-optional.sh | AC-134 (FR-213) | language отсутствует — «missing field» нет, rc=0; 123/null/пустая строка — «invalid type» остаётся; контракт: schemaVersion 2, docRootRequiredFields без language, docRootOptionalFields с language | 🔴 КРАСНЫЙ (language в docRootRequiredFields; ключа docRootOptionalFields нет) |
+| ac-135-table-tags-contract.sh | AC-135 (FR-214) | валидная table/tr/td — ноль W034; баланс не дублируется структурным валидатором (BR-027, контроль); `<mywidget>` — W034 остаётся; контракт: schemaVersion 3, pairedTags ⊇ {table,tr,td}, th вне pairedTags | 🔴 КРАСНЫЙ (table/tr/td не в pairedTags; schemaVersion 2) |
+| ac-136-lucide-registry-boundary.sh | AC-136 (FR-215) | check/ban/aperture/info и CHECK (регистр по code.lower()) — W035 нет; my-custom-x и xlucide-zap — W035 остаётся; lucide-zap — W035 с подсказкой убрать префикс; zap-with-file — находки нет; gramax-lucide-icons.json существует (schemaVersion 1, source 0.525.0/48592b36) | 🔴 КРАСНЫЙ (реестра нет; голые коды дают W035; lucide-zap молчит) |
+| ac-137-html-block-mask.sh | AC-137 (FR-216) | title/div/br и W035 внутри `<html>…</html>` — молчат; `<mytag>` вне блока — W034 остаётся; `<html>` в inline-коде и fenced-блоке маску не переключает; непарный внешний `<html>` — «unpaired» остаётся | 🔴 КРАСНЫЙ (маски html-блока нет) |
+| ac-138-optional-category-index.sh | AC-138 (FR-217) | optionalCategoryIndex: true — ошибки нет; «true»/false/без флага — ERROR с новой формулировкой («раздела в дереве нет, статьи подняты выше»); indexPolicy.subfolderOptionalFlag в контракте | 🔴 КРАСНЫЙ (флаг не читается; старая формулировка; ключа нет) |
+| ac-148-docs-w034-zero.sh | AC-148 (FR-216) | прогон validate_structure по docs/ — 0 W034 (догфудинг по паттерну ac-035) | 🔴 КРАСНЫЙ (три W034-плейсхолдера: `<home>`, `<file>`, `<raw>`) |
+| ac-151-index-properties-verdict.sh | AC-151 (FR-209) | V2 «не должен содержать properties» снят; индекс корня вне находок; индекс подпапки с объявленным свойством чист; V4/V3/V5 на индексах подпапок работают | 🔴 КРАСНЫЙ (V2 на все индексы; V3–V5 заглушены для _index.md). Фикстура общая с переведённым pytest `test_validate_structure.py` (прецедент ADR-0020) |
+
+Перевод существующих ассертов волны-3 (NFR-084 — перевод, не удаление):
+
+- `ac-030-icon-lucide-boundary.sh` (AC-066) — был зелёный warden «lucide-zap не
+  упоминается» (BR-013, Решение 5 ADR-0024); переведён: голый `zap` (в реестре) — W035 нет,
+  `lucide-zap` без файла — W035 с подсказкой убрать префикс (ADR-0026 Решение 3 —
+  superseded в части формы префикса). Красный на 7553da1; фикстура дополнена голым `zap`.

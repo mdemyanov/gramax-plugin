@@ -1,0 +1,5 @@
+code: ac-137-html
+title: "Маска сырого HTML"
+description: "AC-137: содержимое html-блока вне построчных проверок"
+syntax: XML
+language: ru

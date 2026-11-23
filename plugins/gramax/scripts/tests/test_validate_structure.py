@@ -98,9 +98,54 @@ class BadCatalogTests(unittest.TestCase):
         self.assertIn("invalid-value.md", self.result.stdout)
         self.assertIn("не входит", self.result.stdout)
 
-    def test_v2_index_with_properties(self):
-        self.assertIn("index-with-properties/_index.md", self.result.stdout)
-        self.assertIn("не должен содержать properties", self.result.stdout)
+
+class IndexPropertiesVerdictTests(unittest.TestCase):
+    """AC-151 (FR-209) волны-3, ADR-0026 Решение 5: запрет «_index.md не должен
+    содержать properties» снят — ключ штатный и видимый (вердикт gramax-4jf.2).
+    Перевод test_v2_index_with_properties (NFR-084 — перевод, не удаление;
+    red on 7553da1: V2 даёт ERROR на все индексы фикстуры, V3–V5 на них заглушены
+    условием md_file.name != "_index.md").
+
+    Фикстура общая с bash-стабом ac-151 (прецедент ADR-0020: один набор фикстур
+    на два прогона): tests/gramax/catalog-validator/fixtures/ac-151-properties-index/.
+    Старая фикстура bad/index-with-properties перенесена в good/ — там она обязана
+    проходить чисто (законная конструкция не краснеет и под --strict).
+
+    Проверяемое: (a) индекс корня — вне проверок V3–V5 (ADR-0015), находок нет;
+    (b) индекс подпапки с объявленным enum-свойством — чист; (c) индекс подпапки
+    с необъявленным свойством — V4; (d) плоская нотация — V3-warning; (e) значение
+    вне enum — V5."""
+
+    def test_good_index_with_properties_passes_clean(self):
+        result = run_validator(FIXTURES / "good")
+        self.assertEqual(result.returncode, 0, f"stdout: {result.stdout}\nstderr: {result.stderr}")
+        self.assertNotIn("не должен содержать properties", result.stdout,
+                         "запрет properties в _index.md снят (ADR-0026 Решение 5)")
+        self.assertNotIn("index-with-properties", result.stdout,
+                         "перенесённая фикстура обязана проходить чисто")
+
+    def test_v3_v5_apply_to_subfolder_index_root_out(self):
+        result = run_validator(
+            Path(__file__).resolve().parents[4]
+            / "tests" / "gramax" / "catalog-validator" / "fixtures" / "ac-151-properties-index"
+        )
+        self.assertNotIn("не должен содержать properties", result.stdout,
+                         "запрет properties снят целиком")
+        self.assertNotIn("_index.md", result.stdout.replace("sub/_index.md", "")
+                         .replace("sub2/_index.md", "").replace("sub3/_index.md", "")
+                         .replace("sub4/_index.md", ""),
+                         "корневой _index.md обязан остаться вне находок (ADR-0015)")
+        self.assertNotIn("sub/_index.md", result.stdout,
+                         "объявленное enum-свойство у индекса подпапки — чисто (законная конструкция)")
+        self.assertIn("sub2/_index.md", result.stdout)
+        self.assertIn("не объявлен", result.stdout,
+                      "V4 применяется к индексам подпапок наравне со статьями")
+        self.assertIn("sub3/_index.md", result.stdout)
+        self.assertIn("плоская нотация", result.stdout,
+                      "V3 применяется к индексам подпапок")
+        self.assertIn("sub4/_index.md", result.stdout)
+        self.assertIn("не входит в", result.stdout,
+                      "V5 применяется к индексам подпапок")
 
 
 class NestedDocRootDiscoveryTests(unittest.TestCase):

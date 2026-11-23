@@ -18,8 +18,9 @@
 # NFR-072: selfClosingTags += fragment; pairedTags += fragment-link.
 # NFR-071 (регрессия, зелёные на a59db10): snippet ОСТАЁТСЯ в selfClosingTags
 #   (валидный legacy-алиас — дизайн «Контракт тегов»: «snippet остаётся в
-#   списке»); schemaVersion контракта остаётся 2 (ADR-0024 Решение 3 уже
-#   поднял 1→2, смена схемы не нужна).
+#   списке»). schemaVersion: пин «= 2» ПЕРЕВЕДЁН на «= 3» под волну-3 (NFR-084 —
+#   перевод, не удаление): ADR-0026 Решение 2 поднимает schemaVersion 2 → 3
+#   (pairedTags += table/tr/td). Red on 7553da1 (2026-11-23): в дереве schemaVersion 2.
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -54,12 +55,13 @@ if [ -n "$MISSING_SNIPPET" ]; then
   FAIL=$((FAIL + 1))
 fi
 
-# NFR-072: schemaVersion остаётся 2 (расширение списков аддитивно; ADR-0024 уже поднял 1→2).
+# NFR-072: schemaVersion = 3 (ADR-0026 Решение 2, волна-3: pairedTags += table/tr/td;
+# пин «= 2» переведён, не удалён — NFR-084). Red on 7553da1: в дереве schemaVersion 2.
 SCHEMA_V=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1],encoding="utf-8")).get("schemaVersion"))' "$TAGS_JSON" 2>/dev/null)
-if [ "$SCHEMA_V" != "2" ]; then
-  echo "  FAIL: NFR-072 — schemaVersion gramax-tags.json = $SCHEMA_V, ожидается 2 (дизайн: смена схемы не нужна)" >&2
+if [ "$SCHEMA_V" != "3" ]; then
+  echo "  FAIL: NFR-072/ADR-0026 Р2 — schemaVersion gramax-tags.json = $SCHEMA_V, ожидается 3 (pairedTags += table/tr/td; red on 7553da1: в дереве 2)" >&2
   FAIL=$((FAIL + 1))
 fi
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-086: AC-086 — $FAIL assertion(s) failed"; exit 1; fi
-pass_msg "ac-086: AC-086 — канон <fragment>+<fragment-link>, legacy-пометка snippet; контракт: fragment/fragment-link добавлены, snippet и schemaVersion 2 сохранены"
+pass_msg "ac-086: AC-086 — канон <fragment>+<fragment-link>, legacy-пометка snippet; контракт: fragment/fragment-link добавлены, snippet сохранён, schemaVersion 3 (ADR-0026 Р2)"

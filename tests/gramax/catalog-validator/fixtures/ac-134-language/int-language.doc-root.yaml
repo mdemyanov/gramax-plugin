@@ -1,0 +1,5 @@
+code: ac-134-language
+title: "Каталог с language: 123"
+description: "AC-134: присутствующее поле неверного типа"
+syntax: XML
+language: 123

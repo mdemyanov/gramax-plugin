@@ -1,0 +1,14 @@
+code: ac-151-properties-index
+title: "properties в _index.md"
+description: "AC-151: вердикт ADR-0026 Решение 5"
+syntax: XML
+language: ru
+
+properties:
+  - name: Тип контента
+    type: Enum
+    style: green
+    icon: file-text
+    values:
+      - ADR
+      - Требование

@@ -1,0 +1,6 @@
+code: ac-138-optional-index
+title: "Флаг false"
+description: "AC-138: false флаг не снимает"
+syntax: XML
+language: ru
+optionalCategoryIndex: false

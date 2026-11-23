@@ -76,9 +76,13 @@ class NestedDocRootOwnIconsTests(unittest.TestCase):
 
 
 class XlucidePrefixBoundaryTests(unittest.TestCase):
-    """Граница префикса `lucide-` (BR-013, Решение 5 ADR-0024): `xlucide-zap` префиксом
-    НЕ является (не в начале) → кастомный код → резолв против .icons/xlucide-zap.svg;
-    `lucide-zap` — библиотечный, против .icons/ не резолвится."""
+    """Граница префикса `lucide-`, переведённая под ADR-0026 Решение 3 (NFR-084 —
+    перевод, не удаление; red on 7553da1 — реестра нет). ADR-0024 Решение 5 и BR-013 —
+    superseded в части формы префикса: форм с префиксом `lucide-` движок не знает.
+
+    `xlucide-zap` префиксом НЕ является (не в начале) → кастомный код → W035
+    (нет файла .icons/xlucide-zap.svg); `lucide-zap` без файла — тоже W035, с
+    подсказкой убрать префикс (stem zap входит в реестр lucide-react)."""
 
     def test_xlucide_is_custom_lucide_is_not(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -87,8 +91,12 @@ class XlucidePrefixBoundaryTests(unittest.TestCase):
             result = run_validator(root)
             self.assertIn("xlucide-zap", result.stdout,
                           "xlucide-zap — кастомный код (префикс не в начале): обязан резолвиться против .icons/")
-            self.assertNotIn("lucide-zap\n", result.stdout.replace("xlucide-zap", ""),
-                             "lucide-zap не резолвится против .icons/ — упоминаний быть не должно")
+            self.assertIn("lucide-zap", result.stdout.replace("xlucide-zap", ""),
+                          "lucide-zap без файла обязан давать W035: форма префикса движку неизвестна (ADR-0026 Решение 3)")
+            lucide_line = next(line for line in result.stdout.splitlines()
+                               if "lucide-zap" in line and "xlucide-zap" not in line)
+            self.assertIn("префикс", lucide_line,
+                          "W035 на lucide-zap обязан нести подсказку убрать префикс (дизайн волны-3 §2.4)")
 
 
 class BareSelfClosingW034Tests(unittest.TestCase):
