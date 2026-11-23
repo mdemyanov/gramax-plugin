@@ -3,7 +3,22 @@
 # requires-python = ">=3.10"
 # dependencies = ["pyyaml>=6.0"]
 # ///
-"""Валидация парности <comment id> в md и ключей в .comments.yaml."""
+"""Валидация парности позиций комментариев в md и ключей в .comments.yaml.
+
+Позиции комментария в md — три формы: inline-тег `<comment id="ID">…</comment>`,
+XML-блочная `<comment id="ID"/> … </comment>` (канон для `syntax: XML`) и скобочная
+legacy `[comment:ID] … [/comment]`. Несколько позиций у одного ID — штатная конструкция
+движка (BlockMark.getCommentPosition(), FR-210): валидатор показывает их информационной
+строкой уровня `info`, на rc и `--strict` она не влияет.
+
+Примеры синтаксиса в code-span и fenced-блоке маскируются `lib/md_code_mask.py`
+до извлечения ID (ADR-0026 Решение 8) — иллюстрация не считается разметкой; пробелы
+внутри тега ограничены одной строкой, тег, разорванный переносом строки, даёт находку
+«тег разорван», а не ложный ID.
+
+Файл с битым UTF-8 даёт ровно одну находку `E036` (ADR-0026 Решение 6), проверки его
+текста пропускаются, обход продолжается (чтение — `lib/read_page.py`).
+"""
 
 import argparse
 import re
@@ -12,9 +27,17 @@ from pathlib import Path
 
 import yaml
 
+from lib.md_code_mask import _mask_code
+from lib.read_page import read_page, utf8_message
+
 ID_RE = re.compile(r"^[a-zA-Z0-9]{5}$")
-INLINE_RE = re.compile(r'<comment\s+id="([^"]+)">', re.DOTALL)
+# Пробелы внутри тега — только в пределах одной строки (gramax-4jf.13): \s+ мостил
+# через переводы строк и абзацы, порождая ложные ID на разорванных тегах.
+INLINE_RE = re.compile(r'<comment[ \t]+id="([^"]+)"[ \t]*>')
+XML_BLOCK_RE = re.compile(r'<comment[ \t]+id="([^"]+)"[ \t]*/>')
 BLOCK_RE = re.compile(r'\[comment:([a-zA-Z0-9]+)\]')
+# Тег, разорванный переносом строки между <comment и id= — разметка не распознаётся.
+BROKEN_TAG_RE = re.compile(r'<comment[ \t]*\n[ \t]*id="([^"]*)"')
 ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
 
 REQUIRED_COMMENT_FIELDS = [
@@ -36,8 +59,9 @@ class Issue:
 
 
 def extract_md_ids(md_text: str) -> list[str]:
-    """Вернуть все ID из <comment id> и [comment:id] по порядку (с повторами)."""
-    return INLINE_RE.findall(md_text) + BLOCK_RE.findall(md_text)
+    """Вернуть все ID позиций комментариев по порядку (с повторами): inline-тег,
+    XML-блочная форма и скобочная legacy."""
+    return INLINE_RE.findall(md_text) + XML_BLOCK_RE.findall(md_text) + BLOCK_RE.findall(md_text)
 
 
 def get_nested(d: dict, *keys):
@@ -50,21 +74,31 @@ def get_nested(d: dict, *keys):
 
 
 def validate_md(md_path: Path, issues: list[Issue], strict: bool):
-    md_text = md_path.read_text(encoding="utf-8")
-    md_ids = extract_md_ids(md_text)
+    md_text, read_err = read_page(md_path)
+    if read_err is not None:
+        issues.append(Issue("error", md_path, f"E036: {utf8_message(read_err)}"))
+        return
+    masked = _mask_code(md_text)
+    md_ids = extract_md_ids(masked)
 
     # Check ID format
     for mid in md_ids:
         if not ID_RE.match(mid):
             issues.append(Issue("error", md_path, f"invalid comment id format: {mid!r} (must be ^[a-zA-Z0-9]{{5}}$)"))
 
-    # Check uniqueness within md
-    seen = {}
-    for mid in md_ids:
-        seen[mid] = seen.get(mid, 0) + 1
-    for mid, count in seen.items():
-        if count > 1:
-            issues.append(Issue("error", md_path, f"duplicate comment id in md: {mid} (appears {count} times)"))
+    # Несколько позиций у одного ID — штатная конструкция движка (FR-210): показываем
+    # информационной строкой с номерами строк, уникальность не проверяем.
+    positions: dict[str, list[int]] = {}
+    for lineno, line in enumerate(masked.split("\n"), 1):
+        for mid in extract_md_ids(line):
+            positions.setdefault(mid, []).append(lineno)
+    for mid, lines in positions.items():
+        if len(lines) > 1:
+            issues.append(Issue("info", md_path, f"comment id в нескольких позициях md: {mid} (строки {', '.join(map(str, lines))})"))
+
+    # Тег, разорванный переносом строки (gramax-4jf.13): находка вместо ложного ID.
+    for broken in BROKEN_TAG_RE.finditer(masked):
+        issues.append(Issue("error", md_path, f"тег <comment> разорван переносом строки (id=\"{broken.group(1)}\" не распознан как позиция комментария)"))
 
     # Check yaml
     yaml_path = md_path.with_suffix(".comments.yaml")
@@ -72,8 +106,12 @@ def validate_md(md_path: Path, issues: list[Issue], strict: bool):
     # but pathlib uses last suffix so _index.md → _index.comments.yaml is correct
     yaml_data: dict = {}
     if yaml_path.exists():
+        yaml_text, yaml_err = read_page(yaml_path)
+        if yaml_err is not None:
+            issues.append(Issue("error", yaml_path, f"E036: {utf8_message(yaml_err)}"))
+            return
         try:
-            yaml_data = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
+            yaml_data = yaml.safe_load(yaml_text) or {}
         except yaml.YAMLError as e:
             issues.append(Issue("error", yaml_path, f"invalid yaml: {e}"))
             return
@@ -110,6 +148,10 @@ def validate_md(md_path: Path, issues: list[Issue], strict: bool):
             for ans in answers:
                 if not isinstance(ans, dict):
                     continue
+                # У автора ответа движок пишет user.id, равный mail (FR-218)
+                user = ans.get("user")
+                if not isinstance(user, dict) or user.get("id") is None:
+                    issues.append(Issue("warning", yaml_path, f"{yid}: у ответа нет user.id (ожидается id, равный user.mail)"))
                 key = (ans.get("content"), ans.get("dateTime"))
                 if key in seen_answers:
                     level = "error" if strict else "warning"

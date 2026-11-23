@@ -1,0 +1,8 @@
+ccccc:
+  comment:
+    dateTime: '2026-04-01T10:00:00.000Z'
+    user:
+      mail: author@example.com
+      name: Имя Автора
+    content: 'Текст здорового комментария'
+  answers: []
