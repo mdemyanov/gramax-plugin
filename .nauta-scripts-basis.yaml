@@ -2,9 +2,9 @@
 # редактируйте руками значения; секцию `skip:` — можно (ADR-030-spec §5/§6).
 # Доставленные файлы — MIT, Copyright (c) 2026 mdemyanov (tools-ai/nauta).
 # Полный текст лицензии: LICENSE в корне репозитория плагина.
-nauta_version: "2.26.0"
-nauta_ref_sha: "d1fc7a0ac8386d94c5817ef5e6191d6d09b7ef96"
-synced_at: "2026-11-21T07:56:54Z"
+nauta_version: "2.27.0"
+nauta_ref_sha: "be3ad3964f279127d86a6de08be318f42f054503"
+synced_at: "2026-11-22T07:40:40Z"
 delivery_complete: true
 files_count: 25
 files:
