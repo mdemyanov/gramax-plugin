@@ -24,3 +24,4 @@ order: 1
 - [Отчёт ночной сессии вычитки и ревью проекта (2026-11-19)](2026-11-19-night-review-report.md) — 2 фикса на месте, 5 классов предметов владельцу, гейты зелёные до/после
 - [QA Report — прибор рендер-проб Playwright: первый --full после подключения сюиты render-quality (шаг 18); shellcheck SC2034×2 + SC2059×3, класс NEW, вердикт fix-first](2026-11-21-playwright-render-quality-qa-report.md)
 - [QA Report qa-057 — волна-2 render-quality: полный гейт --full на f8af038; единственный красный — ac-128 нога (д), артефакт закрытия волны ещё не написан; вердикт — закрытие без возврата в Dev](2026-11-21-qa-057-render-quality-wave2-full-gate.md)
+- [QA Report qa-057 — волна-3 (релиз 4.10.0): два полных прогона check.sh --full (красный на 7d8001c, зелёный на 07c05c0); оба отказа тестовые (ac-134, ac-105), класс test-adaptation; вердикт — pass](2026-11-23-wave3-qa-report.md)
