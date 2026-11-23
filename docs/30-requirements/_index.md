@@ -27,3 +27,4 @@ order: 3
 - [writer 4.8.0 — хвосты волны 4.7.0 (открытые вопросы writer-sync и исключения RES-007 §3)](2026-11-18-writer-tail-480-requirement.md) — FR-183…FR-186
 - [Прибор рендер-проб Playwright и калибровка validate_render](2026-11-21-playwright-render-quality-requirement.md) — FR-187…FR-198
 - [Волна-2 калибровки render-quality: боевой режим прибора на живой цели](2026-11-21-render-quality-wave2-requirements.md) — FR-199…FR-207
+- [Волна-3 — релиз 4.10.0: калибровка контрактов валидаторов, гейтов и хвостов гигиены](2026-11-23-wave3-validators-contracts-gates-requirement.md) — FR-208…FR-221, AC-129…AC-151
