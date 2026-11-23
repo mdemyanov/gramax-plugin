@@ -29,7 +29,7 @@ HINT_UNSET = (
     "bash scripts/render-quality/warm.sh"
 )
 HINT_UNAVAILABLE = (
-    "запускай прибор через bash scripts/render-quality/probe.sh "
+    "запускай замер через bash scripts/render-quality/live.sh "
     "(uv добавляет --with playwright); прогрев: bash scripts/render-quality/warm.sh"
 )
 HINT_NO_BROWSER = (

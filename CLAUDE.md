@@ -35,8 +35,11 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 - Markdown skills и agent prompts (большая часть плагина).
 - Bash скрипты (плагинная инфраструктура, smoke-тесты).
 - JSON (manifests, settings).
-- Python-скрипты в `scripts/` — не язык этого проекта: доставлены из `nauta` через
-  `/nauta:sync-scripts`, запускаются через `uv run` (PEP 723). Их не пишут и не правят здесь.
+- Скрипты `nauta` в `scripts/` (перечень — `.nauta-scripts-basis.yaml`) доставлены через
+  `/nauta:sync-scripts`, запускаются через `uv run` (PEP 723); их не пишут и не правят здесь.
+- Собственные инструменты репозитория на Python: `scripts/render-quality/*.py` (прибор
+  рендер-проб, ADR-0025) и `scripts/gen-gramax-lucide-icons.py` (генератор реестра иконок,
+  ADR-0026) — правятся здесь, в payload плагина не входят.
 
 ## Команды сборки и проверки
 

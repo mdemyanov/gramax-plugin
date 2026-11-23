@@ -30,6 +30,10 @@ if OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$FIX
 else
   RC=$?
 fi
+if [ "$RC" -ne 0 ]; then
+  echo "  FAIL: AC-136 — W035 остаётся предупреждением: без --strict валидатор обязан закончить с rc=0" >&2
+  FAIL=$((FAIL + 1))
+fi
 
 w035_for() {
   printf '%s\n' "$OUT" | grep "W035" | grep -cF "код \"$1\"" || true

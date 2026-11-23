@@ -42,6 +42,10 @@ if OUT_BROKEN=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_comments.py
 else
   RC_BROKEN=$?
 fi
+if [ "$RC_BROKEN" -eq 0 ]; then
+  echo "  FAIL: FR-216 (комментарии) — разорванный тег обязан давать находку «тег разорван» уровня error: rc=1" >&2
+  FAIL=$((FAIL + 1))
+fi
 
 if printf '%s\n' "$OUT_BROKEN" | grep -qF 'invalid comment id format'; then
   echo "  FAIL: FR-216 (комментарии) — разорванный переносом тег не должен рождать «invalid comment id format» с ложным ID" >&2

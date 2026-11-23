@@ -42,7 +42,7 @@ if printf '%s\n' "$FULL_LINES" | grep -qF 'bash tests/gramax/cross-catalog-retra
   :
 else
   echo "  FAIL: AC-143 — в --full-блоке check-gramax.sh нет вызова" >&2
-  echo "  bash tests/gramax/cross-catalog-retraction/run.sh (ADR-0027, Решение 3: последним шагом)" >&2
+  echo "  bash tests/gramax/cross-catalog-retraction/run.sh (ADR-0027, Решение 3: шаг перед сторожевой gate-composition)" >&2
   FAIL=$((FAIL + 1))
 fi
 

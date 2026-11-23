@@ -831,7 +831,7 @@ def validate(root: Path, strict: bool, fix: bool, yes: bool) -> list[Issue]:
     # (ADR-0024 Решение 4, FR-156):
     #   known = {"drawio"} ∪ diagramTags ∪ selfClosingTags ∪ pairedTags ∪ killerTags ∪
     #   allowlistedTags — W034 молчит по каноническим тегам ОБОИХ контрактов
-    #   (BR-011: канонический по контракту плагина тег не репортится; новый киллер или
+    #   (BR-028: канонический по контракту плагина тег не репортится; новый киллер или
     #   тег добавляется строкой JSON, демаркация обновляется сама);
     #   check_tags балансит только pairedTags − balanceTags — unbalanced note/tabs/tab/color/
     #   highlight, как и table/tr/td (ADR-0026 Решение 2, BR-027: баланс тегов таблицы ведёт

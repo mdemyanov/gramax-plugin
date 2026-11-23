@@ -41,22 +41,15 @@ if ! printf '%s\n' "$OUT" | grep -qF "Несбалансированный <td>"
 fi
 
 # --- (b): дубля от validate_structure нет ---
-if OUT_STRUCT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$BAD" 2>&1); then
-  RC_STRUCT=0
-else
-  RC_STRUCT=$?
-fi
+OUT_STRUCT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$BAD" 2>&1) || true
 if printf '%s\n' "$OUT_STRUCT" | grep -qE 'unpaired <(table|tr|td)>|Несбалансированный'; then
   echo "  FAIL: AC-135 (BR-027) — validate_structure не должен балансировать table/tr/td: расширение pairedTags не вводит вторую находку" >&2
   FAIL=$((FAIL + 1))
 fi
 
 # --- (c): валидная таблица — validate_render чист ---
-if OUT_GOOD=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_render.py "$GOOD" 2>&1); then
-  RC_GOOD=0
-else
-  RC_GOOD=$?
-fi
+RC_GOOD=0
+(cd "$ROOT" && uv run plugins/gramax/scripts/validate_render.py "$GOOD") >/dev/null 2>&1 || RC_GOOD=$?
 assert_exit_zero "$RC_GOOD" "AC-135 (BR-027): валидная XML-таблица — validate_render чист (rc=0)"
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-135: AC-135 (рендер) — $FAIL assertion(s) failed"; exit 1; fi

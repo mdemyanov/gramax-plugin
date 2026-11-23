@@ -40,7 +40,7 @@ if ! printf '%s\n' "$OUT" | grep -qF 'abcde'; then
 fi
 
 # --- (c): info-уровень не эскалируется --strict'ом ---
-if OUT_STRICT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_comments.py "$FIXTURE/page.md" --strict 2>&1); then
+if (cd "$ROOT" && uv run plugins/gramax/scripts/validate_comments.py "$FIXTURE/page.md" --strict) >/dev/null 2>&1; then
   RC_STRICT=0
 else
   RC_STRICT=$?

@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 # tests/gramax/comments/run.sh
 # Aggregator: runs all ac-*.sh, prints summary, returns non-zero if any failed.
-# Красный результат сейчас — ожидаемое стартовое состояние волны-3 (TDD-цепочка
-# qa-author → dev → qa-runner, BR-025): стабы рождаются красными на 7553da1,
-# позеленение — цикл Dev по ADR-0026 (см. README.md → таблица).
-# Suite подключён к scripts/check-gramax.sh шагом `comments` (--full, ADR-0027 Решение 5);
-# заглушки рождались красными на 7553da1 (QA-author), позеленели в цикле Dev.
+# Suite подключён к scripts/check-gramax.sh шагом `comments` (--full, ADR-0027 Решение 5).
+# Стабы рождались красными на 7553da1 (QA-author, TDD-цепочка BR-025) и позеленели
+# в цикле Dev по ADR-0026 (см. README.md → таблица).
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -27,6 +27,10 @@ if OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$FIX
 else
   RC=$?
 fi
+if [ "$RC" -eq 0 ]; then
+  echo "  FAIL: AC-137 — настоящие дефекты вне блока и непарный внешний <html> обязаны давать rc≠0" >&2
+  FAIL=$((FAIL + 1))
+fi
 
 # --- (a): содержимое html-блока молчит ---
 for tag in title div br; do

@@ -21,10 +21,15 @@ FAIL=0
 DOCS="$ROOT/docs"
 
 OUT_FILE="$SCRIPT_DIR/.ac-148-out.txt"
+trap 'rm -f "$OUT_FILE"' EXIT
 if (cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$DOCS" > "$OUT_FILE" 2>&1); then
   RC=0
 else
   RC=$?
+fi
+if [ "$RC" -ne 0 ]; then
+  echo "  FAIL: AC-148 — validate_structure.py docs обязан заканчиваться с rc=0 (0 ERROR)" >&2
+  FAIL=$((FAIL + 1))
 fi
 
 W034_COUNT=$(grep -c "W034" "$OUT_FILE" || true)

@@ -77,6 +77,10 @@ if OUT_DUP=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_comments.py "$
 else
   RC_DUP=$?
 fi
+if [ "$RC_DUP" -ne 0 ]; then
+  echo "  FAIL: AC-139 регрессия — «duplicate answer» остаётся предупреждением: rc=0" >&2
+  FAIL=$((FAIL + 1))
+fi
 
 if ! printf '%s\n' "$OUT_DUP" | grep -qF 'duplicate answer'; then
   echo "  FAIL: AC-139 регрессия — предупреждение «duplicate answer» обязано остаться: правка контура answers не должна снять существующую проверку" >&2

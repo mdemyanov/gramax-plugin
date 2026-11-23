@@ -64,6 +64,7 @@ rm -f "$VAL_OUT"
 # --- (b): parse_comments — пропуск с предупреждением на stderr, rc=0 ---
 PARSE_ERR="$FIXTURE/../.ac-132-parse-err.txt"
 PARSE_OUT="$FIXTURE/../.ac-132-parse-out.txt"
+trap 'rm -f "$VAL_OUT" "$PARSE_ERR" "$PARSE_OUT"' EXIT
 if (cd "$ROOT" && uv run plugins/gramax/scripts/parse_comments.py "$FIXTURE" > "$PARSE_OUT" 2> "$PARSE_ERR"); then
   RC_PARSE=0
 else

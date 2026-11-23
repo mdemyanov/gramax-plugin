@@ -83,7 +83,8 @@ properties:
 
 - ADR — создаёт SA (ADR-0011).
 - Тесты (`ac-*.sh`, `run.sh`, `verify.sh` тело) — создаёт QA-author.
-- Любые правки `scripts/*.py` и `scripts/apply-overlay.sh` — чужие файлы под `.nauta-scripts-basis.yaml`.
+- Любые правки `scripts/*.py` и `scripts/apply-overlay.sh` — чужие файлы под `.nauta-scripts-basis.yaml`
+  (`scripts/apply-overlay.sh` удалён 2026-11-23 — ADR-0027 Решение 6).
 - Любые правки корневого `marketplace.json` за пределами поля `metadata.version`.
 - Точная regex-формулировка паттернов `sunset-registry.txt` (см. открытый вопрос — риск ложных срабатываний).
 

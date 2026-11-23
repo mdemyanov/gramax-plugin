@@ -81,6 +81,7 @@ GaRkQ:
   answers:
     - user:
         mail: reviewer@example.com
+        id: reviewer@example.com
         name: Имя Рецензента
       dateTime: '2026-04-01T11:00:00.000Z'
       content: >-

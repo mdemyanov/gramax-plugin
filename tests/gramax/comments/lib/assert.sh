@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # tests/gramax/comments/lib/assert.sh
 # Копия tests/gramax/catalog-validator/lib/assert.sh (тот же интерфейс, независимая копия —
 # suite не шарит lib/ между suite, по прецеденту catalog-validator/plugin-contract).

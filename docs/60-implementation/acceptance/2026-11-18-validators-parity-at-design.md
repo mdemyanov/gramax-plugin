@@ -12,16 +12,16 @@ properties:
 
 # Приёмка (BA-acceptance): паритет офлайн-валидаторов с модулем «Проверка на ошибки»
 
-**Роль:** BA-acceptance gate — проверка AC-15-59…AC-16-68 и FR-151…FR-157 требования против
+**Роль:** BA-acceptance gate — проверка AC-152…AC-163 и FR-151…FR-157 требования против
 **реализованного** кода валидатора (не против обещаний дизайна), с независимым повторным
 исполнением буквальных проверок и вердиктом.
 **Дата приёмки:** 2026-11-18
-**Требование:** [Паритет офлайн-валидаторов плагина с модулем проверки ошибок приложения](../../30-requirements/2026-11-18-validators-error-check-parity-requirement.md) (AC-15-59…AC-16-68, FR-151…FR-157)
+**Требование:** [Паритет офлайн-валидаторов плагина с модулем проверки ошибок приложения](../../30-requirements/2026-11-18-validators-error-check-parity-requirement.md) (AC-152…AC-163, FR-151…FR-157)
 **ADR:** [0024-validators-error-check-parity](../../00-project/adr/0024-validators-error-check-parity.md) (коды — Решение 1, строгость — Решение 2, `diagramTags` — Решение 3, W034 — Решение 4, lucide — Решение 5)
 **Дизайн:** [2026-11-18-validators-parity-design](../../40-architecture/2026-11-18-validators-parity-design.md) (план правок по FR, контракт с QA-author, миграция)
 **Реализация:** коммит `6d43b7d` — `plugins/gramax/gramax-tags.json` (schemaVersion 2, ключ `diagramTags`, `plant-uml`/`bpmn` в `selfClosingTags`), `plugins/gramax/scripts/lib/md_link_parser.py` (параметризованный матчер), `plugins/gramax/scripts/validate_structure.py` (`check_diagrams` по членству, новый `check_icons` + W035, `known_tags` из обоих контрактов, фикс `_UNSUPPORTED_HTML_RE`), новый `plugins/gramax/scripts/tests/test_validators_parity.py`
 **QA-отчёт:** [QA Report — паритет валидаторов](../test-reports/2026-11-18-validators-parity-qa-report.md) — независимый прогон, рекомендация **accept** (принята как вход, не как замена собственной проверке)
-**Suite:** `tests/gramax/catalog-validator/` — `ac-025`…`ac-036`, один-к-одному на AC-15-59…AC-16-68 (карта — `README.md:199-210`); `ac-001`…`ac-024` — регрессионный пласт
+**Suite:** `tests/gramax/catalog-validator/` — `ac-025`…`ac-036`, один-к-одному на AC-152…AC-163 (карта — `README.md:199-210`); `ac-001`…`ac-024` — регрессионный пласт
 **Метод:** каждый AC — проверка из требования, свидетельство реализации (файл:строка), собственный дословный прогон команды AC на собственных фикстурах в `/tmp`, вердикт PASS/FAIL. Каждый FR — implemented / partially / not implemented со свидетельством. Отклонения дизайн↔реализация классифицируются: accepted-deviation (с основанием) или дефект.
 
 ---
@@ -30,7 +30,7 @@ properties:
 
 | Метрика | Значение |
 |---|---|
-| AC | **12 pass / 0 fail** (AC-15-59…AC-16-68) |
+| AC | **12 pass / 0 fail** (AC-152…AC-163) |
 | FR | **7 implemented / 0 partial / 0 not implemented** (FR-151…FR-157) |
 | NFR | NFR-065/066/067 satisfied; NFR-068 — код-половина satisfied, CHANGELOG-часть отложена (Находка 1); NFR-069 N/A |
 | Отклонения | 3 accepted-deviation, 0 дефектов (развод — раздел «Находки») |
@@ -42,7 +42,7 @@ properties:
 - `bash tests/gramax/catalog-validator/run.sh` → rc=0, **36/36** (`All 36 AC tests passed.`);
 - `uv run pytest plugins/gramax/scripts/tests/ plugins/gramax/scripts/lib/` → **33 passed**, rc=0;
 - `bash scripts/check.sh --fast` → rc=0, `Errors: 0 | Warnings: 6`, `RESULT: PASS` (все шесть warnings — предсуществующие TPL-69 в досинтезных файлах вне окна волны, как зафиксировано QA-отчётом);
-- собственные фикстуры в `/tmp` (композитная «паритет» и «пустой сбор») — формулы AC-15-59…AC-16-70 исполнены дословно, счётчики в разделе «AC coverage».
+- собственные фикстуры в `/tmp` (композитная «паритет» и «пустой сбор») — формулы AC-152…AC-161 исполнены дословно, счётчики в разделе «AC coverage».
 
 Замечание о механике: первый прогон suite в этой сессии (до PM-коммита `4ba3202`) дал 35/36 —
 красным был только `ac-036` по env-причине (два незарегистрированных QA-отчёта параллельных
@@ -50,7 +50,7 @@ properties:
 
 ---
 
-## AC coverage (AC-15-59…AC-16-68)
+## AC coverage (AC-152…AC-163)
 
 Каждый AC закрыт ровно одним stub'ом suite (`ac-025`…`ac-036`, соответствие 1:1 по
 `README.md:199-210`). Колонка «Прогон BA» — мой собственный дословный прогон формулы из
@@ -59,18 +59,18 @@ properties:
 
 | AC | Проверка из требования (предмет) | Свидетельство реализации | Прогон BA (дословная формула) | Вердикт |
 |---|---|---|---|---|
-| AC-15-59 (диаграммы, позитив) | битые цели `missing.mmd`/`missing.puml`/`missing.bpmn` упомянуты в выводе | матчер `md_link_parser.py:24-30,99-104`; `check_diagrams` `validate_structure.py:732-754` | каждая из трёх целей упомянута ровно 1 раз, rc=0 | **PASS** |
-| AC-15-58 (диаграммы, негатив) | существующие цели всех четырёх тегов → `grep -icE 'W031\|диаграмм'` → 0 | членство `target_type not in diagram_set` (`:745`) | `0` | **PASS** |
-| AC-15-57 (regression guard drawio) | `bash ac-015-diagram-broken.sh && echo PASS` | W031-семантика сохранена, сообщение аддитивно (`:750-754`) | `PASS` | **PASS** |
-| AC-15-56 (иконки, позитив) | `<icon code="my-custom-icon"/>` без `.icons/` → находка с кодом | `check_icons` `:760-786`, W035 с кодом и ожидаемым путём (`:783-786`) | `ba-check-icon` найден 1 раз: `W035: … код "ba-check-icon" → ожидается .icons/ba-check-icon.svg` | **PASS** |
-| AC-15-55 (иконки, негатив) | та же фикстура + `.icons/<код>.svg` → НЕ находит | резолв `root/.icons/<code>.svg` (`:781`) | после добавления файла — `0` упоминаний кода | **PASS** |
-| AC-15-54 (иконки, граница lucide) | `<icon code="lucide-zap"/>` без `.icons/` → находки нет | skip по префиксу (`:779-780`) | `lucide-zap` — `0` упоминаний | **PASS** |
-| AC-15-53 (W034, контракт-паритет) | `<view defs>` + существующая `<mermaid path="./ok.mmd"/>` → `W034` НЕ находит | `known_tags ⊇ selfClosingTags ∪ pairedTags` (`:654-657`) | `W034` в фикстуре ровно 1 — и это `fancy-widget-x`; `view` молчит | **PASS** |
-| AC-15-52 (W034, неизвестный дефисный тег) | `<fancy-widget-x/>` вне контрактов → `W034` находит | `_UNSUPPORTED_HTML_RE` дефис + `/?` (`:802`) | `W034: неподдерживаемая разметка: <fancy-widget-x>` — находит (дефис и голый `/>` обе ветки) | **PASS** |
-| AC-15-51 (одна находка на дефект) | битая `<mermaid path="./missing.mmd"/>` → `grep -c 'missing.mmd'` → 1 | структурная демаркация: `plant-uml`/`bpmn`/`mermaid` в `selfClosingTags` (`gramax-tags.json:4`) → W034 молчит | ровно `1` | **PASS** |
-| AC-16-70 (уровень по умолчанию) | единственный дефект — битая цель: exit 0 без флагов, exit 1 с `--strict` | warning-уровень (`:750`), эскалация `--strict` (`main:896-906`) | `EXIT_DEFAULT=0`, `EXIT_STRICT=1` | **PASS** |
-| AC-16-69 (догфудинг) | `grep -E 'W034: .*<(view\|mermaid\|…)>'` на живом `docs/` — пусто | вычисляемый known-набор (`:652-663`) | grep пуст (rc=1); полный инвентарь W034 по `docs/` — ровно 3 прозаические находки `<home>`, `<file>`, `<raw>`; обе живые ложные факта 7 устранены | **PASS** |
-| AC-16-68 (композитный) | `bash scripts/check.sh --fast` зелёный | — | rc=0, `Errors: 0 \| Warnings: 6`, `RESULT: PASS`; stub `ac-036` на финальном дереве — PASS | **PASS** |
+| AC-152 (диаграммы, позитив) | битые цели `missing.mmd`/`missing.puml`/`missing.bpmn` упомянуты в выводе | матчер `md_link_parser.py:24-30,99-104`; `check_diagrams` `validate_structure.py:732-754` | каждая из трёх целей упомянута ровно 1 раз, rc=0 | **PASS** |
+| AC-153 (диаграммы, негатив) | существующие цели всех четырёх тегов → `grep -icE 'W031\|диаграмм'` → 0 | членство `target_type not in diagram_set` (`:745`) | `0` | **PASS** |
+| AC-154 (regression guard drawio) | `bash ac-015-diagram-broken.sh && echo PASS` | W031-семантика сохранена, сообщение аддитивно (`:750-754`) | `PASS` | **PASS** |
+| AC-155 (иконки, позитив) | `<icon code="my-custom-icon"/>` без `.icons/` → находка с кодом | `check_icons` `:760-786`, W035 с кодом и ожидаемым путём (`:783-786`) | `ba-check-icon` найден 1 раз: `W035: … код "ba-check-icon" → ожидается .icons/ba-check-icon.svg` | **PASS** |
+| AC-156 (иконки, негатив) | та же фикстура + `.icons/<код>.svg` → НЕ находит | резолв `root/.icons/<code>.svg` (`:781`) | после добавления файла — `0` упоминаний кода | **PASS** |
+| AC-157 (иконки, граница lucide) | `<icon code="lucide-zap"/>` без `.icons/` → находки нет | skip по префиксу (`:779-780`) | `lucide-zap` — `0` упоминаний | **PASS** |
+| AC-158 (W034, контракт-паритет) | `<view defs>` + существующая `<mermaid path="./ok.mmd"/>` → `W034` НЕ находит | `known_tags ⊇ selfClosingTags ∪ pairedTags` (`:654-657`) | `W034` в фикстуре ровно 1 — и это `fancy-widget-x`; `view` молчит | **PASS** |
+| AC-159 (W034, неизвестный дефисный тег) | `<fancy-widget-x/>` вне контрактов → `W034` находит | `_UNSUPPORTED_HTML_RE` дефис + `/?` (`:802`) | `W034: неподдерживаемая разметка: <fancy-widget-x>` — находит (дефис и голый `/>` обе ветки) | **PASS** |
+| AC-160 (одна находка на дефект) | битая `<mermaid path="./missing.mmd"/>` → `grep -c 'missing.mmd'` → 1 | структурная демаркация: `plant-uml`/`bpmn`/`mermaid` в `selfClosingTags` (`gramax-tags.json:4`) → W034 молчит | ровно `1` | **PASS** |
+| AC-161 (уровень по умолчанию) | единственный дефект — битая цель: exit 0 без флагов, exit 1 с `--strict` | warning-уровень (`:750`), эскалация `--strict` (`main:896-906`) | `EXIT_DEFAULT=0`, `EXIT_STRICT=1` | **PASS** |
+| AC-162 (догфудинг) | `grep -E 'W034: .*<(view\|mermaid\|…)>'` на живом `docs/` — пусто | вычисляемый known-набор (`:652-663`) | grep пуст (rc=1); полный инвентарь W034 по `docs/` — ровно 3 прозаические находки `<home>`, `<file>`, `<raw>`; обе живые ложные факта 7 устранены | **PASS** |
+| AC-163 (композитный) | `bash scripts/check.sh --fast` зелёный | — | rc=0, `Errors: 0 \| Warnings: 6`, `RESULT: PASS`; stub `ac-036` на финальном дереве — PASS | **PASS** |
 
 Дополнительно к формуле требования (проверено по коду и pytest): периметр иконок — только
 тела статей (`_collect_md_files`, `:775`), `properties.icon` не читается (FR-154); пустой сбор
@@ -94,7 +94,7 @@ root — против своего `.icons/`) и `XlucidePrefixBoundaryTests` (`
 
 **NFR:** NFR-065 (офлайн) — satisfied: только regex + файловая система, сетевых обращений и
 вызовов модели нет. NFR-066 (warning по умолчанию, `--strict` эскалирует) — satisfied:
-замер AC-16-70 (0/1); новых флагов нет. NFR-067 (одна находка) — satisfied: замер AC-15-51.
+замер AC-161 (0/1); новых флагов нет. NFR-067 (одна находка) — satisfied: замер AC-160.
 NFR-068 (синхрон контрактов) — код-половина satisfied: `git show --stat 6d43b7d` —
 `gramax-tags.json` + `md_link_parser.py` + `validate_structure.py` + `test_validators_parity.py`
 одним коммитом; CHANGELOG-часть отложена — Находка 1. NFR-069 — N/A (офлайн-скрипт).

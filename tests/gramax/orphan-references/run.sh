@@ -29,7 +29,7 @@ SEARCH_PATHS=(plugins scripts tests CLAUDE.md AGENTS.md README.md)
 # предмет своих ассертов (ADR-0011, Решение 1). CHANGELOG, ADR и отчёты — то же основание.
 # tests/gramax/gate-composition/ — варден реестра закатов (ac-145) цитирует шаблоны
 # sunset-registry дословно: цитирующий реестр — не остаточная ссылка (ADR-0027).
-EXCLUDE_RE='(^|/)CHANGELOG\.md$|^docs/00-project/adr/|^docs/60-implementation/|^docs/|^tests/gramax/orphan-references/|^tests/gramax/archive/|^tests/gramax/gate-composition/'
+EXCLUDE_RE='(^|/)CHANGELOG\.md$|^docs/00-project/adr/|^docs/60-implementation/|^docs/|^tests/gramax/orphan-references/|^tests/gramax/archive/|^tests/gramax/gate-composition/ac-145-overlay-sunset\.sh$'
 
 TOTAL=0
 while IFS= read -r pattern; do

@@ -100,7 +100,7 @@ else
   echo "OK: no docs/ directory"
 fi
 
-# --- 3. (--full only) Shellcheck on tracked .sh files, if installed ---
+# --- 3. (--full only) Полный блок --full: догфудинг валидаторов → shellcheck → submodule status → сюиты ---
 if [ "$MODE" = "--full" ]; then
   # --- 3.0 (--full only) Догфудинг своих валидаторов на docs/ (FR-220б, ADR-0027
   # Решение 4): два шага первыми внутри --full-блока, подряд с быстрыми валидаторами
@@ -160,7 +160,7 @@ if [ "$MODE" = "--full" ]; then
       # «payload не трогается», ADR-0021). SC1125 — русский текст после директивы
       # disable (намеренный стиль payload-файлов); SC2001/SC2016/SC2086 — стиль/info
       # в тех же файлах, shellcheck даёт rc=1 на любую находку. Фикс вынесен вверх
-      # по потоку: issue tools-ai/nauta#42 (doc-hub.gitlab.yandexcloud.net) —
+      # по потоку: issue tools-ai/nauta#42 (внутренний GitLab) —
       # «payload-скрипты: битые shellcheck-директивы (SC1125 — disable не работает) +
       # стиль SC2001/SC2016/SC2086». Исключение снимается тем же коммитом синка
       # payload после релиза nauta с фиксом: убрать коды из -e ниже и прогнать

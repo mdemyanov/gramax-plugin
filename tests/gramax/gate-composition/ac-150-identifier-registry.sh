@@ -99,4 +99,22 @@ for N in 025 026 027 028 029 030 031 032 033 034 035 036; do
 done
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-150: $FAIL assertion(s) failed"; exit 1; fi
+# --- Нога 6: требование паритета определяет ровно AC-152…AC-163, каждый по одному разу ---
+# (урок ревью 2026-11-23: сбой перенумерации дал вид AC-15-NN — ноги 1 и 3 его не видели)
+for n in 152 153 154 155 156 157 158 159 160 161 162 163; do
+  C_N="$(grep -cF "**AC-$n" "$PARITY")"
+  if [ "$C_N" -ne 1 ]; then
+    echo "  FAIL: AC-150 — требование паритета обязано определять **AC-$n ровно один раз (найдено $C_N)" >&2
+    FAIL=$((FAIL + 1))
+  fi
+done
+
+# --- Нога 7: нет идентификаторов с лишним дефисом (вид AC-15-NN, AC-16-NN) в требованиях и сюитах ---
+MALFORMED="$(grep -rnoE 'AC-1[0-9]-[0-9]{2}' "$REQ_DIR" "$ROOT/tests/gramax" 2>/dev/null | head -5)"
+if [ -n "$MALFORMED" ]; then
+  echo "  FAIL: AC-150 — найдены идентификаторы с лишним дефисом: $MALFORMED" >&2
+  FAIL=$((FAIL + 1))
+fi
+
+if [ "$FAIL" -gt 0 ]; then fail_msg "ac-150: $FAIL assertion(s) failed (ноги 6–7)"; exit 1; fi
 pass_msg "ac-150: идентификаторы глобальной эры определены ровно один раз; реестр с владельцами на месте; паритет на AC-152…AC-163; имена стабов catalog-validator не менялись"

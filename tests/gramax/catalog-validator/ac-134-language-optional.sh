@@ -53,6 +53,10 @@ for variant in int-language null-language empty-language; do
   else
     RC_V=$?
   fi
+  if [ "$RC_V" -eq 0 ]; then
+    echo "  FAIL: AC-134 — вариант $variant: неверный тип language обязан давать rc≠0" >&2
+    FAIL=$((FAIL + 1))
+  fi
   if ! printf '%s\n' "$OUT_V" | grep -qF 'invalid type for field "language"'; then
     echo "  FAIL: AC-134 — вариант $variant: присутствующее поле language обязано проверяться на непустую строку (docRootOptionalFields, FR-121)" >&2
     FAIL=$((FAIL + 1))

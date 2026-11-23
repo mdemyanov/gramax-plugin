@@ -74,6 +74,7 @@ red на текущем коде») — задокументировано яв�
 bash tests/gramax/link-form-resolver/run.sh; echo "exit=$?"
 ```
 
-Не подключён к `scripts/check.sh --fast`/`--full` — подключение (если решит Dev/PM) делает
+На момент создания не был подключён к `scripts/check.sh --fast`/`--full` (с 2026-11-18 входит
+в `--full` шагом `link-form-resolver`); подключение (если решит Dev/PM) делает
 Dev тем же шагом, что закрывает FR-082, по прецеденту `tests/gramax/catalog-validator/`
 (DEV-002 там же).

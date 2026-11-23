@@ -22,7 +22,7 @@ ADR: `docs/00-project/adr/0026-validator-contracts-engine-pin.md` (Решени�
 
 ## Запуск
 
-    bash tests/gramax/comments/run.sh                          # весь suite (красный до цикла Dev — норма TDD)
+    bash tests/gramax/comments/run.sh                          # весь suite (зелёный с волны-3)
     bash tests/gramax/comments/ac-130-xml-block-form.sh        # одиночный тест
 
 Фикстуры — `fixtures/ac-*/` (page.md + page.comments.yaml парами; `ac-132-utf8` содержит

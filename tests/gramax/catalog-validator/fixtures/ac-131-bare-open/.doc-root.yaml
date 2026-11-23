@@ -1,0 +1,5 @@
+code: ac-131-bare-open
+title: "Оборванный блочный комментарий"
+description: "AC-131: негатив — открывающий без закрывающего"
+syntax: XML
+language: ru

@@ -38,4 +38,16 @@ fi
 assert_eq "$RC" "0" "AC-131: каталог с обеими блочными формами — чист (rc=0; замер 2026-11-23: rc=1 с unpaired)"
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-131: AC-131 — $FAIL assertion(s) failed"; exit 1; fi
-pass_msg "ac-131: AC-131 — XML-форма парна для validate_structure, скобочная legacy-форма парна как прежде"
+# --- негатив: самозакрывающий открывающий без закрывающего — настоящая непарность ---
+BARE="$SCRIPT_DIR/fixtures/ac-131-bare-open"
+if OUT_BARE=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$BARE" 2>&1); then
+  RC_BARE=0
+else
+  RC_BARE=$?
+fi
+BARE_COUNT=$(printf '%s\n' "$OUT_BARE" | grep -c "unpaired <comment>" || true)
+assert_eq "$RC_BARE" "1" "AC-131: самозакрывающий открывающий <comment id=…/> без </comment> — настоящая непарность (rc=1)"
+assert_eq "$BARE_COUNT" "1" "AC-131: ровно одна находка «unpaired <comment>» на оборванный блок"
+
+if [ "$FAIL" -gt 0 ]; then fail_msg "ac-131: AC-131 — $FAIL assertion(s) failed"; exit 1; fi
+pass_msg "ac-131: AC-131 — XML-форма парна для validate_structure, скобочная legacy-форма парна как прежде; оборванный блок — одна находка"

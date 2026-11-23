@@ -30,6 +30,10 @@ if OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$FIX
 else
   RC=$?
 fi
+if [ "$RC" -eq 0 ]; then
+  echo "  FAIL: AC-151 — истинные находки V3–V5 на _index.md подпапок обязаны давать rc≠0" >&2
+  FAIL=$((FAIL + 1))
+fi
 
 # --- (f): запрет снят целиком ---
 if printf '%s\n' "$OUT" | grep -qF 'не должен содержать properties'; then
