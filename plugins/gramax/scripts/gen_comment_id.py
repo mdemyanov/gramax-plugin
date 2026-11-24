@@ -22,13 +22,28 @@ def generate_id() -> str:
 def load_existing_ids(yaml_path: Path) -> set[str]:
     if not yaml_path.exists():
         return set()
+    if not yaml_path.is_file():
+        # Граница --check: путь-каталог — именованный отказ вместо traceback
+        # IsADirectoryError (ADR-0028 Решение 7, дизайн волны-4 §3.7).
+        print(f"not a file: {yaml_path}", file=sys.stderr)
+        sys.exit(2)
     try:
         import yaml
     except ImportError:
         print("pyyaml required for --check", file=sys.stderr)
         sys.exit(3)
+    # Чтение через общий примитив lib/read_page (ADR-0028 Решение 7): файл с битым
+    # UTF-8 — именованный отказ с байтом/позицией/размером вместо traceback
+    # UnicodeDecodeError. Импорт ленивый: модуль остаётся импортируемым без lib/ на
+    # пути (проба уровня модуля вызывает только generate_id).
+    from lib.read_page import read_page, utf8_message
+
+    text, read_err = read_page(yaml_path)
+    if read_err is not None or text is None:
+        print(f"{yaml_path}: {utf8_message(read_err)}", file=sys.stderr)
+        sys.exit(2)
     try:
-        data = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
+        data = yaml.safe_load(text)
     except yaml.YAMLError as e:
         print(f"yaml parse error in {yaml_path}: {e}", file=sys.stderr)
         sys.exit(2)

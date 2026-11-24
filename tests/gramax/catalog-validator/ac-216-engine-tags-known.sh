@@ -25,10 +25,19 @@ source "$SCRIPT_DIR/lib/assert.sh"
 FAIL=0
 FIXTURE="$SCRIPT_DIR/fixtures/ac-216-engine-tags"
 
-if ! OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$FIXTURE" 2>&1); then
-  echo "  FAIL: AC-216 — валидатор не исполнился на фикстуре реестра (крушение прибора, не ассерт)" >&2
-  fail_msg "ac-216: AC-216 — прибор не исполнился"
-  exit 1
+if OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py "$FIXTURE" 2>&1); then
+  RC=0
+else
+  RC=$?
+fi
+
+# Крушение прибора судится явно: контракт допускает rc 0 (только warnings) и 1
+# (ERROR «unpaired <alert>» — та же модель, что ADR-0028 Решение 11 для --strict).
+# rc вне {0, 1} либо traceback — именованный отказ прибора, не находка контракта.
+if [ "$RC" -gt 1 ] || printf '%s\n' "$OUT" | grep -q "Traceback"; then
+  echo "  FAIL: AC-216 — крушение прибора: rc=$RC (допустимы 0/1), либо traceback в выводе" >&2
+  printf '%s\n' "$OUT" | tail -5 >&2
+  FAIL=$((FAIL + 1))
 fi
 
 w034_on() { printf '%s\n' "$OUT" | grep "W034" | grep -F "$1" | grep -cF "<$2>"; }

@@ -183,7 +183,12 @@ def main():
     for issue in issues:
         print(str(issue))
 
-    if any(i.level == "error" for i in issues):
+    # ADR-0028 Решение 11: --strict эскалирует КАЖДОЕ предупреждение (справка
+    # «Warnings → errors.» становится истинной); уровень info не эскалируется
+    # (AC-129). Метки находок не меняются — меняется только код выхода.
+    has_errors = any(i.level == "error" for i in issues)
+    has_warnings_strict = args.strict and any(i.level == "warning" for i in issues)
+    if has_errors or has_warnings_strict:
         sys.exit(1)
     sys.exit(0)
 

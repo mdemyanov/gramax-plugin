@@ -26,9 +26,10 @@ FAIL=0
 FIXTURE="$SCRIPT_DIR/fixtures/ac-164-utf8-parser"
 LIBDIR="$ROOT/plugins/gramax/scripts"
 PROBE="$(mktemp "${TMPDIR:-/tmp}/ac-164.XXXXXX")"
-trap 'rm -f "$PROBE"' EXIT
+PROBE_ERR="$(mktemp "${TMPDIR:-/tmp}/ac-164-err.XXXXXX")"
+trap 'rm -f "$PROBE" "$PROBE_ERR"' EXIT
 
-python3 -B - "$FIXTURE" "$LIBDIR" >"$PROBE" <<'PY'
+python3 -B - "$FIXTURE" "$LIBDIR" >"$PROBE" 2>"$PROBE_ERR" <<'PY'
 import sys
 from pathlib import Path
 
@@ -67,14 +68,21 @@ if [ "$RC" -eq 3 ]; then
   exit 1
 fi
 
-assert_exit_zero "$RC" "AC-164: scan_md_resources выполняется без исключения на каталоге с битым UTF-8 (замер 2026-11-24: сегодня parse_md_resources падает UnicodeDecodeError)"
+assert_exit_zero "$RC" "AC-164: scan_md_resources выполняется без исключения на каталоге с битым UTF-8 (замер 2026-11-24: parse_md_resources на старом дереве падал UnicodeDecodeError)"
 
-assert_eq "$(grep -c '^ERRS=1$' "$PROBE")" "1" "AC-164: ровно одна ошибка чтения — файл с битым UTF-8 даёт один MdPageError (BR-004, дизайн §3.1 инвариант 1)"
-assert_eq "$(grep -c '^ERRSOURCE=broken.md$' "$PROBE")" "1" "AC-164: MdPageError называет источник broken.md"
-assert_grep "^ERRMSG=файл не является валидным UTF-8" "$PROBE" "AC-164: ошибка несёт фрагмент utf8_message из lib/read_page.py (дизайн §3.1)"
+# Ни одного traceback — ни в stdout прибора, ни в stderr (дизайн §6.1, зелёная колонка).
+if grep -q "Traceback" "$PROBE" || grep -q "Traceback" "$PROBE_ERR"; then
+  echo "  FAIL: AC-164 — traceback в выводе пробы не допускается: чтение идёт через lib/read_page.py, ошибки отдаются наружу как MdPageError (ADR-0028 Решение 1)" >&2
+  grep -m3 "Traceback" "$PROBE" "$PROBE_ERR" >&2
+  FAIL=$((FAIL + 1))
+fi
 
-assert_grep "^RES=2$" "$PROBE" "AC-164: оба ресурса на месте — ссылки из a.md на c.md и на broken.md (обход доведён до конца, не оборван битым файлом)"
-assert_grep "^TARGETS=broken.md,c.md$" "$PROBE" "AC-164: цели ресурсов — c.md и broken.md, отсортированный порядок обхода сохранён (дизайн §3.1 инвариант 1)"
+assert_grep_regex "$PROBE" "^ERRS=1$" "AC-164: ровно одна ошибка чтения — файл с битым UTF-8 даёт один MdPageError (BR-004, дизайн §3.1 инвариант 1)"
+assert_grep_regex "$PROBE" "^ERRSOURCE=broken.md$" "AC-164: MdPageError называет источник broken.md"
+assert_grep_regex "$PROBE" "^ERRMSG=файл не является валидным UTF-8" "AC-164: ошибка несёт фрагмент utf8_message из lib/read_page.py (дизайн §3.1)"
+
+assert_grep_regex "$PROBE" "^RES=2$" "AC-164: оба ресурса на месте — ссылки из a.md на c.md и на broken.md (обход доведён до конца, не оборван битым файлом)"
+assert_grep_regex "$PROBE" "^TARGETS=broken.md,c.md$" "AC-164: цели ресурсов — c.md и broken.md, отсортированный порядок обхода сохранён (дизайн §3.1 инвариант 1)"
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-164: AC-164 — $FAIL assertion(s) failed"; exit 1; fi
 pass_msg "ac-164: AC-164 — scan_md_resources: одна MdPageError (broken.md), оба ресурса на месте, без исключения"

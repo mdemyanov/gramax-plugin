@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
-  "pairedTags": ["note", "tabs", "tab", "html", "comment", "color", "highlight", "fragment-link", "cut", "question", "questionAnswer", "table", "tr", "td"],
-  "selfClosingTags": ["view", "snippet", "openapi", "mermaid", "video", "icon", "image", "drawio", "plant-uml", "bpmn", "fragment", "property", "inline-property", "img-h", "img-v", "cmd", "kbd", "alfa", "beta"],
-  "diagramTags": ["drawio", "mermaid", "plant-uml", "bpmn"],
+  "pairedTags": ["note", "tabs", "tab", "html", "comment", "color", "highlight", "fragment-link", "cut", "question", "questionAnswer", "table", "tr", "td", "alert", "block-field", "block-property"],
+  "selfClosingTags": ["view", "snippet", "openapi", "mermaid", "video", "icon", "image", "drawio", "plant-uml", "bpmn", "fragment", "property", "inline-property", "img-h", "img-v", "cmd", "kbd", "alfa", "beta", "db-diagram", "db-table", "include", "term", "module", "issue", "when", "who", "see"],
+  "diagramTags": ["drawio", "mermaid", "plant-uml", "bpmn", "db-diagram"],
   "legacy": [
     {
       "tag": "drawio",

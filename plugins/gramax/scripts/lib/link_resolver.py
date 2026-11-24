@@ -1,9 +1,16 @@
 # plugins/gramax/scripts/lib/link_resolver.py
-"""Продвинутый резолв markdown-ссылок: no-ext и hash-якоря.
+"""Продвинутый резолв markdown-ссылок и hash-якоря.
 
-Зеркалирует поведение Gramax при рендеринге:
-- Ссылка без расширения [text](other) → other.md или other/index.md
-- Якорь [text](article#section) → проверка заголовка в целевом файле
+Единственный резолвер ссылок плагина (ADR-0028 Решение 4, поправка к ADR-0016
+Решение 1) — `resolve_link_target(source_dir, target, *, index_optional=False)`.
+Зеркалирует поведение Gramax при рендеринге (linkCreator.ts:99-176 на пине
+48592b36) и проверке на ошибки (Healthcheck.ts:192-201, `app/config/const.ts:32-33`):
+- Ссылка без расширения [text](other) → other.md или other/_index.md
+  (корень раздела движка — `_index.md`);
+- Каталог без `_index.md` без флага не резолвится (`None`) — раздел становится
+  только при `optionalCategoryIndex: true` (FileStructure.ts:528-531, `:653`);
+- При одноимённых файле и каталоге побеждает файл;
+- Якорь [text](article#section) → проверка заголовка в целевом файле.
 """
 
 import re
@@ -77,32 +84,37 @@ def slugify_heading(text: str) -> str:
     return text.strip("-")
 
 
-def resolve_no_ext(candidate: Path) -> Path | None:
-    """Резолвит markdown-ссылку без расширения.
+def resolve_link_target(source_dir: Path, target: str, *,
+                        index_optional: bool = False) -> Path | None:
+    """Резолвит `target` ссылки относительно `source_dir` (ADR-0028 Решение 4).
 
-    Пробует:
-    1. candidate как есть (может быть папкой с index.md)
-    2. candidate.md
-    3. candidate/index.md (для ссылок на категории)
+    Порядок кандидатов; возвращается первый подошедший, иначе `None` (дизайн
+    волны-4 §3.4):
 
-    Возвращает Path существующего файла или None.
-    """
-    # 1. Точное совпадение (может быть директория)
-    if candidate.is_dir():
-        index_md = candidate / "index.md"
-        if index_md.exists():
-            return index_md
-        return None
-    if candidate.is_file():
-        return candidate
-    # 2. candidate.md
-    with_ext = candidate.with_suffix(".md")
-    if with_ext.exists():
-        return with_ext
-    # 3. candidate/index.md
-    index_md = candidate / "index.md"
-    if index_md.exists():
+    1. литерал `(source_dir / target).resolve()` — `is_file()`;
+    2. `source_dir / (target + ".md")` — только для цели без `.md` на конце —
+       `is_file()` (второго `.md` не появляется, AC-011b);
+    3. литерал / `"_index.md"` — `is_file()` (корень раздела движка — `_index.md`,
+       `app/config/const.ts:32-33` на пине 48592b36);
+    4. литерал — каталог, только при `index_optional=True` — `is_dir()`
+       (FileStructure.ts:653).
+
+    Каталог не считается файлом: без `_index.md` и без флага цель не резолвится
+    (`None`); при одноимённых файле и каталоге побеждает файл (каталог не проходит
+    шаг 1, файл находится на шаге 2). До трёх обращений к файлу и одного к каталогу
+    на ссылку (NFR-002)."""
+    literal = (source_dir / target).resolve()
+    if literal.is_file():
+        return literal
+    if not target.endswith(".md"):
+        with_md = (source_dir / f"{target}.md").resolve()
+        if with_md.is_file():
+            return with_md
+    index_md = literal / "_index.md"
+    if index_md.is_file():
         return index_md
+    if index_optional and literal.is_dir():
+        return literal
     return None
 
 

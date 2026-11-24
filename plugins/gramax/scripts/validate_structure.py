@@ -26,9 +26,9 @@ from pathlib import Path
 import yaml
 
 from lib.md_code_mask import _mask_code, _mask_html_blocks
-from lib.md_link_parser import _MD_LINK_RE, _EXTERNAL_RE, MdResource, _diagram_tag_re
+from lib.md_link_parser import MdResource, scan_md_resources
 from lib.read_page import read_page, utf8_message
-from lib.link_resolver import resolve_no_ext, check_hash_anchor
+from lib.link_resolver import resolve_link_target, check_hash_anchor
 
 DOC_URL = "https://github.com/mdemyanov/gramax-plugin"
 EPILOG = (
@@ -328,46 +328,23 @@ def _in_nested_subtree(path: Path, nested: set[Path]) -> bool:
     return any(r == n or n in r.parents for n in nested)
 
 
-def _parse_resources(root: Path, nested: set[Path],
-                     diagram_tags: tuple[str, ...] = ("drawio",)):
-    """Ресурсные ссылки (ссылки/изображения/диаграммные теги) только из структурной
-    области `root`: источники из поддеревьев вложенных root / исключённых путей
-    отбрасываются (FR-120). `diagram_tags` прокидывается в матчер (ADR-0024 Решение 3).
+def _scan_resources(root: Path, nested: set[Path], issues: list[Issue],
+                    diagram_tags: tuple[str, ...] = ("drawio",)) -> list[MdResource]:
+    """Тонкий адаптер над `scan_md_resources` (ADR-0028 Решение 1, дизайн волны-4 §3.1).
 
-    Чтение файла — через `read_page` (ADR-0026 Решение 6, FR-212): файл с битым UTF-8
-    исключается из ресурсного скана (находка E036 о нём уже выдана текстовыми
-    читателями), скан продолжается ПОФАЙЛОВО — ресурсы здоровых соседних файлов не
-    теряются. Поэтому здесь не `parse_md_resources` целиком: он читает файлы сам
-    (`lib/md_link_parser.py` — вне правок этого цикла) и на битом UTF-8 обрывал бы
-    весь скан каталога traceback'ом. Логика разбора не дублируется: регэкспы ссылок
-    и строитель матчера диаграммных тегов импортируются из того же модуля."""
-    diagram_re = _diagram_tag_re(tuple(diagram_tags))
-    root_resolved = root.resolve()
-    resources: list[MdResource] = []
-    for md in _collect_md_files(root, nested):
-        if _in_nested_subtree(md, nested) or _is_excluded_walk_path(root, md):
-            continue
-        text, read_err = read_page(md)
-        if read_err is not None or text is None:
-            continue  # E036 уже выдана текстовыми читателями (BR-004: одна находка на файл)
-        text = _mask_code(text)
-        for m in _MD_LINK_RE.finditer(text):
-            full_match = m.group(0)
-            raw = m.group(1)
-            target = raw.split("#", 1)[0].strip().strip("<>")
-            if not target:
-                continue  # якорь на текущую страницу — не файловая ссылка
-            if _EXTERNAL_RE.match(target):
-                continue  # http/https/mailto/tel/protocol-relative — офлайн-инструмент их не резолвит
-            resolved = (md.parent / target).resolve()
-            in_scope = resolved == root_resolved or root_resolved in resolved.parents
-            ttype = "image" if full_match.startswith("!") else "link"
-            resources.append(MdResource(md, raw, resolved, ttype, in_scope))
-        for m in diagram_re.finditer(text):
-            raw = m.group(2)
-            resolved = (md.parent / raw).resolve()
-            in_scope = resolved == root_resolved or root_resolved in resolved.parents
-            resources.append(MdResource(md, raw, resolved, m.group(1), in_scope))
+    Парсер — единственный читатель ресурсных ссылок и единственный владелец маски
+    кода: второго чтения и второго прохода по регэкспам здесь нет. Границы владения
+    валидатора (FR-120: поддеревья вложенных `.doc-root.yaml` и исключённые пути
+    обхода) передаются ему предикатом `exclude`; `diagram_tags` прокидывается в
+    матчер (ADR-0024 Решение 3). Файл с битым UTF-8 парсер отдаёт `MdPageError` —
+    адаптер превращает его в находку E036; дубликаты от разных проверок гасит
+    `_dedupe_utf8_findings` (BR-004)."""
+    def _excluded(p: Path) -> bool:
+        return _in_nested_subtree(p, nested) or _is_excluded_walk_path(root, p)
+
+    resources, page_errors = scan_md_resources(root, diagram_tags, exclude=_excluded)
+    for err in page_errors:
+        issues.append(Issue("error", err.source, f"E036: {utf8_message(err.error)}"))
     return resources
 
 
@@ -579,8 +556,6 @@ def check_no_drawio(root: Path, issues: list[Issue], strict: bool, nested: set[P
 # ===== Плейсхолдеры / сироты / битые ссылки (FR-046…FR-048, ADR-0012 Решение 2) =======
 # _mask_code (fenced + inline) — общий примитив lib/md_code_mask.py (ADR-0019 Решение 5)
 
-_MD_LINK_RE = re.compile(r"!?\[[^\]\n]*\]\(([^)\n]+)\)")
-_EXTERNAL_RE = re.compile(r"^(?:[a-z][a-z0-9+.\-]*:|//)", re.IGNORECASE)
 _PLACEHOLDER_RE = re.compile(r"\{\{[^{}\n]+\}\}")
 
 
@@ -603,63 +578,36 @@ class LinkRef:
     in_scope: bool      # False — цель за пределами root (cross-каталожная), FR-047 граница
 
 
-# Апстрим-дефект nauta C9 (нет инференса .md/_index.md) — issue tools-ai/nauta, номер уточнит PM
-def _resolve_link_target(source_dir: Path, target: str) -> Path:
-    """Резолвит `target` ссылки относительно `source_dir` (FR-082, ADR-0016 Решение 1).
-
-    Если `target` уже оканчивается на `.md` — инференс не применяется, возвращается
-    буквальный `resolve()` (не пытается получить `цель.md.md`, AC-011b). Иначе пробует по
-    порядку: литерал `target` → `target + ".md"` → `target + "/_index.md"`, возвращает
-    первый существующий (`Path.exists()`) путь. Если ни один вариант не существует — тоже
-    возвращается буквальный `resolve()` (нужен и для текста ошибки, и для `in_scope`,
-    NFR-001: генуинно битая ссылка не должна «починиться»)."""
-    literal = (source_dir / target).resolve()
-    if target.endswith(".md"):
-        return literal
-    for candidate in (literal, (source_dir / f"{target}.md").resolve(), (source_dir / f"{target}/_index.md").resolve()):
-        if candidate.exists():
-            return candidate
-    return literal
-
-
 def _collect_links(root: Path, issues: list[Issue], nested: set[Path] | None = None) -> list[LinkRef]:
     """Собирает markdown-ссылки/изображения (`[текст](цель)`, `![alt](цель)`) из всех .md
-    каталога.
-
-    Чтение файла — через `read_page` (ADR-0026 Решение 6): файл с битым UTF-8 даёт
-    находку E036 (дубликаты поглощает `_dedupe_utf8_findings`) и в сбор ссылок не
-    входит.
+    каталога — через единственный парсер ресурсов (`_scan_resources`, ADR-0028
+    Решение 1): собственного прохода по регулярному выражению здесь нет. Резолв —
+    общая функция `resolve_link_target` (ADR-0028 Решение 4, дизайн волны-4 §3.4).
 
     Границы (FR-047, разделяемые orphan- и broken-link-проверками):
-    - внешние (http/https/mailto/tel/protocol-relative) и якорные (`#foo`) цели не
-      резолвятся вовсе — не .md-путь внутри каталога;
+    - внешние (http/https/mailto/tel/protocol-relative) и якорные (`#foo`) цели парсер
+      не отдаёт вовсе — не .md-путь внутри каталога;
     - цель, резолвящаяся ЗА пределами `root` (cross-каталожная ссылка на соседний
       `.doc-root.yaml`-каталог), помечается `in_scope=False`: ни orphan-, ни
       broken-link-проверка её не использует — не резолвится, не создаёт ложных находок
       (AC-014);
     - статьи из поддеревьев вложенных `.doc-root.yaml` не собираются вовсе (FR-120
-      ownership boundary): их ссылки резолвятся в границах своего root (AC-039).
+      ownership boundary, предикат в `_scan_resources`): их ссылки резолвятся в
+      границах своего root (AC-039).
     """
     if nested is None:
         nested = _nested_doc_root_dirs(root)
-    root_resolved = root.resolve()
     refs: list[LinkRef] = []
-    for md in _collect_md_files(root, nested):
-        text = _read_page_or_report(md, issues)
-        if text is None:
+    for res in _scan_resources(root, nested, issues):
+        if res.target_type != "link":
             continue
-        text = _mask_code(text)
-        for m in _MD_LINK_RE.finditer(text):
-            raw = m.group(1)
-            target = raw.split("#", 1)[0].strip()
-            target = target.strip("<>")
-            if not target:
-                continue  # якорь на текущую страницу — не файловая ссылка
-            if _EXTERNAL_RE.match(target):
-                continue  # http/https/mailto/tel/protocol-relative — офлайн-инструмент их не резолвит
-            resolved = _resolve_link_target(md.parent, target)
-            in_scope = resolved == root_resolved or root_resolved in resolved.parents
-            refs.append(LinkRef(md, raw, resolved, in_scope))
+        target = res.raw_target.split("#", 1)[0].strip().strip("<>")
+        resolved = resolve_link_target(res.source.parent, target)
+        if resolved is None:
+            # Не резолвится — литеральный путь (для текста ошибки; сироте он
+            # входящей ссылкой не засчитывается: не существует, NFR-001).
+            resolved = (res.source.parent / target).resolve()
+        refs.append(LinkRef(res.source, res.raw_target, resolved, res.in_scope))
     return refs
 
 
@@ -695,19 +643,66 @@ def check_placeholders(root: Path, issues: list[Issue], suppressed_tokens: set[s
                                  f"плейсхолдер шаблона {m.group(0)} не заменён (placeholder)"))
 
 
-def check_broken_links(root: Path, issues: list[Issue], nested: set[Path] | None = None):
+# ADR-0028 Решение 5 (FR-072, FR-073; дизайн волны-4 §3.5): утечка абсолютного локального
+# пути контрибьютора — детерминированный признак класса приватности, уровень error
+# (прецедент — плейсхолдер, доехавший до каталога, ADR-0012 Решение 2). Регэксп — дословно
+# дизайн §3.5; маскированные формы (`/Users/...`, `$USER`, адрес с `/home/`) не совпадают.
+_ABS_PATH_RE = re.compile(
+    r"(?<![\w/.\-])(?:/(?:Users|home)/|[A-Za-z]:(?:\\Users\\|/Users/))"
+    r"(?P<seg>[A-Za-z0-9._-]*[A-Za-z0-9][A-Za-z0-9._-]*)(?=[\\/\s`\"')\],;:]|$)")
+
+
+def check_absolute_paths(root: Path, issues: list[Issue], nested: set[Path] | None = None):
+    """E037 (error): абсолютный локальный путь контрибьютора в тексте статьи
+    (`/Users/<имя>/…`, `/home/<имя>/…`, `C:\\Users\\<имя>\\…`) — замена ручной проверки
+    правилом (ADR-0028 Решение 5; диспозиция 2026-08-11, `:103` по `f551d87`).
+
+    Читает СЫРОЙ текст статьи через `_read_page_or_report` — без маски кода: обе
+    замеренные находки собственного корпуса стоят внутри code-span. Одна находка на
+    строку (первое совпадение строки, BR-004). Сообщение называет номер строки и
+    форму пути, но не сам путь и не имя (FR-072)."""
+    if nested is None:
+        nested = _nested_doc_root_dirs(root)
+    for md in _collect_md_files(root, nested):
+        text = _read_page_or_report(md, issues)
+        if text is None:
+            continue  # битый UTF-8: находка E036 выдана, текстовые проверки файла пропущены
+        for lineno, line in enumerate(text.split("\n"), 1):
+            m = _ABS_PATH_RE.search(line)
+            if m is None:
+                continue
+            matched = m.group(0)
+            if matched[1:2] == ":":
+                form = "C:\\Users\\<имя>\\…"
+            elif matched.startswith("/Users/"):
+                form = "/Users/<имя>/…"
+            else:
+                form = "/home/<имя>/…"
+            issues.append(Issue(
+                "error", md,
+                f"E037: абсолютный локальный путь контрибьютора на строке {lineno} "
+                f"(форма {form}) — не публикуй: утечка идентификационных данных и "
+                f"битая ссылка при рендеринге (FR-072)",
+            ))
+
+
+def check_broken_links(root: Path, issues: list[Issue], nested: set[Path] | None = None,
+                       *, index_optional: bool = False):
     """FR-048: markdown-ссылка на несуществующий файл внутри того же `.doc-root.yaml`-
-    каталога — error безусловно (ADR-0012 Решение 2).
+    каталога — error безусловно (ADR-0012 Решение 2). Резолв — единственный
+    `resolve_link_target` (ADR-0028 Решение 4, поправка к ADR-0016 Решение 1):
+    литеральный файл → `цель.md` → `цель/_index.md` → каталог только при
+    `index_optional` (строго булев `true` флага `optionalCategoryIndex` корня
+    каталога). Каталог без `_index.md` без флага — ERROR «каталог без _index.md
+    (раздела в дереве нет)» (ранее — тишина); при одноимённых файле и каталоге
+    побеждает файл (ранее каталог, и статья оставалась «сиротой»).
 
     Расширено healthcheck-портом:
-    - W032: no-ext resolution — если target не найден, но target.md существует → OK;
-      если ни target, ни target.md не найдены → предупреждение (до повышения до error
-      в будущем релизе).
     - W033: hash anchor — если #fragment не соответствует ни одному заголовку → warning.
     """
     if nested is None:
         nested = _nested_doc_root_dirs(root)
-    for res in _parse_resources(root, nested):
+    for res in _scan_resources(root, nested, issues):
         if res.target_type != "link":
             continue
         if not res.in_scope:
@@ -717,19 +712,24 @@ def check_broken_links(root: Path, issues: list[Issue], nested: set[Path] | None
         fragment = raw.split("#", 1)[1] if "#" in raw else ""
         target_no_fragment = raw.split("#", 1)[0].strip().strip("<>")
 
-        # Пробуем найти целевой файл с no-ext резолвом
-        resolved = res.resolved_path
-        if not resolved.exists():
-            # no-ext fallback
-            alt = resolve_no_ext(resolved)
-            if alt is not None:
-                resolved = alt
+        resolved = resolve_link_target(res.source.parent, target_no_fragment,
+                                       index_optional=index_optional)
+        if resolved is None:
+            # Ни одна из файловых веток не подошла; формулировка — по тому, чем
+            # оказался литерал (дизайн волны-4 §3.4, две формы дословно).
+            literal = (res.source.parent / target_no_fragment).resolve()
+            if literal.is_dir():
+                issues.append(Issue(
+                    "error", res.source,
+                    f'битая ссылка (broken link) на "{raw}" — '
+                    f'каталог без _index.md (раздела в дереве нет): {literal}',
+                ))
             else:
                 issues.append(Issue(
                     "error", res.source,
-                    f'битая ссылка (broken link) на "{raw}" — файл не найден: {resolved}',
+                    f'битая ссылка (broken link) на "{raw}" — файл не найден: {literal}',
                 ))
-                continue
+            continue
 
         # Проверяем hash-якорь только если файл найден
         if fragment and resolved.suffix == ".md":
@@ -899,7 +899,12 @@ def _validate_catalog_root(root: Path, issues: list[Issue], strict: bool, fix: b
     check_garbage(root, issues, strict, fix, yes, garbage_files, nested)
     check_no_drawio(root, issues, strict, nested)
     check_placeholders(root, issues, suppressed, nested)
-    check_broken_links(root, issues, nested)
+    check_absolute_paths(root, issues, nested)
+    # ADR-0028 Решение 4: строго булев `true` флага indexPolicy.subfolderOptionalFlag
+    # корня каталога снимает требование `_index.md` и у резолвера ссылок
+    # (каталог без индекса — раздел при флаге, FileStructure.ts:653).
+    index_optional = bool(subfolder_optional_flag) and _doc_root_flag_true(root, subfolder_optional_flag)
+    check_broken_links(root, issues, nested, index_optional=index_optional)
     check_orphans(root, issues, strict, nested)
     check_unsupported_markup(root, issues, known_tags, nested)
     check_images(root, issues, nested)
@@ -914,7 +919,7 @@ def check_images(root: Path, issues: list[Issue], nested: set[Path] | None = Non
     """
     if nested is None:
         nested = _nested_doc_root_dirs(root)
-    for res in _parse_resources(root, nested):
+    for res in _scan_resources(root, nested, issues):
         if res.target_type != "image":
             continue
         if not res.in_scope:
@@ -938,7 +943,7 @@ def check_diagrams(root: Path, issues: list[Issue], nested: set[Path] | None = N
     if nested is None:
         nested = _nested_doc_root_dirs(root)
     diagram_set = set(diagram_tags)
-    for res in _parse_resources(root, nested, diagram_tags):
+    for res in _scan_resources(root, nested, issues, diagram_tags):
         if res.target_type not in diagram_set:
             continue
         if not res.in_scope:
@@ -1060,7 +1065,7 @@ def check_unsupported_markup(root: Path, issues: list[Issue], known_tags: set[st
 # не вводится: каноническое имя апстрим-группы для иконок не подтверждено
 # (ADR-0024 Решение 6).
 _ERROR_GROUPS = {
-    "content":       {"title": "incorrects-content",      "pattern": r"^(?:ERROR|WARNING)\s+.*\s+(?:missing|invalid|плейсхолдер|placeholder|фронтматтер|frontmatter|UTF-8)"},
+    "content":       {"title": "incorrects-content",      "pattern": r"^(?:ERROR|WARNING)\s+.*\s+(?:missing|invalid|плейсхолдер|placeholder|фронтматтер|frontmatter|UTF-8|абсолютн)"},
     "links":         {"title": "incorrects-paths",         "pattern": r"битая ссылка|broken link|hash-якорь|W032|W033"},
     "images":        {"title": "incorrects-paths",         "pattern": r"W030|W035|изображени|иконк"},
     "diagrams":      {"title": "incorrects-paths",         "pattern": r"W031|диаграмм"},
