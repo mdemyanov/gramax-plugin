@@ -1,0 +1,8 @@
+abcde:
+  comment:
+    dateTime: "не дата"
+    user: {mail: a@example.com, name: Имя Автора}
+    content: "Текст"
+  answers:
+    - content: "Ответ без user.id"
+      dateTime: "2026-04-02T10:00:00.000Z"

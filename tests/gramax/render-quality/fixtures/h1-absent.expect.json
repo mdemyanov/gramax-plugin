@@ -1,0 +1,12 @@
+{
+  "tableRow": "h1-absent",
+  "expect": {
+    "tier0": "ok",
+    "tier1": "any",
+    "asserts": [
+      {"name": "h1-carries-title", "selector": "h1:has-text('Страница замера H1')", "count": 0},
+      {"name": "h2-carries-title", "selector": "h2:has-text('Страница замера H1')", "count": 0}
+    ],
+    "comment": "tier1=any — прибор не судит (probe.py печатает «any (не судится)»); счётчики ставит шаг замеров D12 по живому рендеру, исходы — ADR-0028 Решение 6 (дизайн §3.6)"
+  }
+}

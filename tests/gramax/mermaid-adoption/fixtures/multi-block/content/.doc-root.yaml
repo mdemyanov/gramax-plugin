@@ -1,0 +1,5 @@
+code: multi-block
+title: "Три legacy-блока в одном файле"
+description: "AC-187: N legacy-блоков мигрируются все"
+syntax: XML
+language: ru

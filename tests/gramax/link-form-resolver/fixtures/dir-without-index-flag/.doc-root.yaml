@@ -1,0 +1,4 @@
+title: Link resolution fixture — dir without _index, optionalCategoryIndex true
+language: ru
+syntax: XML
+optionalCategoryIndex: true

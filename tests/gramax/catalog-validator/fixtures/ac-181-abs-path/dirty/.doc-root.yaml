@@ -1,0 +1,5 @@
+code: ac-181-dirty
+title: "Утечка абсолютных путей"
+description: "AC-181: находки по трём формам и код-спану"
+syntax: XML
+language: ru

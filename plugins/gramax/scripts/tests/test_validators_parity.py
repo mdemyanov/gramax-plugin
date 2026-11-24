@@ -114,22 +114,87 @@ class BareSelfClosingW034Tests(unittest.TestCase):
 
 
 class DiagramPathWithoutSelfClosingTests(unittest.TestCase):
-    """Унаследованная слепая зона (документирована дизайн-документом, паритет семантики
-    drawio, не дефект этого изменения): диаграммный тег с `path`, записанный БЕЗ
-    self-closing слэша, не матчится парсером (нет W031) и не репортится W034
-    (тег известен контракту) — ноль находок."""
+    """Перевод паритетного замка под ADR-0028 Решение 3 (NFR-084 — перевод, не удаление;
+    BR-029: контракт меняется через SA-артефакт): диаграммный тег с `path`, записанный
+    парным, без самозакрывающего слэша или вовсе без закрывающего `>`, даёт ту же
+    находку W031, что самозакрытая форма; атрибут, чьё имя оканчивается на `path`
+    (`data-path=`), целью не считается — перед `path` обязан стоять пробельный символ
+    (дизайн волны-4 §3.3; интеграционная нога — стаб
+    tests/gramax/catalog-validator/ac-167-diagram-tag-without-self-closing.sh).
+    Red on 6e2db04: `_diagram_tag_re` требует `/>` — формы без слэша не матчатся,
+    ноль находок (слепая зона, закреплённая прежде как намеренная — ADR-0024, следствие
+    снято решением 3); `data-path=` сегодня матчится (регэксп допускает любой префикс
+    атрибута) и даёт ложный W031."""
 
-    def test_no_findings_for_path_without_slash(self):
+    def test_self_closing_with_missing_target_reports_w031(self):
+        # Контроль неизменности: прежнее поведение самозакрытой формы сохраняется.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_catalog(root, '<plant-uml path="./missing.puml"/>')
+            result = run_validator(root)
+            self.assertIn("W031", result.stdout, f"фон: {result.stdout}")
+            self.assertIn("missing.puml", result.stdout, f"фон: {result.stdout}")
+
+    def test_open_tag_without_slash_reports_w031(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             build_catalog(root, '<plant-uml path="./missing.puml">')
             result = run_validator(root)
-            self.assertNotIn("missing.puml", result.stdout,
-                             "тег с path без /> — парсер не матчится: ноль находок (унаследованная слепая зона)")
-            self.assertNotIn("W031", result.stdout)
+            self.assertIn("W031", result.stdout,
+                          "открывающий тег с path без самозакрывающего слэша обязан дать W031 "
+                          "(ADR-0028 Решение 3; red on 6e2db04 — детектор требует />)")
+            self.assertIn("missing.puml", result.stdout,
+                          "W031 обязан называть цель из path")
+
+    def test_paired_tag_with_missing_target_reports_w031(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_catalog(root, '<plant-uml path="./missing.puml">текст</plant-uml>')
+            result = run_validator(root)
+            self.assertIn("W031", result.stdout,
+                          "парная форма с path и битой целью обязана дать ту же W031, что "
+                          "самозакрытая (движок читает атрибуты из открывающего тега — "
+                          "tag.pegjs:19-36; red on 6e2db04)")
+            self.assertIn("missing.puml", result.stdout, f"фон: {result.stdout}")
+
+    def test_tag_without_closing_gt_reports_w031(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            body = ('<plant-uml path="./missing.puml" width="800px"\n'
+                    '\n'
+                    'Автор забыл закрыть тег; ближайший `>` дальше по статье — в строке '
+                    '<note>совет</note> ниже.')
+            build_catalog(root, body)
+            result = run_validator(root)
+            self.assertIn("W031", result.stdout,
+                          "тег с path без закрывающего `>` обязан дать W031 наравне с "
+                          "самозакрытой формой (ADR-0028 Решение 3; red on 6e2db04)")
+            self.assertIn("missing.puml", result.stdout, f"фон: {result.stdout}")
+
+    def test_paired_tag_with_existing_target_clean(self):
+        # Warden (зелёный при рождении): целевая парная форма с существующей целью —
+        # ноль находок; фиксирует, что правка детектора не добавляет ложных W031.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_catalog(root, '<plant-uml path="./real.puml">текст</plant-uml>')
+            (root / "real.puml").write_text("DIAGRAM DSL\n", encoding="utf-8")
+            result = run_validator(root)
+            self.assertNotIn("W031", result.stdout, f"фон: {result.stdout}")
             self.assertNotIn("W034", result.stdout,
                              "plant-uml объявлен в selfClosingTags контракта — W034 молчит")
             self.assertEqual(result.returncode, 0, f"фон: {result.stdout}")
+
+    def test_data_path_attribute_is_not_a_target(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_catalog(root, '<plant-uml data-path="./decoy.puml"/>')
+            result = run_validator(root)
+            self.assertNotIn("decoy.puml", result.stdout,
+                             "атрибут, чьё имя оканчивается на path, целью не считается — "
+                             "перед path обязан стоять пробельный символ (ADR-0028 Решение 3; "
+                             "red on 6e2db04 — старый регэксп матчит data-path)")
+            self.assertNotIn("W031", result.stdout, f"фон: {result.stdout}")
+            self.assertNotIn("W034", result.stdout, f"фон: {result.stdout}")
 
 
 if __name__ == "__main__":

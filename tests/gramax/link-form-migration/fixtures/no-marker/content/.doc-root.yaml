@@ -1,0 +1,5 @@
+code: no-marker
+title: "Перечисление без маркера"
+description: "AC-187: перечисление без маркера остаётся SUBJECT"
+syntax: XML
+language: ru

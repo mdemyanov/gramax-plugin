@@ -1,0 +1,5 @@
+code: ac-167-diagram-forms
+title: "Формы диаграммного тега"
+description: "AC-167: парная, без закрывающего >, парная с целью, самозакрытая"
+syntax: XML
+language: ru
