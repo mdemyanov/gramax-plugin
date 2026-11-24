@@ -70,4 +70,7 @@ marketplace `Agents365-ai/365-skills` (установка: `/plugin marketplace 
 
 ## Версии
 
-См. [CHANGELOG.md](./CHANGELOG.md) — версия marketplace в целом, и [plugins/gramax/CHANGELOG.md](./plugins/gramax/CHANGELOG.md) — версия gramax-плагина.
+См. [plugins/gramax/CHANGELOG.md](./plugins/gramax/CHANGELOG.md) — единственный действующий
+журнал релизов; версия плагина и metadata.version marketplace.json держатся синхронными.
+[CHANGELOG.md](./CHANGELOG.md) в корне — архив записей marketplace 1.0.0–3.0.0, заморожен на
+3.0.0 (2026-05-11).

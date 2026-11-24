@@ -292,6 +292,23 @@ uv run ${CLAUDE_PLUGIN_ROOT}/scripts/validate_comments.py <md_file>
 5. Обязательные поля присутствуют (`dateTime`, `user.mail`, `user.name`, `content`)
 6. У каждого ответа есть `user.id`, равный `user.mail` (отсутствие — warning)
 
+### В каталоге и в цикле коммита
+
+Проверка после операции смотрит один файл; ручные правки вне этой операции она не видит.
+Чтобы они проверялись, добавьте валидатор в pre-commit хук или CI своего репозитория — по
+каталогу:
+
+uv run ${CLAUDE_PLUGIN_ROOT}/scripts/validate_comments.py content
+
+`content` — папка с `.doc-root.yaml`. ERROR даёт exit 1 и блокирует коммит; предупреждения
+печатаются, exit не меняют. Шаблон хука плагина (`scripts/pre-commit.sh`, см. README плагина →
+«Валидация каталога») запускает структурный валидатор и рендер-линтер; добавьте в скопированный
+хук строку после них:
+
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_comments.py" "$CONTENT_DIR"
+
+Хук работает в сессии с активным плагином; вне её задайте `CLAUDE_PLUGIN_ROOT`.
+
 ## Обработка ошибок
 
 | Ситуация | Действие |

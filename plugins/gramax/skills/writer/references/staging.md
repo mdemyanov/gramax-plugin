@@ -44,6 +44,10 @@ uv run ${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py <path> --fix --yes # 
 markdown-ссылок внутри каталога (warning, error под `--strict`), битые markdown-ссылки на
 несуществующие файлы (error).
 
+Строгость плейсхолдеров — намеренная асимметрия с контуром nauta: там та же проверка (C7 его
+`validate-content.py`) — предупреждение и только для frontmatter; здесь — error без условия
+(ADR-0012, Решение 2).
+
 Каждый `.md` файл должен начинаться с:
 
 ```yaml

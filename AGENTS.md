@@ -171,3 +171,10 @@ run — re-run `/nauta:init` after moving or renaming homes.
 <!-- nauta:layout-map:end -->
 
 <!-- nauta:managed:end -->
+
+## Стор задач
+
+Стор задач этого репозитория — beads: CLI `bd`, данные — локальный каталог `.beads/`
+в корне дерева. Каталог не отслеживается git и существует только на той машине,
+где создан: в свежем clone его и задач нет. Стора исполнения `bin/store.sh`
+и каталога `openspec/` в дереве нет.

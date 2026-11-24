@@ -30,6 +30,10 @@
 
 Marketplace объявлен в корневом `.claude-plugin/marketplace.json` под именем `gramax-marketplace` (для публичного distribution).
 
+Бэклог — стор beads: CLI `bd`, локальный каталог `.beads/` в корне; в git не входит, поэтому
+существует только на этой машине. Стора исполнения `bin/store.sh` и каталога `openspec/`
+в дереве нет.
+
 ## Стек
 
 - Markdown skills и agent prompts (большая часть плагина).
@@ -44,9 +48,9 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 ## Команды сборки и проверки
 
 - `bash scripts/check.sh --fast` — pre-commit gate (whitespace, JSON, валидация `docs/`).
-- `bash scripts/check.sh --full` — то же плюс lint `.sh`-файлов (shellcheck), submodule
-  status, догфудинг собственных валидаторов плагина — `validate_structure.py` и
-  `validate_comments.py` по `docs/` (порог 0 ERROR, ADR-0027) — и 17 suite'ов
+- `bash scripts/check.sh --full` — то же плюс lint `.sh`-файлов (shellcheck), догфудинг
+  собственных валидаторов плагина — `validate_structure.py` и
+  `validate_comments.py` по `docs/` (порог 0 ERROR, ADR-0027) — и 18 suite'ов
   `tests/gramax/` (полный прогон, не для pre-commit — вызывается вручную или в CI;
   сетевых шагов в `--full` нет — NFR-085).
 - `uv run scripts/validate-content.py` — только валидация Gramax-каталога.
@@ -90,7 +94,7 @@ Marketplace объявлен в корневом `.claude-plugin/marketplace.jso
 - НЕ публиковать секреты (`.env`, токены, API-ключи, credentials).
 - НЕ менять `.claude-plugin/marketplace.json` (корневой, публичный) без ADR. Это договор с пользователями.
 - НЕ принимать `/nauta:dev`-задачи без артефакта SA (для нетривиальных фич — обязателен ADR).
-- НЕ ломать обратную совместимость skill-имён в `plugins/gramax/skills/` без bump major-версии в `plugins/gramax/CHANGELOG.md` + анонс в основном CHANGELOG.
+- НЕ ломать обратную совместимость skill-имён в `plugins/gramax/skills/` без bump major-версии в `plugins/gramax/CHANGELOG.md` — единственном действующем журнале релизов; корневой `CHANGELOG.md` — архив (ADR-0030).
 - Tests/линтеры (если в проекте есть) — зелёные перед commit.
 - НЕ коммитить с `--no-verify` без явного разрешения.
 - Удаляя skill или script — добавь его имя в `tests/gramax/orphan-references/sunset-registry.txt`

@@ -1,5 +1,8 @@
 # Marketplace Changelog
 
+Архив: записи marketplace 1.0.0–3.0.0, последняя от 2026-05-11. Новые записи сюда не добавляются —
+единственный действующий журнал релизов: [plugins/gramax/CHANGELOG.md](./plugins/gramax/CHANGELOG.md) (ADR-0030).
+
 ## 3.0.0 — 2026-05-11
 
 Breaking change. Устранён конфликт триггеров mermaid/drawio: добавлен явный skill `gramax:drawio`, удалён vendored mermaid-preview submodule из marketplace.
