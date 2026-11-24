@@ -20,28 +20,31 @@ order: 1
 | [0003](0003-drawio-backend-vendoring-strategy.md) | Vendoring strategy для drawio MCP-бэкенда | Accepted → Historical | 2026-05-08 | gramax |
 | [0004](0004-router-and-engine-selection.md) | Механизм выбора движка (router и engine selection) | Accepted → Superseded by ADR-0008 | 2026-05-08 | gramax |
 | [0005](0005-save-flow-script-api-contract.md) | Контракт API save flow (drawio_convert.py, slugify.py, .doc-root.yaml) | Accepted → Superseded by ADR-0008 | 2026-05-08 | gramax |
-| [0006](0006-marketplace-json-semver-strategy.md) | Стратегия версионирования marketplace.json при добавлении diagram-on-demand | Accepted (Active) | 2026-05-08 | marketplace |
+| [0006](0006-marketplace-json-semver-strategy.md) | Стратегия версионирования marketplace.json при добавлении diagram-on-demand | Accepted (Active) (поправка — ADR-0030) | 2026-05-08 | marketplace |
 | [0007](0007-out-of-scope-phase2.md) | Функциональность, перенесённая в Phase 2 | Accepted → Superseded by ADR-0008 | 2026-05-08 | gramax |
 | [0008](0008-drop-internal-drawio-skills.md) | Удаление внутренних drawio-skills и делегирование внешнему плагину | Accepted | 2026-05-11 | gramax / marketplace |
 | [0009](0009-drawio-stub-and-claude-mermaid-removal.md) | Drawio-stub skill и удаление submodule claude-mermaid | Accepted | 2026-05-11 | gramax / marketplace |
 | [0010](0010-mermaid-file-based-workflow.md) | Mermaid skill — file-based workflow | Accepted (дополнен ADR-0013) | 2026-05-12 | gramax |
-| [0011](0011-test-harness-taxonomy.md) | Таксономия test harness tests/gramax и гейт doc-paths | Accepted | 2026-08-09 | gramax / marketplace |
-| [0012](0012-catalog-validation-contract.md) | Контракт валидации Gramax-каталога как публичной поверхности плагина | Accepted (Решение 1 дополнено ADR-0015) | 2026-08-11 | gramax / marketplace |
+| [0011](0011-test-harness-taxonomy.md) | Таксономия test harness tests/gramax и гейт doc-paths | Accepted (поправка — ADR-0029) | 2026-08-09 | gramax / marketplace |
+| [0012](0012-catalog-validation-contract.md) | Контракт валидации Gramax-каталога как публичной поверхности плагина | Accepted (Решение 1 дополнено ADR-0015) (поправка — ADR-0030) | 2026-08-11 | gramax / marketplace |
 | [0013](0013-mermaid-adoption-and-migration.md) | Принятие file-based mermaid потребителями и пакетная миграция | Accepted | 2026-08-11 | gramax |
-| [0014](0014-dual-publication-targets.md) | Два независимых таргета публикации — публичный GitHub и внутренний GitLab-каталог | Accepted | 2026-08-11 | marketplace |
+| [0014](0014-dual-publication-targets.md) | Два независимых таргета публикации — публичный GitHub и внутренний GitLab-каталог | Accepted (поправка — ADR-0030) | 2026-08-11 | marketplace |
 | [0015](0015-root-index-inert.md) | Корневой `_index.md` инертен для движка Gramax — амендмент к ADR-0012 Решение 1 | Accepted | 2026-08-11 | gramax / marketplace |
-| [0016](0016-link-form-contract.md) | Контракт формы ссылки на артефакт — резолвер гейта и временный протокол при расхождении с nauta | Accepted (дополнен ADR-0018) | 2026-08-13 | gramax / marketplace |
-| [0017](0017-cross-catalog-retraction.md) | Ретракция нерабочего рецепта cross-каталожной ссылки через `code` — амендмент к диспозиции Тема A/FR-065 | Accepted | 2026-08-13 | gramax / marketplace |
+| [0016](0016-link-form-contract.md) | Контракт формы ссылки на артефакт — резолвер гейта и временный протокол при расхождении с nauta | Accepted (дополнен ADR-0018) (поправка — ADR-0030) (поправка — ADR-0028) | 2026-08-13 | gramax / marketplace |
+| [0017](0017-cross-catalog-retraction.md) | Ретракция нерабочего рецепта cross-каталожной ссылки через `code` — амендмент к диспозиции Тема A/FR-065 | Accepted (поправка — ADR-0030) | 2026-08-13 | gramax / marketplace |
 | [0018](0018-link-form-version-authorization.md) | Резервирование версии 4.3.0 волны link-form-contract и разрешение на синхронную правку marketplace.json | Accepted | 2026-08-12 | gramax / marketplace |
-| [0019](0019-render-killer-linter.md) | Линтер рендер-киллеров (порт validate-gramax.py) — отдельный контент-валидатор, гибридный контракт, демаркация с W034 | Accepted | 2026-08-12 | gramax / marketplace |
+| [0019](0019-render-killer-linter.md) | Линтер рендер-киллеров (порт validate-gramax.py) — отдельный контент-валидатор, гибридный контракт, демаркация с W034 | Accepted (поправка — ADR-0028) | 2026-08-12 | gramax / marketplace |
 | [0020](0020-doc-root-recursive-discovery.md) | Рекурсивное обнаружение .doc-root.yaml и типизация обязательных полей в validate_structure.py | Accepted | 2026-08-13 | gramax / marketplace |
 | [0021](0021-docs-layout-inversion.md) | Инверсия раскладки документации — переезд `content/` → `docs/`, слияние doc-roots, зачистка исторических артефактов | Accepted | 2026-11-17 | gramax / marketplace |
 | [0022](0022-export-skill-placement.md) | Навык export — шестой публичный скилл плагина gramax: плейсмент, релизная поверхность, контракт границы | Accepted | 2026-11-18 | gramax / marketplace |
 | [0023](0023-plantuml-bpmn-skill.md) | Навык plantuml — PlantUML/BPMN-авторство как новый публичный скилл: плейсмент, релизная поверхность, граница рендера | Accepted | 2026-11-18 | gramax / marketplace |
-| [0024](0024-validators-error-check-parity.md) | Паритет офлайн-валидаторов с модулем «Проверка на ошибки» — коды находок, строгость, контракт-паритет W034 | Accepted | 2026-11-18 | gramax / marketplace |
+| [0024](0024-validators-error-check-parity.md) | Паритет офлайн-валидаторов с модулем «Проверка на ошибки» — коды находок, строгость, контракт-паритет W034 | Accepted (поправка — ADR-0028) | 2026-11-18 | gramax / marketplace |
 | [0025](0025-playwright-dev-loop-dependency.md) | Playwright в dev-контуре — питон-биндинг через uv без npm-поверхности, браузер вне репо, первый сетевой шаг `--full` | Accepted | 2026-11-21 | gramax / marketplace |
-| [0026](0026-validator-contracts-engine-pin.md) | Калибровка контрактов валидаторов по движку 48592b36 — language, теги таблицы, реестр иконок, optionalCategoryIndex, properties в _index.md, битый UTF-8 | Accepted | 2026-11-23 | gramax / marketplace |
-| [0027](0027-full-gate-composition.md) | Полный гейт `--full` релиза 4.10.0 — живая нога вне гейта, именованные отказы, догфудинг валидаторов, статус сюит и удаление overlay-тулинга | Accepted | 2026-11-23 | gramax / marketplace |
+| [0026](0026-validator-contracts-engine-pin.md) | Калибровка контрактов валидаторов по движку 48592b36 — language, теги таблицы, реестр иконок, optionalCategoryIndex, properties в _index.md, битый UTF-8 | Accepted (поправка — ADR-0028) | 2026-11-23 | gramax / marketplace |
+| [0027](0027-full-gate-composition.md) | Полный гейт `--full` релиза 4.10.0 — живая нога вне гейта, именованные отказы, догфудинг валидаторов, статус сюит и удаление overlay-тулинга | Accepted (поправка — ADR-0029) | 2026-11-23 | gramax / marketplace |
+| [0028](0028-wave4-validator-link-contracts.md) | Контракты валидаторов и резолвера волны-4 — чтение в парсере, маска многострочного спана, детектор диаграммного тега, резолв каталога, правило утечки путей, реестр тегов движка, `--strict` комментариев и снятие временного протокола ссылок (релиз 4.11.0) | Accepted (ратифицирован PM 2026-11-24) | 2026-11-24 | gramax / marketplace |
+| [0029](0029-wave4-gate-suite-composition.md) | Состав гейта и сюит волны-4 — shellcheck на пути стабов, живая сюита инвариантов раскладки, снятие report-режима, два неотданных гейта и остатки ревью волны-3 (релиз 4.11.0) | Accepted (ратифицирован PM 2026-11-24) | 2026-11-24 | gramax / marketplace |
+| [0030](0030-plugin-perimeter-deferred-capabilities.md) | Периметр плагина, снятые возможности и поправки к ADR-0006, 0012, 0014, 0016, 0017 — волна-4 (релиз 4.11.0) | Accepted (ратифицирован PM 2026-11-24) | 2026-11-24 | gramax / marketplace |
 
 ## Связи между ADR
 

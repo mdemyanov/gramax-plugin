@@ -28,4 +28,6 @@ order: 3
 - [Прибор рендер-проб Playwright и калибровка validate_render](2026-11-21-playwright-render-quality-requirement.md) — FR-187…FR-198
 - [Волна-2 калибровки render-quality: боевой режим прибора на живой цели](2026-11-21-render-quality-wave2-requirements.md) — FR-199…FR-207
 - [Волна-3 — релиз 4.10.0: калибровка контрактов валидаторов, гейтов и хвостов гигиены](2026-11-23-wave3-validators-contracts-gates-requirement.md) — FR-208…FR-221, AC-129…AC-151
+- [Волна-4 — релиз 4.11.0: контракты валидаторов и резолвера, гейты и сюиты](2026-11-24-wave4-contracts-gates-requirement.md) — FR-222…FR-235, AC-164…AC-188, AC-214
+- [Волна-4 — релиз 4.11.0: документарная гигиена и записи решений владельца](2026-11-24-wave4-docs-decisions-requirement.md) — FR-242…FR-261, AC-189…AC-213
 - [Реестр диапазонов идентификаторов требований: FR, AC, NFR, BR](2026-11-23-identifier-ranges-registry.md) — гайд: владельцы диапазонов и следующие свободные номера

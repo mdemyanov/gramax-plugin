@@ -171,7 +171,9 @@ bash scripts/render-quality/probe.sh; echo "rc=$?"
 
 Дефолтные пути: фикстуры `tests/gramax/render-quality/fixtures/`, отчёт
 `tests/gramax/render-quality/results/report.md` (каталог gitignored, `.gitignore:31`),
-stdout зеркалит отчёт. Скриншоты — `tests/gramax/render-quality/results/screenshots/<слаг>.png`.
+stdout зеркалит отчёт; именованный отказ (rc=2) — исключение: баннер `REFUSAL <КОД>: <подсказка>`
+идёт в stderr, stdout при этом пуст, файл отчёта не пишется (с 2026-11-24, ADR-0029 Решение 5).
+Скриншоты — `tests/gramax/render-quality/results/screenshots/<слаг>.png`.
 
 Флаги (сверены с `probe.py`):
 

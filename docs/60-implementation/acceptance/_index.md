@@ -30,3 +30,6 @@ ADR-0021); ниже — design-документы живых suite (at-design).
 - [AT-design: Волна-3 — контракты валидаторов и навыков комментариев: стабы comments, catalog-validator, render-linter, plugin-contract и переводы ассертов (AC-129…AC-140, AC-148, AC-151)](2026-11-23-wave3-plugin-at-design.md)
 - [AT-design: Волна-3 — релиз 4.10.0 — гейт --full, именованные отказы живой ноги и хвосты гигиены (AC-141…AC-147, AC-149, AC-150)](2026-11-23-wave3-gates-at-design.md)
 - [Приёмка (BA-acceptance): волна-3 — релиз 4.10.0, калибровка контрактов валидаторов, гейтов и хвостов гигиены — accept (23 PASS / 0 N/A / 0 FAIL)](2026-11-23-wave3-at-acceptance.md) — accept, 23/23 AC
+- [AT-design: Волна-4 — гейт и сюиты (AC-170, AC-172, AC-173, AC-174…AC-179, AC-185, AC-186)](2026-11-24-wave4-gates-at-design.md) — стабы гейт-трека: docs-layout-invariants, shellcheck-changed, остатки ревью волны-3
+- [GES-окно живых проверок: вердикты «не проверено» по чек-листу — документарное закрытие (волна-4)](2026-11-24-ges-window-verdicts.md) — документарно, решение D12
+- [AT-design: Волна-4 — документарные исходы (AC-189…AC-195, AC-196/197, AC-203, AC-204, AC-208, AC-209)](2026-11-24-wave4-docs-at-design.md) — сторожа текстов и корпуса; AC-191/192 красный до релизного коммита статусов

@@ -1,0 +1,171 @@
+---
+title: "AT-design: Волна-4 — гейт и сюиты (AC-170, AC-172, AC-173, AC-174…AC-179, AC-185, AC-186)"
+order: 25
+status: draft
+date: 2026-11-24
+plugin: gramax
+properties:
+  - name: Тип контента
+    value: [Тест-отчёт]
+  - name: Статус
+    value: [Draft]
+  - name: Плагин
+    value: [gramax]
+---
+
+# AT-design: Волна-4 — гейт и сюиты (AC-170, AC-172, AC-173, AC-174…AC-179, AC-185, AC-186)
+
+**Роль:** QA-author (тест-дизайн до правок Dev; TDD-цепочка qa-author → dev → qa-runner).
+**Опоры:** `scripts/check-gramax.sh`,
+`scripts/render-quality/probe.py`, `scripts/render-quality/probe.sh`,
+`docs/00-project/adr/0027-full-gate-composition.md`,
+`docs/30-requirements/2026-11-23-wave3-validators-contracts-gates-requirement.md`,
+`docs/60-implementation/acceptance/2026-11-23-wave3-gates-at-design.md` (формат),
+`tests/gramax/archive/docs-migration/README.md`
+**Требование:** «Волна-4 — контракты, гейты и хвосты» —
+`docs/30-requirements/2026-11-24-wave4-contracts-gates-requirement.md`
+(вне индекса на момент письма) — AC-170, AC-172, AC-173, AC-174…AC-179, AC-185, AC-186; BR-029 действует.
+**Решение:** ADR-0029 «Состав гейта и сюит волны-4» —
+`docs/00-project/adr/0029-wave4-gate-suite-composition.md`
+(вне индекса на момент письма; записан в дереве, ещё не закоммичен координатором) —
+Решения 1-5, поправки к ADR-0027; «дословные цели» ячеек ADR — предмет реализации Dev.
+**Артефакты этой задачи:**
+- `tests/gramax/docs-layout-invariants/` — новая сюита: `run.sh`, `README.md` (копии архивных
+  оригиналов байт в байт) и пять стабов — копии с семистрочным отличием ADR-0029 Решения 2;
+- `tests/gramax/gate-composition/` — новые стабы `ac-170-shellcheck-changed-step.sh`,
+  `ac-175-submodule-status-removed.sh`, `ac-185-ac186-not-adopted-decisions.sh`; правки
+  `ac-143`, `ac-146`, `ac-149`, `ac-144`;
+- `tests/gramax/render-quality/` — стаб `ac-174-ac179-expect-stderr-refusals.sh`;
+- `tests/gramax/plugin-contract/ac-140-readme-version-docstring.sh` — усиление регекса + наживка;
+- `tests/gramax/comments/ac-132-comments-utf8-skip.sh`, `tests/gramax/comments/README.md` — переподпись;
+- этот at-design (индексную строку `docs/60-implementation/acceptance/_index.md` сажает
+  координатор — правка индексов исполнителю запрещена).
+
+## Сюита `tests/gramax/docs-layout-invariants/` (AC-172, AC-173; ADR-0029 Решение 2)
+
+Пять стабов — копии `tests/gramax/archive/docs-migration/` с отличием ровно в 7 строках 5 файлов:
+строка 2 каждого стаба (адрес + происхождение) и адрес собственного исключения в `ac-003` (строка 100)
+и `ac-004` (строка 72). `run.sh` и `README.md` — байт в байт. Проверено `diff` каждой пары (только
+перечисленные строки) и `git status --short -- tests/gramax/archive/` — пуст. В `ac-003` исключение
+переведено в форму case-глоба `./tests/gramax/docs-layout-invariants/*)` — `archive/docs-migration`
+уже покрыт соседней строкой `./tests/gramax/archive/*` (сложение обоих глобов давало бы SC2221 и
+красный shellcheck; покрытие дословной пары ADR сохранено). В `ac-004` — дословная форма ADR:
+`grep -qE "^tests/gramax/(archive/docs-migration|docs-layout-invariants)/"`.
+
+Цвет: все пять — **зелёные от рождения** на текущем дереве (assert утверждают состояние, которое
+выполняется: инверсия раскладки проведена). Прогон: 5 из 5 rc=0, `run.sh` rc=0; архив нетронут.
+Мутации к красному (см. «Демонстрации»): указатель `content/…` или удаляемый артефакт
+(`superpowers/` и др.) в живом отслеживаемом файле; `content/`-литерал или `documentaryCircuit`
+в не-комментарий строке `.nauta-gates.yaml`; падение `uv run scripts/validate-content.py`;
+пара карты раскладки `→ content/<дом>` в AGENTS.md; второй `.doc-root.yaml` на глубине 2.
+
+## Покрытие AC
+
+| Стаб | AC | Что утверждает | Цвет на текущем дереве | Мутация к красному |
+|----|----|----------------|------------------------|---------------------|
+| `tests/gramax/docs-layout-invariants/ac-003-no-content-pointers.sh` | AC-172 (инвариант AC-003 инверсии) | литерал `content/` вне исключений Решения 3 ADR-0021 не встречается | 🟢 гард (rc=0) | указатель в живом tracked-файле — **показано** (см. «Демонстрации») |
+| `…/ac-004-no-deleted-pointers.sh` | AC-172 (AC-004) | указателей на удаляемые по FR-129 артефакты нет (RECORD учтён) | 🟢 гард (rc=0) | указатель в живом tracked-файле — **показано** |
+| `…/ac-005-gates-rekeyed.sh` | AC-172 (AC-005) | гейты действуют на `docs/`, documentaryCircuit отсутствует, валидатор зелёный | 🟢 гард на момент записи; на момент сдачи rc=1 — нога 3 судит `uv run scripts/validate-content.py`, чья единственная ERROR — незарегистрированная строка индекса для ЭТОГО документа; регистрация записи — шаг координатора, после неё rc=0 (замер: до записи этой статьи валидатор ошибок не давал) | `content/`/`documentaryCircuit` в не-комментарий строке `.nauta-gates.yaml`; падение `uv run scripts/validate-content.py` (файл гейта и конфиг — вне списка файлов этой роли; верификация «5 из 5 краснеют» — ADR-0029 Решение 2, чистый экспорт) |
+| `…/ac-006-layout-map-resolves-docs.sh` | AC-172 (AC-006) | карта раскладки адресует все шесть домов через `docs/` | 🟢 гард (rc=0) | пара `→ content/<дом>` в AGENTS.md или `docs/00-project/` вне AGENTS.md (AGENTS.md — управляемый /nauta:init, вне списка этой роли) |
+| `…/ac-007-single-doc-root.sh` | AC-172 (AC-007) | один doc-root `docs/`, модель свойств объединена, индекс поглотил роль корневого | 🟢 гард (rc=0) | второй `.doc-root.yaml` на глубине 2; изъятие «Требование» из enum; `docs/_index.md` с < 6 упоминаниями `_index.md` |
+| `tests/gramax/gate-composition/ac-170-shellcheck-changed-step.sh` | AC-170 | шаг 2.7 `==> shellcheck-changed` в пути --fast (после render, до --full): список дословно ADR; 11 .sh базиса (`.nauta-scripts-basis.yaml`) с `-e SC1125 -e SC2001 -e SC2016 -e SC2086`, остальные без `-e`; пять исходов дословно; FAILED=1 вне двух OK | 🟢 гард (rc=0) — на момент записи КРАСНЫЙ (шага не было); реализован Dev (check-gramax.sh:107-155). Дефект матчера v1 (нашёл Dev, подтверждён замером): сравнение `$2 == "==> …"` на РАВЕНСТВО «голой» метке не совпадало со строкой гейта `echo "==> …"` — обе `*_LINE` пусты, стаб давал ложный отказ «шага нет»; «голая» метка к тому же неисполнима (`bash -c '==> render'` → rc=127) — пин такой формы был бы пином мёртвого кода. Матчер v2: `$2 ~ /^echo "==> <label>$/"` (дом ac-143 — опознание по строке, вызывающей шаг) | снять шаг; изменить дословный якорь списка (`--exclude-standard`), изъять `-e SC2001` из цепочки, изменить строку исхода `OK: no changed shell files`, изъять один `FAILED=1` — каждая мутация показана на scratch-копии гейта и красит ровно свою ногу. Число «11» не пришито — список базиса меняется синком nauta, стаб держит правило расщепления |
+| `tests/gramax/gate-composition/ac-143-suite-statuses.sh` | AC-172 + ноги 7-10 | ноги 1-6 волны-3 без изменений; новые: run.sh живой сюиты существует; шаг `bash tests/gramax/docs-layout-invariants/run.sh` в теле --full (после nauta-integration, порядок не пришит); заголовок называет сюиту; пять стабов на месте; «17-я сюита» → «18-я» (`:84`) | 🔴 КРАСНЫЙ — ноги 8-9 (сюиты нет в теле и заголовке check-gramax.sh); ноги 7, 10 зелёные с рождением каталога сюиты | правка Dev по Решению 2; нога 6 (последний шаг) не менялась |
+| `tests/gramax/gate-composition/ac-146-root-texts.sh` | — | нога 3: описание --full в CLAUDE.md называет **18** сюит (`:58`, `:61-62`, `:97`; шапка `:8-9`) | 🔴 КРАСНЫЙ — в CLAUDE.md до сих пор «17 suite'ов» (строка 53 рабочего дерева; строки 46-51 по f551d87, где литерал на `:49`) | правит **координатор** после освобождения CLAUDE.md другой ролью (файл в матрице занят); стаб ожидает «18» с этого коммита |
+| `tests/gramax/gate-composition/ac-149-changelog-calibration.sh` | AC-176 | нога 5 переустроена по Решению 5 (строка 4): rc `check-content-actuality.py` захвачен (`python3 -B`); rc ∉ {0, 1} красит (крушение прибора); rc=1 без строки `SIGNAL` красит (маскированный отказ); SIGNAL по записи замера красит по-прежнему | 🟢 гард (rc=0; замер на дереве: rc=1, 2 строки SIGNAL) | харнесс в /tmp (см. «Демонстрации»): rc=2 → красит; rc=1 без SIGNAL → красит; rc=1 с SIGNAL и rc=0 — проходит |
+| `tests/gramax/gate-composition/ac-144-dogfood-validators.sh` | AC-177 | нога 4 (`:58`): `python3 -B` → `uv run`, исполнитель гейта (`scripts/check-gramax.sh:112`, `:125`); шапка стаба называет тот же исполнитель и основание (python3 user-site дрейфует от окружения uv — Решение 5, строка 5) | 🟢 гард (rc=0 на чистом docs/) | подложенный дефект валидатору — **показано**: `uv run plugins/gramax/scripts/validate_structure.py <дерево>` на синтетическом docs с битым UTF-8 даёт rc=1 и `E036`; нога судит rc — та же команда на испорченном docs/ красит стаб |
+| `tests/gramax/gate-composition/ac-175-submodule-status-removed.sh` | AC-175 (ветка «шаг снят») | литерала `submodule` нет в check-gramax.sh нигде — ни в исполняемых строках, ни в заголовке-самописце (`:11`, `:103` удаляются вместе с шагом `:183-189`); варден основания: `git submodule status` — 0 строк и `.gitmodules` нет (появление сабмодуля лишает решение предмета и красит) | 🔴 КРАСНЫЙ — шаг ещё в гейте (5 упоминаний) | правка Dev по Решению 5 (строка 2); варден красный от рождения не бывает — мутация `.gitmodules`/первый сабмодуль |
+| `tests/gramax/gate-composition/ac-185-ac186-not-adopted-decisions.sh` | AC-185, AC-186 | report-режим мигратора не шаг гейта: ни одна исполняемая строка check-gramax.sh не зовёт `migrate_nav_codespans` (комментарий шага link-form-migration — правомерное упоминание сюиты классификации, не гейт-шаг отчёта); мигратор остаётся в дереве ручным диагностом; ADR-0029 несёт оба «не усыновлять» (строк ≥ 2) поимённо (`check-backlog-closure`, `check-breaking-change-section`) | 🟢 гард (rc=0) | добавить шаг report-режима в гейт; удалить мигратор; вычеркнуть «не усыновлять»/имя инструмента из Решения 4 ADR-0029 |
+| `tests/gramax/render-quality/ac-174-ac179-expect-stderr-refusals.sh` | AC-174, AC-179 | (a) нечитаемый expect.json (битый JSON) — именованная строка расхождения с нотой «expect.json не читается», слаг назван, НЕ TypeError, rc=1, отчёт написан, здоровая пара соседнего слага оценена (офлайн: стаб-портал, дом-паттерн ac-108); (b) оба пути отказа — refuse() прибора (RENDER_TARGET_UNSET) и обёртка uv (PLAYWRIGHT_PIN_UNRESOLVED, фейковый uv, дом-паттерн ac-142) — баннер в stderr, stdout пуст при rc=2; стаб судит потоки раздельно | 🔴 КРАСНЫЙ — 4 ноги: TypeError «'NoneType' object is not subscriptable» (probe.py:185-192 — чтение `expect["tier0"]` до проверки None), отчёт не написан, баннер RENDER_TARGET_UNSET в stdout (probe.py:46-49), в stderr его нет. Нога (b2) 🟢 с рождения — обёртка probe.sh уже пишет в stderr (пин обоих путей AC-179) | правка Dev по Решению 5 (строки 1 и 7); после зелёного — вернуть `expect["tier0"]` до проверки None либо `print(...)` в refuse() — соответствующая нога краснеет |
+| `tests/gramax/plugin-contract/ac-140-readme-version-docstring.sh` | — (Решение 5, строка 3) | нога (b) `:76`: регекс усилен до `<th>[^.]*warn` / `warn[^.]*<th>` (якорь литерала тега); нога (b2) — наживка «Without any doubt the linter may warn here» под усиленный регекс не проходит | 🟢 гард (rc=0: докстринг несёт `<th>`+warn — 2 совпадения) | наживка: под старый регекс `th[^.]*warn|warn[^.]*th` проходит (**показано**: 1 совпадение), под усиленный — 0; докстринг без тега красит ногу (b) |
+| `tests/gramax/comments/ac-132-comments-utf8-skip.sh` | AC-178 | переподпись (Решение 5, строка 6): шапка `:3-7` — «AC-132 (FR-212), comments-нога» + запись о переподписи; все 12 подписей «AC-133 (комментарии)» в ногах → «AC-132 (комментарии)»; `grep -c 'AC-133'` по файлу = 0; имя файла и ADR-0026 не меняются | 🟢 гард (rc=0; поведение не менялось) | возврат подписи «AC-133» при имени файла ac-132 — рассинхрон имени и подписи |
+| `tests/gramax/comments/README.md:16` | AC-178 | строка таблицы инвентаря: «AC-132 (FR-212, комментарии)» | 🟢 гард | дрейф таблицы обратно к AC-133 |
+
+Уровни: статические пины состава гейта и текстов (gate-composition), интеграционные поведенческие
+прогоны прибора на loopback-стабе и на фикстурах (render-quality), интеграционные CLI-прогоны на
+`docs/` (docs-layout-invariants: валидатор; plugin-contract: докстринг через ast). Сеть не
+запрашивается: uv — с UV_OFFLINE=1 у вызовов прибора, стаб-портал — только 127.0.0.1.
+
+## Именованные негативы (malformed / masked failure)
+
+| AC | Malformed-вход | Маскированный (тихий) отказ |
+|----|----------------|------------------------------|
+| AC-170 | оболочка с shellcheck-находкой в изменённых `.sh` — ловится шагом до передачи Dev | список изменённых собран, но shellcheck отсутствует — FAIL «N изменённых .sh не проверены», не тихий skip; ошибка git — FAIL с именем шага |
+| AC-172 | литерал `content/` в живом файле — находка с file:line | исключение самой сюиты расширяется на чужой каталог — находка наружу выходит именованной строкой |
+| AC-174 | битый JSON в expect.json — именованная строка расхождения, не TypeError | расхождение, «не измерено» подаётся как «измерено» — не здесь: слаг назван, вердикт divergence |
+| AC-176 | rc ∉ {0, 1} (крушение прибора) — красит | rc=1 без единой строки SIGNAL — маскированный отказ, красит |
+| AC-177 | каталог `docs/` отсутствует — именованный отказ | прогон валидатора чужим интерпретатором (python3 user-site) — тихий дрейф среды; нога гоняет `uv run` и называет его |
+| AC-179 | отказ любого класса — баннер в stderr | баннер в stdout при пустом stderr — нога судит потоки раздельно, не «2>&1» |
+| AC-185/186 | мигратор/ADR исчезли — именованный отказ | гейт молча зеленеет без предмета (объявленное молчание `scripts/check.sh`) — варден требует записи в ADR |
+
+## Демонстрации (команды этой роли, замеры на текущем дереве)
+
+- Семистрочное отличие: `diff` каждой пары архив-оригинал/копия — только строки 2 (×5), `ac-003:100`,
+  `ac-004:72`; `run.sh`, `README.md` — пустые diff; `git status --short -- tests/gramax/archive/` — пусто.
+- ac-003 copy: посадка `# content/30-requirements/demo-pointer-for-mutation-demo.md` в живой
+  tracked-файл `ac-143-suite-statuses.sh` (файл этой роли) → rc=1, находка «1 строка …ac-143:144»;
+  ac-004 copy: посадка `# superpowers/ и doc-paths-disposition …` → rc=1, «1 указателеподобное
+  упоминание …ac-143:145». После демонстрации файл восстановлен правкой (восстановление прогоном
+  `git checkout --` — мой процессный промах: недопустимая смена git-состояния, правки ac-143
+  утрачены и немедленно наложены заново; на другие файлы промах не распространился).
+- ac-149: харнесс `/tmp/gramax-wave4/qa-author-b/ac149-leg-harness.sh` — тело ноги дословно:
+  rc=2 → FAIL; rc=1 без SIGNAL → FAIL; rc=1 с SIGNAL → PASS; rc=0 → PASS.
+- ac-140: наживка «Without any doubt the linter may warn here»: старый регекс — 1 совпадение,
+  усиленный — 0; текущий докстринг validate_render под усиленным — 2 совпадения (ноги зелёные).
+- ac-144: `uv run plugins/gramax/scripts/validate_structure.py /tmp/…/docs-plant` (синтетический
+  docs с битым UTF-8) → rc=1, `ERROR … E036: файл не является валидным UTF-8 (байт 0xff…)`;
+  та же команда на `docs/` → rc=0. Нога судит rc — подложенный дефект красит.
+- shellcheck-скан (вне архива, без `-e`, shellcheck 0.11.0): 6 находок в 5 файлах `tests/gramax/`
+  (в ac-123 две строки — 93 и 98):
+  `catalog-validator/ac-035-dogfood-w034-contract-tags.sh:23 SC2001`;
+  `plantuml-bpmn/ac-053-article-embeds-plant-uml-tag.sh:46 SC2016`;
+  `render-linter/ac-137-html-block-render.sh:49 SC2016`;
+  `render-quality/ac-123-downgrade-cycle.sh:93 SC2016` и `:98 SC2016`;
+  `writer-sync-470/lib/assert.sh:68 SC2016` — это список Dev (правились до включения шага;
+  закрыты Dev при реализации ADR-0029 — рескан 2026-11-24 после реализации: 0 находок).
+  Расхождение с числом ADR-0029 («8 находок в 5 файлах: 6× SC2016, 2× SC2001»): замер на текущем
+  дереве и на экспорте HEAD давал одинаковые 6 в 5 — к замеру ADR на f551d87 дерево ушло; текст ADR
+  не правится этой ролью. С `-e` гейта все находки скрыты (замер: rc=0), в 4 файлах базиса —
+  оставшиеся 12 (2× SC2001 check-readiness.sh, 1× SC2001 check.sh:1181, 3× SC1125, 2× SC2086,
+  4× SC2016 role-preflight.sh) — совпадает с trade-off ADR «18 находок в 4 файлах базиса».
+
+## Верификация (прогон каждого стаба на текущем дереве)
+
+| Стаб | rc |
+|---|---|
+| `tests/gramax/docs-layout-invariants/run.sh` | 0 на момент записи (5 из 5); на момент сдачи 1 из 5 красных — ac-005, нога 3 (validate-content, единственная ERROR = незарегистрированная строка индекса этой записи; регистрация — координатор) |
+| `tests/gramax/gate-composition/ac-143-suite-statuses.sh` | 1 (2 ноги: шаг и заголовок) |
+| `tests/gramax/gate-composition/ac-144-dogfood-validators.sh` | 0 (гард) |
+| `tests/gramax/gate-composition/ac-146-root-texts.sh` | 1 (число 18) |
+| `tests/gramax/gate-composition/ac-149-changelog-calibration.sh` | 0 (гард) |
+| `tests/gramax/gate-composition/ac-170-shellcheck-changed-step.sh` | 1 на момент записи (шаг отсутствовал — именованный отказ); 0 после реализации Dev и починки матчера v1→v2 (гард, rc=0) |
+| `tests/gramax/gate-composition/ac-175-submodule-status-removed.sh` | 1 (шаг ещё в гейте) |
+| `tests/gramax/gate-composition/ac-185-ac186-not-adopted-decisions.sh` | 0 (гард) |
+| `tests/gramax/plugin-contract/ac-140-readme-version-docstring.sh` | 0 (гард) |
+| `tests/gramax/render-quality/ac-174-ac179-expect-stderr-refusals.sh` | 1 (4 ноги: TypeError, отчёт, stdout, stderr) |
+| `tests/gramax/comments/ac-132-comments-utf8-skip.sh` | 0 (гард) |
+
+Все стабы краснеют на именованном ассерте либо на именованном отказе стаба — не на синтаксисе;
+`bash -n` и `shellcheck -x -P <каталог файла>` чисты (rc=0) по каждому новому и правленному файлу,
+включая пять копий сюиты и `run.sh`. Агрегаторы сюит целиком по брифу изоляции не запускались
+(кроме нового `docs-layout-invariants/run.sh` — это и есть предмет поставки).
+
+## Отклонения от буквы и что осталось нерешаемым
+
+1. **ac-003, строка 100:** дословная пара ADR переведена в case-глоб `docs-layout-invariants/*`
+   без дубля `archive/docs-migration/*` (он покрыт строкой 96; дубль давал SC2221 и красный
+   shellcheck у копии, что противоречит замеру ADR «shellcheck rc=0»). Покрытие дословной пары —
+   эквивалентное.
+2. **Число сюит в ac-146/ac-143:** стабы кодируют 18 по ADR-0029 до его регистрации в индексе;
+   при ратификации в другой редакции число правится тем же коммитом, что и состав. CLAUDE.md
+   правит координатор (файл занят другой ролью матрицы) — до того ac-146 честно красный.
+3. **ac-185, граница пина:** «report-режим не шаг гейта» судится по исполняемым строкам
+   check-gramax.sh: комментарий шага link-form-migration называет мигратор правомерно (сюита
+   классификации — не гейт-шаг отчёта, Решение 3); пин по всему файлу был бы ложным красным.
+4. **Мутации ac-005/ac-006/ac-007 не посажены руками:** файлы-носители (`.nauta-gates.yaml`,
+   AGENTS.md, `docs/.doc-root.yaml`, `docs/_index.md`) вне списка файлов этой роли либо
+   управляются `/nauta:init`; мутации названы дословно, «5 из 5 краснеют на подкладывании»
+   верифицировано автором ADR на чистом экспорте (ADR-0029 Решение 2). Для ac-003/ac-004
+   посадка показана на файле этой роли.
+5. **Вне стаба:** настоящий зелёный `--full` с 18 сюитами и шагом shellcheck-changed на чистом
+   дереве — доказательство координатора при приёмке; индексная строка настоящего документа —
+   координатор.
