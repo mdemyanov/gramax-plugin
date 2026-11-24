@@ -49,7 +49,7 @@ properties:
 3. **Принцип разделения:** историческое = запись о завершённой работе (удаляется);
    design-документы живых suite'ов (`tests/gramax/*/ac-*.sh`) остаются.
 4. **GES-конфиг вне этого репозитория.** Репоинтинг регистрации витрины
-   (`nau-gramax-manager`: `repositories/tools-ai/gramax-plugin.yaml`, `workspace.yaml`) —
+   (`<управление-GES>`: `repositories/tools-ai/gramax-plugin.yaml`, `workspace.yaml`) —
    внешнее последствие, которое это требование именует (см. «Внешние последствия»), но не
    решает — по прецеденту ADR-0014, раздел «Что нужно вне этого репозитория».
 
@@ -108,7 +108,7 @@ properties:
 
 - Сам ADR об инверсии, порядок коммитов и механика слияния схем — SA.
 - Ревизия/ретирмент suite `doc-paths` — решение SA (FR-130 фиксирует только факт).
-- Внешний репоинтинг GES-конфига в `nau-gramax-manager` — отдельный шаг вне репозитория.
+- Внешний репоинтинг GES-конфига в `<управление-GES>` — отдельный шаг вне репозитория.
 - Редактирование содержимого переезжающих статей сверх переписывания путей.
 
 ## Функциональные требования
@@ -138,7 +138,7 @@ properties:
   документарного контура», он его переносит).
 - **FR-127 (карта раскладки и корневой промт-слой):** карта раскладки в `AGENTS.md`
   перегенерируется повторным прогоном
-  `/Users/mdemyanov/.zcode/cli/plugins/cache/nauta/nauta/2.23.0/bin/init.sh` (канон на
+  `/Users/<имя>/.zcode/cli/plugins/cache/nauta/nauta/2.23.0/bin/init.sh` (канон на
   момент работ; точная командная строка с `--profile classic` и шестью
   `--map-home content/<home>=docs/<home>` — ADR-0021, Поправка B1) так, чтобы
   пары домов читались как `content/<home>` → `docs/<home>` (канон-маркер плагина
@@ -206,7 +206,7 @@ properties:
 ## Внешние последствия (именуется, не решается)
 
 - Витрина GES читала `content/` по `content/.doc-root.yaml` (ADR-0014); после инверсии корень —
-  `docs/`. Регистрация в `nau-gramax-manager` (`repositories/tools-ai/gramax-plugin.yaml`,
+  `docs/`. Регистрация в `<управление-GES>` (`repositories/tools-ai/gramax-plugin.yaml`,
   секция в `workspace.yaml`) и `git push internal main` — внешние шаги, вне этого требования.
 - Инвариант «`.doc-root.yaml` в `content/`» (ADR-0014, двойная нагрузка с
   `tests/gramax/nauta-integration/ac-003`) переворачивается: пин корня в ac-003

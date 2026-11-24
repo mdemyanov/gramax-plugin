@@ -569,7 +569,7 @@ grep -ohE 'FR-[0-9]{3}' "$f" | sort -u; done | sort | uniq -c | sort -rn` — в
 | `content/00-project/adr/008-pii-masking-integration-log.md:159,243` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:104`, `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md:45` | сторонний каталог-потребитель («потребитель 1») |
 | `content/00-project/plans/deploy-1-stand-smoke.md:180` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:105`, `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md:46` | сторонний каталог-потребитель («потребитель 2») |
 | `content/70-operations/network-prerequisites.md:30` | те же строки | сторонний каталог-потребитель («потребитель 2») |
-| `content/gramax-internal-docs/(.doc-root.yaml)` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:198`, `content/30-requirements/2026-08-11-writer-consumer-rules.md:88` | сторонний каталог-потребитель («потребитель 1», вложенный doc-root) |
+| `content/<каталог-потребитель-И>/(.doc-root.yaml)` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:198`, `content/30-requirements/2026-08-11-writer-consumer-rules.md:88` | сторонний каталог-потребитель («потребитель 1», вложенный doc-root) |
 | `content/00-project/handoffs/` | `content/10-domain/research/2026-08-11-plugin-consumers-gaps.md:107`, `content/30-requirements/2026-08-11-mermaid-file-based-adoption.md:47` | сторонний каталог-потребитель («потребитель 5») |
 
 Эти пути в принципе непроверяемы существованием в этом репозитории (некоторые каталоги — `70-operations`,

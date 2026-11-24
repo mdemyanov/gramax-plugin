@@ -485,7 +485,7 @@ $resolved" >> "$LAYOUT_MAP_FILE"`, верифицировано `grep -n`); ст
 репозитория»):** витрина GES после следующего ручного `git push internal main` обнаружит корень
 `docs/.doc-root.yaml` рекурсивным сканом и перерендерится; инвариант ADR-0014 «корень в
 `content/`» перевёрнут — пин `ac-003` переписан (FR-125), архитектурную сторону держит этот ADR.
-Репоинтинг/верификация регистрации в `nau-gramax-manager`
+Репоинтинг/верификация регистрации в `<управление-GES>`
 (`repositories/tools-ai/gramax-plugin.yaml`, `workspace.yaml`) и сам push — внешние шаги, вне
 репозитория; до них внутренняя витрина показывает прежнюю раскладку.
 
@@ -526,5 +526,5 @@ $resolved" >> "$LAYOUT_MAP_FILE"`, верифицировано `grep -n`); ст
   `scripts/check-gramax.sh`, `.nauta-gates.yaml`
 - ретирирует: `tests/gramax/doc-paths/` (suite миграции 2026-08-09, ADR-0011)
 - переезжает вместе с миграцией: сам этот ADR → `docs/00-project/adr/0021-docs-layout-inversion.md`
-- вне репозитория: `nau-gramax-manager` — верификация регистрации витрины после
+- вне репозитория: `<управление-GES>` — верификация регистрации витрины после
   `git push internal main`

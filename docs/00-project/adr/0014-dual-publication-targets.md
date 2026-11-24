@@ -36,14 +36,14 @@ git:
 ```
 
 GitHub-репозиторий источником такого workspace быть не может — хост фиксирован в конфиге GES
-(`nau-gramax-manager/workspace.yaml`), не выбирается per-репозиторий.
+(`<управление-GES>/workspace.yaml`), не выбирается per-репозиторий.
 
 Публикуется весь репозиторий, не только `content/`: Gramax не требует, чтобы `.doc-root.yaml`
-лежал в корне. Подтверждено практикой: (а) `repositories/tools-ai/nsmp-plugin.yaml` в GES несёт
-`mainBranch: public`, а ветка `public` репозитория `tools-ai/nsmp-plugin` держит в корне `src/`,
+лежал в корне. Подтверждено практикой: (а) `repositories/tools-ai/<смежный-плагин>.yaml` в GES несёт
+`mainBranch: public`, а ветка `public` репозитория `tools-ai/<смежный-плагин>` держит в корне `src/`,
 `scripts/`, `.claude-plugin/`, `docs/` — `.doc-root.yaml` лежит в `content/`, и GES это рендерит;
-(б) из шести проверенных репозиториев-потребителей (`gramax-user-docs`, `moex`, `tsn-assistant`,
-`process_design`, `mango-cti-rest`, `nsmp-plugin`) все шесть держат `.doc-root.yaml` в `content/`,
+(б) из шести проверенных репозиториев-потребителей (`<каталог-потребитель-Д>`, `<каталог-потребитель-Ж>`, `<каталог-потребитель-Б>`,
+`<репозиторий-процесса>`, `<каталог-потребитель-А>`, `<смежный-плагин>`) все шесть держат `.doc-root.yaml` в `content/`,
 ни один — в корне. Значит зеркалировать нужно репозиторий целиком, не вычленять поддерево.
 
 Решение принято и механизм уже выполнен — этот ADR фиксирует его постфактум.
@@ -103,9 +103,9 @@ push-target через `set-url`), рутинный `git push` без парам
 ### Что нужно вне этого репозитория, чтобы витрина заработала
 
 Регистрация в GES — отдельный шаг, не выполняемый этим ADR и не в этом репозитории: файл
-`repositories/tools-ai/gramax-plugin.yaml` (по образцу соседнего `nsmp-plugin.yaml`, но
+`repositories/tools-ai/gramax-plugin.yaml` (по образцу соседнего `<смежный-плагин>.yaml`, но
 `mainBranch: main`, не `public` — у этого репозитория нет раздельных веток) плюс запись
-`gramax-plugin` в секции `tools-ai` файла `workspace.yaml`. Делается PR-ом в `nau-gramax-manager`.
+`gramax-plugin` в секции `tools-ai` файла `workspace.yaml`. Делается PR-ом в `<управление-GES>`.
 До выполнения этого шага `internal`-remote существует и синхронизирован, но GES его не видит.
 
 ## Alternatives Considered
@@ -118,9 +118,9 @@ push-target через `set-url`), рутинный `git push` без парам
   публичным пользователям marketplace (submodule указывает на приватный внутренний хост, не
   резолвится без доступа) и красит `check.sh --fast` у контрибьютора без доступа к внутреннему
   GitLab.
-- **Ветки `private`/`public` в одном репозитории (паттерн `nsmp-plugin`).** Отклонено: этот
+- **Ветки `private`/`public` в одном репозитории (паттерн `<смежный-плагин>`).** Отклонено: этот
   репозиторий публичный с первого дня — курировать приватный/публичный срез не от чего, у
-  `nsmp-plugin` ветки решают другую задачу (постепенное открытие ранее приватного содержимого).
+  `<смежный-плагин>` ветки решают другую задачу (постепенное открытие ранее приватного содержимого).
 
 ## Consequences
 
@@ -143,7 +143,7 @@ push-target через `set-url`), рутинный `git push` без парам
   ориентирующийся только на первую нагрузку, рискует не заметить вторую.
 - Регистрация в GES (`repositories/tools-ai/gramax-plugin.yaml` + запись в `workspace.yaml`) —
   внешняя зависимость вне этого репозитория и вне этого ADR: до её выполнения PR-ом в
-  `nau-gramax-manager` внутренний remote синхронизирован, но нигде не отрендерен.
+  `<управление-GES>` внутренний remote синхронизирован, но нигде не отрендерен.
 
 **Mitigations:**
 - `tests/gramax/nauta-integration/ac-003-doc-root-contract.sh` уже проверяет расположение
@@ -160,6 +160,6 @@ push-target через `set-url`), рутинный `git push` без парам
 - прецедент маскирования внутреннего хоста: `docs/onboarding-nauta.md`
 - контракт каталога, не меняется этим ADR: [Контракт валидации Gramax-каталога как публичной поверхности плагина](0012-catalog-validation-contract.md),
   `content/.doc-root.yaml`
-- внешняя зависимость (вне этого репозитория): `nau-gramax-manager` —
-  `repositories/tools-ai/gramax-plugin.yaml` (new, по образцу `repositories/tools-ai/nsmp-plugin.yaml`),
+- внешняя зависимость (вне этого репозитория): `<управление-GES>` —
+  `repositories/tools-ai/gramax-plugin.yaml` (new, по образцу `repositories/tools-ai/<смежный-плагин>.yaml`),
   `workspace.yaml` (секция `tools-ai`)

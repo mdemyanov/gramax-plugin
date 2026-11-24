@@ -23,7 +23,7 @@ copy_composite_fixture() {
 # файлов — 156×2 (md + .mermaid) почти идентичных файлов раздули бы репозиторий без
 # содержательного выигрыша; генератор сам по себе — ревьюируемый, детерминированный
 # артефакт (см. README.md, раздел «Фикстура масштаба (AC-004)»). Образец масштаба —
-# naumen-smp-mcp, 156 корректных тегов (NFR-051, research G5).
+# `<продуктовый-репозиторий-Д>`, 156 корректных тегов (NFR-051, research G5).
 generate_at_scale_fixture() {
   local dir="$1" count="${2:-156}"
   mkdir -p "$dir"
@@ -31,7 +31,7 @@ generate_at_scale_fixture() {
 code: mermaid-adoption-at-scale
 title: "Сгенерированная фикстура масштаба (AC-004)"
 description: >-
-  156 корректных тегов <mermaid path="…"/> — образец naumen-smp-mcp (NFR-051). Генерируется
+  156 корректных тегов <mermaid path="…"/> — образец `<продуктовый-репозиторий-Д>` (NFR-051). Генерируется
   на лету generate_at_scale_fixture() (lib/fixtures.sh), не коммитится в git.
 language: ru
 syntax: XML

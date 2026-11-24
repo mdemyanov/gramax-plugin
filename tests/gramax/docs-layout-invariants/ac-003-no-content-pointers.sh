@@ -100,11 +100,6 @@ file_excluded() {
     ./tests/gramax/docs-layout-invariants/*) return 0 ;;
     # кл.3 — sha-пиновые доставленные скрипты (Решение 5 ADR-0021)
     ./scripts/validate-content.py | ./scripts/decide.py | ./scripts/test-validate-content.sh) return 0 ;;
-    # кл.2 — RECORD-провенанс nauta/шаблона (ADR-0021, Поправка 2): docstring-пример
-    # «…the ADR-018 ordering warning in `content/.doc-root.yaml`» — запись о дереве-шаблоне
-    # на момент дизайна; замена пути превратила бы запись в утверждение о сегодняшней
-    # раскладке; правка сломала бы провенанс («KEEP_EXACT ships to descendants»)
-    ./scripts/_apply_yaml_patch.py) return 0 ;;
     # кл.2 — RECORD (ADR-0021, Поправка 2): цитаты `git show --stat ce4228d` / `git log -1`
     # о верификации базового коммита 2026-08-13; исполняемая строка файла путей не несёт
     ./tests/gramax/cross-catalog-retraction/lib/baseline-commit.sh) return 0 ;;
@@ -176,13 +171,13 @@ line_allowed() {
   if printf '%s' "$line" | grep -qE 'assert_(file|dir)_not_exists "content/'; then
     return 0
   fi
-  # кл.6 — таблица находок по ЧУЖИМ репозиториям-потребителям (moex, mango-cti-rest,
-  # naumen-smp-mcp): пути content/ их корпусов, колонка-источник «research G5»
+  # кл.6 — таблица находок по ЧУЖИМ репозиториям-потребителям (имена замещены токенами
+  # локального корня потребителя, приват-проход D8 ADR-0030): пути content/ их корпусов
   if printf '%s' "$line" | grep -qF 'research G5'; then
     return 0
   fi
-  # кл.6 — пути чужих репозиториев-потребителей knowlage/moex и knowlage/tsn-assistant
-  if printf '%s' "$line" | grep -qF 'knowlage/'; then
+  # кл.6 — пути чужих репозиториев-потребителей (корень замещён токеном локального корня):
+  if printf '%s' "$line" | grep -qF '<локальный-корень>/'; then
     return 0
   fi
   # кл.6 — dogfood-фикстуры примеров в дереве плагина (plugins/…/examples/)
@@ -220,7 +215,7 @@ line_allowed() {
   if printf '%s' "$line" | grep -qF '`content/.doc-root.yaml`, отсутствию'; then
     return 0
   fi
-  # кл.6 — плейсхолдеры чужого корпуса tsn-assistant ({{TSN_CODE}}, {{EDITOR_EMAIL}})
+  # кл.6 — плейсхолдеры чужого корпуса потребителя (имя репозитория-роли маскировано, D8 ADR-0030)
   if printf '%s' "$line" | grep -qF '{{TSN_CODE}}'; then
     return 0
   fi

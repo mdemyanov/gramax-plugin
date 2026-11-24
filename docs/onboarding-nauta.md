@@ -203,7 +203,7 @@ set-url`), рутинный `git push` без параметров начнёт 
 
 **Если после push витрина не появилась.** Синхронизированный `internal` — не то же самое, что
 видимый в GES репозиторий. Отдельный шаг вне этого репозитория — регистрация в GES: PR в
-`nau-gramax-manager` (файл `repositories/tools-ai/gramax-plugin.yaml` + запись в
+`<управление-GES>` (файл `repositories/tools-ai/gramax-plugin.yaml` + запись в
 `workspace.yaml`). Пока этот PR не смёржен, `internal` синхронизирован, но GES его не видит.
 Если контент не отрендерился — причина здесь, а не в `git push`.
 
