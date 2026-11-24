@@ -5,7 +5,8 @@
 #   RISK-001/002) и RES-001 (docs/10-domain/research/2026-05-11-drawio-skill-external.md,
 #   раздел «Prerequisites (точный список)» и «Триггеры»).
 # Проверка (контракт): CLAUDE.md называет все 7 навыков и агента в строке состава плагина;
-#   несёт никакого «v0.3.1»; описание --full называет оба своих валидатора и число сюит (17);
+#   несёт никакого «v0.3.1»; описание --full называет оба своих валидатора и число сюит
+#   (18 — с волной-4, ADR-0029 Решение 2; правит координатор после освобождения CLAUDE.md);
 #   сумма строк CLAUDE.md + AGENTS.md в пороге 550 (.nauta-gates.yaml, C14);
 #   корневой README несёт блок предусловий drawio (ADR-0008/RES-001) и предупреждение
 #   о конфликте триггеров с mermaid.
@@ -44,7 +45,7 @@ done
 assert_no_grep "$CLAUDE_MD" 'v0.3.1' \
   "AC-146: CLAUDE.md не несёт устаревший пин v0.3.1 (ref nauta актуален, gramax-o0q.10)"
 
-# --- Нога 3: описание --full называет оба своих валидатора и число сюит (17) ---
+# --- Нога 3: описание --full называет оба своих валидатора и число сюит (18) ---
 FULL_BLOCK="$(awk '/check\.sh --full/ { show = 1 } show { print; n++ } n >= 6 { exit }' "$CLAUDE_MD")"
 for ANCHOR in validate_structure.py validate_comments.py; do
   if printf '%s\n' "$FULL_BLOCK" | grep -qF "$ANCHOR"; then
@@ -55,11 +56,12 @@ for ANCHOR in validate_structure.py validate_comments.py; do
     FAIL=$((FAIL + 1))
   fi
 done
-if printf '%s\n' "$FULL_BLOCK" | grep -qE '(^|[^0-9])17([^0-9]|$)'; then
+if printf '%s\n' "$FULL_BLOCK" | grep -qE '(^|[^0-9])18([^0-9]|$)'; then
   :
 else
-  echo "  FAIL: AC-146 — описание --full в CLAUDE.md не называет фактическое число сюит (17)" >&2
-  echo "  (16 сюит по ADR-0027 + настоящая сюита последним шагом — поправка PM)" >&2
+  echo "  FAIL: AC-146 — описание --full в CLAUDE.md не называет фактическое число сюит (18)" >&2
+  echo "  (17 сюит по ADR-0027 с поправкой PM + docs-layout-invariants — ADR-0029 Решение 2;" >&2
+  echo "  число в CLAUDE.md обновляет координатор после освобождения файла)" >&2
   FAIL=$((FAIL + 1))
 fi
 
@@ -94,4 +96,4 @@ else
 fi
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-146: $FAIL assertion(s) failed"; exit 1; fi
-pass_msg "ac-146: CLAUDE.md называет 7 навыков + агента, без v0.3.1, --full = 2 валидатора + 17 сюит, порог C14 цел; README несёт предусловия ADR-0008/RES-001 и предупреждение о конфликте триггеров"
+pass_msg "ac-146: CLAUDE.md называет 7 навыков + агента, без v0.3.1, --full = 2 валидатора + 18 сюит, порог C14 цел; README несёт предусловия ADR-0008/RES-001 и предупреждение о конфликте триггеров"

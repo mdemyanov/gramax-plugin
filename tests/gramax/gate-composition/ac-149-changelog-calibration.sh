@@ -7,7 +7,8 @@
 #   «**Опоры:**» стоит в шапке записи замера
 #   docs/60-implementation/acceptance/2026-11-21-render-calibration-validate-render.md
 #   (первые 30 строк, до первого заголовка «## »); гейт актуальности
-#   scripts/check-content-actuality.py не даёт SIGNAL по этому файлу.
+#   scripts/check-content-actuality.py судится по rc отдельно от SIGNAL-строк (rc ∉ {0, 1}
+#   и rc=1 без SIGNAL красят — ADR-0029 Решение 5, строка 4) и не даёт SIGNAL по этому файлу.
 # Цвет на 7553da1: КРАСНЫЙ — в 4.9.0 перечислен только th (note-in-cell/note-in-note/
 #   colgroup-multiline отсутствуют); маркер «Опоры» стоит в конце файла (строка 90 из 90)
 #   и check-content-actuality даёт SIGNAL «неопределим — маркера в шапке нет».
@@ -64,8 +65,28 @@ if [ -f "$RECORD" ]; then
     fi
   fi
 
-  # --- Нога 5: гейт актуальности не даёт SIGNAL по записи замера ---
-  ACTUAL_OUT="$(cd "$ROOT" && python3 scripts/check-content-actuality.py 2>&1)"
+  # --- Ноги 5-5.3: гейт актуальности судится по rc И по SIGNAL-строкам раздельно
+  # (ADR-0029 Решение 5, строка 4): rc захватывается; rc ∉ {0, 1} — крушение прибора,
+  # красит ногу (не «мягкий неопределим»); rc=1 без единой строки SIGNAL — маскированный
+  # отказ (код 1 правомерен только рядом с названными сигналами); SIGNAL по записи
+  # замера красит по-прежнему.
+  ACTUAL_OUT="$(cd "$ROOT" && python3 -B scripts/check-content-actuality.py 2>&1)"
+  ACTUAL_RC=$?
+  case "$ACTUAL_RC" in
+    0|1) : ;;
+    *)
+      echo "  FAIL: AC-149 — rc check-content-actuality.py = ${ACTUAL_RC} (∉ {0, 1}):" >&2
+      echo "  крушение прибора не подаётся как «мягкий неопределим» (ADR-0029 Решение 5, строка 4)" >&2
+      printf '%s\n' "$ACTUAL_OUT" | head -5 >&2
+      FAIL=$((FAIL + 1))
+      ;;
+  esac
+  if [ "$ACTUAL_RC" -eq 1 ] && ! printf '%s\n' "$ACTUAL_OUT" | grep -q '^SIGNAL'; then
+    echo "  FAIL: AC-149 — rc=1 без строки SIGNAL: маскированный отказ — код 1 правомерен" >&2
+    echo "  только при названных сигналах (ADR-0029 Решение 5, строка 4)" >&2
+    printf '%s\n' "$ACTUAL_OUT" | head -5 >&2
+    FAIL=$((FAIL + 1))
+  fi
   if printf '%s\n' "$ACTUAL_OUT" \
      | grep -qF 'SIGNAL docs/60-implementation/acceptance/2026-11-21-render-calibration-validate-render.md'; then
     echo "  FAIL: AC-149 — check-content-actuality даёт SIGNAL по записи замера" >&2
@@ -76,4 +97,4 @@ if [ -f "$RECORD" ]; then
 fi
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-149: $FAIL assertion(s) failed"; exit 1; fi
-pass_msg "ac-149: CHANGELOG несёт запись калибровки волны-1 (note-in-cell/note-in-note WARN, colgroup-multiline ERROR); маркер «Опоры» в шапке записи; SIGNAL по файлу нет"
+pass_msg "ac-149: CHANGELOG несёт запись калибровки волны-1 (note-in-cell/note-in-note WARN, colgroup-multiline ERROR); маркер «Опоры» в шапке записи; rc гейта актуальности ∉ {0,1}∪(rc=1 без SIGNAL) красит, SIGNAL по файлу нет"

@@ -90,12 +90,12 @@ if ! grep -q 'warn' "$LINTER/ac-007-fenced-code.sh" || grep -qF 'ERROR L17' "$LI
   FAIL=$((FAIL + 1)); MISSING="$MISSING ac-007"
 fi
 # ac-011: инверсия — rc-ассерт не «1», негативной фразы «не должен понижаться» нет
-if grep -qF 'assert_eq "$RC" "1"' "$LINTER/ac-011-th-severity.sh" || grep -qF 'не должен понижаться' "$LINTER/ac-011-th-severity.sh"; then
+if grep -qF "assert_eq \"\$RC\" \"1\"" "$LINTER/ac-011-th-severity.sh" || grep -qF 'не должен понижаться' "$LINTER/ac-011-th-severity.sh"; then
   echo "  FAIL: AC-123 — элемент «адаптация ac-011-th-severity» не исполнен: инверсия severity-ассертов (warn есть, ERROR нет, rc=0)" >&2
   FAIL=$((FAIL + 1)); MISSING="$MISSING ac-011"
 fi
 # ac-012: validate_render-нога на warn — rc2-ассерт не «1», warn есть
-if grep -qF 'assert_eq "$RC2" "1"' "$LINTER/ac-012-dedup-w034.sh" || ! grep -q 'warn' "$LINTER/ac-012-dedup-w034.sh"; then
+if grep -qF "assert_eq \"\$RC2\" \"1\"" "$LINTER/ac-012-dedup-w034.sh" || ! grep -q 'warn' "$LINTER/ac-012-dedup-w034.sh"; then
   echo "  FAIL: AC-123 — элемент «адаптация ac-012-dedup-w034 (validate_render-нога)» не исполнен: паритетная находка th — warn, W034-молчание сохраняется (membership th в killerTags)" >&2
   FAIL=$((FAIL + 1)); MISSING="$MISSING ac-012"
 fi

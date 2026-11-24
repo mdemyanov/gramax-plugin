@@ -8,7 +8,9 @@
 #       plugins/gramax/.claude-plugin/plugin.json;
 #   (b) докстринг validate_render согласован с gramax-render-rules.json: th носит
 #       severity warn — докстринг не подаёт th как ERROR-киллер «HTTP 500» в
-#       перечислении «Обнаруживает конструкции…», и несёт th+WARN вместе;
+#       перечислении «Обнаруживает конструкции…», и несёт th+WARN вместе
+#       (якорь тега: <th>[^.]*warn / warn[^.]*<th> — ADR-0029 Решение 5, строка 3;
+#       наживка без тега «Without any doubt the linter may warn here» не проходит);
 #   (c) запасной ERROR-текст не подаётся как действующий: литерала
 #       «Тег <th> не поддерживается Gramax → HTTP 500.» нет в README и докстринге
 #       (регресс-нога, зелёная от рождения).
@@ -73,8 +75,19 @@ if [ -n "$FIRST_SENTENCE" ] && printf '%s\n' "$FIRST_SENTENCE" | grep -qF '<th>'
   FAIL=$((FAIL + 1))
 fi
 
-if ! printf '%s\n' "$DOCSTRING" | grep -qiE 'th[^.]*warn|warn[^.]*th'; then
+if ! printf '%s\n' "$DOCSTRING" | grep -qiE '<th>[^.]*warn|warn[^.]*<th>'; then
   echo "  FAIL: AC-140 — докстринг обязан называть th WARN-семантику (согласованность с gramax-render-rules.json)" >&2
+  FAIL=$((FAIL + 1))
+fi
+
+# --- (b2): регекс заякорен на литерал тега (ADR-0029 Решение 5, строка 3):
+# th[^.]*warn проходило предложение без тега («Without any doubt the linter may warn
+# here» — «With**out** … may **warn**»); усиленный <th>[^.]*warn / warn[^.]*<th> — нет.
+# Наживка — самопроверка якоря: зелёная нога только при тег-заякоренном регексе.
+BAIT="Without any doubt the linter may warn here"
+if printf '%s\n' "$BAIT" | grep -qiE '<th>[^.]*warn|warn[^.]*<th>'; then
+  echo "  FAIL: AC-140 — регекс нога (b) не заякорен на литерал <th>: наживка без тега" >&2
+  echo "  проходит (ADR-0029 Решение 5, строка 3: <th>[^.]*warn или warn[^.]*<th>)" >&2
   FAIL=$((FAIL + 1))
 fi
 

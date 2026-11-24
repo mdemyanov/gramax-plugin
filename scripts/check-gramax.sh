@@ -4,12 +4,15 @@
 # доставлен через /nauta:sync-scripts, обновляется тем же каналом.
 #
 # Modes:
-#   --fast   : whitespace + JSON validity + validate-content.py + validate_render.py
+#   --fast   : whitespace + JSON validity + validate-content.py + validate_render.py +
+#              шаг shellcheck-changed: lint изменённых и новых .sh (ADR-0029 Решение 1)
 #              (uv обязателен; для pre-commit hook)
 #   --full   : --fast + догфудинг своих валидаторов docs/ (validate_structure.py и
 #              validate_comments.py, порог 0 ERROR — ADR-0027 Решение 4) +
-#              lint .sh (если установлен) + проверка submodule status +
+#              lint .sh (если установлен; -e коды — только файлам базиса,
+#              ADR-0029 Решение 1) +
 #              tests/gramax/orphan-references + tests/gramax/nauta-integration +
+#              tests/gramax/docs-layout-invariants +
 #              tests/gramax/plugin-contract +
 #              tests/gramax/catalog-validator + tests/gramax/comments +
 #              tests/gramax/mermaid-adoption +
@@ -19,7 +22,8 @@
 #              tests/gramax/writer-tail-480 + tests/gramax/render-linter +
 #              tests/gramax/render-quality (только офлайн-стабы, ADR-0027 Решение 1) +
 #              tests/gramax/cross-catalog-retraction + tests/gramax/gate-composition
-#              (17 сюит; состав — ADR-0027 «Целевой состав --full» с поправкой PM:
+#              (18 сюит; состав — ADR-0027 «Целевой состав --full» с поправкой PM,
+#              волна-4 добавляет docs-layout-invariants — ADR-0029 Решение 2;
 #              gate-composition — последним шагом)
 #
 # Exit codes:
@@ -100,7 +104,57 @@ else
   echo "OK: no docs/ directory"
 fi
 
-# --- 3. (--full only) Полный блок --full: догфудинг валидаторов → shellcheck → submodule status → сюиты ---
+# --- 2.7. shellcheck изменённых и новых .sh (ADR-0029 Решение 1) ---
+# Стаб с shellcheck-находкой ловится на пути qa-author → Dev (уроки журнала
+# 2026-11-21 и 2026-11-23: стабы дважды дошли до полного гейта с lint-долгом),
+# не дожидаясь --full. Цена на чистом дереве: 0 вызовов shellcheck, 2 вызова git.
+echo "==> shellcheck-changed"
+LIST_RC=0
+CHANGED_SH="$(
+  { git ls-files --others --exclude-standard -- '*.sh';
+    git diff --name-only --diff-filter=d HEAD -- '*.sh'; } \
+    | { grep -v '^tests/gramax/archive/' || true; } \
+    | sort -u
+)" || LIST_RC=1
+if [ "$LIST_RC" -ne 0 ]; then
+  echo "FAIL: shellcheck-changed — список изменённых .sh не собрался (ошибка git)"
+  FAILED=1
+elif [ -z "$CHANGED_SH" ]; then
+  echo "OK: no changed shell files"
+elif ! command -v shellcheck > /dev/null 2>&1; then
+  CHANGED_COUNT="$(printf '%s\n' "$CHANGED_SH" | grep -c .)" || CHANGED_COUNT=0
+  echo "FAIL: shellcheck not installed — ${CHANGED_COUNT} изменённых .sh не проверены"
+  FAILED=1
+else
+  CHANGED_COUNT="$(printf '%s\n' "$CHANGED_SH" | grep -c .)" || CHANGED_COUNT=0
+  # Расщепление по базису (ADR-0029 Решение 1): 11 .sh базиса (.nauta-scripts-basis.yaml,
+  # до исправления issue №42) — с -e кодами; остальные файлы — чистый вызов, их находки
+  # блокирующие. Список базиса меняется синком nauta — число «11» здесь не пришито.
+  BASIS_SH="$(sed -n 's/^  \([^:]*\.sh\): "sha256:.*/\1/p' .nauta-scripts-basis.yaml)"
+  BASIS_CHANGED="$(printf '%s\n' "$CHANGED_SH" | grep -Fxf <(printf '%s\n' "$BASIS_SH") || true)"
+  OTHER_CHANGED="$(printf '%s\n' "$CHANGED_SH" | grep -Fxvf <(printf '%s\n' "$BASIS_SH") || true)"
+  CHANGED_BAD=0
+  if [ -n "$BASIS_CHANGED" ]; then
+    # shellcheck disable=SC2086
+    if ! shellcheck -e SC1125 -e SC2001 -e SC2016 -e SC2086 -x -P SCRIPTDIR $BASIS_CHANGED; then
+      CHANGED_BAD=1
+    fi
+  fi
+  if [ -n "$OTHER_CHANGED" ]; then
+    # shellcheck disable=SC2086
+    if ! shellcheck -x -P SCRIPTDIR $OTHER_CHANGED; then
+      CHANGED_BAD=1
+    fi
+  fi
+  if [ "$CHANGED_BAD" -ne 0 ]; then
+    echo "FAIL: shellcheck issues (changed files)"
+    FAILED=1
+  else
+    echo "OK: shellcheck clean (${CHANGED_COUNT} changed)"
+  fi
+fi
+
+# --- 3. (--full only) Полный блок --full: догфудинг валидаторов → shellcheck → сюиты ---
 if [ "$MODE" = "--full" ]; then
   # --- 3.0 (--full only) Догфудинг своих валидаторов на docs/ (FR-220б, ADR-0027
   # Решение 4): два шага первыми внутри --full-блока, подряд с быстрыми валидаторами
@@ -153,8 +207,8 @@ if [ "$MODE" = "--full" ]; then
       # каталога проверяемого скрипта, и почти каждый `source "$SCRIPT_DIR/lib/…"`
       # даёт ложный SC1091 "Not following". С флагами shellcheck идёт по source
       # и резолвит путь от файла скрипта — так, как это реально исполняется.
-      # shellcheck disable=SC2086
-      # -e SC1125,SC2001,SC2016,SC2086 (qa-057 F1): все четыре кода живут ТОЛЬКО в
+      # -e SC1125,SC2001,SC2016,SC2086 (qa-057 F1; с волны-4 — только файлам базиса,
+      # ADR-0029 Решение 1): все четыре кода живут ТОЛЬКО в
       # базис-пиновых payload-файлах nauta (role-postflight.sh, role-preflight.sh,
       # check.sh, check-readiness.sh — замер на ad7f1a4+; файлы не редактируются,
       # «payload не трогается», ADR-0021). SC1125 — русский текст после директивы
@@ -164,9 +218,25 @@ if [ "$MODE" = "--full" ]; then
       # «payload-скрипты: битые shellcheck-директивы (SC1125 — disable не работает) +
       # стиль SC2001/SC2016/SC2086». Исключение снимается тем же коммитом синка
       # payload после релиза nauta с фиксом: убрать коды из -e ниже и прогнать
-      # --full. Проектные .sh (scripts/check-gramax.sh, tests/gramax/**) под
-      # исключениями не находятся — их находки остаются блокирующими.
-      if ! shellcheck -e SC1125 -e SC2001 -e SC2016 -e SC2086 -x -P SCRIPTDIR $SH_FILES; then
+      # --full. Проектные .sh (scripts/check-gramax.sh, tests/gramax/**) зовутся
+      # отдельным вызовом без -e — их находки блокирующие.
+      BASIS_SH="$(sed -n 's/^  \([^:]*\.sh\): "sha256:.*/\1/p' .nauta-scripts-basis.yaml)"
+      BASIS_TRACKED="$(printf '%s\n' "$SH_FILES" | grep -Fxf <(printf '%s\n' "$BASIS_SH") || true)"
+      PROJECT_TRACKED="$(printf '%s\n' "$SH_FILES" | grep -Fxvf <(printf '%s\n' "$BASIS_SH") || true)"
+      SHELL_BAD=0
+      if [ -n "$BASIS_TRACKED" ]; then
+        # shellcheck disable=SC2086
+        if ! shellcheck -e SC1125 -e SC2001 -e SC2016 -e SC2086 -x -P SCRIPTDIR $BASIS_TRACKED; then
+          SHELL_BAD=1
+        fi
+      fi
+      if [ -n "$PROJECT_TRACKED" ]; then
+        # shellcheck disable=SC2086
+        if ! shellcheck -x -P SCRIPTDIR $PROJECT_TRACKED; then
+          SHELL_BAD=1
+        fi
+      fi
+      if [ "$SHELL_BAD" -ne 0 ]; then
         echo "FAIL: shellcheck issues"
         FAILED=1
       else
@@ -177,15 +247,6 @@ if [ "$MODE" = "--full" ]; then
     fi
   else
     echo "WARN: shellcheck not installed — skipping"
-  fi
-
-  # --- 4. (--full only) Submodule status ---
-  echo "==> submodule status"
-  if git submodule status 2>&1 | grep -q '^[+-]'; then
-    echo "WARN: submodule out of sync (not a hard fail)"
-    git submodule status
-  else
-    echo "OK: submodules in sync"
   fi
 
   # --- 5. (--full only) orphan-references gate ---
@@ -203,6 +264,18 @@ if [ "$MODE" = "--full" ]; then
     echo "OK: nauta-integration AC suite green"
   else
     echo "FAIL: nauta-integration AC suite"
+    FAILED=1
+  fi
+
+  # --- 6.5. (--full only) docs-layout-invariants: живые инварианты раскладки docs/
+  # (ADR-0029 Решение 2: выделенные ассерты архивной сюиты docs-migration; сразу
+  # после nauta-integration, хвост cross-catalog-retraction → gate-composition
+  # не трогается)
+  echo "==> docs-layout-invariants"
+  if bash tests/gramax/docs-layout-invariants/run.sh; then
+    echo "OK: docs-layout-invariants green"
+  else
+    echo "FAIL: docs-layout-invariants"
     FAILED=1
   fi
 
@@ -343,7 +416,7 @@ if [ "$MODE" = "--full" ]; then
   fi
 
   # --- 20. (--full only) gate-composition: сторож состава гейта и текстов репозитория
-  # (поправка PM к списку ADR-0027 — последним шагом, 17-я сюита) ---
+  # (поправка PM к списку ADR-0027 — последним шагом, 18-я сюита) ---
   echo "==> gate-composition"
   if bash tests/gramax/gate-composition/run.sh; then
     echo "OK: gate-composition green"

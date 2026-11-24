@@ -65,7 +65,7 @@ assert_grep() {
 }
 
 assert_grep_regex() {
-  local file="$1" pattern="$2" msg="${3:-regex '$pattern' should match in file}"
+  local file="$1" pattern="$2" msg="${3:-regex "'\$pattern'" should match in file}"
   if ! grep -qE "$pattern" "$file" 2>/dev/null; then
     echo "  FAIL: $msg — regex '$pattern' not matched in $file" >&2
     FAIL=$((FAIL + 1))

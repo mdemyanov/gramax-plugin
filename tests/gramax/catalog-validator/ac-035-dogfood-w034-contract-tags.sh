@@ -20,7 +20,7 @@ OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/validate_structure.py docs 2>&
 FALSE_W034=$(echo "$OUT" | grep -E 'W034: .*<(view|mermaid|snippet|openapi|video|icon)>' || true)
 if [ -n "$FALSE_W034" ]; then
   echo "  FAIL: AC-162 — живые ложные W034 на канонические теги контракта на docs/ (FR-156):" >&2
-  echo "$FALSE_W034" | sed 's/^/    /' >&2
+  printf '    %s\n' "${FALSE_W034//$'\n'/$'\n'    }" >&2
   FAIL=$((FAIL + 1))
 fi
 

@@ -43,7 +43,7 @@ assert_grep_regex_i "$SKILL_MD" 'пуст' \
   "AC-053/FR-144 — SKILL.md обязан требовать пустую строку до и после тега (FR-144, прецедент mermaid/ADR-0010)"
 assert_grep_regex_i "$SKILL_MD" 'явному запрос' \
   "AC-053 (Q-4, edge case дизайна) — атрибуты сверх path (title/width/height/float/scale) только по явному запросу (пин-язык таблицы Q-4)"
-assert_no_grep "$SKILL_MD" 'Атрибуты `width` и `height` обязательны' \
+assert_no_grep "$SKILL_MD" "Атрибуты \`width\` и \`height\` обязательны" \
   "AC-053 (Q-4, edge case дизайна) — mermaid-форма «атрибуты width и height обязательны» не переносится в plantuml (дефолтных размеров нет)"
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-053: $FAIL assertion(s) failed"; exit 1; fi

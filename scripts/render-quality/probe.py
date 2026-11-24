@@ -4,7 +4,8 @@
 CLI, порядок именованных отказов (цель -> импорт playwright -> запуск браузера),
 оркестрация тиров tier-0/1/2, агрегат вердикта, rc. rc-семантика: 0 — расхождений
 нет; 1 — есть расхождения (отчёт написан); 2 — именованный отказ окружения
-(баннер REFUSAL <КОД>: <подсказка>, файл отчёта не пишется).
+(баннер REFUSAL <КОД>: <подсказка> в stderr, stdout пуст, файл отчёта не пишется;
+ADR-0029 Решение 5, строка 7).
 """
 
 import argparse
@@ -44,8 +45,9 @@ HINT_UNREACHABLE = (
 
 
 def refuse(code: str, hint: str) -> None:
-    """Именованный отказ: баннер на stdout, rc=2, отчёт не пишется (дизайн, Решение 2)."""
-    print("REFUSAL %s: %s" % (code, hint))
+    """Именованный отказ: баннер в stderr, rc=2, отчёт не пишется (дизайн, Решение 2;
+    поток stderr — ADR-0029 Решение 5, строка 7: stdout при rc=2 пуст)."""
+    sys.stderr.write("REFUSAL %s: %s\n" % (code, hint))
     sys.exit(2)
 
 
@@ -184,12 +186,16 @@ def run_probes(target, args) -> int:
 
 def _probe_row(target, context, slug: str, expect, fact, args) -> dict:
     note = " / ".join(fact.notes) if fact.notes else ""
-    t0_verdict = "match" if tier0_match(fact, expect["tier0"]) else "divergence"
-    expect_tier0 = expect["tier0"] or "?"
+    # ADR-0029 Решение 5, строка 1: проверка expect is None — первой, до любого
+    # чтения expect[...]: нечитаемый expect.json — именованная строка расхождения
+    # с нотой «expect.json не читается», не TypeError.
     if expect is None:
         note = " / ".join(part for part in (note, "expect.json не читается") if part)
         expect_tier0 = "?"
         t0_verdict = "divergence"
+    else:
+        t0_verdict = "match" if tier0_match(fact, expect["tier0"]) else "divergence"
+        expect_tier0 = expect["tier0"] or "?"
 
     row = {
         "slug": slug,

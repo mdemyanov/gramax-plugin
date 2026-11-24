@@ -5,7 +5,10 @@
 #   внутри --full-блока, подряд с быстрыми валидаторами docs/, порог 0 ERROR).
 # Проверка (контракт): --full-блок scripts/check-gramax.sh вызывает validate_structure.py docs
 #   и validate_comments.py docs с rc-гейтингом (rc≠0 — FAIL, хвост-подавлений на строке нет);
-#   оба валидатора на docs/ дают rc=0 (предупреждения печатаются и не красят).
+#   оба валидатора на docs/ дают rc=0 (предупреждения печатаются и не красят) — и гоняются
+#   стабом тем же исполнителем, что гейт: `uv run` (scripts/check-gramax.sh:112, :125;
+#   ADR-0029 Решение 5, строка 5: python3 user-site дрейфует от окружения uv — 3.15.2
+#   против 3.12.10, догфудинг обязан идти в среде гейта).
 # Цвет на 7553da1: КРАСНЫЙ — шагов в --full-блоке нет; validate_comments.py docs даёт rc=1
 #   (4 ложных ERROR «invalid comment id format» на примерах синтаксиса в code-span,
 #   gramax-4jf.13 — маска кода); validate_structure.py docs — rc=0 (3 WARNING W034, красят
@@ -49,13 +52,14 @@ for V in validate_structure.py validate_comments.py; do
   fi
 done
 
-# --- Нога 4: оба валидатора на docs/ дают rc=0 ---
+# --- Нога 4: оба валидатора на docs/ дают rc=0 (исполнитель — uv run, как у гейта:
+# scripts/check-gramax.sh:112 и :125; ADR-0029 Решение 5, строка 5) ---
 if [ ! -d "$ROOT/docs" ]; then
-  echo "  FAIL: AC-144 — каталога docs/ нет, догфудинг не на чём исполнить" >&2
+  echo "  FAIL: AC-144 — каталога docs/ нет, догфудинг не на чем исполнить" >&2
   FAIL=$((FAIL + 1))
 else
   for V in validate_structure.py validate_comments.py; do
-    OUT="$(cd "$ROOT" && python3 -B "plugins/gramax/scripts/$V" docs 2>&1)"
+    OUT="$(cd "$ROOT" && uv run "plugins/gramax/scripts/$V" docs 2>&1)"
     RC=$?
     if [ "$RC" -ne 0 ]; then
       echo "  FAIL: AC-144 — ${V} docs даёт rc=${RC}, порог 0 ERROR не достигнут:" >&2
