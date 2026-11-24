@@ -15,6 +15,11 @@ properties:
 **Status:** Accepted
 **Date:** 2026-08-13
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-08-13-cross-catalog-retraction.md`,
+`docs/00-project/adr/0015-root-index-inert.md`,
+`docs/40-architecture/2026-08-11-writer-rules-disposition.md`,
+`docs/30-requirements/2026-08-11-writer-consumer-rules.md`,
+`plugins/gramax/skills/writer/references/doc-root-schema.md`
 
 ## Context
 

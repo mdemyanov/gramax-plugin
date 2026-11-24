@@ -15,6 +15,12 @@ properties:
 
 # Контракт `.doc-root.yaml`: рекурсивное обнаружение и типизация title
 
+**Опоры:** `plugins/gramax/scripts/validate_structure.py`,
+`tests/gramax/catalog-validator/ac-021-nested-doc-root-discovered.sh`,
+`tests/gramax/catalog-validator/ac-022-doc-root-title-type.sh`,
+`tests/gramax/catalog-validator/ac-023-unparseable-doc-root-diagnostics.sh`,
+`tests/gramax/catalog-validator/ac-024-nested-doc-root-orphan-demarcation.sh`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

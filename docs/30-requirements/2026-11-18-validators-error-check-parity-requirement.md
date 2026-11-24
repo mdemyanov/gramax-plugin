@@ -15,6 +15,10 @@ properties:
 
 # Паритет офлайн-валидаторов плагина с модулем проверки ошибок приложения
 
+**Опоры:** `docs/40-architecture/2026-11-18-validators-parity-design.md`,
+`docs/00-project/adr/0024-validators-error-check-parity.md`,
+`plugins/gramax/scripts/validate_structure.py`, `plugins/gramax/scripts/lib/md_link_parser.py`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)
@@ -94,8 +98,9 @@ POINTER на HEAD 2026-11-18, [форма цитирования](2026-08-13-lin
 7. Проба 2026-11-18: `<icon>`, `<view>`, `<mermaid path>`, `<bpmn>`, `<openapi>`, `<snippet>`,
    `<video>` — каждый даёт W034 «неподдерживаемая разметка», при этом все шесть объявлены в
    `selfClosingTags` контракта `gramax-tags.json`; находки живые на `docs/` репозитория —
-   `<view>` и `<mermaid>` в `docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md`
-   и `docs/10-domain/research/2026-08-11-index-md-at-catalog-root.md` (POINTER).
+   `<view>` и `<mermaid>` в
+   [Принятие file-based mermaid потребителями — граница юрисдикции, обнаружение и миграция устаревшего формата](2026-08-11-mermaid-file-based-adoption.md)
+   и [`_index.md` в корне Gramax-каталога: что запрещает скилл, что требует валидатор, что делает движок](../10-domain/research/2026-08-11-index-md-at-catalog-root.md) (POINTER).
 8. `_UNSUPPORTED_HTML_RE` (`validate_structure.py:744`) — паттерн `[a-z][a-z0-9]*` не совпадает
    с именами через дефис: `<plant-uml ...>` невидим даже для W034 (подтверждено пробой, факт 4).
 9. ADR-0012 Решение 2 фиксирует градуировку строгости по природе дефекта (плейсхолдер/битая

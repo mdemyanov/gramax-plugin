@@ -18,6 +18,8 @@ properties:
 - https://github.com/Agents365-ai/drawio-skill (v1.5.2)
 - https://github.com/Agents365-ai/365-skills (marketplace)
 
+**Опоры:** нет — предмет и источники вне дерева — внешние репозитории навыка drawio на GitHub, утверждений о файлах этого репозитория запись не делает
+
 ## Лицензия
 
 **MIT** — оба репозитория (`Agents365-ai/drawio-skill` v1.5.2 и контейнирующий marketplace `Agents365-ai/365-skills`). Совместимо с MIT нашего плагина; нет ограничений на распространение и ссылки.

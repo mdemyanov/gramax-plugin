@@ -20,6 +20,10 @@ properties:
 проверена вживую; валидация — [запись приёмки](../../60-implementation/acceptance/2026-11-21-playwright-render-quality-at-acceptance.md))
 **Date:** 2026-11-21
 **Plugin:** gramax
+**Опоры:** `docs/30-requirements/2026-11-21-playwright-render-quality-requirement.md`,
+`docs/40-architecture/2026-11-21-playwright-render-quality-design.md`,
+`docs/00-project/epics/2026-11-21-playwright-render-quality-genesis-tree.md`,
+`scripts/render-quality/probe.sh`
 
 ## Context
 

@@ -15,6 +15,9 @@ properties:
 **Status:** Accepted
 **Date:** 2026-08-11
 **Plugin:** gramax
+**Опоры:** `docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md`,
+`docs/10-domain/research/2026-08-11-plugin-consumers-gaps.md`,
+`plugins/gramax/scripts/migrate_mermaid.py`, `plugins/gramax/skills/mermaid/SKILL.md`
 
 ## Context
 

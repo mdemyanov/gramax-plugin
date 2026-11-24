@@ -15,6 +15,9 @@ properties:
 
 # Инверсия раскладки документации — `content/` → `docs/` с зачисткой исторических артефактов
 
+**Опоры:** `docs/00-project/adr/0021-docs-layout-inversion.md`, `scripts/validate-content.py`,
+`tests/gramax/nauta-integration/ac-003-doc-root-contract.sh`, `tests/gramax/orphan-references/run.sh`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)
@@ -114,9 +117,9 @@ properties:
   `docs/` с сохранением структуры: `content/<X>` → `docs/<X>` для всех шести домов
   (`00-project`, `10-domain`, `30-requirements`, `40-architecture`,
   `60-implementation`, `70-operations`), включая `content/lessons-learned.md` →
-  `docs/lessons-learned.md` и `_index.md` каждого дома. Имя и относительный путь каждого
-  переезжающего файла не меняются — меняется только корень. Каталог `content/` после
-  переезда не существует.
+  [Lessons Learned — gramax marketplace](../lessons-learned.md) и `_index.md` каждого
+  дома. Имя и относительный путь каждого переезжающего файла не меняются — меняется
+  только корень. Каталог `content/` после переезда не существует.
 - **FR-125 (переписывание ссылающихся файлов):** все 260 файлов, ссылающихся на
   `content/`, переписываются: указатель (POINTER — ссылка, по которой читателя
   приглашают перейти) переписывается на `docs/<X>`; указатель на удаляемый по FR-129
@@ -146,7 +149,7 @@ properties:
 - **FR-128 (слияние двух doc-roots):** в дереве остаётся ровно один `.doc-root.yaml` —
   `docs/.doc-root.yaml`. Он вбирает модель свойств `content/.doc-root.yaml`
   (enum «Тип контента» как объединение значений обоих корней, enum «Плагин»,
-  `filterProperties`); точная редакция YAML — SA/Dev. `docs/_index.md` вбирает роль
+  `filterProperties`); точная редакция YAML — SA/Dev. [Документы](../_index.md) вбирает роль
   `content/_index.md` — становится корневым индексом объединённого каталога (разделы-дома
   от «Проект» до «Эксплуатация» + ссылка на `lessons-learned.md`). `content/.doc-root.yaml`
   и `content/_index.md` удаляются (`git rm`) после переноса их ролей — это поглощение при
@@ -268,7 +271,7 @@ properties:
 - [ ] **AC-010 (NFR-001/002/005, только R и одобренные D):**
   `git diff --name-status 8b6332d..ad7f1a4 -- content/ docs/` — строки `A` отсутствуют;
   строки `D` — только 19 путей FR-129 + `content/.doc-root.yaml` + `content/_index.md`;
-  строки `M` — только на стороне `docs/` (слияние ролей: `docs/_index.md`,
+  строки `M` — только на стороне `docs/` (слияние ролей: [Документы](../_index.md),
   `docs/.doc-root.yaml`), на стороне `content/` M запрещены (там только `R`/`D`);
   остальные строки — `R`/`R100`. Окно заморожено на цепочку миграции: `8b6332d` — старт
   Dev-цепочки (после коммита сюиты docs-migration: новые файлы сюиты в диф не попадают),
@@ -310,7 +313,7 @@ properties:
 
 ## Бриф для SA
 
-**Требование:** `content/30-requirements/2026-11-17-docs-layout-inversion.md`
+**Требование:** `docs/30-requirements/2026-11-17-docs-layout-inversion.md`
 **Фаза:** инверсия раскладки `content/` → `docs/`, слияние doc-roots, зачистка
 исторических артефактов по FR-129.
 

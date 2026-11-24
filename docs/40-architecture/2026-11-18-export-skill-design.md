@@ -15,6 +15,10 @@ properties:
 
 # Навык export — guidance-скилл экспорта DOCX/PDF: плейсмент, структура, границы, рецепты
 
+**Опоры:** `docs/30-requirements/2026-11-18-export-skill-requirement.md`,
+`docs/00-project/adr/0022-export-skill-placement.md`,
+`plugins/gramax/skills/export/SKILL.md`
+
 ## Контекст
 
 Реализация требования [Навык export — экспорт DOCX/PDF: шаблоны, CI/CD и статический

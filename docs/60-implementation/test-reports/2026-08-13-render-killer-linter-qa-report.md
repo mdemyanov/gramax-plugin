@@ -12,6 +12,10 @@ properties:
 
 # QA Report — линтер рендер-киллеров Gramax (`validate_render.py`, 4.4.0)
 
+**Опоры:** `docs/30-requirements/2026-08-12-render-killer-linter.md`,
+`docs/00-project/adr/0019-render-killer-linter.md`, `tests/gramax/render-linter/README.md`,
+`plugins/gramax/scripts/validate_render.py`
+
 **Дата прогона:** 2026-08-13
 **Ветка/дерево:** `main`, HEAD `9d66c0a` + незакоммиченная фича (спека, ADR-0019, реализация, suite — рабочее дерево)
 **Tester:** QA-runner (независимый прогон, не полагался на заявленный PM/Dev результат)

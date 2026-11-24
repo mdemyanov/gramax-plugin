@@ -15,6 +15,11 @@ properties:
 
 # Routing mermaid/drawio v3.0.0
 
+**Опоры:** `docs/00-project/adr/0004-router-and-engine-selection.md`,
+`docs/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md`,
+`plugins/gramax/skills/drawio/SKILL.md`, `plugins/gramax/skills/mermaid/SKILL.md`,
+`plugins/gramax/.claude-plugin/plugin.json`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

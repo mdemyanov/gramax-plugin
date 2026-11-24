@@ -15,6 +15,10 @@ properties:
 **Status:** Accepted
 **Date:** 2026-11-18
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/10-domain/research/2026-11-18-enterprise-server-skill-gap.md`,
+`docs/30-requirements/2026-11-18-plantuml-bpmn-requirement.md`,
+`docs/40-architecture/2026-11-18-plantuml-bpmn-design.md`,
+`plugins/gramax/skills/plantuml/SKILL.md`
 
 ## Context
 

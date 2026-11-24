@@ -15,6 +15,11 @@ properties:
 
 # Прибор рендер-проб Playwright и калибровка validate_render
 
+**Опоры:** `docs/00-project/epics/2026-11-21-playwright-render-quality-genesis-tree.md`,
+`docs/10-domain/research/2026-11-21-upstream-render-calibration-facts.md`,
+`docs/40-architecture/2026-11-21-playwright-render-quality-design.md`,
+`plugins/gramax/scripts/validate_render.py`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

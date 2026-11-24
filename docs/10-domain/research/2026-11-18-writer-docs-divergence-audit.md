@@ -27,6 +27,10 @@ dev-стадия.
 фрагментов», «Семантика `defs` у `<view>`», «Формы ссылок на статьи», «width/height/scale
 картинок», «Скобочные токены vs теги») и из прямого чтения файлов writer.
 
+**Опоры:** `plugins/gramax/skills/writer/SKILL.md`,
+`plugins/gramax/skills/writer/references/blocks.md`,
+`docs/10-domain/research/2026-11-18-enterprise-server-skill-gap.md`
+
 ## TL;DR — вердикты
 
 | # | Пункт | Вердикт |

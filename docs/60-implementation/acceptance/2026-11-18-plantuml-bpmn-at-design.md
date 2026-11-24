@@ -12,6 +12,11 @@ properties:
 
 # Приёмка (BA-acceptance): Авторство PlantUML/BPMN-диаграмм — навык plantuml: file-based, без конвертационных пайплайнов
 
+**Опоры:** `docs/30-requirements/2026-11-18-plantuml-bpmn-requirement.md`,
+`docs/00-project/adr/0023-plantuml-bpmn-skill.md`,
+`docs/40-architecture/2026-11-18-plantuml-bpmn-design.md`, `tests/gramax/plantuml-bpmn/README.md`,
+`plugins/gramax/skills/plantuml/SKILL.md`
+
 **Роль:** BA-acceptance gate — проверка AC-051…AC-062 и FR-141…FR-148 требования против
 **реализованного** навыка и граничных правок mermaid/drawio (не против обещаний дизайна),
 с независимым повторным исполнением буквальных проверок и вердиктом.

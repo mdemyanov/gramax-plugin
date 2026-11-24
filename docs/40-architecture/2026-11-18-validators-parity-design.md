@@ -15,6 +15,10 @@ properties:
 
 # Паритет офлайн-валидаторов с модулем «Проверка на ошибки» — цели диаграммных тегов, иконки `.icons/`, контракт-паритет W034
 
+**Опоры:** `docs/30-requirements/2026-11-18-validators-error-check-parity-requirement.md`,
+`docs/00-project/adr/0024-validators-error-check-parity.md`,
+`plugins/gramax/scripts/validate_structure.py`, `plugins/gramax/gramax-tags.json`
+
 ## Контекст
 
 Реализация требования [Паритет офлайн-валидаторов плагина с модулем проверки ошибок

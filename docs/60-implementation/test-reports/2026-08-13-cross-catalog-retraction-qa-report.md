@@ -12,6 +12,11 @@ properties:
 
 # QA Report — ретракция cross-каталожного `code:`-рецепта (hotfix 4.2.1)
 
+**Опоры:** `docs/30-requirements/2026-08-13-cross-catalog-retraction.md`,
+`docs/00-project/adr/0017-cross-catalog-retraction.md`,
+`docs/60-implementation/acceptance/2026-08-13-cross-catalog-retraction-at-design.md`,
+`tests/gramax/cross-catalog-retraction/run.sh`
+
 **Дата прогона:** 2026-08-13
 **Ветка/дерево:** `worktree-epic-link-form`, HEAD `bba5d80`, дерево чистое (`git status --porcelain` — пусто)
 **Диапазон волны:** `1264a16..bba5d80` — `ce4228d` (проектная фаза), `4a6f8d0` (красный suite приёмки, QA-author), `bba5d80` (реализация Dev)

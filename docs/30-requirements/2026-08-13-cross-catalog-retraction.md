@@ -15,6 +15,12 @@ properties:
 
 # Ретракция кросс-каталожного `code:`-рецепта и миграция потребителей
 
+**Опоры:** `docs/10-domain/research/2026-08-13-cross-catalog-links-probe.md`,
+`docs/40-architecture/2026-08-11-writer-rules-disposition.md`,
+`docs/30-requirements/2026-08-11-writer-consumer-rules.md`,
+`docs/00-project/adr/0017-cross-catalog-retraction.md`,
+`plugins/gramax/skills/writer/references/doc-root-schema.md`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

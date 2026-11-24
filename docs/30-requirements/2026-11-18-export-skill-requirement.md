@@ -15,6 +15,11 @@ properties:
 
 # Навык export — экспорт DOCX/PDF: шаблоны, CI/CD и статический портал
 
+**Опоры:** `docs/10-domain/research/2026-11-18-enterprise-server-skill-gap.md`,
+`docs/00-project/adr/0022-export-skill-placement.md`,
+`docs/40-architecture/2026-11-18-export-skill-design.md`,
+`plugins/gramax/skills/export/SKILL.md`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

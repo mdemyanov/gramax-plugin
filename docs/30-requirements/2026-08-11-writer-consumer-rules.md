@@ -15,6 +15,10 @@ properties:
 
 # Правила, изобретённые потребителями поверх writer — триаж на включение в плагин
 
+**Опоры:** `docs/40-architecture/2026-08-11-writer-rules-disposition.md`,
+`docs/10-domain/research/2026-08-11-plugin-consumers-gaps.md`,
+`plugins/gramax/skills/writer/SKILL.md`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

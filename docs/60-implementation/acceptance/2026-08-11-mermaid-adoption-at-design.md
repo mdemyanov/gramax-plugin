@@ -12,6 +12,10 @@ properties:
 
 # AT-design: Принятие file-based mermaid потребителями
 
+**Опоры:** `docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md`,
+`docs/00-project/adr/0013-mermaid-adoption-and-migration.md`,
+`tests/gramax/mermaid-adoption/README.md`, `plugins/gramax/scripts/migrate_mermaid.py`
+
 **Роль:** QA-author (тест-дизайн до реализации Dev — этот документ и failing stubs
 предшествуют коду DEV-003, не следуют за ним).
 **Требование:** [Принятие file-based mermaid потребителями — граница юрисдикции, обнаружение и миграция устаревшего формата](../../30-requirements/2026-08-11-mermaid-file-based-adoption.md)

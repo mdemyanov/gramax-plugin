@@ -15,6 +15,10 @@ properties:
 
 # writer 4.7.0 — массовая синхронизация с движком 48592b36: решения Q1–Q6, план правок по кластерам, контракт тегов
 
+**Опоры:** `docs/30-requirements/2026-11-18-writer-sync-470-requirement.md`,
+`docs/10-domain/research/2026-11-18-writer-docs-divergence-audit.md`,
+`plugins/gramax/skills/writer/SKILL.md`, `plugins/gramax/gramax-tags.json`
+
 ## Контекст
 
 Реализация требования [writer 4.7.0 — массовая синхронизация скилла с окном движка

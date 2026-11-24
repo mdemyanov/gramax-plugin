@@ -15,6 +15,8 @@ properties:
 **Status:** Accepted
 **Date:** 2026-05-08
 **Plugin:** marketplace
+**Опоры:** `docs/30-requirements/2026-05-08-diagram-on-demand-design.md`,
+`plugins/gramax/.claude-plugin/plugin.json`, `plugins/gramax/CHANGELOG.md`
 
 ## Context
 

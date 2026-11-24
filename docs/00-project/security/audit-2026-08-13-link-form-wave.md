@@ -12,6 +12,11 @@ properties:
 
 # Security Audit — secrets sweep волны link-form перед публикацией
 
+**Опоры:** `docs/30-requirements/2026-08-13-link-form-contract.md`,
+`docs/30-requirements/2026-08-13-cross-catalog-retraction.md`,
+`tests/gramax/cross-catalog-retraction/README.md`,
+`tests/gramax/cross-catalog-retraction/ac-006-changelog-migration-guide.sh`
+
 Фиксирует «Тип контента: Тест-отчёт» за неимением отдельного enum-значения для security-аудита
 в `content/.doc-root.yaml` (тот же приём, что `2026-08-13-cross-catalog-retraction-dev-notes.md`
 применил для «Урок»): по форме этот документ — набор проверок с вердиктом pass/fail, ближе к

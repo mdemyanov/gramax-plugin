@@ -12,6 +12,11 @@ properties:
 
 # AT-design: Классификация NAV/SELF/SUBJECT и миграция код-спанов (link-form-contract)
 
+**Опоры:** `docs/30-requirements/2026-08-13-link-form-contract.md`,
+`docs/00-project/adr/0016-link-form-contract.md`,
+`docs/40-architecture/2026-08-13-link-form-contract-design.md`,
+`plugins/gramax/scripts/migrate_nav_codespans.py`, `tests/gramax/link-form-migration/run.sh`
+
 **Роль:** QA-author (тест-дизайн до реализации Dev — этот документ и failing-тесты
 предшествуют коду `migrate_nav_codespans.py`, не следуют за ним).
 **Требование:** [Контракт формы ссылки на артефакт в Gramax-каталоге](../../30-requirements/2026-08-13-link-form-contract.md) (трек классификации

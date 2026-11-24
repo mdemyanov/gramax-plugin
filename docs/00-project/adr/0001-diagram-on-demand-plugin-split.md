@@ -15,6 +15,8 @@ properties:
 **Status:** Superseded by ADR-0008
 **Date:** 2026-05-08
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-05-08-diagram-on-demand-design.md`,
+`plugins/gramax/.claude-plugin/plugin.json`
 
 ## Context
 

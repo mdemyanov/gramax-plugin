@@ -15,6 +15,11 @@ properties:
 
 # Волна-2 калибровки render-quality: боевой режим прибора на живой цели
 
+**Опоры:** `docs/00-project/epics/2026-11-21-render-quality-wave2-genesis-tree.md`,
+`docs/40-architecture/2026-11-21-render-quality-wave2-design.md`,
+`docs/30-requirements/2026-11-21-playwright-render-quality-requirement.md`,
+`plugins/gramax/scripts/validate_render.py`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)
@@ -184,8 +189,9 @@ main → origin/internal — отдельный акт владельца вне
   команды документов сверены с фактическими флагами прибора, таблица настройки цели и
   `scripts/render-quality/render-target.example.json` приведены к живой форме
   `pageUrlTemplate` без `/page/` (host-заполнитель `.invalid` сохраняется); (в) урок волны-2
-  записан в журнал уроков `docs/lessons-learned.md`. README и runbook правятся синхронно —
-  расхождение инструкции с фактическим прибором не допускается.
+  записан в журнал уроков
+  [Lessons Learned — gramax marketplace](../lessons-learned.md). README и runbook правятся
+  синхронно — расхождение инструкции с фактическим прибором не допускается.
 
 ## Нефункциональные требования
 
@@ -249,7 +255,7 @@ BR-021…024 волны-1 действуют в волне-2 без измене
 - [ ] **AC-128 (FR-207, документарное закрытие):** at-acceptance дополнение волны-2
   существует; README сюиты и runbook согласованы с фактическим прибором, включая живую форму
   `pageUrlTemplate` в таблице настройки цели и в `render-target.example.json`; урок записан
-  в `docs/lessons-learned.md`.
+  в [Lessons Learned — gramax marketplace](../lessons-learned.md).
 
 ## Инварианты и Safeguards
 

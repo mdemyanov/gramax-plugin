@@ -15,6 +15,10 @@ properties:
 
 # PlantUML/BPMN-авторство — навык plantuml: плейсмент, контракт тегов по движку, границы, тест-хуки
 
+**Опоры:** `docs/30-requirements/2026-11-18-plantuml-bpmn-requirement.md`,
+`docs/00-project/adr/0023-plantuml-bpmn-skill.md`,
+`plugins/gramax/skills/plantuml/SKILL.md`
+
 ## Контекст
 
 Реализация требования [Авторство PlantUML/BPMN-диаграмм в Gramax (file-based, без

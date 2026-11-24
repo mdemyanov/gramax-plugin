@@ -15,6 +15,9 @@ properties:
 **Status:** Accepted
 **Date:** 2026-08-09
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md`,
+`scripts/check.sh`, `tests/gramax/archive/README.md`, `tests/gramax/orphan-references/run.sh`,
+`tests/gramax/orphan-references/sunset-registry.txt`
 
 ## Context
 

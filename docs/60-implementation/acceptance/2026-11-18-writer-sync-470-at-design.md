@@ -12,6 +12,11 @@ properties:
 
 # Приёмка (BA-acceptance): writer 4.7.0 — массовая синхронизация скилла с движком 48592b36 и документацией gram.ax
 
+**Опоры:** `docs/30-requirements/2026-11-18-writer-sync-470-requirement.md`,
+`docs/40-architecture/2026-11-18-writer-sync-design.md`,
+`docs/10-domain/research/2026-11-18-writer-docs-divergence-audit.md`,
+`tests/gramax/writer-sync-470/README.md`, `plugins/gramax/skills/writer/SKILL.md`
+
 **Роль:** BA-acceptance gate — финальный гейт волны 4.7.0 (порядок 13). Проверка AC-073…AC-096 и
 FR-161…FR-182 требования против **реализованных** файлов writer (не против обещаний дизайна),
 с собственным повторным исполнением буквальных формул AC, собственных грепов четырёх override'ов

@@ -15,6 +15,11 @@ properties:
 
 # Авторство PlantUML/BPMN-диаграмм в Gramax (file-based, без конвертационных пайплайнов)
 
+**Опоры:** `docs/10-domain/research/2026-11-18-enterprise-server-skill-gap.md`,
+`docs/00-project/adr/0023-plantuml-bpmn-skill.md`,
+`docs/40-architecture/2026-11-18-plantuml-bpmn-design.md`,
+`plugins/gramax/skills/plantuml/SKILL.md`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)
@@ -74,9 +79,10 @@ Ground truth движка (RES-007 §3, §4): страница полного с
 
 ## Почему это не повтор ADR-0008
 
-Прецедент, который обязан быть адресован явно: ADR-0008
-(`docs/00-project/adr/0008-drop-internal-drawio-skills.md`) удалил из плагина внутренний
-drawio-pipeline — навыки `diagram-on-demand` и `diagrams`, `drawio_convert.py` и четыре
+Прецедент, который обязан быть адресован явно:
+[ADR-0008: Удаление внутренних drawio-skills и делегирование внешнему плагину](../00-project/adr/0008-drop-internal-drawio-skills.md)
+удалил из плагина внутренний drawio-pipeline — навыки `diagram-on-demand` и `diagrams`,
+`drawio_convert.py` и четыре
 вспомогательных скрипта. Причина удаления: авторство drawio было невозможно без локальной
 конвертации `.drawio → .svg`, для которой требовались draw.io desktop и Python 3 на машине
 пользователя, а плагин нёс всю поверхность поддержки этого pipeline. Плоское чтение «диаграммы —
@@ -121,7 +127,8 @@ drawio-pipeline — навыки `diagram-on-demand` и `diagrams`, `drawio_conv
 - Конвертационные скрипты, локальные бинарники, SVG/PNG-промежуточные — исключены (BR-008).
 - Пакетная миграция inline-блоков ` ```plant-uml ` по каталогу — в периметр не входит; если Q-2
   выберет file-based канон, точечное предложение миграции в интерактиве допустимо, batch —
-  отдельная задача по прецеденту mermaid-миграции (`docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md`,
+  отдельная задача по прецеденту mermaid-миграции
+  ([Принятие file-based mermaid потребителями — граница юрисдикции, обнаружение и миграция устаревшего формата](2026-08-11-mermaid-file-based-adoption.md),
   FR-054–FR-060).
 - ADR — создаёт SA. Тесты — QA-author (failing stubs до Dev).
 
@@ -159,7 +166,8 @@ drawio-pipeline — навыки `diagram-on-demand` и `diagrams`, `drawio_conv
 - **FR-147 (именование):** файлы именуются `<page-slug>-<diagram-slug>.puml` / `.bpmn`; конвенция
   slug'ов — та же, что у mermaid (`<page-slug>` из имени статьи, `_index.md` → имя директории;
   `<diagram-slug>` — kebab-case, ASCII, ≤ 30 символов). Вторая параллельная конвенция не вводится
-  (принцип FR-060 требования о миграции mermaid, `docs/30-requirements/2026-08-11-mermaid-file-based-adoption.md`).
+  (принцип FR-060 требования о миграции mermaid,
+  [Принятие file-based mermaid потребителями — граница юрисдикции, обнаружение и миграция устаревшего формата](2026-08-11-mermaid-file-based-adoption.md)).
 - **FR-148 (защита от перезаписи):** если `.puml`/`.bpmn` с предложенным именем существует, навык
   показывает его начало и спрашивает: перезаписать / другое имя / отмена. Без явного «перезаписать»
   файл не трогается (прецедент mermaid).

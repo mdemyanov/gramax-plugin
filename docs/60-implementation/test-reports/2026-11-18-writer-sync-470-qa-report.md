@@ -12,6 +12,10 @@ properties:
 
 # QA Report — синхронизация writer 4.7.0 с движком 48592b36 (AC-073…AC-096: четыре override'а RES-008, диф контракта тегов NFR-072, миграция filterProperty)
 
+**Опоры:** `tests/gramax/writer-sync-470/README.md`,
+`docs/30-requirements/2026-11-18-writer-sync-470-requirement.md`,
+`docs/40-architecture/2026-11-18-writer-sync-design.md`
+
 | Поле | Значение |
 |---|---|
 | **Дата прогона** | 2026-11-18 |

@@ -15,6 +15,9 @@ properties:
 **Status:** Accepted
 **Date:** 2026-08-12
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/00-project/adr/0006-marketplace-json-semver-strategy.md`,
+`docs/00-project/adr/0013-mermaid-adoption-and-migration.md`,
+`docs/00-project/adr/0016-link-form-contract.md`, `plugins/gramax/.claude-plugin/plugin.json`
 
 ## Context
 

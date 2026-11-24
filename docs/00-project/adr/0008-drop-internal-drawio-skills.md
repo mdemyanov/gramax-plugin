@@ -15,6 +15,10 @@ properties:
 **Status:** Accepted
 **Date:** 2026-05-11
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-05-11-remove-diagram-skills.md`,
+`docs/10-domain/research/2026-05-11-drawio-skill-external.md`,
+`plugins/gramax/.claude-plugin/plugin.json`, `plugins/gramax/skills/writer/references/drawio.md`,
+`plugins/gramax/skills/mermaid/SKILL.md`
 
 ## Context
 

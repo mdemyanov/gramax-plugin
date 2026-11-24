@@ -15,6 +15,10 @@ properties:
 
 # Правила писателя, изобретённые потребителями — диспозиция по шести темам
 
+**Опоры:** `docs/10-domain/research/2026-08-11-plugin-consumers-gaps.md`,
+`docs/30-requirements/2026-08-11-writer-consumer-rules.md`,
+`plugins/gramax/skills/writer/SKILL.md`
+
 ## Контекст
 
 Разрешающий design-документ, не ADR. Закрывает FR-065…FR-076 из

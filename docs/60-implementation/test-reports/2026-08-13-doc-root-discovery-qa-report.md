@@ -12,6 +12,12 @@ properties:
 
 # QA Report — рекурсивное обнаружение `.doc-root.yaml` и типизация полей (FR-120…123, ADR-0020)
 
+**Опоры:** `docs/30-requirements/2026-08-13-doc-root-discovery-contract.md`,
+`docs/00-project/adr/0020-doc-root-recursive-discovery.md`,
+`tests/gramax/catalog-validator/ac-021-nested-doc-root-discovered.sh`,
+`tests/gramax/catalog-validator/ac-022-doc-root-title-type.sh`,
+`tests/gramax/catalog-validator/ac-001-dogfood-clean-exit.sh`
+
 **Дата прогона:** 2026-08-13
 **Ветка/дерево:** `main`, HEAD `4958238` + незакоммиченная фича (требование, ADR-0020, реализация, suite, фикстуры — рабочее дерево; `git status --short`)
 **Tester:** QA-runner (независимый прогон, не полагался на заявленный Dev-результат)

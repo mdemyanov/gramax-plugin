@@ -12,6 +12,8 @@ properties:
 
 # Онбординг: роли nauta на чистой машине
 
+**Опоры:** `CLAUDE.md`, `README.md`, `scripts/check.sh`, `docs/lessons-learned.md`
+
 Этот документ — для контрибьютора **этого репозитория** (`gramax-marketplace`), не для
 потребителя плагина `gramax`. Если вы просто хотите установить `gramax` в свой Claude
 Code — вам в раздел [«Установка» в README.md](../README.md#установка), сюда идти не нужно.

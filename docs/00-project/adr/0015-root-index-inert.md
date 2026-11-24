@@ -15,6 +15,11 @@ properties:
 **Status:** Accepted
 **Date:** 2026-08-11
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/00-project/adr/0012-catalog-validation-contract.md`,
+`docs/10-domain/research/2026-08-11-index-md-at-catalog-root.md`,
+`docs/10-domain/research/2026-08-11-index-md-root-probe.md`,
+`tests/gramax/nauta-integration/ac-003-doc-root-contract.sh`,
+`plugins/gramax/scripts/tests/test_validate_structure.py`
 
 ## Context
 

@@ -12,6 +12,11 @@ properties:
 
 # AT-design: Ретракция нерабочего кросс-каталожного `code:`-рецепта
 
+**Опоры:** `docs/30-requirements/2026-08-13-cross-catalog-retraction.md`,
+`docs/00-project/adr/0017-cross-catalog-retraction.md`,
+`tests/gramax/cross-catalog-retraction/README.md`,
+`plugins/gramax/skills/writer/references/doc-root-schema.md`
+
 **Роль:** QA-author (тест-дизайн до реализации Dev/Tech-writer — этот документ и failing stubs
 предшествуют коду/правкам, не следуют за ними).
 **Требование:** [Ретракция кросс-каталожного `code:`-рецепта и миграция потребителей](../../30-requirements/2026-08-13-cross-catalog-retraction.md) (AC-001…AC-009).

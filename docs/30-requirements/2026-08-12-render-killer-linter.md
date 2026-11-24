@@ -15,6 +15,9 @@ properties:
 
 # Линтер рендер-киллеров Gramax (порт validate-gramax.py)
 
+**Опоры:** `docs/00-project/adr/0019-render-killer-linter.md`,
+`plugins/gramax/scripts/validate_structure.py`, `scripts/check.sh`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

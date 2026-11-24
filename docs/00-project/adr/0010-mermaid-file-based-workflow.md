@@ -15,6 +15,9 @@ properties:
 **Status:** Accepted
 **Date:** 2026-05-12
 **Plugin:** gramax
+**Опоры:** `docs/30-requirements/2026-05-12-mermaid-file-based-design.md`,
+`plugins/gramax/skills/mermaid/SKILL.md`, `plugins/gramax/skills/writer/references/blocks.md`,
+`plugins/gramax/.claude-plugin/plugin.json`
 
 ## Context
 

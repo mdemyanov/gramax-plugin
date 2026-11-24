@@ -12,6 +12,11 @@ properties:
 
 # Dev notes: классификация и миграция NAV-код-спанов (ADR-0016)
 
+**Опоры:** `docs/30-requirements/2026-08-13-link-form-contract.md`,
+`docs/00-project/adr/0016-link-form-contract.md`,
+`docs/60-implementation/acceptance/2026-08-13-link-form-contract-migration-at-design.md`,
+`plugins/gramax/scripts/migrate_nav_codespans.py`
+
 Фиксирует «Тип контента: Урок» за неимением отдельного enum-значения для заметок реализации —
 тот же приём, что [Dev notes: контракт валидации Gramax-каталога (DEV-001)](2026-08-11-validation-contract-dev-notes.md).
 

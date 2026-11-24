@@ -12,6 +12,11 @@ properties:
 
 # Приёмка (BA-acceptance): Навык export — экспорт DOCX/PDF: шаблоны, placement, CI/CD, статический портал
 
+**Опоры:** `docs/30-requirements/2026-11-18-export-skill-requirement.md`,
+`docs/00-project/adr/0022-export-skill-placement.md`,
+`docs/40-architecture/2026-11-18-export-skill-design.md`, `tests/gramax/export-skill/README.md`,
+`plugins/gramax/skills/export/SKILL.md`
+
 **Роль:** BA-acceptance gate — проверка AC-041…AC-050 и FR-131…FR-139 требования против
 **реализованного** навыка (не против обещаний дизайна), с независимым повторным исполнением
 буквальных проверок и вердиктом.

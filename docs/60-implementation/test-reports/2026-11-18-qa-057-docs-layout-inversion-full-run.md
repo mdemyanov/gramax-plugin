@@ -12,6 +12,9 @@ properties:
 
 # QA Report qa-057 — полный прогон после инверсии раскладки content/ → docs/
 
+**Опоры:** `docs/30-requirements/2026-11-17-docs-layout-inversion.md`,
+`docs/00-project/adr/0021-docs-layout-inversion.md`, `scripts/check.sh`, `scripts/check-gramax.sh`
+
 **Дата прогона:** 2026-11-17T22:37:35Z (лог координатора), классификация — 2026-11-18
 **Дерево прогона:** HEAD `ad7f1a4` (конец цепочки миграции A→B→B2→C→D1→D2→D3→D4, 8 коммитов), дерево чистое
 **Точки сравнения:** base `8b6332d` (старт Dev-цепочки), pre-payload `1939ae6` (до синков 2.22.0/2.23.0)

@@ -12,6 +12,11 @@ properties:
 
 # AT-design: Резолвер гейта — инференс расширения `.md`/`_index.md` (link-form-contract)
 
+**Опоры:** `docs/30-requirements/2026-08-13-link-form-contract.md`,
+`docs/00-project/adr/0016-link-form-contract.md`,
+`docs/40-architecture/2026-08-13-link-form-contract-design.md`,
+`tests/gramax/link-form-resolver/README.md`, `scripts/validate-content.py`
+
 **Роль:** QA-author (тест-дизайн до реализации Dev — этот документ и failing-тесты
 предшествуют коду резолвера, не следуют за ним).
 **Требование:** [Контракт формы ссылки на артефакт в Gramax-каталоге](../../30-requirements/2026-08-13-link-form-contract.md) (трек резолвера —

@@ -15,6 +15,9 @@ properties:
 **Status:** Accepted (ратифицировано PM 2026-11-18)
 **Date:** 2026-11-18
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-11-18-validators-error-check-parity-requirement.md`,
+`docs/40-architecture/2026-11-18-validators-parity-design.md`,
+`plugins/gramax/scripts/validate_structure.py`, `plugins/gramax/scripts/lib/md_link_parser.py`
 
 ## Context
 

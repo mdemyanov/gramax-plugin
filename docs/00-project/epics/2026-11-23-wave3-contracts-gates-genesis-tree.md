@@ -15,6 +15,10 @@ properties:
 
 # Дерево решений генезиса: волна-3 — калибровка контрактов валидаторов и гейтов, релиз 4.10.0
 
+**Опоры:** `docs/30-requirements/2026-11-23-wave3-validators-contracts-gates-requirement.md`,
+`docs/00-project/adr/0026-validator-contracts-engine-pin.md`,
+`docs/00-project/adr/0027-full-gate-composition.md`
+
 ## Цель
 
 Выпустить 4.10.0 с закрытым эпиком `gramax-4jf` (12 подтверждённых дефектов плагина) и с

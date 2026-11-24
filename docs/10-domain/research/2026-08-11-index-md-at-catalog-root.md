@@ -19,6 +19,11 @@ properties:
 файл там есть; собрать факты, не формулировать требование или правку скилла.
 **Глубина:** standard (детально — включая чтение исходного кода движка Gramax)
 
+**Опоры:** `plugins/gramax/skills/writer/SKILL.md`, `scripts/validate-content.py`,
+`plugins/gramax/scripts/tests/test_validate_structure.py`,
+`docs/00-project/adr/0012-catalog-validation-contract.md`,
+`plugins/gramax/skills/writer/references/structure.md`
+
 ## TL;DR
 
 Правило `writer/SKILL.md:63,95` («корень каталога НЕ должен содержать `_index.md`») попало в плагин

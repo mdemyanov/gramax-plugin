@@ -16,6 +16,11 @@ properties:
 
 # Mermaid skill — file-based workflow
 
+**Опоры:** `docs/00-project/adr/0010-mermaid-file-based-workflow.md`,
+`plugins/gramax/skills/mermaid/SKILL.md`,
+`plugins/gramax/skills/mermaid/references/syntax-rules.md`,
+`plugins/gramax/skills/writer/references/blocks.md`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)
@@ -129,17 +134,34 @@ Skill читает существующий файл, сообщает поль�
 
 ## Acceptance Criteria
 
-- [ ] **AC-001:** при вызове `gramax:mermaid` с указанным `target_page` skill создаёт `.mermaid`-файл в той же директории, что и `target_page`; файл существует после выполнения: `test -f "$(dirname target_page)/diagram.mermaid"`.
-- [ ] **AC-002:** содержимое созданного `.mermaid`-файла начинается с одного из 8 поддерживаемых типов (`flowchart`, `sequenceDiagram`, `gantt`, `classDiagram`, `stateDiagram-v2`, `erDiagram`, `pie`, `mindmap`): `head -1 diagram.mermaid | grep -qE "^(flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram-v2|erDiagram|pie|mindmap)"`.
-- [ ] **AC-003:** `target_page` содержит тег `<mermaid path="./…" …/>` после вставки: `grep -q '<mermaid path="./' target_page.md`.
-- [ ] **AC-004:** тег в md содержит атрибуты `width` и `height`: `grep -q 'width="' target_page.md && grep -q 'height="' target_page.md`.
-- [ ] **AC-005:** тег в md использует значения по умолчанию `width="800px" height="450px"`, если пользователь не задал явно: `grep -q 'width="800px" height="450px"' target_page.md`.
-- [ ] **AC-006:** тег в md является самозакрывающимся (без содержимого между тегами): `grep -q '<mermaid path="[^"]*" width="[^"]*" height="[^"]*"/>' target_page.md`.
-- [ ] **AC-007:** файл `.mermaid` не содержит Gramax XML-разметки (`<mermaid>`, fenced block): `! grep -qE '^(<mermaid>|```mermaid)' diagram.mermaid`.
-- [ ] **AC-008:** при повторном вызове с тем же именем файла, если файл существует, skill не перезаписывает его без подтверждения — после второго вызова с ответом «нет» на перезапись файл содержит оригинальный DSL: содержимое файла не изменилось.
-- [ ] **AC-009:** при наличии в `target_page` inline-блока `<mermaid>…</mermaid>` skill выводит предупреждение с подстрокой «устаревший формат» или «migration» в stdout — проверяется smoke-тестом, подставляющим преднамеренно некорректный файл: `output=$(run_mermaid_skill …); echo "$output" | grep -qi "устаревший\|migration"`.
-- [ ] **AC-010:** чекбоксы checklist (FR-003) применяются к DSL в `.mermaid`-файле: в созданном файле нет паттерна `[0-9]\. ` (конфликт list-syntax): `! grep -qP '\[\d+\. ' diagram.mermaid`.
-- [ ] **AC-011:** fallback-диалог при ambiguous-request не содержит фразу «inline DSL, без файла»: `! grep -q 'inline DSL, без файла' plugins/gramax/skills/mermaid/SKILL.md`.
+- [ ] **AC-001:** при вызове `gramax:mermaid` с указанным `target_page` skill создаёт
+  `.mermaid`-файл в той же директории, что и `target_page`; файл существует после выполнения:
+  `test -f "$(dirname target_page)/diagram.mermaid"`.
+- [ ] **AC-002:** содержимое созданного `.mermaid`-файла начинается с одного из 8 поддерживаемых
+  типов (`flowchart`, `sequenceDiagram`, `gantt`, `classDiagram`, `stateDiagram-v2`, `erDiagram`,
+  `pie`, `mindmap`):
+  `head -1 diagram.mermaid | grep -qE "^(flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram-v2|erDiagram|pie|mindmap)"`.
+- [ ] **AC-003:** `target_page` содержит тег `<mermaid path="./…" …/>` после вставки:
+  `grep -q '<mermaid path="./' target_page.md`.
+- [ ] **AC-004:** тег в md содержит атрибуты `width` и `height`:
+  `grep -q 'width="' target_page.md && grep -q 'height="' target_page.md`.
+- [ ] **AC-005:** тег в md использует значения по умолчанию `width="800px" height="450px"`, если
+  пользователь не задал явно: `grep -q 'width="800px" height="450px"' target_page.md`.
+- [ ] **AC-006:** тег в md является самозакрывающимся (без содержимого между тегами):
+  `grep -q '<mermaid path="[^"]*" width="[^"]*" height="[^"]*"/>' target_page.md`.
+- [ ] **AC-007:** файл `.mermaid` не содержит Gramax XML-разметки (`<mermaid>`, fenced block):
+  `! grep -qE '^(<mermaid>|```mermaid)' diagram.mermaid`.
+- [ ] **AC-008:** при повторном вызове с тем же именем файла, если файл существует, skill
+  не перезаписывает его без подтверждения — после второго вызова с ответом «нет» на перезапись файл
+  содержит оригинальный DSL: содержимое файла не изменилось.
+- [ ] **AC-009:** при наличии в `target_page` inline-блока `<mermaid>…</mermaid>` skill выводит
+  предупреждение с подстрокой «устаревший формат» или «migration» в stdout — проверяется
+  smoke-тестом, подставляющим преднамеренно некорректный файл:
+  `output=$(run_mermaid_skill …); echo "$output" | grep -qi "устаревший\|migration"`.
+- [ ] **AC-010:** чекбоксы checklist (FR-003) применяются к DSL в `.mermaid`-файле: в созданном
+  файле нет паттерна `[0-9]\. ` (конфликт list-syntax): `! grep -qP '\[\d+\. ' diagram.mermaid`.
+- [ ] **AC-011:** fallback-диалог при ambiguous-request не содержит фразу «inline DSL, без файла»:
+  `! grep -q 'inline DSL, без файла' plugins/gramax/skills/mermaid/SKILL.md`.
 
 ## Открытые вопросы
 

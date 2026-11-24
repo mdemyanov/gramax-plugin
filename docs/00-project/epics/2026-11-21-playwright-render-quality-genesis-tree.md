@@ -15,6 +15,9 @@ properties:
 
 # Дерево решений генезиса: Playwright в пайплайне разработки — пробы рендера и калибровка validate_render
 
+**Опоры:** `docs/30-requirements/2026-11-21-playwright-render-quality-requirement.md`,
+`docs/00-project/adr/0025-playwright-dev-loop-dependency.md`
+
 ## Цель
 
 Встроить Playwright в пайплайн разработки плагина этого репо (gramax-marketplace): пробы

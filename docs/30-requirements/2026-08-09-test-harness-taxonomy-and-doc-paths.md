@@ -15,6 +15,9 @@ properties:
 
 # Наведение порядка в test harness gramax и вычистка устаревших docs-путей
 
+**Опоры:** `docs/00-project/adr/0011-test-harness-taxonomy.md`, `scripts/check.sh`,
+`tests/gramax/orphan-references/sunset-registry.txt`, `docs/onboarding-nauta.md`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)
@@ -180,10 +183,10 @@ properties:
 
 ### E. Онбординг
 
-- **FR-030:** новый документ `docs/onboarding-nauta.md` (мета-артефакт о тулинге репозитория — не о домене продукта, поэтому `docs/`, не `content/`) описывает для контрибьютора на чистой машине: регистрацию marketplace `nauta` в `~/.claude/settings.json` с `ref: v0.3.1`; включение плагина локально через `.claude/settings.local.json` (файл в `.gitignore`, не коммитится); `uv` как жёсткий пререквизит — его отсутствие уже сегодня проваливает `scripts/check.sh --fast` (поведение реализовано, документ его фиксирует, не создаёт заново); запуск `bash scripts/install-hooks.sh`.
+- **FR-030:** новый документ [Онбординг: роли nauta на чистой машине](../onboarding-nauta.md) (мета-артефакт о тулинге репозитория — не о домене продукта, поэтому `docs/`, не `content/`) описывает для контрибьютора на чистой машине: регистрацию marketplace `nauta` в `~/.claude/settings.json` с `ref: v0.3.1`; включение плагина локально через `.claude/settings.local.json` (файл в `.gitignore`, не коммитится); `uv` как жёсткий пререквизит — его отсутствие уже сегодня проваливает `scripts/check.sh --fast` (поведение реализовано, документ его фиксирует, не создаёт заново); запуск `bash scripts/install-hooks.sh`.
 - **FR-031:** в репозиторий коммитится `.claude/settings.local.json.example` — шаблон для копирования пользователем в `.claude/settings.local.json`.
-- **FR-032:** корневой `CLAUDE.md` (абзац после таблицы ролей, строки 19-22 на момент HEAD) получает ссылку-указатель на `docs/onboarding-nauta.md` — не дублирует его содержимое.
-- **FR-033:** корневой `README.md` получает короткий указатель на `docs/onboarding-nauta.md`, адресованный контрибьютору (не потребителю плагина — установочные шаги README для потребителя не меняются). Место — новый короткий раздел после «Установка», перед «Skills (плагин gramax)». Не дублирует содержимое онбординг-документа.
+- **FR-032:** корневой `CLAUDE.md` (абзац после таблицы ролей, строки 19-22 на момент HEAD) получает ссылку-указатель на [Онбординг: роли nauta на чистой машине](../onboarding-nauta.md) — не дублирует его содержимое.
+- **FR-033:** корневой `README.md` получает короткий указатель на [Онбординг: роли nauta на чистой машине](../onboarding-nauta.md), адресованный контрибьютору (не потребителю плагина — установочные шаги README для потребителя не меняются). Место — новый короткий раздел после «Установка», перед «Skills (плагин gramax)». Не дублирует содержимое онбординг-документа.
 
 ### F. Задача 9 — осмысленный и зелёный шаг shellcheck (добавлено 2026-08-10 по итогам финального ревью)
 
@@ -261,18 +264,38 @@ BR-001/ADR-0011 Решение 1: этот код не редактируетс�
 
 ### plugin-contract
 
-- [ ] **AC-007 (роутинг, ожидаемо зелёный уже сегодня — regression guard):** `grep -qi 'не для.*mermaid\|НЕ для mermaid' plugins/gramax/skills/drawio/SKILL.md && grep -q 'gramax:mermaid' plugins/gramax/skills/drawio/SKILL.md && grep -q 'gramax:drawio' plugins/gramax/skills/mermaid/SKILL.md && echo PASS`
-- [ ] **AC-008 (формат тега, позитив):** `grep -qE '<drawio path="[^"]*" width="[^"]*" height="[^"]*"/>' plugins/gramax/skills/writer/references/drawio.md && echo PASS`
-- [ ] **AC-009 (формат тега, негатив — падает до FR-017/FR-018):** `! grep -rE '\[drawio:|<Image src' plugins/gramax/skills/ plugins/gramax/README.md --include='*.md' | grep -v 'references/blocks.md' && echo PASS`
-- [ ] **AC-010 (структура writer-справочника, ожидаемо зелёный уже сегодня):** `grep -q 'Prerequisites' plugins/gramax/skills/writer/references/drawio.md && grep -qi 'draw.io desktop' plugins/gramax/skills/writer/references/drawio.md && grep -q 'Python 3' plugins/gramax/skills/writer/references/drawio.md && grep -q 'marketplace add Agents365-ai/365-skills' plugins/gramax/skills/writer/references/drawio.md && grep -qi 'не вставляет' plugins/gramax/skills/writer/references/drawio.md && echo PASS`
-- [ ] **AC-011 (README prerequisites + WARNING — падает до FR-019):** `grep -q 'marketplace add Agents365-ai/365-skills' plugins/gramax/README.md && grep -qi 'Warning' plugins/gramax/README.md && grep -qi 'mermaid-skill' plugins/gramax/README.md && grep -qi 'недетерминированным' plugins/gramax/README.md && echo PASS`
-- [ ] **AC-012 (mermaid-контракт, ожидаемо зелёный уже сегодня):** `grep -q '<page-slug>-<diagram-slug>.mermaid' plugins/gramax/skills/mermaid/SKILL.md && grep -qi '_index.md' plugins/gramax/skills/mermaid/SKILL.md && grep -q '800px' plugins/gramax/skills/mermaid/SKILL.md && grep -q '450px' plugins/gramax/skills/mermaid/SKILL.md && ! grep -q 'inline DSL, без файла' plugins/gramax/skills/mermaid/SKILL.md && echo PASS`
-- [ ] **AC-013 (согласованность манифестов):** `python3 -c "import json; p=json.load(open('plugins/gramax/.claude-plugin/plugin.json')); m=json.load(open('.claude-plugin/marketplace.json')); assert p['version']==m['metadata']['version'], (p['version'], m['metadata']['version']); print('PASS')"`
-- [ ] **AC-014 (CHANGELOG-секция для текущей версии):** `V=$(python3 -c "import json; print(json.load(open('plugins/gramax/.claude-plugin/plugin.json'))['version'])"); grep -q "## $V" plugins/gramax/CHANGELOG.md && echo PASS`
-- [ ] **AC-015 (ретировка):** ретировка означает, что `plugin-contract` не содержит ассерта на поле `skills` (а не что поля нет в манифесте — манифест мы не трогаем): `test -d tests/gramax/plugin-contract && ! grep -rlE "get\('skills'\)|\['skills'\]" tests/gramax/plugin-contract/ 2>/dev/null | grep -q . && echo PASS`
-- [ ] **AC-016 (sunset-registry расширен, без ложных срабатываний):** реестр содержит нужные паттерны, и гейт зелёный целиком — зелёный результат исключает ложные срабатывания на `staging.md:30` и `drawio.md:60` (иначе `run.sh` вернул бы ненулевой код именно на них): `grep -qi 'claude-mermaid' tests/gramax/orphan-references/sunset-registry.txt && grep -qi 'diagram-on-demand' tests/gramax/orphan-references/sunset-registry.txt && bash tests/gramax/orphan-references/run.sh && echo PASS`
-- [ ] **AC-017 (EXCLUDE_RE схлопнут, переформулирован 2026-08-10 по итогам финального ревью):** проверяется сам паттерн `EXCLUDE_RE`, а не файл целиком — комментарий в строке 4 (`# Обобщение ac-016 из remove-diagram-skills.`) легитимно упоминает старое имя suite и не должен ловиться проверкой: `EXCLUDE_RE` выражает принцип (`^tests/gramax/archive/`), а не список конкретных имён: `! grep 'EXCLUDE_RE=' tests/gramax/orphan-references/run.sh | grep -qE 'remove-diagram-skills|tests/gramax/diagram-on-demand' && grep 'EXCLUDE_RE=' tests/gramax/orphan-references/run.sh | grep -q 'tests/gramax/archive' && echo PASS`
-- [ ] **AC-018 (подключение к `--full`):** `grep -q 'plugin-contract' scripts/check.sh && grep -q 'doc-paths' scripts/check.sh && echo PASS`
+- [ ] **AC-007 (роутинг, ожидаемо зелёный уже сегодня — regression guard):**
+  `grep -qi 'не для.*mermaid\|НЕ для mermaid' plugins/gramax/skills/drawio/SKILL.md && grep -q 'gramax:mermaid' plugins/gramax/skills/drawio/SKILL.md && grep -q 'gramax:drawio' plugins/gramax/skills/mermaid/SKILL.md && echo PASS`
+- [ ] **AC-008 (формат тега, позитив):**
+  `grep -qE '<drawio path="[^"]*" width="[^"]*" height="[^"]*"/>' plugins/gramax/skills/writer/references/drawio.md && echo PASS`
+- [ ] **AC-009 (формат тега, негатив — падает до FR-017/FR-018):**
+  `! grep -rE '\[drawio:|<Image src' plugins/gramax/skills/ plugins/gramax/README.md --include='*.md' | grep -v 'references/blocks.md' && echo PASS`
+- [ ] **AC-010 (структура writer-справочника, ожидаемо зелёный уже сегодня):**
+  `grep -q 'Prerequisites' plugins/gramax/skills/writer/references/drawio.md && grep -qi 'draw.io desktop' plugins/gramax/skills/writer/references/drawio.md && grep -q 'Python 3' plugins/gramax/skills/writer/references/drawio.md && grep -q 'marketplace add Agents365-ai/365-skills' plugins/gramax/skills/writer/references/drawio.md && grep -qi 'не вставляет' plugins/gramax/skills/writer/references/drawio.md && echo PASS`
+- [ ] **AC-011 (README prerequisites + WARNING — падает до FR-019):**
+  `grep -q 'marketplace add Agents365-ai/365-skills' plugins/gramax/README.md && grep -qi 'Warning' plugins/gramax/README.md && grep -qi 'mermaid-skill' plugins/gramax/README.md && grep -qi 'недетерминированным' plugins/gramax/README.md && echo PASS`
+- [ ] **AC-012 (mermaid-контракт, ожидаемо зелёный уже сегодня):**
+  `grep -q '<page-slug>-<diagram-slug>.mermaid' plugins/gramax/skills/mermaid/SKILL.md && grep -qi '_index.md' plugins/gramax/skills/mermaid/SKILL.md && grep -q '800px' plugins/gramax/skills/mermaid/SKILL.md && grep -q '450px' plugins/gramax/skills/mermaid/SKILL.md && ! grep -q 'inline DSL, без файла' plugins/gramax/skills/mermaid/SKILL.md && echo PASS`
+- [ ] **AC-013 (согласованность манифестов):**
+  `python3 -c "import json; p=json.load(open('plugins/gramax/.claude-plugin/plugin.json')); m=json.load(open('.claude-plugin/marketplace.json')); assert p['version']==m['metadata']['version'], (p['version'], m['metadata']['version']); print('PASS')"`
+- [ ] **AC-014 (CHANGELOG-секция для текущей версии):**
+  `V=$(python3 -c "import json; print(json.load(open('plugins/gramax/.claude-plugin/plugin.json'))['version'])"); grep -q "## $V" plugins/gramax/CHANGELOG.md && echo PASS`
+- [ ] **AC-015 (ретировка):** ретировка означает, что `plugin-contract` не содержит ассерта
+  на поле `skills` (а не что поля нет в манифесте — манифест мы не трогаем):
+  `test -d tests/gramax/plugin-contract && ! grep -rlE "get\('skills'\)|\['skills'\]" tests/gramax/plugin-contract/ 2>/dev/null | grep -q . && echo PASS`
+- [ ] **AC-016 (sunset-registry расширен, без ложных срабатываний):** реестр содержит нужные
+  паттерны, и гейт зелёный целиком — зелёный результат исключает ложные срабатывания
+  на `staging.md:30` и `drawio.md:60` (иначе `run.sh` вернул бы ненулевой код именно
+  на них):
+  `grep -qi 'claude-mermaid' tests/gramax/orphan-references/sunset-registry.txt && grep -qi 'diagram-on-demand' tests/gramax/orphan-references/sunset-registry.txt && bash tests/gramax/orphan-references/run.sh && echo PASS`
+- [ ] **AC-017 (EXCLUDE_RE схлопнут, переформулирован 2026-08-10 по итогам финального ревью):**
+  проверяется сам паттерн `EXCLUDE_RE`, а не файл целиком — комментарий в строке 4
+  (`# Обобщение ac-016 из remove-diagram-skills.`) легитимно упоминает старое имя suite
+  и не должен ловиться проверкой: `EXCLUDE_RE` выражает принцип (`^tests/gramax/archive/`),
+  а не список конкретных имён:
+  `! grep 'EXCLUDE_RE=' tests/gramax/orphan-references/run.sh | grep -qE 'remove-diagram-skills|tests/gramax/diagram-on-demand' && grep 'EXCLUDE_RE=' tests/gramax/orphan-references/run.sh | grep -q 'tests/gramax/archive' && echo PASS`
+- [ ] **AC-018 (подключение к `--full`):**
+  `grep -q 'plugin-contract' scripts/check.sh && grep -q 'doc-paths' scripts/check.sh && echo PASS`
 
 ### Продуктовые фиксы v4.1.1
 
@@ -343,7 +366,7 @@ print('PASS')"`
 
 ## Бриф для SA
 
-**Требование:** `content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md`
+**Требование:** `docs/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md`
 **Фаза:** реорганизация test harness + патч-релиз 4.1.1 + гейт doc-paths + онбординг.
 
 **Спроектировать:**
@@ -361,7 +384,7 @@ print('PASS')"`
 
 ## Бриф для QA-author
 
-**Требование:** `content/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md`
+**Требование:** `docs/30-requirements/2026-08-09-test-harness-taxonomy-and-doc-paths.md`
 
 **Покрыть тестами:**
 - `plugin-contract/` — по FR-006…FR-011, с учётом, что часть проверок (AC-007, AC-010, AC-012) ожидаемо зелёные уже сегодня — оформить как regression guard, не как новый failing stub (см. [Lessons Learned — gramax marketplace](../lessons-learned.md), запись «TDD-stubs могут быть частично зелёными от старта»).

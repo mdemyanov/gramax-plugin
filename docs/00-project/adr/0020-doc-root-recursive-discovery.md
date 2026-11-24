@@ -15,18 +15,40 @@ properties:
 **Status:** Accepted
 **Date:** 2026-08-13
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-08-13-doc-root-discovery-contract.md`,
+`plugins/gramax/scripts/validate_structure.py`
 
 ## Context
 
-Инцидент 2026-08-13: редактор Gramax (`editor.nau.im`) не открывался у пользователей воркспейса. Причина — 24 файла `.doc-root.yaml` в 12 подключённых каталогах со строкой `title: {{PROJECT_NAME}} — KB команды` без кавычек. В YAML `{{` открывает flow mapping, поэтому `title` — не строка, а dict; JS-парсер Gramax в мягком режиме отдаёт объект и падает. Все 24 файла лежали **не** в корне каталога, а в скопированной из шаблона папке `examples/<профиль>-example/content/`.
+Инцидент 2026-08-13: редактор Gramax (`editor.nau.im`) не открывался у пользователей воркспейса.
+Причина — 24 файла `.doc-root.yaml` в 12 подключённых каталогах со строкой
+`title: {{PROJECT_NAME}} — KB команды` без кавычек. В YAML `{{` открывает flow mapping, поэтому
+`title` — не строка, а dict; JS-парсер Gramax в мягком режиме отдаёт объект и падает. Все 24 файла
+лежали **не** в корне каталога, а в скопированной из шаблона папке
+`examples/<профиль>-example/content/`.
 
-Ключевой факт: **Gramax ищет catalog root, сканируя весь репозиторий**, а не только переданный путь. `validate_structure.py content` на тех же репозиториях давал exit 0. Три пробела относительно реального поведения Gramax (требование [Контракт .doc-root.yaml: рекурсивное обнаружение и типизация title](../../30-requirements/2026-08-13-doc-root-discovery-contract.md), FR-120…FR-123, AC-036…AC-040):
+Ключевой факт: **Gramax ищет catalog root, сканируя весь репозиторий**, а не только переданный путь.
+`validate_structure.py content` на тех же репозиториях давал exit 0. Три пробела относительно
+реального поведения Gramax (требование
+[Контракт .doc-root.yaml: рекурсивное обнаружение и типизация title](../../30-requirements/2026-08-13-doc-root-discovery-contract.md),
+FR-120…FR-123, AC-036…AC-040):
 
-1. **Область обнаружения.** `validate()` (`validate_structure.py:447`) читает ровно `root/.doc-root.yaml` через `check_doc_root()` (`:70-83`). Вложенные `.doc-root.yaml` глубже по дереву не валидируются никогда. `check_orphans()` про них знает (`in_scope=False`) — но только чтобы **исключить**; Gramax же, наоборот, их включает.
-2. **Типизация полей.** `check_doc_root()` проверяет лишь присутствие ключа (`field not in data`), не тип. `docRootRequiredFields = [title, language, syntax]` проходит при `title: 4.21` (float), `title: yes` (bool), `title: {a: b}` (dict) — ровно класс дефекта инцидента.
-3. **Негашение диагностики.** При неудаче `check_doc_root()` (в т.ч. `invalid yaml`) `validate()` делает ранний `return` (`:447-448`) — остальная диагностика, включая `check_placeholders`, не выполняется; сообщение схлопывается до `invalid yaml: <str(e)>`. Незакавыченный `{{...}}`, при котором файл не парсится вообще, ни одной фикстурой не покрыт (слепое пятно `placeholder-leak`, покрывающего только закавыченный `{{TSN_CODE}}`).
+1. **Область обнаружения.** `validate()` (`validate_structure.py:447`) читает ровно
+   `root/.doc-root.yaml` через `check_doc_root()` (`:70-83`). Вложенные `.doc-root.yaml` глубже
+   по дереву не валидируются никогда. `check_orphans()` про них знает (`in_scope=False`) — но только
+   чтобы **исключить**; Gramax же, наоборот, их включает.
+2. **Типизация полей.** `check_doc_root()` проверяет лишь присутствие ключа (`field not in data`),
+   не тип. `docRootRequiredFields = [title, language, syntax]` проходит при `title: 4.21` (float),
+   `title: yes` (bool), `title: {a: b}` (dict) — ровно класс дефекта инцидента.
+3. **Негашение диагностики.** При неудаче `check_doc_root()` (в т.ч. `invalid yaml`) `validate()`
+   делает ранний `return` (`:447-448`) — остальная диагностика, включая `check_placeholders`,
+   не выполняется; сообщение схлопывается до `invalid yaml: <str(e)>`. Незакавыченный `{{...}}`,
+   при котором файл не парсится вообще, ни одной фикстурой не покрыт (слепое пятно
+   `placeholder-leak`, покрывающего только закавыченный `{{TSN_CODE}}`).
 
-Предшественники: ADR-0012 (контракт валидации: JSON single source of truth BR-002, perimeter Решение 6, прецедент suite/разрешения на marketplace.json), ADR-0019 (паттерн «одна находка на дефект» BR-004, демаркация ownership, образец структуры и тона), ADR-0006 (semver).
+Предшественники: ADR-0012 (контракт валидации: JSON single source of truth BR-002, perimeter
+Решение 6, прецедент suite/разрешения на marketplace.json), ADR-0019 (паттерн «одна находка
+на дефект» BR-004, демаркация ownership, образец структуры и тона), ADR-0006 (semver).
 
 ---
 

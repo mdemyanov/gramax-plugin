@@ -15,6 +15,10 @@ properties:
 **Status:** Accepted
 **Date:** 2026-08-13
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-08-13-link-form-contract.md`,
+`docs/10-domain/research/2026-08-13-link-forms-probe.md`,
+`docs/40-architecture/2026-08-13-link-form-contract-design.md`, `scripts/validate-content.py`,
+`plugins/gramax/scripts/migrate_nav_codespans.py`
 
 ## Context
 

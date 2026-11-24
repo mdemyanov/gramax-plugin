@@ -16,6 +16,9 @@ properties:
 Автор: PM + 6 разведчиков (Explore, Sonnet)
 Тип: экспресс-исследование, вход для BA/SA и формирования бэклога
 
+**Опоры:** `scripts/validate-content.py`, `plugins/gramax/scripts/validate_structure.py`,
+`plugins/gramax/skills/writer/SKILL.md`
+
 ## Метод и охват
 
 Найдены локальные проекты с `gramax@gramax-marketplace: true` в `.claude/settings*.json` — около 30 репозиториев.

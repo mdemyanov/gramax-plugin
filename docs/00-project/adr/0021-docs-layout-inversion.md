@@ -15,6 +15,9 @@ properties:
 **Status:** Accepted
 **Date:** 2026-11-17
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-11-17-docs-layout-inversion.md`,
+`docs/60-implementation/test-reports/2026-11-18-qa-057-docs-layout-inversion-full-run.md`,
+`docs/00-project/adr/0014-dual-publication-targets.md`
 
 ## Context
 

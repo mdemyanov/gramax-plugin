@@ -12,6 +12,12 @@ properties:
 
 # Dev notes: контракт валидации Gramax-каталога (DEV-001)
 
+**Опоры:** `docs/30-requirements/2026-08-11-validation-contract.md`,
+`docs/00-project/adr/0012-catalog-validation-contract.md`,
+`docs/60-implementation/acceptance/2026-08-11-validation-contract-at-design.md`,
+`plugins/gramax/scripts/tests/test_validate_structure.py`,
+`plugins/gramax/scripts/validate_structure.py`
+
 Фиксирует «Тип контента: Урок» за неимением отдельного enum-значения для заметок
 реализации (тот же приём, что использовал QA-author в at-design.md для «Тест-отчёт») —
 ближайший по смыслу существующий тип: неочевидные решения, принятые при переходе

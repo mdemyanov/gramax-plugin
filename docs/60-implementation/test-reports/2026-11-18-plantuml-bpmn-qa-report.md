@@ -12,6 +12,11 @@ properties:
 
 # QA Report — навык plantuml (PlantUML/Salt/BPMN-авторство: file-based, без конвертационных пайплайнов)
 
+**Опоры:** `tests/gramax/plantuml-bpmn/README.md`, `tests/gramax/plantuml-bpmn/at-design.md`,
+`docs/30-requirements/2026-11-18-plantuml-bpmn-requirement.md`,
+`docs/40-architecture/2026-11-18-plantuml-bpmn-design.md`,
+`docs/00-project/adr/0023-plantuml-bpmn-skill.md`
+
 | Поле | Значение |
 |---|---|
 | **Дата прогона** | 2026-11-18 |

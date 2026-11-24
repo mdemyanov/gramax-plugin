@@ -15,6 +15,11 @@ properties:
 
 # Удаление diagram-on-demand и diagrams, переход на внешний drawio-skill
 
+**Опоры:** `docs/10-domain/research/2026-05-11-drawio-skill-external.md`,
+`docs/00-project/adr/0008-drop-internal-drawio-skills.md`,
+`docs/00-project/adr/0009-drawio-stub-and-claude-mermaid-removal.md`,
+`plugins/gramax/skills/mermaid/SKILL.md`, `plugins/gramax/.claude-plugin/plugin.json`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)
@@ -108,22 +113,44 @@ Drawio-workflow для пользователя после изменений:
 
 ## Acceptance Criteria
 
-- [ ] **AC-001:** каталог `plugins/gramax/skills/diagram-on-demand/` не существует: `test ! -d plugins/gramax/skills/diagram-on-demand && echo PASS`
-- [ ] **AC-002:** каталог `plugins/gramax/skills/diagrams/` не существует: `test ! -d plugins/gramax/skills/diagrams && echo PASS`
-- [ ] **AC-003:** скрипты-сироты отсутствуют: `for f in find_doc_root.sh save_diagram.sh insert_diagram_ref.sh validate_diagram_type.sh; do test ! -f "plugins/gramax/scripts/$f" && echo "OK: $f absent" || echo "FAIL: $f still exists"; done`
-- [ ] **AC-004:** `drawio_convert.py` отсутствует: `test ! -f plugins/gramax/scripts/drawio_convert.py && echo PASS`
-- [ ] **AC-005:** `writer/SKILL.md` не содержит строки с `drawio_convert.py`: `grep -n 'drawio_convert.py' plugins/gramax/skills/writer/SKILL.md | wc -l | grep -q '^0$' && echo PASS`
-- [ ] **AC-006:** `writer/references/drawio.md` не содержит строки с `drawio_convert.py`: `grep -n 'drawio_convert.py' plugins/gramax/skills/writer/references/drawio.md | wc -l | grep -q '^0$' && echo PASS`
-- [ ] **AC-007:** `writer/references/staging.md` не содержит строки с `drawio_convert.py`: `grep -n 'drawio_convert.py' plugins/gramax/skills/writer/references/staging.md | wc -l | grep -q '^0$' && echo PASS`
-- [ ] **AC-008:** `writer/references/drawio.md` содержит описание двухшагового workflow с внешним плагином (ключевая фраза `Agents365-ai` или `drawio-skill`): `grep -c 'Agents365-ai\|drawio-skill' plugins/gramax/skills/writer/references/drawio.md | grep -qv '^0$' && echo PASS`
-- [ ] **AC-009:** `plugins/gramax/README.md` содержит prerequisites-блок с командой `marketplace add Agents365-ai/365-skills`: `grep -c 'Agents365-ai/365-skills' plugins/gramax/README.md | grep -qv '^0$' && echo PASS`
-- [ ] **AC-010:** `plugins/gramax/README.md` не упоминает skills `diagram-on-demand` и `diagrams` как доступные: `grep -E 'diagram-on-demand|/gramax:diagrams' plugins/gramax/README.md | wc -l | grep -q '^0$' && echo PASS`
-- [ ] **AC-011:** `plugins/gramax/.claude-plugin/plugin.json` содержит версию 2.0.0: `python3 -c "import json; d=json.load(open('plugins/gramax/.claude-plugin/plugin.json')); assert d['version']=='2.0.0', d['version']; print('PASS')"`
-- [ ] **AC-012:** корневой `.claude-plugin/marketplace.json` description не содержит `diagram-on-demand` или `diagrams` в описании плагина gramax: `python3 -c "import json; d=json.load(open('.claude-plugin/marketplace.json')); desc=[p['description'] for p in d['plugins'] if p['name']=='gramax'][0]; assert 'diagram-on-demand' not in desc and 'diagrams' not in desc, desc; print('PASS')"`
-- [ ] **AC-013:** `plugins/gramax/CHANGELOG.md` содержит секцию `## 2.0.0` и подраздел `### Migration`: `grep -c '## 2.0.0' plugins/gramax/CHANGELOG.md | grep -qv '^0$' && grep -c '### Migration' plugins/gramax/CHANGELOG.md | grep -qv '^0$' && echo PASS`
-- [ ] **AC-014:** `plugins/gramax/skills/mermaid/SKILL.md` description в frontmatter не содержит `drawio` как кейс применения: `python3 -c "import re; content=open('plugins/gramax/skills/mermaid/SKILL.md').read(); fm=re.search(r'^---(.+?)---', content, re.DOTALL); desc=re.search(r'description:\s*(.+)', fm.group(1)); assert 'drawio' not in desc.group(1).lower() or 'не для' in desc.group(1).lower(), 'drawio found in description'; print('PASS')"`
-- [ ] **AC-015:** `bash scripts/check.sh --fast` завершается с exit code 0: `bash scripts/check.sh --fast && echo PASS`
-- [ ] **AC-016:** ни один файл плагина не ссылается на удалённые скрипты по имени: `grep -rn 'drawio_convert\|find_doc_root\|save_diagram\|insert_diagram_ref\|validate_diagram_type' plugins/gramax/skills/ plugins/gramax/agents/ plugins/gramax/.claude-plugin/ plugins/gramax/README.md plugins/gramax/CHANGELOG.md 2>/dev/null | wc -l | grep -q '^0$' && echo PASS`
+- [ ] **AC-001:** каталог `plugins/gramax/skills/diagram-on-demand/` не существует:
+  `test ! -d plugins/gramax/skills/diagram-on-demand && echo PASS`
+- [ ] **AC-002:** каталог `plugins/gramax/skills/diagrams/` не существует:
+  `test ! -d plugins/gramax/skills/diagrams && echo PASS`
+- [ ] **AC-003:** скрипты-сироты отсутствуют:
+  `for f in find_doc_root.sh save_diagram.sh insert_diagram_ref.sh validate_diagram_type.sh; do test ! -f "plugins/gramax/scripts/$f" && echo "OK: $f absent" || echo "FAIL: $f still exists"; done`
+- [ ] **AC-004:** `drawio_convert.py` отсутствует:
+  `test ! -f plugins/gramax/scripts/drawio_convert.py && echo PASS`
+- [ ] **AC-005:** `writer/SKILL.md` не содержит строки с `drawio_convert.py`:
+  `grep -n 'drawio_convert.py' plugins/gramax/skills/writer/SKILL.md | wc -l | grep -q '^0$' && echo PASS`
+- [ ] **AC-006:** `writer/references/drawio.md` не содержит строки с `drawio_convert.py`:
+  `grep -n 'drawio_convert.py' plugins/gramax/skills/writer/references/drawio.md | wc -l | grep -q '^0$' && echo PASS`
+- [ ] **AC-007:** `writer/references/staging.md` не содержит строки с `drawio_convert.py`:
+  `grep -n 'drawio_convert.py' plugins/gramax/skills/writer/references/staging.md | wc -l | grep -q '^0$' && echo PASS`
+- [ ] **AC-008:** `writer/references/drawio.md` содержит описание двухшагового workflow с внешним
+  плагином (ключевая фраза `Agents365-ai` или `drawio-skill`):
+  `grep -c 'Agents365-ai\|drawio-skill' plugins/gramax/skills/writer/references/drawio.md | grep -qv '^0$' && echo PASS`
+- [ ] **AC-009:** `plugins/gramax/README.md` содержит prerequisites-блок с командой
+  `marketplace add Agents365-ai/365-skills`:
+  `grep -c 'Agents365-ai/365-skills' plugins/gramax/README.md | grep -qv '^0$' && echo PASS`
+- [ ] **AC-010:** `plugins/gramax/README.md` не упоминает skills `diagram-on-demand` и `diagrams`
+  как доступные:
+  `grep -E 'diagram-on-demand|/gramax:diagrams' plugins/gramax/README.md | wc -l | grep -q '^0$' && echo PASS`
+- [ ] **AC-011:** `plugins/gramax/.claude-plugin/plugin.json` содержит версию 2.0.0:
+  `python3 -c "import json; d=json.load(open('plugins/gramax/.claude-plugin/plugin.json')); assert d['version']=='2.0.0', d['version']; print('PASS')"`
+- [ ] **AC-012:** корневой `.claude-plugin/marketplace.json` description не содержит
+  `diagram-on-demand` или `diagrams` в описании плагина gramax:
+  `python3 -c "import json; d=json.load(open('.claude-plugin/marketplace.json')); desc=[p['description'] for p in d['plugins'] if p['name']=='gramax'][0]; assert 'diagram-on-demand' not in desc and 'diagrams' not in desc, desc; print('PASS')"`
+- [ ] **AC-013:** `plugins/gramax/CHANGELOG.md` содержит секцию `## 2.0.0` и подраздел
+  `### Migration`:
+  `grep -c '## 2.0.0' plugins/gramax/CHANGELOG.md | grep -qv '^0$' && grep -c '### Migration' plugins/gramax/CHANGELOG.md | grep -qv '^0$' && echo PASS`
+- [ ] **AC-014:** `plugins/gramax/skills/mermaid/SKILL.md` description в frontmatter не содержит
+  `drawio` как кейс применения:
+  `python3 -c "import re; content=open('plugins/gramax/skills/mermaid/SKILL.md').read(); fm=re.search(r'^---(.+?)---', content, re.DOTALL); desc=re.search(r'description:\s*(.+)', fm.group(1)); assert 'drawio' not in desc.group(1).lower() or 'не для' in desc.group(1).lower(), 'drawio found in description'; print('PASS')"`
+- [ ] **AC-015:** `bash scripts/check.sh --fast` завершается с exit code 0:
+  `bash scripts/check.sh --fast && echo PASS`
+- [ ] **AC-016:** ни один файл плагина не ссылается на удалённые скрипты по имени:
+  `grep -rn 'drawio_convert\|find_doc_root\|save_diagram\|insert_diagram_ref\|validate_diagram_type' plugins/gramax/skills/ plugins/gramax/agents/ plugins/gramax/.claude-plugin/ plugins/gramax/README.md plugins/gramax/CHANGELOG.md 2>/dev/null | wc -l | grep -q '^0$' && echo PASS`
 
 ## Migration plan (для пользователей)
 

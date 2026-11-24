@@ -369,9 +369,9 @@ AC-151.
   маску построчные проверки и баланс `validate_render.py`, W034 и W035; `check_tags` продолжает
   балансировать внешнюю пару `html`. Провенанс апстрим-механики `html_mask` — по ADR-0019.
   Вторая половина FR-216 (AC-148) — три плейсхолдера `docs/`, найденные маской валидатора:
-  `docs/00-project/adr/0021-docs-layout-inversion.md:389` (`<home>`, дважды, без code-span),
-  `docs/30-requirements/2026-11-18-plantuml-bpmn-requirement.md:191` (`<file>`),
-  `docs/60-implementation/2026-08-13-doc-root-discovery-dev-notes.md:42` (`<raw>`); в двух
+  `docs/00-project/adr/0021-docs-layout-inversion.md:392` (`<home>`, дважды, без code-span),
+  `docs/30-requirements/2026-11-18-plantuml-bpmn-requirement.md:199` (`<file>`),
+  `docs/60-implementation/2026-08-13-doc-root-discovery-dev-notes.md:48` (`<raw>`); в двух
   последних строках нечётное число бэктиков разрывает code-span.
 - **AC-139.** Предупреждение об ответе без `user.id` — уровень `warning`; обе формы пустых
   `answers` находок не дают.
@@ -439,7 +439,7 @@ AC-151.
 - `plugins/gramax/scripts/LICENSE.upstream.md` — провенанс переноса `read_page` и `html_mask`.
 - `plugins/gramax/scripts/validate_render.py:5-9` (докстринг), `:170` (запасной текст) — задача
   `gramax-4jf.12`.
-- `docs/70-operations/2026-11-21-render-quality-runbook.md:236-240` — исключение байтовой
+- `docs/70-operations/2026-11-21-render-quality-runbook.md:238-242` — исключение байтовой
   фикстуры из прогона валидатора перестаёт быть обязательным (Решение 6).
 
 ## Допущения

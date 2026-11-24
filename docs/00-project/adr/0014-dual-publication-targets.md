@@ -15,6 +15,8 @@ properties:
 **Status:** Accepted
 **Date:** 2026-08-11
 **Plugin:** marketplace
+**Опоры:** `docs/00-project/adr/0012-catalog-validation-contract.md`,
+`tests/gramax/nauta-integration/ac-003-doc-root-contract.sh`
 
 ## Context
 

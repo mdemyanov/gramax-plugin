@@ -12,6 +12,10 @@ properties:
 
 # AT-design: Правила, изобретённые потребителями поверх writer
 
+**Опоры:** `docs/30-requirements/2026-08-11-writer-consumer-rules.md`,
+`docs/40-architecture/2026-08-11-writer-rules-disposition.md`,
+`tests/gramax/writer-consumer-rules/README.md`, `plugins/gramax/skills/writer/SKILL.md`
+
 **Роль:** QA-author (тест-дизайн до реализации Dev — этот документ и failing stubs
 предшествуют коду DEV-004, не следуют за ним).
 **Требование:** [Правила, изобретённые потребителями поверх writer — триаж на включение в плагин](../../30-requirements/2026-08-11-writer-consumer-rules.md) (AC-001…AC-013)

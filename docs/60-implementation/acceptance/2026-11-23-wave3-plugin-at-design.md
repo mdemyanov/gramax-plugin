@@ -15,6 +15,11 @@ properties:
 
 # AT-design: Волна-3 — контракты валидаторов и навыков комментариев: стабы comments, catalog-validator, render-linter, plugin-contract и переводы ассертов (AC-129…AC-140, AC-148, AC-151)
 
+**Опоры:** `docs/30-requirements/2026-11-23-wave3-validators-contracts-gates-requirement.md`,
+`docs/00-project/adr/0026-validator-contracts-engine-pin.md`,
+`docs/40-architecture/2026-11-23-wave3-validator-contracts-design.md`,
+`tests/gramax/comments/README.md`, `tests/gramax/writer-sync-470/README.md`
+
 **Роль:** QA-author (тест-дизайн и born-red стабы до реализации Dev; TDD-цепочка
 qa-author → dev → qa-runner, BR-025).
 **Требование:** [Волна-3 — релиз 4.10.0](../../30-requirements/2026-11-23-wave3-validators-contracts-gates-requirement.md)

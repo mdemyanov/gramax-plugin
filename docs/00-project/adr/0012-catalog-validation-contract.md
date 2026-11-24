@@ -15,6 +15,9 @@ properties:
 **Status:** Accepted
 **Date:** 2026-08-11
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-08-11-validation-contract.md`,
+`docs/10-domain/research/2026-08-11-plugin-consumers-gaps.md`,
+`plugins/gramax/scripts/validate_structure.py`, `plugins/gramax/gramax-catalog-rules.json`
 
 ## Context
 

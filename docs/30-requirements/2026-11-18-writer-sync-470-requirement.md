@@ -15,6 +15,11 @@ properties:
 
 # writer 4.7.0 — массовая синхронизация скилла с окном движка 48592b36 и документацией gram.ax
 
+**Опоры:** `docs/40-architecture/2026-11-18-writer-sync-design.md`,
+`docs/10-domain/research/2026-11-18-writer-docs-divergence-audit.md`,
+`docs/10-domain/research/2026-11-18-enterprise-server-skill-gap.md`,
+`plugins/gramax/skills/writer/SKILL.md`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

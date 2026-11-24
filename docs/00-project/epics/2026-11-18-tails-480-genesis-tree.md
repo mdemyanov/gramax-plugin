@@ -15,6 +15,9 @@ properties:
 
 # Дерево решений генезиса: хвосты 4.7.0 → 4.8.0
 
+**Опоры:** `docs/30-requirements/2026-11-18-writer-sync-470-requirement.md`,
+`plugins/gramax/README.md`
+
 ## Цель
 
 Разобрать хвосты волны 4.7.0: отложенные открытые вопросы writer-sync как следующий цикл

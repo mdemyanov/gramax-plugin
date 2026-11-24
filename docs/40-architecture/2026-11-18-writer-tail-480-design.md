@@ -15,6 +15,10 @@ properties:
 
 # writer 4.8.0 — хвост writer-sync: служебная синтаксика, негативный перечень, HTML-компонент, frontmatter-поля
 
+**Опоры:** `docs/30-requirements/2026-11-18-writer-tail-480-requirement.md`,
+`docs/00-project/epics/2026-11-18-tails-480-genesis-tree.md`,
+`docs/40-architecture/2026-11-18-writer-sync-design.md`
+
 ## Контекст
 
 Реализация потока П1 эпика [«хвосты 4.7.0 → 4.8.0»](../00-project/epics/2026-11-18-tails-480-genesis-tree.md)

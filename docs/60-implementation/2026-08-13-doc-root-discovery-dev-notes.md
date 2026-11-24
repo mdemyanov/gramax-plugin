@@ -12,6 +12,12 @@ properties:
 
 # Dev notes: рекурсивное обнаружение `.doc-root.yaml` и типизация полей (ADR-0020)
 
+**Опоры:** `docs/30-requirements/2026-08-13-doc-root-discovery-contract.md`,
+`docs/00-project/adr/0020-doc-root-recursive-discovery.md`,
+`plugins/gramax/scripts/validate_structure.py`,
+`plugins/gramax/scripts/tests/test_validate_structure.py`,
+`tests/gramax/catalog-validator/ac-021-nested-doc-root-discovered.sh`
+
 Фиксирует «Тип контента: Урок» за неимением отдельного enum-значения для заметок реализации —
 тот же приём, что `2026-08-11-validation-contract-dev-notes.md`.
 

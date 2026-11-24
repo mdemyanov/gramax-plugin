@@ -15,6 +15,9 @@ properties:
 
 # writer 4.8.0 — хвосты волны 4.7.0 (открытые вопросы writer-sync и исключения RES-007 §3)
 
+**Опоры:** `docs/00-project/epics/2026-11-18-tails-480-genesis-tree.md`,
+`docs/40-architecture/2026-11-18-writer-tail-480-design.md`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

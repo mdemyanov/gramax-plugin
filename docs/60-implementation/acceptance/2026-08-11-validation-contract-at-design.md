@@ -12,6 +12,11 @@ properties:
 
 # AT-design: Валидация Gramax-каталога как публичный контракт плагина
 
+**Опоры:** `docs/30-requirements/2026-08-11-validation-contract.md`,
+`docs/00-project/adr/0012-catalog-validation-contract.md`,
+`docs/00-project/adr/0015-root-index-inert.md`, `tests/gramax/catalog-validator/README.md`,
+`plugins/gramax/scripts/tests/test_validate_structure.py`
+
 **Роль:** QA-author (тест-дизайн до реализации Dev — этот документ и стаб-тесты
 предшествуют коду, не следуют за ним).
 **Требование:** [Валидация Gramax-каталога как публичный контракт плагина](../../30-requirements/2026-08-11-validation-contract.md) (AC-001…AC-017)

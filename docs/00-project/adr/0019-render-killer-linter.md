@@ -15,6 +15,8 @@ properties:
 **Status:** Accepted
 **Date:** 2026-08-12
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-08-12-render-killer-linter.md`,
+`plugins/gramax/scripts/validate_render.py`, `plugins/gramax/gramax-render-rules.json`
 
 ## Context
 

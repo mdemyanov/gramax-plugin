@@ -15,6 +15,10 @@ properties:
 
 # Волна-3 — релиз 4.10.0: калибровка контрактов валидаторов, гейтов и хвостов гигиены
 
+**Опоры:** `docs/00-project/epics/2026-11-23-wave3-contracts-gates-genesis-tree.md`,
+`docs/00-project/adr/0026-validator-contracts-engine-pin.md`,
+`docs/00-project/adr/0027-full-gate-composition.md`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

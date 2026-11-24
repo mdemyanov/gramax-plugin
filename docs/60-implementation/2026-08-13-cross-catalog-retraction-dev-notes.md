@@ -12,6 +12,12 @@ properties:
 
 # Dev notes: ретракция кросс-каталожного `code:`-рецепта (ADR-0017)
 
+**Опоры:** `docs/30-requirements/2026-08-13-cross-catalog-retraction.md`,
+`docs/00-project/adr/0017-cross-catalog-retraction.md`,
+`docs/60-implementation/acceptance/2026-08-13-cross-catalog-retraction-at-design.md`,
+`plugins/gramax/skills/writer/SKILL.md`,
+`plugins/gramax/skills/writer/references/doc-root-schema.md`
+
 Фиксирует «Тип контента: Урок» за неимением отдельного enum-значения для заметок реализации —
 тот же приём, что `2026-08-11-validation-contract-dev-notes.md`.
 

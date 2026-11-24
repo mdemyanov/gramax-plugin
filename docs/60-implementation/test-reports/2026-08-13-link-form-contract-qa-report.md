@@ -12,6 +12,11 @@ properties:
 
 # QA Report — контракт формы ссылки на артефакт (`link-form-contract`, 4.3.0)
 
+**Опоры:** `docs/30-requirements/2026-08-13-link-form-contract.md`,
+`docs/00-project/adr/0016-link-form-contract.md`,
+`docs/40-architecture/2026-08-13-link-form-contract-design.md`,
+`tests/gramax/link-form-resolver/run.sh`, `tests/gramax/link-form-migration/run.sh`
+
 **Дата прогона:** 2026-08-12/13
 **Ветка/дерево:** `worktree-link-form-impl`, HEAD `fc2ff21`, дерево чистое (`git status --porcelain` — пусто, проверено до и после прогона)
 **Диапазон волны:** `2996de4`…`fc2ff21` — резолвер (`51252ed`), миграция (`2996de4`…`d743750`), подключение обоих suite к `check.sh --full` (`fc2ff21`)

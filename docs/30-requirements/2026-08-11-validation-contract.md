@@ -15,6 +15,9 @@ properties:
 
 # Валидация Gramax-каталога как публичный контракт плагина
 
+**Опоры:** `docs/00-project/adr/0012-catalog-validation-contract.md`,
+`scripts/validate-content.py`, `plugins/gramax/scripts/validate_structure.py`
+
 **Контур И:** файл целиком уезжает в стор (Фаза 3) — собственной capability у него нет.
 
 ## Уезжает в стор (Фаза 3)

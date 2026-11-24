@@ -12,6 +12,12 @@ properties:
 
 # Приёмка (BA-acceptance): паритет офлайн-валидаторов с модулем «Проверка на ошибки»
 
+**Опоры:** `docs/30-requirements/2026-11-18-validators-error-check-parity-requirement.md`,
+`docs/00-project/adr/0024-validators-error-check-parity.md`,
+`docs/40-architecture/2026-11-18-validators-parity-design.md`,
+`tests/gramax/catalog-validator/README.md`,
+`plugins/gramax/scripts/tests/test_validators_parity.py`
+
 **Роль:** BA-acceptance gate — проверка AC-152…AC-163 и FR-151…FR-157 требования против
 **реализованного** кода валидатора (не против обещаний дизайна), с независимым повторным
 исполнением буквальных проверок и вердиктом.

@@ -15,6 +15,10 @@ properties:
 **Status:** Accepted
 **Date:** 2026-05-11
 **Plugin:** gramax / marketplace
+**Опоры:** `docs/30-requirements/2026-05-11-routing-mermaid-drawio.md`,
+`docs/00-project/adr/0008-drop-internal-drawio-skills.md`,
+`plugins/gramax/.claude-plugin/plugin.json`, `plugins/gramax/skills/drawio/SKILL.md`,
+`plugins/gramax/skills/mermaid/SKILL.md`
 
 ## Context
 

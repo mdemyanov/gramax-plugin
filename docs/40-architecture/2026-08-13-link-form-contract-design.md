@@ -15,6 +15,10 @@ properties:
 
 # Контракт формы ссылки на артефакт — резолвер, миграция, интеграция с nauta
 
+**Опоры:** `docs/30-requirements/2026-08-13-link-form-contract.md`,
+`docs/00-project/adr/0016-link-form-contract.md`,
+`plugins/gramax/scripts/migrate_nav_codespans.py`, `scripts/validate-content.py`
+
 ## Контекст
 
 Реализация решений [ADR-0016](../00-project/adr/0016-link-form-contract.md) для требования

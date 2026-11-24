@@ -23,6 +23,9 @@ properties:
 тот же приём мокирования `Catalog`; добавлен новый исполняемый файл-проба на двух каталогах и один
 точечный WebFetch по вендорской документации схемы `.doc-root.yaml`).
 
+**Опоры:** `plugins/gramax/skills/writer/SKILL.md`,
+`docs/40-architecture/2026-08-11-writer-rules-disposition.md`
+
 ## TL;DR
 
 Правило `SKILL.md:215` **верно по итоговому эффекту, но с существенной оговоркой в объяснении**.
