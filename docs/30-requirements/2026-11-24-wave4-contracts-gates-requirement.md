@@ -1,14 +1,14 @@
 ---
 title: "Волна-4 — релиз 4.11.0: контракты валидаторов и резолвера, гейты и сюиты"
 order: 30
-status: accepted
+status: done
 date: 2026-11-24
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Accepted]
+    value: [Done]
   - name: Плагин
     value: [gramax]
 ---
