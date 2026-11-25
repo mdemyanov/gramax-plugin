@@ -10,6 +10,7 @@ tests/gramax/catalog-validator/ac-025…ac-036 не покрывает; инте
 inline-зависимостей (pyyaml).
 """
 
+import os
 import subprocess
 import tempfile
 import unittest
@@ -195,6 +196,96 @@ class DiagramPathWithoutSelfClosingTests(unittest.TestCase):
                              "red on 6e2db04 — старый регэксп матчит data-path)")
             self.assertNotIn("W031", result.stdout, f"фон: {result.stdout}")
             self.assertNotIn("W034", result.stdout, f"фон: {result.stdout}")
+
+
+class AbsolutePathLeakE037Tests(unittest.TestCase):
+    """Правило E037 — целевое значение ADR-0028 Решение 5 с поправкой по ревью без
+    автора — раунд r1 (2026-11-25): класс сегмента имени — `\\w` (не-латинские имена
+    домашнего каталога), форма WSL `/mnt/<буква>/Users/<имя>/…`, буква диска и буква
+    монтирования в сообщении — ФАКТИЧЕСКИЕ (не пришитая `C:`). Имя и сам путь в вывод
+    не попадают (FR-072); двойники (`/mnt/…` внутри URL, `$USER`, маскированные формы)
+    находки не дают. Интеграционная нога — стаб
+    tests/gramax/catalog-validator/ac-181-absolute-path-leak.sh. Имена фиктивные:
+    demouser — латиница из [a-z], заповедный — придуманное слово строчной кириллицей
+    (не фамилия)."""
+
+    def run_validator_offline(self, target: Path) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            ["uv", "run", str(SCRIPT), str(target)],
+            capture_output=True,
+            text=True,
+            check=False,
+            env={**os.environ, "UV_OFFLINE": "1"},
+        )
+
+    def test_wsl_form_reports_with_actual_mount_letter(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_catalog(root, "Отчёт WSL пишется в /mnt/c/Users/demouser/notes/report.md — путь подсистемы.")
+            result = self.run_validator_offline(root)
+            self.assertIn("E037", result.stdout, f"фон: {result.stdout}")
+            self.assertIn("(форма /mnt/c/Users/<имя>/…)", result.stdout,
+                          "форма WSL обязана называть фактическую букву монтирования "
+                          "(ADR-0028 Решение 5, поправка r1: /mnt/<буква>/Users/<имя>/…)")
+            self.assertNotIn("demouser", result.stdout, f"фон: {result.stdout}")
+            self.assertNotIn("notes/report", result.stdout,
+                             "сам путь WSL-формы в вывод не попадает (FR-072)")
+
+    def test_non_ascii_name_in_users_form(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_catalog(root, "Заметки лежат в /Users/заповедный/notes/plan.md и публике им не место.")
+            result = self.run_validator_offline(root)
+            self.assertIn("E037", result.stdout,
+                          "не-ASCII имя домашнего каталога обязано ловиться: класс сегмента "
+                          r"\w — буквы и цифры Юникода (ADR-0028 Решение 5, поправка r1)")
+            self.assertIn("(форма /Users/<имя>/…)", result.stdout, f"фон: {result.stdout}")
+            self.assertNotIn("заповедный", result.stdout,
+                             "не-ASCII имя не попадает в вывод правила (FR-072)")
+
+    def test_drive_letter_is_actual_in_message(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_catalog(root, r"Локальная копия: D:\Users\demouser\Documents\todo.md — диск D.")
+            result = self.run_validator_offline(root)
+            self.assertIn("E037", result.stdout, f"фон: {result.stdout}")
+            self.assertIn("(форма D:\\Users\\<имя>\\…)", result.stdout,
+                          "буква диска в сообщении — фактическая (поправка r1), не пришитая C:")
+            self.assertNotIn("(форма C:\\Users", result.stdout,
+                             "для диска D форма C: — дефект пришитой буквы (поправка r1)")
+
+    def test_non_ascii_name_in_drive_form(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_catalog(root, r"Локальная копия: X:\Users\заповедный\Documents\todo.md — другая буква диска.")
+            result = self.run_validator_offline(root)
+            self.assertIn("E037", result.stdout,
+                          "не-ASCII имя в форме с буквой диска обязано ловиться (поправка r1)")
+            self.assertIn("(форма X:\\Users\\<имя>\\…)", result.stdout, f"фон: {result.stdout}")
+            self.assertNotIn("заповедный", result.stdout, f"фон: {result.stdout}")
+
+    def test_line_number_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_catalog(root, "Заметки лежат в /Users/demouser/notes/plan.md — строка 6 тела файла.")
+            result = self.run_validator_offline(root)
+            self.assertIn("на строке 6", result.stdout,
+                          "фронтматтер 4 строки + пустая — путь на строке 6 файла (дизайн §3.5)")
+
+    def test_clean_lookalikes_stay_quiet(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            body = ("Документация WSL: https://example.com/mnt/c/Users/demouser/notes — путь внутри адреса.\n"
+                    "\n"
+                    "Домашний каталог в WSL: /mnt/c/Users/$USER/notes — подстановка, не имя.\n"
+                    "\n"
+                    "Шаблон пути /Users/... — сегмент из одних точек.\n")
+            build_catalog(root, body)
+            result = self.run_validator_offline(root)
+            self.assertNotIn("E037", result.stdout,
+                             "WSL-путь внутри URL, $USER и маскированные формы находки не дают "
+                             "(ADR-0028 Решение 5, поправка r1; взгляд назад отсекает /mnt/ после домена)")
+            self.assertEqual(result.returncode, 0, f"фон: {result.stdout}")
 
 
 if __name__ == "__main__":

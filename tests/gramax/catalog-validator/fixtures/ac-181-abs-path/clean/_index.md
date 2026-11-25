@@ -4,3 +4,5 @@ title: "Индекс"
 ---
 
 [чистые формы](clean-forms.md)
+
+[WSL-двойники](wsl-lookalikes.md)

@@ -9,8 +9,21 @@
 #   собственных _FENCE_RE/_INLINE_CODE_RE; единственное определение _mask_code — в
 #   lib/md_code_mask.py (замер-основание ADR-0028: grep -c 'def _mask_code' по трём
 #   файлам → 1, 1, 1).
+# Дополнено ревью r1 (2026-11-25, эпик-бид, находки [F] AC-165 anchor
+# migrate_nav_codespans.py:91 и ac-165:41; решения PM 1):
+#   (a) список файлов с def _mask_code по plugins/gramax/scripts — РОВНО ДВА:
+#   lib/md_code_mask.py (одна маска двух контуров: парсер и валидаторы) и
+#   migrate_nav_codespans.py (ЗАПИСАННОЕ ИСКЛЮЧЕНИЕ — побайтовая копия без фазы 2,
+#   ADR-0028 Решение 2 и дизайн §3.2 «Побайтовая копия … не меняется»; мигратор —
+#   замороженный ручной диагност, ADR-0029 Решение 3). Ногa замкнута против «1 по
+#   построению»: третья копия в любом файле красит;
+#   (b) текст мигратора не содержит устаревший указатель
+#   `validate_structure.py::_mask_code` — функции, которой больше нет (переезжала в
+#   lib/md_code_mask.py, ADR-0028 Решение 1).
 # Red on 6e2db04: парсер держит собственную копию _mask_code (:43-60) и оба выражения
 #   (:13-14) — второй путь маскирования рядом с lib/md_code_mask.py.
+# Red on 3a0166b (по дизайну, нога (b)): устаревший указатель в тексте мигратора ещё
+#   на месте (:30, :80, :92) — нога (b) красная до правки текста Dev; нога (a) зелёная.
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -41,5 +54,24 @@ fi
 N_MASKLIB=$(grep -c 'def _mask_code' "$MASKLIB")
 assert_eq "$N_MASKLIB" "1" "AC-165: единственное определение _mask_code — в lib/md_code_mask.py (одна маска на валидатор, парсер и рендер; замер ADR-0028: 1)"
 
+# --- (r1, a): по plugins/gramax/scripts РОВНО ДВА файла с def _mask_code ---
+MIGRATOR="$ROOT/plugins/gramax/scripts/migrate_nav_codespans.py"
+assert_file_exists "$MIGRATOR" "AC-165: migrate_nav_codespans.py на месте"
+
+ACTUAL_MASK_FILES=$(grep -rl 'def _mask_code' "$ROOT/plugins/gramax/scripts" | sed "s|^$ROOT/plugins/gramax/scripts/||" | sort)
+EXPECTED_MASK_FILES=$'lib/md_code_mask.py\nmigrate_nav_codespans.py'
+if [ "$ACTUAL_MASK_FILES" != "$EXPECTED_MASK_FILES" ]; then
+  echo "  FAIL: AC-165 (r1-a) — с def _mask_code РОВНО ДВА файла: lib/md_code_mask.py (одна маска двух контуров: парсер и валидаторы) и migrate_nav_codespans.py (записанное исключение: побайтовая копия без фазы 2 — ADR-0028 Решение 2, дизайн §3.2, ADR-0029 Решение 3); фактический список:" >&2
+  printf '%s\n' "$ACTUAL_MASK_FILES" >&2
+  FAIL=$((FAIL + 1))
+fi
+
+# --- (r1, b): устаревший указатель на несуществующий источник ---
+if grep -qF 'validate_structure.py::_mask_code' "$MIGRATOR"; then
+  echo "  FAIL: AC-165 (r1-b) RED — migrate_nav_codespans.py зовёт себя побайтовой копией validate_structure.py::_mask_code — функции, которой больше нет (маска переехала в lib/md_code_mask.py, ADR-0028 Решение 1): указатель устарел, текст правит Dev" >&2
+  grep -n 'validate_structure.py::_mask_code' "$MIGRATOR" >&2
+  FAIL=$((FAIL + 1))
+fi
+
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-165: AC-165 — $FAIL assertion(s) failed"; exit 1; fi
-pass_msg "ac-165: AC-165 — маска одна: у парсера нет копии _mask_code и собственных выражений, определение одно в md_code_mask.py"
+pass_msg "ac-165: AC-165 — маска одна: у парсера нет копии и собственных выражений; с def _mask_code ровно два файла (md_code_mask + записанное исключение-мигратор), устаревшего указателя нет"
