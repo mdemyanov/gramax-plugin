@@ -18,3 +18,7 @@ title: "Индекс"
 [форма WSL](wsl-home.md)
 
 [диск D](win-d-drive.md)
+
+[пути в конце предложения](sentence-end.md)
+
+[строчная форма Windows](win-lowercase.md)

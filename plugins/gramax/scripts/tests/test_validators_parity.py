@@ -288,6 +288,56 @@ class AbsolutePathLeakE037Tests(unittest.TestCase):
                              "(ADR-0028 Решение 5, поправка r1; взгляд назад отсекает /mnt/ после домена)")
             self.assertEqual(result.returncode, 0, f"фон: {result.stdout}")
 
+    def test_sentence_end_forms_are_caught(self):
+        # Поправка r3: во взгляд вперёд добавлены ., !, ? — путь в конце предложения
+        # (все четыре формы) обязан давать находку; период после имени не входит в
+        # совпадение (сегмент кончается буквой имени).
+        cases = [
+            ("Заметки лежат в /Users/demouser.", "/Users/<имя>/…"),
+            ("Отчёт сервера в /home/demouser!", "/home/<имя>/…"),
+            (r"Локальная копия X:\Users\demouser?", "X:\\Users\\<имя>\\…"),
+            ("Отчёт WSL в /mnt/c/Users/demouser.", "/mnt/c/Users/<имя>/…"),
+        ]
+        for body, form in cases:
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                build_catalog(root, body)
+                result = self.run_validator_offline(root)
+                self.assertIn("E037", result.stdout,
+                              f"путь в конце предложения обязан ловиться (поправка r3): {body}")
+                self.assertIn(f"(форма {form})", result.stdout,
+                              f"форма с фактической буквой обязана сохраниться: {body}")
+                self.assertNotIn("demouser", result.stdout,
+                                 f"имя не попадает в вывод: {body}")
+
+    def test_lowercase_windows_users_form_is_caught(self):
+        # Поправка r3: Users — с первой буквой в любом регистре; строчная запись
+        # c:\users\… ловится, буква диска в сообщении фактическая (c).
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_catalog(root, r"Локальная копия: c:\users\demouser\Documents\todo.md — строчная форма.")
+            result = self.run_validator_offline(root)
+            self.assertIn("E037", result.stdout,
+                          "строчная форма c:\\users\\… обязана ловиться (поправка r3)")
+            self.assertIn("(форма c:\\Users\\<имя>\\…)", result.stdout,
+                          "форма называет фактическую (строчную) букву диска")
+            self.assertNotIn("demouser", result.stdout, f"фон: {result.stdout}")
+
+    def test_clean_lookalikes_r3_stay_quiet(self):
+        # Поправка r3, чистые двойники: литерал-заполнитель <имя> (угловые скобки —
+        # не символ имени) и сегмент из одних точек находки не дают.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            body = ("Шаблон в документации: /Users/<имя>. — заполнитель, не имя.\n"
+                    "\n"
+                    "Многоточие шаблона: /Users/.... — точки не имя.\n")
+            build_catalog(root, body)
+            result = self.run_validator_offline(root)
+            self.assertNotIn("E037", result.stdout,
+                             "литерал <имя> с угловыми скобками и сегмент из точек — не имена "
+                             "(класс сегмента требует хотя бы одну букву/цифру)")
+            self.assertEqual(result.returncode, 0, f"фон: {result.stdout}")
+
 
 class TolerantScanUtf8Tests(unittest.TestCase):
     """Толерантное чтение в ресурсном парсере (ADR-0028 Решение 1, дизайн волны-4 §3.1):

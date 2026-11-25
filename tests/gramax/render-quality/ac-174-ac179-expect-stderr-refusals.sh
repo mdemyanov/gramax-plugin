@@ -50,7 +50,9 @@ cat > "$TMP/routes.json" <<'JSON'
 {
   "slugs": {
     "stub-control": { "codes": [200], "html": "<html><body><p>контроль</p></body></html>" },
-    "stub-broken-expect": { "codes": [200], "html": "<html><body><p>страница с битой парой</p></body></html>" }
+    "stub-broken-expect": { "codes": [200], "html": "<html><body><p>страница с битой парой</p></body></html>" },
+    "stub-nonobj-list": { "codes": [200], "html": "<html><body><p>expect — массив</p></body></html>" },
+    "stub-nonobj-null": { "codes": [200], "html": "<html><body><p>expect — null</p></body></html>" }
   }
 }
 JSON
@@ -117,6 +119,49 @@ fi
 if [ -s "$TMP/probe.out" ] && ! grep -qF 'expect.json не читается' "$TMP/probe.out"; then
   echo "  FAIL: AC-174 — stdout (зеркало отчёта) не несёт ноту «expect.json не читается»" >&2
   FAIL=$((FAIL + 1))
+fi
+
+# --- (a2): expect.json — валидный JSON, но НЕ объект ([] и null) — тот же контракт,
+# что нечитаемый: именованная строка расхождения «expect.json не читается» по слагу,
+# rc=1, отчёт написан, без Traceback. Ревью r3 (2026-11-25, [F] advisory AC-174,
+# anchor scripts/render-quality/probe.py:82): data.get() на не-объекте ронял прибор
+# AttributeError'ом (ловятся только OSError/ValueError) — AC-174 обещала именованную
+# строку. Red on a1c229a по дизайну. ---
+mkdir -p "$TMP/fixtures-nonobj"
+printf '%s\n' '# Контроль' '' 'Здоровая страница стаба.' > "$TMP/fixtures-nonobj/stub-control.md"
+cat > "$TMP/fixtures-nonobj/stub-control.expect.json" <<'JSON'
+{ "tableRow": "control", "expect": { "tier0": "ok", "tier1": "any", "asserts": [] } }
+JSON
+printf '%s\n' '# Пара: expect — массив' '' 'Валидный JSON, но не объект.' > "$TMP/fixtures-nonobj/stub-nonobj-list.md"
+printf '%s\n' '[]' > "$TMP/fixtures-nonobj/stub-nonobj-list.expect.json"
+printf '%s\n' '# Пара: expect — null' '' 'Валидный JSON, не объект (второй случай).' > "$TMP/fixtures-nonobj/stub-nonobj-null.md"
+printf '%s\n' 'null' > "$TMP/fixtures-nonobj/stub-nonobj-null.expect.json"
+
+bash "$PROBE" --config "$TMP/config.json" --fixtures "$TMP/fixtures-nonobj" \
+  --report "$TMP/report-nonobj.md" > "$TMP/nonobj.out" 2> "$TMP/nonobj.err"
+RC_NONOBJ=$?
+COMBINED_NONOBJ="$(cat "$TMP/nonobj.out" "$TMP/nonobj.err")"
+
+if [ "$RC_NONOBJ" -ne 1 ]; then
+  echo "  FAIL: AC-174 (r3) — прогон с не-объектными expect.json обязан дать rc=1 (расхождение с отчётом), получен rc=${RC_NONOBJ}" >&2
+  printf '%s\n' "$COMBINED_NONOBJ" | head -8 >&2
+  FAIL=$((FAIL + 1))
+fi
+if printf '%s\n' "$COMBINED_NONOBJ" | grep -qF 'Traceback'; then
+  echo "  FAIL: AC-174 (r3) — не-объектный expect.json уронил прибор (traceback вместо именованной строки расхождения; ревью 2026-11-25)" >&2
+  printf '%s\n' "$COMBINED_NONOBJ" | grep -F 'Traceback' | head -3 >&2
+  FAIL=$((FAIL + 1))
+fi
+assert_file_exists "$TMP/report-nonobj.md" "AC-174 (r3): отчёт написан и для не-объектных expect.json"
+if [ -f "$TMP/report-nonobj.md" ]; then
+  assert_grep "$TMP/report-nonobj.md" 'expect.json не читается' \
+    "AC-174 (r3): нота «expect.json не читается» — не-объект судится как нечитаемый (PM-рулинг r3)"
+  assert_grep "$TMP/report-nonobj.md" 'stub-nonobj-list: divergence' \
+    "AC-174 (r3): слаг expect-массива назван и помечен divergence"
+  assert_grep "$TMP/report-nonobj.md" 'stub-nonobj-null: divergence' \
+    "AC-174 (r3): слаг expect-null назван и помечен divergence"
+  assert_grep "$TMP/report-nonobj.md" 'stub-control: match' \
+    "AC-174 (r3): здоровая пара оценена — обход доведён до конца"
 fi
 
 # --- (b1): отказ refuse() прибора — баннер в stderr, stdout пуст при rc=2 (AC-179) ---

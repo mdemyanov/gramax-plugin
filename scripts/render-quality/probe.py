@@ -79,6 +79,11 @@ def load_fixtures(fixtures_dir: Path) -> list:
 def _load_expect(expect_path: Path):
     try:
         data = json.loads(expect_path.read_text(encoding="utf-8"))
+        # JSON, валидный, но не объект (`[]`, `null`, `"x"`), — как нечитаемый файл
+        # (ADR-0028, поправка r3): None ведёт к именованной строке расхождения
+        # «expect.json не читается», а не к AttributeError на .get ниже.
+        if not isinstance(data, dict):
+            return None
         expect = data.get("expect") or {}
         return {
             "tier0": str(expect.get("tier0", "")),
