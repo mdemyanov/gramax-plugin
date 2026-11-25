@@ -1,14 +1,14 @@
 ---
 title: "Реестр диапазонов идентификаторов требований: FR, AC, NFR, BR"
 order: 29
-status: draft
+status: Active
 date: 2026-11-23
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Гайд]
   - name: Статус
-    value: [Draft]
+    value: [Active]
   - name: Плагин
     value: [gramax]
 ---

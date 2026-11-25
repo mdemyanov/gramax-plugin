@@ -1,7 +1,7 @@
 ---
 title: "Routing mermaid/drawio v3.0.0"
 order: 3
-status: draft
+status: done
 date: 2026-05-11
 plugin: gramax
 properties:

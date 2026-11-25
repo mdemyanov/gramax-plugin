@@ -1,14 +1,14 @@
 ---
 title: "Волна-3 — релиз 4.10.0: калибровка контрактов валидаторов, гейтов и хвостов гигиены"
 order: 28
-status: draft
+status: done
 date: 2026-11-23
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [gramax]
 ---

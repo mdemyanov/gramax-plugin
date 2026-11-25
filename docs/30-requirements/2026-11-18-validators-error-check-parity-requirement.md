@@ -1,14 +1,14 @@
 ---
 title: Паритет офлайн-валидаторов плагина с модулем проверки ошибок приложения
 order: 23
-status: draft
+status: done
 date: 2026-11-18
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [gramax]
 ---

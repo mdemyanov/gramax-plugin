@@ -1,14 +1,14 @@
 ---
 title: Авторство PlantUML/BPMN-диаграмм в Gramax (file-based, без конвертационных пайплайнов)
 order: 21
-status: draft
+status: done
 date: 2026-11-18
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [gramax]
 ---

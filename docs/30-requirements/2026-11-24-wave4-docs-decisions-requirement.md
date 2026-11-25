@@ -1,14 +1,14 @@
 ---
 title: "Волна-4 — релиз 4.11.0: документарная гигиена и записи решений владельца"
 order: 31
-status: draft
+status: accepted
 date: 2026-11-24
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Accepted]
   - name: Плагин
     value: [gramax]
 ---
@@ -86,7 +86,7 @@ TPL-69 исполняет Dev/tech-writer этой же волны; тексты
 | 4 | Те же 89 по «Тип контента»: ADR 25, Требование 20, Тест-отчёт 18, Research 10, Архитектура 7, Урок 4, Дерево решений 3, Гайд 2 | перебор шапок `sed -n '1,/^---$/p'` + grep `value:` |
 | 5 | Ремонт «неопределим» у гейта ровно два: «объявить опоры строкой шапки: `**Опоры:** \`path/one\`, \`path/two\`» или «объявить отказ строкой шапки: `**Опоры:** нет — <причина>`» | `bash scripts/check.sh --fast 2>&1 \| grep -A3 'Ремонт'` |
 | 6 | Ловушки маркера: резолв по `git ls-files`, только tracked-конкретные файлы, каталог не резолвится; опоры — провенанс, не истина | `docs/lessons-learned.md:587-597`, `:628-634`, вывод гейта (ADR-076 Д3) |
-| 7 | Статусы по шапкам `docs/`: draft 45, accepted 7, done 4, Active 1 (на db24aec: 44/7/4/1); внутри requirements: draft 18, done 4, accepted 0; маркер `[Draft]` в теле — 14 файлов | `grep -rhE '^status:' docs --include='*.md' \| sort \| uniq -c`; `grep -rlE '\[Draft\]' docs/30-requirements/*.md \| wc -l` |
+| 7 | Статусы по шапкам `docs/`: draft 45, accepted 7, done 4, Active 1 (на db24aec: 44/7/4/1); внутри requirements: draft 18, done 4, accepted 0; маркер Draft (значение статуса в квадратных скобках) в теле — 14 файлов | `grep -rhE '^status:' docs --include='*.md' \| sort \| uniq -c`; `grep -rlE '\[Draft\]' docs/30-requirements/*.md \| wc -l` |
 | 8 | Словарь «Статус»: `[Draft, Active, Accepted, Superseded, Historical, Done]` — Accepted и Done в словаре есть; Proposed нет; написание в шапках строчное (draft/accepted/done) против словарного | `docs/.doc-root.yaml:22-24` |
 | 9 | Быстрый гейт: Errors 0, Warnings 7 — все TPL-69, 7 файлов (ADR-0020, пять требований мая–августа, at-acceptance волны-3); каждое предупреждение печатается двумя строками вывода | `bash scripts/check.sh --fast 2>&1 \| grep 'TPL-69' \| cut -d: -f1 \| sort -u` |
 | 10 | RES-007: 0 ссылок на требование export; строки :280 и :285 говорят «не покрыт», хотя навык export приземлён коммитом 1409740 тем же днём; проверок роутинга триггеров в дереве нет — только отложенные пометки | `grep -c 'export-skill-requirement' docs/10-domain/research/2026-11-18-enterprise-server-skill-gap.md` → 0; `:278-286` |

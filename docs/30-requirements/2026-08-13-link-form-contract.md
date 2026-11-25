@@ -1,14 +1,14 @@
 ---
 title: Контракт формы ссылки на артефакт в Gramax-каталоге
 order: 9
-status: draft
+status: done
 date: 2026-08-13
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [gramax]
 ---

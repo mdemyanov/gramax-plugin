@@ -3,7 +3,7 @@ title: Mermaid skill — file-based workflow
 order: 4
 feature: mermaid-file-based
 plugin: gramax
-status: draft
+status: done
 created: 2026-05-12
 properties:
   - name: Тип контента

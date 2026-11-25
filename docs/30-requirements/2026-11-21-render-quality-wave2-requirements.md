@@ -1,14 +1,14 @@
 ---
 title: "Волна-2 калибровки render-quality: боевой режим прибора на живой цели"
 order: 27
-status: draft
+status: done
 date: 2026-11-21
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [gramax]
 ---

@@ -1,14 +1,14 @@
 ---
 title: Прибор рендер-проб Playwright и калибровка validate_render
 order: 26
-status: draft
+status: done
 date: 2026-11-21
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [gramax]
 ---

@@ -1,14 +1,14 @@
 ---
 title: writer 4.7.0 — массовая синхронизация скилла с окном движка 48592b36 и документацией gram.ax
 order: 24
-status: draft
+status: done
 date: 2026-11-18
 plugin: gramax
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [gramax]
 ---

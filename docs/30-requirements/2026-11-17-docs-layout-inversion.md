@@ -1,14 +1,14 @@
 ---
 title: Инверсия раскладки документации — `content/` → `docs/` с зачисткой исторических артефактов
 order: 13
-status: draft
+status: done
 date: 2026-11-17
 plugin: marketplace
 properties:
   - name: Тип контента
     value: [Требование]
   - name: Статус
-    value: [Draft]
+    value: [Done]
   - name: Плагин
     value: [marketplace]
 ---
