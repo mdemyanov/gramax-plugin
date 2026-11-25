@@ -6,10 +6,13 @@
 # Modes:
 #   --fast   : whitespace + JSON validity + validate-content.py + validate_render.py +
 #              шаг shellcheck-changed: lint изменённых и новых .sh (ADR-0029 Решение 1)
-#              (uv обязателен; для pre-commit hook)
+#              (uv обязателен; shellcheck обязателен, когда в дереве есть изменённые
+#              или новые .sh — без него шаг 2.7 красит оба режима; для pre-commit hook)
 #   --full   : --fast + догфудинг своих валидаторов docs/ (validate_structure.py и
 #              validate_comments.py, порог 0 ERROR — ADR-0027 Решение 4) +
-#              lint .sh (если установлен; -e коды — только файлам базиса,
+#              полный lint отслеживаемых .sh (если shellcheck не установлен — шаг
+#              пропускается с предупреждением; предусловие для изменённых .sh уже
+#              предъявил шаг 2.7 состава --fast; -e коды — только файлам базиса,
 #              ADR-0029 Решение 1) +
 #              tests/gramax/orphan-references + tests/gramax/nauta-integration +
 #              tests/gramax/docs-layout-invariants +

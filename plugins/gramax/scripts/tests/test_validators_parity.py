@@ -12,6 +12,7 @@ inline-зависимостей (pyyaml).
 
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -286,6 +287,93 @@ class AbsolutePathLeakE037Tests(unittest.TestCase):
                              "WSL-путь внутри URL, $USER и маскированные формы находки не дают "
                              "(ADR-0028 Решение 5, поправка r1; взгляд назад отсекает /mnt/ после домена)")
             self.assertEqual(result.returncode, 0, f"фон: {result.stdout}")
+
+
+class TolerantScanUtf8Tests(unittest.TestCase):
+    """Толерантное чтение в ресурсном парсере (ADR-0028 Решение 1, дизайн волны-4 §3.1):
+    `scan_md_resources` на каталоге с файлом-с-битым-UTF-8 возвращает пару
+    `(resources, errors)` вместо исключения; файл с битым UTF-8 даёт ровно один
+    `MdPageError` (его `source` — этот файл) и ни одного ресурса; обход доводится до
+    конца в отсортированном порядке — ресурсы здорового файла, идущего ПОСЛЕ битого,
+    на месте (инвариант 1 §3.1). `parse_md_resources` сохраняет совместимость:
+    возвращает те же ресурсы.
+
+    Bash-стаб ac-164 этот инвариант доказать не может: оба его ресурса берутся из
+    файла, отсортированного ДО битого — `continue`→`break` на его фикстуре невидим.
+    Здесь битый файл отсортирован в СЕРЕДИНЕ (a-… < m-… < z-…), поэтому обрыв обхода
+    краснит тест. Мутация к красному — `continue`→`break` в scan_md_resources
+    (исполнена на scratch-копии plugins/gramax вне дерева, отчёт Dev r2).
+    Имена файлов фиктивные (a/m/z + target/img), битые байты синтетические."""
+
+    @classmethod
+    def _import_scan(cls):
+        """Импорт парсера внутри теста: scripts/ на sys.path относительно файла теста
+        (тот же приём, что в lib/test_link_resolver.py) — отсутствие функций даёт
+        именованный ассерт-отказ, не ошибку коллекции."""
+        if str(Path(__file__).resolve().parent.parent) not in sys.path:
+            sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        try:
+            from lib.md_link_parser import parse_md_resources, scan_md_resources
+        except ImportError:
+            return None, None
+        return scan_md_resources, parse_md_resources
+
+    def test_scan_survives_broken_utf8_in_the_middle(self):
+        scan_md_resources, parse_md_resources = self._import_scan()
+        self.assertIsNotNone(scan_md_resources,
+                             "scan_md_resources отсутствует в lib/md_link_parser.py "
+                             "(ADR-0028 Решение 1)")
+        self.assertIsNotNone(parse_md_resources,
+                             "parse_md_resources отсутствует в lib/md_link_parser.py")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "a-healthy.md").write_text(
+                "---\norder: 1\ntitle: До\n---\n[цель](./target-a.md)\n", encoding="utf-8"
+            )
+            # Битый файл: синтетические байты, невалидные как UTF-8, — имя в СЕРЕДИНе
+            # сортировки (a-… < m-… < z-…).
+            (root / "m-broken.md").write_bytes(
+                b"---\norder: 2\ntitle: broken\n---\n\xff\xfe not utf-8\n"
+            )
+            (root / "z-healthy.md").write_text(
+                "---\norder: 3\ntitle: После\n---\n[цель](./target-z.md)\n"
+                "![иллюстрация](./img-z.png)\n", encoding="utf-8"
+            )
+            (root / "target-a.md").write_text("---\norder: 4\ntitle: TA\n---\n\n", encoding="utf-8")
+            (root / "target-z.md").write_text("---\norder: 5\ntitle: TZ\n---\n\n", encoding="utf-8")
+            (root / "img-z.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+
+            result = scan_md_resources(root)
+            self.assertIsInstance(result, tuple,
+                                  f"scan_md_resources обязана вернуть пару (resources, errors): "
+                                  f"{type(result)}")
+            resources, errors = result
+
+            # Ровно одна ошибка чтения — битый файл, и никакой другой.
+            self.assertEqual(len(errors), 1,
+                             f"файл с битым UTF-8 даёт ровно один MdPageError: {errors}")
+            self.assertEqual(errors[0].source.name, "m-broken.md",
+                             "source ошибки — файл с битым UTF-8")
+            self.assertTrue("a-healthy.md" < errors[0].source.name < "z-healthy.md",
+                             "битый файл отсортирован в середине (a- < m- < z-) — "
+                             "файл ПОСЛЕ него существует и обязан быть просканирован")
+            self.assertEqual(errors[0].error.byte_hex, "ff",
+                             "PageReadError несёт первый неверный байт (lib/read_page.py)")
+
+            # Ресурсы ОБОИХ здоровых файлов на месте — особенно файла ПОСЛЕ битого
+            # (обход доведён до конца: continue, не break — инвариант 1 §3.1).
+            sources = [r.source.name for r in resources]
+            self.assertEqual(sources, ["a-healthy.md", "z-healthy.md", "z-healthy.md"],
+                             f"порядок обхода отсортированный, ресурсы после битого файла "
+                             f"на месте (обрыв обхода здесь краснит): {sources}")
+            z_targets = [r.raw_target for r in resources if r.source.name == "z-healthy.md"]
+            self.assertEqual(z_targets, ["./target-z.md", "./img-z.png"],
+                             "файл ПОСЛЕ битого дал и ссылку, и изображение на существующие цели")
+
+            # Совместимость: parse_md_resources возвращает те же ресурсы.
+            self.assertEqual(parse_md_resources(root), resources,
+                             "parse_md_resources сохраняет сигнатуру и результат "
+                             "(первый элемент пары scan_md_resources, ADR-0028 Решение 1)")
 
 
 if __name__ == "__main__":

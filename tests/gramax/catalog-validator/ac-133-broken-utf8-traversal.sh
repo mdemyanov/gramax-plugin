@@ -64,6 +64,20 @@ if ! grep -qF "unpaired <html>" "$OUT_FILE"; then
   echo "  FAIL: AC-133 — находка здорового bait-файла (unpaired <html>) обязана появиться: обход доведён до конца, не оборван битым файлом" >&2
   FAIL=$((FAIL + 1))
 fi
+
+# Ревью r2 (2026-11-25): bait-unpaired-html.md в отсортированном порядке читается ДО
+# broken.md — его находка переживает и оборванный обход (break на первой ошибке чтения).
+# late-bait.md читается ПОСЛЕ broken.md и несёт ресурс — битую ссылку на
+# missing-tail.md: находка класс broken link идёт от scan_md_resources через тонкий
+# адаптер, поэтому её присутствие с именем late-bait.md доказывает, что ОБХОД
+# РЕСУРСОВ доведён до конца. (Находка unpaired <html> того же файла остаётся зелёной
+# и под break — check_tags ведёт собственный обход текста; дискриминатор — именно
+# ресурсная находка.)
+if ! grep "битая ссылка" "$OUT_FILE" | grep -qF "late-bait.md"; then
+  echo "  FAIL: AC-133 (r2) — битая ссылка missing-tail.md из late-bait.md не доложена: файл читается ПОСЛЕ broken.md в отсортированном порядке — обход РЕСУРСОВ оборван на битом файле (break на ошибке чтения вместо continue)" >&2
+  grep "битая ссылка" "$OUT_FILE" | head -3 >&2
+  FAIL=$((FAIL + 1))
+fi
 rm -f "$OUT_FILE"
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-133: AC-133 — $FAIL assertion(s) failed"; exit 1; fi

@@ -17,13 +17,16 @@
 #   ADR-0028 Решение 2 и дизайн §3.2 «Побайтовая копия … не меняется»; мигратор —
 #   замороженный ручной диагност, ADR-0029 Решение 3). Ногa замкнута против «1 по
 #   построению»: третья копия в любом файле красит;
-#   (b) текст мигратора не содержит устаревший указатель
-#   `validate_structure.py::_mask_code` — функции, которой больше нет (переезжала в
-#   lib/md_code_mask.py, ADR-0028 Решение 1).
+#   (b) текст мигратора НЕ содержит ни одной ссылки вида validate_structure.py::<имя>
+#   — все определения-образцы удалены из validate_structure.py (ADR-0028 Решение 1).
+#   Ревью r2 (2026-11-25, anchor migrate_nav_codespans.py:91): после правки r1 у
+#   мигратора осталась ЧЕТВЁРТАЯ ссылка того же класса — validate_structure.py::
+#   _MD_LINK_RE (:91); нога обобщена с одного литерала на весь класс ссылок.
 # Red on 6e2db04: парсер держит собственную копию _mask_code (:43-60) и оба выражения
 #   (:13-14) — второй путь маскирования рядом с lib/md_code_mask.py.
-# Red on 3a0166b (по дизайну, нога (b)): устаревший указатель в тексте мигратора ещё
-#   на месте (:30, :80, :92) — нога (b) красная до правки текста Dev; нога (a) зелёная.
+# Red on f3d16a5 (по дизайну, нога (b) в редакции r2): ссылка validate_structure.py::
+#   _MD_LINK_RE на :91 ещё на месте — нога красная до правки текста Dev (идёт
+#   параллельно); нога (a) зелёная.
 
 set -u -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -66,12 +69,17 @@ if [ "$ACTUAL_MASK_FILES" != "$EXPECTED_MASK_FILES" ]; then
   FAIL=$((FAIL + 1))
 fi
 
-# --- (r1, b): устаревший указатель на несуществующий источник ---
-if grep -qF 'validate_structure.py::_mask_code' "$MIGRATOR"; then
-  echo "  FAIL: AC-165 (r1-b) RED — migrate_nav_codespans.py зовёт себя побайтовой копией validate_structure.py::_mask_code — функции, которой больше нет (маска переехала в lib/md_code_mask.py, ADR-0028 Решение 1): указатель устарел, текст правит Dev" >&2
-  grep -n 'validate_structure.py::_mask_code' "$MIGRATOR" >&2
+# --- (r1-b, обобщено ревью r2 2026-11-25): НИ ОДНОЙ ссылки вида
+# validate_structure.py::<имя> — все определения-образцы, на которые мигратор ссылался
+# как на модели копий (_mask_code, _MD_LINK_RE, _FENCE_RE, _INLINE_CODE_RE,
+# _EXTERNAL_RE), из validate_structure.py удалены (ADR-0028 Решение 1: маска — в
+# lib/md_code_mask.py); упоминание «территории validate_structure.py» без ::<имя>
+# указателем модели не является ---
+if grep -qE 'validate_structure\.py::' "$MIGRATOR"; then
+  echo "  FAIL: AC-165 (r1-b, r2) RED — migrate_nav_codespans.py ссылается на модельную копию вида validate_structure.py::<имя>: ни одно из определений-образцов в validate_structure.py больше не существует (ADR-0028 Решение 1) — текст правит Dev" >&2
+  grep -nE 'validate_structure\.py::' "$MIGRATOR" >&2
   FAIL=$((FAIL + 1))
 fi
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-165: AC-165 — $FAIL assertion(s) failed"; exit 1; fi
-pass_msg "ac-165: AC-165 — маска одна: у парсера нет копии и собственных выражений; с def _mask_code ровно два файла (md_code_mask + записанное исключение-мигратор), устаревшего указателя нет"
+pass_msg "ac-165: AC-165 — маска одна: у парсера нет копии и собственных выражений; с def _mask_code ровно два файла (md_code_mask + записанное исключение-мигратор); в тексте мигратора нет ни одной ссылки вида validate_structure.py::<имя>"

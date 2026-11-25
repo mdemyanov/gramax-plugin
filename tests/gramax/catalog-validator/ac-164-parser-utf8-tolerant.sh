@@ -12,6 +12,14 @@
 # Уровень: интеграционный прогон парсера (модуль stdlib-only, вызывается python3 -B
 #   напрямую, без uv — pyyaml парсеру не нужен); ac-133 остаётся замком уровня CLI
 #   (validate_structure), этот стаб судит сам парсер.
+# Дополнено ревью r2 (2026-11-25, [F] advisory AC-164, anchor стаба :84-85): прежняя
+#   фикстура несла оба ресурса из a.md — читаемой ДО битого broken.md, поэтому замена
+#   continue на break в scan_md_resources не меняла вывод (RES=2, ERRS=1) — стаб
+#   оставался зелёным на дереве с оборванным обходом; TARGETS сортировался самой
+#   пробой и порядок встреч не измерял. Теперь: c.md (читается ПОСЛЕ broken.md в
+#   отсортированном порядке) несёт ссылку на a.md; проба печатает SOURCES в порядке
+#   ВОЗВРАТА парсером и стаб ассертирует точную последовательность — и «обход доведён
+#   до конца», и «отсортированный порядок» измерены, не заявлены.
 # Red on 6e2db04: scan_md_resources в lib/md_link_parser.py нет; parse_md_resources на
 #   каталоге с битым UTF-8 роняет скрипт UnicodeDecodeError'ом (замер 2026-11-24 — дизайн
 #   §2, карточка gramax-4jf.14): второго читателя и обёртки валидатора недостаточно, чтобы
@@ -55,6 +63,7 @@ from lib.read_page import utf8_message  # noqa: E402
 for err in errors:
     print(f"ERRSOURCE={err.source.name}")
     print(f"ERRMSG={utf8_message(err.error)}")
+print("SOURCES=" + ",".join(r.source.name for r in resources))
 print("TARGETS=" + ",".join(sorted(r.resolved_path.name for r in resources)))
 PY
 RC=$?
@@ -81,8 +90,9 @@ assert_grep_regex "$PROBE" "^ERRS=1$" "AC-164: ровно одна ошибка 
 assert_grep_regex "$PROBE" "^ERRSOURCE=broken.md$" "AC-164: MdPageError называет источник broken.md"
 assert_grep_regex "$PROBE" "^ERRMSG=файл не является валидным UTF-8" "AC-164: ошибка несёт фрагмент utf8_message из lib/read_page.py (дизайн §3.1)"
 
-assert_grep_regex "$PROBE" "^RES=2$" "AC-164: оба ресурса на месте — ссылки из a.md на c.md и на broken.md (обход доведён до конца, не оборван битым файлом)"
-assert_grep_regex "$PROBE" "^TARGETS=broken.md,c.md$" "AC-164: цели ресурсов — c.md и broken.md, отсортированный порядок обхода сохранён (дизайн §3.1 инвариант 1)"
+assert_grep_regex "$PROBE" "^RES=3$" "AC-164: три ресурса — ссылки из a.md (на c.md и broken.md) и из c.md (на a.md): файл, читаемый ПОСЛЕ битого в отсортированном порядке, несёт ресурс (ревью r2 2026-11-25: иначе break на первом ошибке чтения не изменил бы вывод)"
+assert_grep_regex "$PROBE" "^TARGETS=a.md,broken.md,c.md$" "AC-164: цели ресурсов — a.md, broken.md и c.md"
+assert_grep_regex "$PROBE" "^SOURCES=a.md,a.md,c.md$" "AC-164: порядок ВСТРЕЧИ ресурсов измерен самой пробой (не сортировка постфактум): источники идут в отсортированном порядке обхода — a.md, a.md, затем c.md из-ПОСЛЕ broken.md (дизайн §3.1 инвариант 1; ревью r2 2026-11-25)"
 
 if [ "$FAIL" -gt 0 ]; then fail_msg "ac-164: AC-164 — $FAIL assertion(s) failed"; exit 1; fi
-pass_msg "ac-164: AC-164 — scan_md_resources: одна MdPageError (broken.md), оба ресурса на месте, без исключения"
+pass_msg "ac-164: AC-164 — scan_md_resources: одна MdPageError (broken.md), три ресурса на месте, порядок встреч отсортирован (обход доведён до конца), без исключения"

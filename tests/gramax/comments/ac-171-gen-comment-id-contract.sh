@@ -47,7 +47,11 @@ assert_grep "$MODULE_PROBE" "COUNT=200" "AC-171: 200 запусков дают 2
 assert_grep "$MODULE_PROBE" "HAS_LETTERS=True" "AC-171: алфавит несёт буквы — нога мутации «ALPHABET до цифр»"
 assert_grep "$MODULE_PROBE" "HAS_DIGITS=True" "AC-171: алфавит несёт цифры"
 
-# --- инвариант 2: --check против ключей файла ---
+# --- инвариант 2: --check против ключей файла. Ревью r2 (2026-11-25): ключи фикстуры
+# переведены в формат ID (abcde, fghij) — прежние key1/key2 (4 знака) не могли совпасть
+# с 5-значным ID НИКОГДА, нога была пустой по построению; --check, игнорирующий файл
+# ключей, проходил бы её. Теперь совпадение возможно по построению, и нога его
+# запрещает ---
 if OUT=$(cd "$ROOT" && uv run plugins/gramax/scripts/gen_comment_id.py --check "$FIXTURE/keys.comments.yaml" 2>&1); then
   RC=0
 else
@@ -55,8 +59,9 @@ else
 fi
 assert_exit_zero "$RC" "AC-171: --check по существующему файлу — rc=0"
 assert_eq "$(printf '%s\n' "$OUT" | grep -cvE '^[A-Za-z0-9]{5}$')" "0" "AC-171: --check печатает один ID формата [A-Za-z0-9]{5}"
-if printf '%s\n' "$OUT" | grep -qE '^(key1|key2)$'; then
-  echo "  FAIL: AC-171 — напечатанный ID совпал с ключом файла: generate_unique_id обязан отсекать ключи (инвариант 2)" >&2
+if printf '%s\n' "$OUT" | grep -qE '^(abcde|fghij)$'; then
+  echo "  FAIL: AC-171 (r2) — напечатанный --check ID совпал с ключом файла фикстуры (abcde/fghij — оба в формате ID): generate_unique_id обязан отсекать существующие ключи (инвариант 2 §3.7)" >&2
+  printf '%s\n' "$OUT" >&2
   FAIL=$((FAIL + 1))
 fi
 
