@@ -157,7 +157,7 @@ OI-1 закрыт: живые ассерты выделены в `tests/gramax/d
   NFR-088 — имена внутренних репозиториев не приводятся.
 
 ## Alternatives Considered
-- Локальная команда в README сюиты — отклонена: уроки `docs/lessons-learned.md` 2026-11-21 и 2026-11-23 — ручной прогон провалился дважды.
+- Локальная команда в README сюиты — отклонена: уроки [Lessons Learned — gramax marketplace](../../lessons-learned.md) 2026-11-21 и 2026-11-23 — ручной прогон провалился дважды.
 - shellcheck всех 269 файлов в `--fast` — отклонён: 269 файлов × 11 прогонов пути `--fast` ради нуля изменений.
 - Шаг `submodule status` с `FAILED=1` — отклонён: предмета нет (0 submodules).
 - Живая сюита под именем `docs-migration` — отклонена: нога 4 `ac-143` держит отсутствие старого каталога.
@@ -167,7 +167,7 @@ OI-1 закрыт: живые ассерты выделены в `tests/gramax/d
 
 ## Связанные артефакты
 - требования: [Волна-3 — релиз 4.10.0: калибровка контрактов валидаторов, гейтов и хвостов гигиены](../../30-requirements/2026-11-23-wave3-validators-contracts-gates-requirement.md);
-  [Инверсия раскладки документации — `content/` → `docs/` с зачисткой исторических артефактов](../../30-requirements/2026-11-17-docs-layout-inversion.md); `docs/30-requirements/2026-11-24-wave4-contracts-gates-requirement.md` (вне индекса на момент письма)
+  [Инверсия раскладки документации — `content/` → `docs/` с зачисткой исторических артефактов](../../30-requirements/2026-11-17-docs-layout-inversion.md); [Волна-4 — релиз 4.11.0: контракты валидаторов и резолвера, гейты и сюиты](../../30-requirements/2026-11-24-wave4-contracts-gates-requirement.md) (вне индекса на момент письма)
 - поправляет в части: [ADR-0011: Таксономия test harness tests/gramax и гейт doc-paths](0011-test-harness-taxonomy.md) (Решение 1), [ADR-0027: Полный гейт `--full` релиза 4.10.0 — живая нога вне гейта, именованные отказы, догфудинг валидаторов, статус сюит и удаление overlay-тулинга](0027-full-gate-composition.md) (Решения 2, 3; состав)
 - применяет: [ADR-0016: Контракт формы ссылки на артефакт — резолвер гейта и временный протокол при расхождении с nauta](0016-link-form-contract.md) (Решение 3), [ADR-0021: Инверсия раскладки документации — переезд `content/` → `docs/`, слияние doc-roots, зачистка исторических артефактов](0021-docs-layout-inversion.md) (Решения 3, 4)
 - затрагивает (файлы Dev): `scripts/check-gramax.sh`, `scripts/render-quality/probe.py`, `CLAUDE.md:46-51`; `tests/gramax/docs-layout-invariants/` (новая);

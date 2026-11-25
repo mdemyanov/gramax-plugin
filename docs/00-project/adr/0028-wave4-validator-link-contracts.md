@@ -302,7 +302,7 @@ Contract: `gen_comment_id.py` — `--check <путь>`: каталог или ф
 
 ## Связанные артефакты
 
-- требование: `docs/30-requirements/2026-11-24-wave4-contracts-gates-requirement.md` (вне индекса на
+- требование: [Волна-4 — релиз 4.11.0: контракты валидаторов и резолвера, гейты и сюиты](../../30-requirements/2026-11-24-wave4-contracts-gates-requirement.md) (вне индекса на
   момент письма); решения волны: [дерево волны-4](../epics/2026-11-24-wave4-tails-genesis-tree.md)
 - дизайн-документ (факты движка, замеры, целевые значения, контракт с QA-author, бриф Dev):
   [Контракты валидаторов и резолвера волны-4](../../40-architecture/2026-11-24-wave4-validators-design.md)

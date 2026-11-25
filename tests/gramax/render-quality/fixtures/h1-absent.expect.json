@@ -4,9 +4,17 @@
     "tier0": "ok",
     "tier1": "any",
     "asserts": [
-      {"name": "h1-carries-title", "selector": "h1:has-text('Страница замера H1')", "count": 0},
-      {"name": "h2-carries-title", "selector": "h2:has-text('Страница замера H1')", "count": 0}
+      {
+        "name": "h1-carries-title",
+        "selector": "h1:has-text('Страница замера H1')",
+        "count": 1
+      },
+      {
+        "name": "h2-carries-title",
+        "selector": "h2:has-text('Страница замера H1')",
+        "count": 0
+      }
     ],
-    "comment": "tier1=any — прибор не судит (probe.py печатает «any (не судится)»); счётчики ставит шаг замеров D12 по живому рендеру, исходы — ADR-0028 Решение 6 (дизайн §3.6)"
+    "comment": "tier1=any — прибор не судит (probe.py печатает «any (не судится)»). Счётчики поставлены шагом замеров D12 по живому рендеру 2026-11-24 (docs/60-implementation/acceptance/2026-11-24-render-measurement-session.md): страница с равным title H1 в теле показывает h1=1 и h2=1, та же страница без H1 — h1=1 и h2=0; дубль подтверждён, исходы — ADR-0028 Решение 6 (дизайн §3.6)"
   }
 }

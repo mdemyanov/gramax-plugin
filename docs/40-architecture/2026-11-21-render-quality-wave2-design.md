@@ -305,7 +305,7 @@ ADR-0019 Решение 3 / ADR-0024) — перенос th в новый спи
 
 - контракт + код: `plugins/gramax/gramax-render-rules.json`,
   `plugins/gramax/scripts/validate_render.py`;
-- запись замера: `docs/60-implementation/acceptance/2026-11-21-render-calibration-th.md`
+- запись замера: [Запись замера: судьба th-правила validate_render по повторному факту рендера (волна-2, FR-199/FR-200)](../60-implementation/acceptance/2026-11-21-render-calibration-th.md)
   (форма девяти полей runbook; индексную строку в `acceptance/_index.md` заводит PM);
 - сюиты: полный регресс-перечень таблицы выше;
 - `plugins/gramax/CHANGELOG.md` — пункт тем же коммитом;
