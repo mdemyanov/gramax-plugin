@@ -125,6 +125,15 @@ enum, нотация); `_index.md` корня остаётся вне прове
 даёт одну именованную ошибку `E036` (путь, байт, позиция) у `validate_structure.py` и
 `validate_comments.py`, а обход каталога продолжается.
 
+Ссылки и абсолютные пути (ADR-0028): ссылка резолвится по цепочке «литеральный файл →
+`цель.md` → `цель/_index.md`». Каталог без `_index.md` резолвится только при флаге
+`optionalCategoryIndex: true` в `.doc-root.yaml`: без флага ссылка на такой каталог даёт
+ERROR битой ссылки — «каталог без _index.md (раздела в дереве нет)», с флагом находки нет.
+При одноимённых файле и каталоге (`section.md` и `section/`) ссылка `[Название](section)`
+ведёт в файл. Абсолютный локальный путь контрибьютора в тексте статьи (`/Users/<имя>/…`,
+`/home/<имя>/…`, `C:\Users\<имя>\…`), включая код, даёт ERROR `E037` — по одной находке на
+строку; сообщение называет строку и форму, но не сам путь.
+
 ```bash
 uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py" content
 uv run "${CLAUDE_PLUGIN_ROOT}/scripts/validate_structure.py" --help
@@ -161,6 +170,11 @@ Pre-commit-хук этого плагина запускает оба валид
 Комментарии эти валидаторы не проверяют: команда по каталогу и способ включения в хук — в
 `skills/comments-write/SKILL.md`, раздел «В каталоге и в цикле коммита».
 
+Валидатор комментариев `validate_comments.py` с флагом `--strict` завершается с кодом 1 на
+любом предупреждении — например, `dateTime not ISO 8601 UTC` или ответ без `user.id`; метки
+находок остаются `WARNING`, уровень `info` не эскалируется. Без флага код выхода меняют
+только ERROR.
+
 Отдельно — `scripts/migrate_mermaid.py`: офлайн-сканер и пакетный мигратор устаревшего inline-mermaid (`<mermaid>…</mermaid>`, fenced ` ```mermaid `) в file-based формат внутри границы юрисдикции (`.doc-root.yaml`). По умолчанию — только отчёт (файл:строка + сводка из трёх счётчиков — `To-migrate`/`Out-of-jurisdiction`/`Already-compliant`), без единой мутации; мутация — только под `--fix --yes` (сводка тогда печатает `Migrated` вместо `To-migrate`). **Режим отчёта завершается ненулевым кодом, если найдены вхождения для миграции** — удобно как сигнал для CI, но учтите это заранее при вставке вызова в свой пайплайн, не выясняйте по красной сборке. Граница юрисдикции и предикат валидного `.mermaid`-файла для собственного валидатора потребителя — [`skills/mermaid/references/jurisdiction-and-validation.md`](./skills/mermaid/references/jurisdiction-and-validation.md).
 
 ```bash
@@ -185,4 +199,4 @@ uv run "${CLAUDE_PLUGIN_ROOT}/scripts/migrate_mermaid.py" content --fix --yes
 
 ## Версия
 
-4.10.0 — см. [CHANGELOG.md](./CHANGELOG.md)
+4.11.0 — см. [CHANGELOG.md](./CHANGELOG.md)
